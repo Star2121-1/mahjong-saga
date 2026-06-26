@@ -113,6 +113,11 @@ class Player {
             if (this.heroId === 'Knight' && window.gameEngine && typeof window.gameEngine._triggerKnightDodgeSlam === 'function') {
                 window.gameEngine._triggerKnightDodgeSlam();
             }
+            /* Epoch 3: 闪避计数 */
+            if (window.gameEngine) {
+                window.gameEngine._totalDodgesThisRun = (window.gameEngine._totalDodgesThisRun || 0) + 1;
+                window.gameEngine._checkAchievementInflight('dodge_king', window.gameEngine._totalDodgesThisRun);
+            }
             return false;
         }
 

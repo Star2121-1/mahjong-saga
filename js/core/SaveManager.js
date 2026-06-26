@@ -74,7 +74,14 @@ class SaveManager {
                 activeMutations: [],
                 hasSeenGuide: false,
                 achievements: {},
-                flawlessRuns: 0
+                flawlessRuns: 0,
+                /* Epoch 3 成就追踪 */
+                overdriveCount: 0,
+                bossKills: 0,
+                finalBossKills: 0,
+                totalCrits: 0,
+                totalDodges: 0,
+                fullSetActivated: false
             };
         } else {
             if (!data.unlockedHeroes) data.unlockedHeroes = ['Knight'];
@@ -128,6 +135,13 @@ class SaveManager {
             if (data.hasSeenGuide == null) data.hasSeenGuide = false;
             if (!data.achievements) data.achievements = {};
             if (data.flawlessRuns == null) data.flawlessRuns = 0;
+            /* Epoch 3 成就迁移 */
+            if (data.overdriveCount == null) data.overdriveCount = 0;
+            if (data.bossKills == null) data.bossKills = 0;
+            if (data.finalBossKills == null) data.finalBossKills = 0;
+            if (data.totalCrits == null) data.totalCrits = 0;
+            if (data.totalDodges == null) data.totalDodges = 0;
+            if (data.fullSetActivated == null) data.fullSetActivated = false;
             this._metaCache = data;
         }
         return this._metaCache;
@@ -445,7 +459,14 @@ class SaveManager {
             equipments: [],
             equipped: { weapon: null, armor: null, talisman: null },
             highestEndlessLoop: 0,
-            causalityFlags: { level1NoDamage: false, level2Overkill: false }
+            causalityFlags: { level1NoDamage: false, level2Overkill: false },
+            /* Epoch 3 */
+            overdriveCount: 0,
+            bossKills: 0,
+            finalBossKills: 0,
+            totalCrits: 0,
+            totalDodges: 0,
+            fullSetActivated: false
         };
         this._writeJSON('meta.json', defaults);
         this._writeJSON('active_run.json', {

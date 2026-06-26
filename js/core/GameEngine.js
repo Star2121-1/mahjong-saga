@@ -73,6 +73,12 @@ window.GameEngine = function() {
     this.pauseOverlay = null;
     this._overdriveCount = 0;
     this._maxGoldThisRun = 0;
+    this._totalCritsThisRun = 0;
+    this._totalDodgesThisRun = 0;
+    this._bossKillsThisRun = 0;
+    this._finalBossKillsThisRun = 0;
+    this._startElapsed = 0;
+    this._recordedFlawless = false;
 
     this.battlefield = null;
     this.container = null;
@@ -341,6 +347,7 @@ Gp._startNewRun = function(heroId, levelId) {
     this._activeMutator = null;
     this.playerHitCountInLevel1 = 0;
     this._playerHitCountThisRun = 0;
+    this._recordedFlawless = false;
     this.stalkersKilledInLevel2 = 0;
     if (this._currentLevelId === 'level_1' || !this.loopCount) this.loopCount = 0;
     this._clearTotems();
@@ -351,6 +358,7 @@ Gp._startNewRun = function(heroId, levelId) {
 
     this._overdriveActive = false;
     this._overdriveTimer = 0;
+    this._overdriveCount = 0;
     this._resonanceAuraTimer = 0;
 
     this.player.reset(heroId);
@@ -1222,6 +1230,13 @@ Gp._updateExpGems = function(dt) {
 
 Gp._rewardKill = function(enemy) {
     this.kills++;
+    /* Epoch 3: Boss 击杀计数 */
+    if (enemy.isBoss) {
+        this._bossKillsThisRun = (this._bossKillsThisRun || 0) + 1;
+        if (enemy.type === 'Boss_Lord') {
+            this._finalBossKillsThisRun = (this._finalBossKillsThisRun || 0) + 1;
+        }
+    }
     if (enemy.type === 'Stalker' && this._currentLevelId === 'level_2') {
         this.stalkersKilledInLevel2++;
     }
@@ -1420,6 +1435,17 @@ Gp._settleRun = async function(tokens) {
     meta.metaTokens = (meta.metaTokens || 0) + tokens;
     meta.totalRuns = (meta.totalRuns || 0) + 1;
     meta.totalKills = (meta.totalKills || 0) + this.kills;
+    /* Epoch 3: 保存局内成就计数器到 meta */
+    meta.overdriveCount = (meta.overdriveCount || 0) + (this._overdriveCount || 0);
+    meta.bossKills = (meta.bossKills || 0) + (this._bossKillsThisRun || 0);
+    meta.finalBossKills = (meta.finalBossKills || 0) + (this._finalBossKillsThisRun || 0);
+    meta.totalCrits = (meta.totalCrits || 0) + (this._totalCritsThisRun || 0);
+    meta.totalDodges = (meta.totalDodges || 0) + (this._totalDodgesThisRun || 0);
+    meta.maxGoldThisRun = Math.max(meta.maxGoldThisRun || 0, this._maxGoldThisRun || 0);
+    /* 检查套装共鸣成就 */
+    if (this.player && this.player.setResonanceSpeed && this.player.setResonanceIce) {
+        meta.fullSetActivated = true;
+    }
     var bonusCores = 1;
     if (this._bloodRageActive) bonusCores += 2;
     /* Epoch 2: 核心共鸣天赋 */
@@ -1453,23 +1479,35 @@ Gp._settleRun = async function(tokens) {
     await window.saveManager.clearActiveRun();
 
     /* ── 成就：局末型检测 ── */
+    /* 击杀类 */
     if ((meta.totalKills || 0) >= 1)    this._checkAchievement('first_kill');
     if ((meta.totalKills || 0) >= 100)  this._checkAchievement('hundred_kills');
     if ((meta.totalKills || 0) >= 1000) this._checkAchievement('thousand_kills');
+    if ((meta.totalKills || 0) >= 10000) this._checkAchievement('ten_thousand_kills');
+    /* 通关类 */
     if ((meta.totalRuns || 0) >= 1)     this._checkAchievement('first_victory');
+    if ((meta.totalRuns || 0) >= 10)    this._checkAchievement('victory_10');
+    if ((meta.totalRuns || 0) >= 50)    this._checkAchievement('victory_50');
+    /* 深渊类 */
     if ((meta.highestEndlessLoop || 0) >= 5) this._checkAchievement('deep_abyss');
-    /* 无伤通当前关 */
-    if (this.playerHitCountInLevel1 >= 0) { /* all levels */
-        if (this._currentLevelId === 'level_1' && this.playerHitCountInLevel1 === 0) {
-            meta.flawlessRuns = (meta.flawlessRuns || 0) + 1;
-        }
-        if (this._playerHitCountThisRun === 0 && !this._recordedFlawless) {
-            meta.flawlessRuns = (meta.flawlessRuns || 0) + 1;
-            this._recordedFlawless = true;
-        }
+    if ((meta.highestEndlessLoop || 0) >= 10) this._checkAchievement('deep_abyss_10');
+    if ((meta.highestEndlessLoop || 0) >= 20) this._checkAchievement('deep_abyss_20');
+    /* 无伤 */
+    if (this._playerHitCountThisRun === 0) {
+        meta.flawlessRuns = (meta.flawlessRuns || 0) + 1;
     }
     if ((meta.flawlessRuns || 0) >= 1) this._checkAchievement('flawless');
-    if (meta.flawlessRuns !== undefined) await window.saveManager.saveMeta(meta);
+    if ((meta.flawlessRuns || 0) >= 5) this._checkAchievement('flawless_5');
+    /* Boss 击杀 */
+    if ((meta.bossKills || 0) >= 10) this._checkAchievement('boss_slayer');
+    if ((meta.finalBossKills || 0) >= 5) this._checkAchievement('final_boss_down');
+    /* 英雄解锁 */
+    if ((meta.unlockedHeroes || []).length >= 3) this._checkAchievement('all_heroes');
+    /* 套装共鸣 */
+    if (meta.fullSetActivated) this._checkAchievement('full_set');
+    /* 金币 */
+    if ((meta.maxGoldThisRun || 0) >= 1000) this._checkAchievement('get_rich');
+    if ((meta.maxGoldThisRun || 0) >= 10000) this._checkAchievement('gold_10k');
 
     /* ── 变异保险库：20%概率解锁新突变 ── */
     if (Math.random() < 0.2) {
@@ -1647,6 +1685,15 @@ Gp._checkAchievement = function(id) {
     }
 };
 
+/* Epoch 3: 局内成就检测（基于运行时数值） */
+Gp._checkAchievementInflight = function(id, currentValue) {
+    var check = window.achievementCheck && window.achievementCheck.inflight && window.achievementCheck.inflight[id];
+    if (!check) return;
+    if (check(this, currentValue)) {
+        this._checkAchievement(id);
+    }
+};
+
 /* ── 成就弹出提示：大字体，短暂停留 ── */
 Gp._spawnAchievementText = function(text) {
     var el = document.createElement('div');
@@ -1762,6 +1809,12 @@ Gp._onClick = function(e) {
     if (damage === 0) return;
 
     enemy.takeDamage(damage, this.player, undefined, undefined, isCrit ? 'crit' : undefined);
+
+    /* Epoch 3: 暴击计数 */
+    if (isCrit) {
+        this._totalCritsThisRun = (this._totalCritsThisRun || 0) + 1;
+        this._checkAchievementInflight('crit_master', this._totalCritsThisRun);
+    }
 
     if (isCrit) this.triggerShake(2, 300);
 
@@ -2200,7 +2253,9 @@ Gp._triggerOverdrive = function() {
 
     /* \u6210\u5C31\uFF1AOverdrive \u8BA1\u6570 */
     this._overdriveCount = (this._overdriveCount || 0) + 1;
+    if (this._overdriveCount >= 1) this._checkAchievement('overdrive_1');
     if (this._overdriveCount >= 10) this._checkAchievement('overdrive_10');
+    if (this._overdriveCount >= 50) this._checkAchievement('overdrive_50');
 };
 
 Gp._endOverdrive = function() {

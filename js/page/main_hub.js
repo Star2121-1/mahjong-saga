@@ -725,12 +725,47 @@
         for (var i = 0; i < cfg.length; i++) {
             var c = cfg[i];
             var unlocked = !!achievements[c.id];
+            /* 计算进度百分比 */
+            var threshold = (c.thresholds && c.thresholds[0]) || 1;
+            var progress = 0;
+            var currentVal = 0;
+            /* 根据成就 ID 获取当前值 */
+            if (c.id === 'hundred_kills' || c.id === 'thousand_kills' || c.id === 'ten_thousand_kills') {
+                currentVal = meta.totalKills || 0;
+            } else if (c.id === 'first_victory' || c.id === 'victory_10' || c.id === 'victory_50') {
+                currentVal = meta.totalRuns || 0;
+            } else if (c.id === 'deep_abyss' || c.id === 'deep_abyss_10' || c.id === 'deep_abyss_20') {
+                currentVal = meta.highestEndlessLoop || 0;
+            } else if (c.id === 'overdrive_1' || c.id === 'overdrive_10' || c.id === 'overdrive_50') {
+                currentVal = meta.overdriveCount || 0;
+            } else if (c.id === 'flawless' || c.id === 'flawless_5') {
+                currentVal = meta.flawlessRuns || 0;
+            } else if (c.id === 'get_rich' || c.id === 'gold_10k') {
+                currentVal = meta.maxGoldThisRun || 0;
+            } else if (c.id === 'boss_slayer') {
+                currentVal = meta.bossKills || 0;
+            } else if (c.id === 'final_boss_down') {
+                currentVal = meta.finalBossKills || 0;
+            } else if (c.id === 'all_heroes') {
+                currentVal = (meta.unlockedHeroes || []).length;
+            } else if (c.id === 'crit_master') {
+                currentVal = meta.totalCrits || 0;
+            } else if (c.id === 'dodge_king') {
+                currentVal = meta.totalDodges || 0;
+            } else if (c.id === 'full_set') {
+                currentVal = meta.fullSetActivated ? 1 : 0;
+            } else if (c.id === 'gold_10k') {
+                currentVal = meta.maxGoldThisRun || 0;
+            }
+            progress = Math.min(100, Math.round((currentVal / threshold) * 100));
             html +=
                 '<div class="achievement-card' + (unlocked ? ' unlocked' : ' locked') + '">' +
                 '<div class="achievement-icon">' + c.icon + '</div>' +
                 '<div class="achievement-info">' +
                 '<div class="achievement-name">' + c.name + '</div>' +
                 '<div class="achievement-desc">' + c.desc + '</div>' +
+                '<div class="achievement-progress"><div class="achievement-progress-bar" style="width:' + progress + '%"></div></div>' +
+                '<div class="achievement-progress-text">' + currentVal + ' / ' + threshold + (unlocked ? ' ✓' : '') + '</div>' +
                 '</div>' +
                 '</div>';
         }

@@ -530,3 +530,14 @@
 .achievement-name { font-size: 13px; font-weight: 700; color: #fbfbf7; }
 .achievement-card.unlocked .achievement-name { color: #ffd700; }
 .achievement-desc { font-size: 10px; color: #7a9a8a; margin-top: 2px; }
+.achievement-progress {
+    width: 100%; height: 4px; background: rgba(255,255,255,0.06);
+    border-radius: 2px; overflow: hidden; margin-top: 4px;
+}
+.achievement-progress-bar {
+    height: 100%; background: linear-gradient(90deg, #1a5336, #4caf50);
+    border-radius: 2px; transition: width 0.3s ease;
+}
+.achievement-progress-text {
+    font-size: 9px; color: #666; margin-top: 2px; text-align: right;
+}
