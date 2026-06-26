@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>麻将江湖 - 血战到底</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/gameplay.css">
+    <script src="js/core/SaveManager.js"></script>
+</head>
+<body>
+    <div id="game-container">
+        <div id="top-bar">
+            <div class="stat" id="wave-display">🌊 第 1 波</div>
+            <div class="stat" id="gold-display">💰 0</div>
+            <div class="stat" id="atk-display">⚔️ 10</div>
+            <div class="stat" id="kills-display">☠️ 0</div>
+        </div>
+        <div id="exp-bar-container">
+            <div id="exp-bar-fill" style="width:0%"></div>
+            <div id="exp-bar-text">Lv.1 [ 0 / 15 ]</div>
+        </div>
+        <div id="rage-bar-container">
+            <div id="rage-bar-fill" style="width:0%"></div>
+            <div id="rage-bar-text">愤怒 0 / 100</div>
+        </div>
+
+        <div id="battlefield">
+            <div id="world-layer">
+                <div id="fct-layer"></div>
+                <div id="player">
+                    <div id="player-hp-wrap">
+                        <div id="player-hp-bar">
+                            <div id="player-hp-fill" style="width:100%"></div>
+                        </div>
+                        <div id="player-hp-text">100/100</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="reward-overlay">
+                <div class="reward-title">选择圣物</div>
+                <div class="reward-cards"></div>
+            </div>
+
+            <div id="boss-hp-bar">
+                <span id="boss-hp-label">深渊领主</span>
+                <div class="hp-bar-track"><div id="boss-hp-fill" style="width:100%"></div></div>
+            </div>
+
+            <div id="wave-announce"></div>
+
+            <div id="mutator-overlay">
+                <div class="mutator-title">⚠ 波次突变</div>
+                <div class="mutator-subtitle">当前波次出现异常战况，请选择一种适应策略</div>
+                <div class="mutator-choices" id="mutator-choices"></div>
+            </div>
+
+            <div id="victory-overlay">
+                <h1>胡牌！大捷！</h1>
+                <div class="result">存活时间：<span id="victory-time">00:00</span></div>
+                <div class="result">击杀数：<span id="victory-kills">0</span></div>
+                <div class="result">圣物：<span id="victory-relics">-</span></div>
+                <div class="result">获得核心：<span id="victory-tokens">0</span></div>
+                <button id="victory-restart-btn">🔄 再来一局</button>
+                <button id="victory-hub-btn">返回大本营</button>
+            </div>
+
+            <div id="joystick-container">
+                <div id="joystick-base">
+                    <div id="joystick-knob"></div>
+                </div>
+            </div>
+
+            <div id="game-over-overlay">
+                <h1>GAME OVER</h1>
+                <div class="result">存活时间：<span id="result-time">00:00</span></div>
+                <div class="result">击杀数：<span id="result-kills">0</span></div>
+                <button id="restart-btn">🔄 重新开始</button>
+                <button id="hub-btn" style="padding:8px 0;font-size:13px;font-weight:600;width:200px;margin-top:4px;background:rgba(255,255,255,0.04);color:#888;border:1px solid #333;border-radius:6px;cursor:pointer;">返回大本营</button>
+            </div>
+
+            <div id="pause-overlay">
+                <div class="pause-panel">
+                    <div class="pause-title">⏸ 游戏暂停</div>
+                    <button id="pause-continue-btn">▶ 继续游戏</button>
+                    <button id="pause-hub-btn">返回大本营</button>
+                </div>
+            </div>
+
+            <div id="guide-overlay">
+                <div class="guide-panel">
+                    <div class="guide-title">⚔ 新手指引</div>
+                    <div class="guide-body">
+                        <div class="guide-item"><span class="guide-key">WASD</span> / 方向键 移动</div>
+                        <div class="guide-item"><span class="guide-key">点击地面</span> 走位 / 点击敌人攻击</div>
+                        <div class="guide-item"><span class="guide-key">空格</span> 怒气满时触发 Overdrive</div>
+                        <div class="guide-item"><span class="guide-key">Esc</span> / ⏸ 暂停游戏</div>
+                        <div class="guide-item"><span class="guide-key">拾取</span> 击杀掉落铜筹码与经验石，自动吸附</div>
+                        <div class="guide-item"><span class="guide-key">升级</span> 弹出三选一麻将牌，强化天命手牌</div>
+                    </div>
+                    <button id="guide-confirm-btn">明白了，出征！</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="weapon-slot-bar">
+            <div class="weapon-slots" id="weapon-slots"></div>
+        </div>
+
+        <!-- 天命手牌槽 — 14 列 CSS Grid -->
+        <div id="hand-tile-bar">
+            <div id="hand-tile-grid">
+                <!-- 14 个槽位由 JS 动态生成 -->
+            </div>
+        </div>
+
+        <div id="bottom-bar">
+            <div class="hint" id="time-display">⏱ 00:00</div>
+            <button id="pause-btn">⏸</button>
+        </div>
+    </div>
+
+    <script src="js/entities/EquipmentRegistry.js"></script>
+    <script src="js/entities/HeroRegistry.js"></script>
+    <script src="js/config/HeroConfig.js"></script>
+    <script src="js/config/LevelConfig.js"></script>
+    <script src="js/entities/Player.js"></script>
+    <script src="js/entities/Enemy.js"></script>
+    <script src="js/entities/ExpGem.js"></script>
+    <script src="js/entities/Weapon.js"></script>
+    <script src="js/core/RewardManager.js"></script>
+    <script src="js/core/FxManager.js"></script>
+    <script src="js/core/AudioManager.js"></script>
+    <script src="js/config/AchievementConfig.js"></script>
+    <script src="js/core/GameEngine.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/responsive.js"></script>
+</body>
+</html>

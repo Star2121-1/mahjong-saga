@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>麻将江湖 - 大本营</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/main_hub.css">
+    <script src="js/core/SaveManager.js"></script>
+</head>
+<body>
+    <div id="main-hub-screen">
+        <!-- 顶部统计（绝对定位右上角） -->
+        <div id="hub-top-stats">
+            <span>已通关: <span id="hub-total-runs">0</span></span>
+            <span class="hub-stat-sep">|</span>
+            <span>总击杀: <span id="hub-total-kills">0</span></span>
+            <span class="hub-stat-sep">|</span>
+            <span>核心: <span id="hub-meta-tokens">0</span></span>
+        </div>
+
+        <!-- ════════════════════════════ 左侧竹节导航 (15%) ════════════════════════════ -->
+        <aside id="hub-left-nav">
+            <div class="nav-item active" data-panel="tavern">🍺 雀坛招募</div>
+            <div class="nav-item" data-panel="talents">👑 牌浪洗练</div>
+            <div class="nav-item" data-panel="forge">⚒ 百宝牌箩</div>
+            <div class="nav-item" data-panel="expedition">⚔ 血战到底</div>
+            <div class="nav-item" data-panel="mutation">🧬 变异保险库</div>
+            <div class="nav-item" data-panel="achievements">🏆 雀理乾坤</div>
+        </aside>
+
+        <!-- ════════════════════════════ 右侧内容画布 (85%) ════════════════════════════ -->
+        <main id="hub-right-canvas">
+            <!-- 英雄详情弹窗(全局) -->
+            <div id="hero-details-modal" class="hidden">
+                <div class="modal-content">
+                    <div id="hero-detail-portrait" class="hero-portrait large shape-circle"></div>
+                    <h2 id="hero-detail-name"></h2>
+                    <p id="hero-detail-backstory"></p>
+                    <p id="hero-detail-ability"></p>
+                    <div id="hero-detail-stats"></div>
+                    <button id="btn-detail-close" class="relic-btn">关闭</button>
+                </div>
+            </div>
+
+            <!-- ════════════════════════════ tab 1: 雀坛招募 ════════════════════════════ -->
+            <div id="panel-tavern" class="hub-panel">
+                <div class="panel-hero-header">
+                    <div id="hero-carousel-compact">
+                        <button id="btn-hero-prev" class="carousel-arrow">&#9664;</button>
+                        <div id="hero-carousel-viewport">
+                            <div id="hero-portrait" class="hero-portrait shape-circle"></div>
+                            <div id="hero-name-display">光刃行者</div>
+                            <div id="hero-status-display">均衡型战士</div>
+                        </div>
+                        <button id="btn-hero-next" class="carousel-arrow">&#9654;</button>
+                    </div>
+                    <div class="panel-hero-actions">
+                        <button id="btn-hero-main-action" class="relic-btn" disabled>—</button>
+                        <button id="btn-hero-details" class="hub-secondary-btn">详情</button>
+                    </div>
+                </div>
+                <div id="hero-tavern-market">
+                    <div class="tavern-title">雀坛招募 · 英雄集结</div>
+                    <div id="hero-nodes"></div>
+                </div>
+            </div>
+
+            <!-- ════════════════════════════ tab 2: 牌浪洗练 ════════════════════════════ -->
+            <div id="panel-talents" class="hub-panel" style="display:none">
+                <div id="tech-tree-panel">
+                    <div id="tech-tree-nodes">
+                        <div class="tech-node" data-tech="life_enhancement">
+                            <span class="tech-name">生命强化</span>
+                            <span class="tech-level">Lv.0</span>
+                            <span class="tech-effect">最大HP+10/级</span>
+                            <span class="tech-cost">升级: 5 核心</span>
+                            <button class="btn-tech-upgrade">升级</button>
+                        </div>
+                        <div class="tech-node" data-tech="sharpening">
+                            <span class="tech-name">锋芒打磨</span>
+                            <span class="tech-level">Lv.0</span>
+                            <span class="tech-effect">攻击力+2/级</span>
+                            <span class="tech-cost">升级: 8 核心</span>
+                            <button class="btn-tech-upgrade">升级</button>
+                        </div>
+                        <div class="tech-node" data-tech="precision_training">
+                            <span class="tech-name">精准训练</span>
+                            <span class="tech-level">Lv.0</span>
+                            <span class="tech-effect">暴击率+3%/级</span>
+                            <span class="tech-cost">升级: 10 核心</span>
+                            <button class="btn-tech-upgrade">升级</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="talent-tree-market">
+                    <div class="talent-market-title">牌浪洗练 · 永久强化</div>
+                    <div id="talent-cores-display" class="talent-cores-bar">魔王核心: <span id="talent-cores-count">0</span></div>
+                    <div id="talent-nodes"></div>
+                </div>
+
+                <div id="abyss-record-board">
+                    <div class="abyss-record-title">时空裂隙 · 深渊记录</div>
+                    <div id="abyss-record-value">0 轮重塑</div>
+                </div>
+            </div>
+
+            <!-- ════════════════════════════ tab 3: 百宝牌箩 ════════════════════════════ -->
+            <div id="panel-forge" class="hub-panel" style="display:none">
+                <div id="forge-workshop">
+                    <div class="forge-title">百宝牌箩 · 装备检视</div>
+                    <div class="forge-body">
+                        <div class="forge-left">
+                            <div class="forge-section-label">当前装备</div>
+                            <div id="forge-slots"></div>
+                            <div class="forge-section-label">仓库</div>
+                            <div id="inventory-grid"></div>
+                        </div>
+                        <div class="forge-right">
+                            <div class="forge-section-label">牌面祭坛</div>
+                            <div id="forge-altar" class="forge-altar-empty">选择一件装备以查看词条</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ════════════════════════════ tab 4: 血战到底 ════════════════════════════ -->
+            <div id="panel-expedition" class="hub-panel" style="display:none">
+                <div id="level-selector">
+                    <div id="level-cards"></div>
+                    <div id="level-detail-panel">选择一个关卡</div>
+                </div>
+                <button id="btn-hub-start">轰然出征</button>
+            </div>
+
+            <!-- ════════════════════════════ tab 5: 变异保险库 ════════════════════════════ -->
+            <div id="panel-mutation" class="hub-panel" style="display:none">
+                <div class="mutation-vault-title">🧬 变异保险库</div>
+                <div class="mutation-vault-desc">每通关结算时有20%概率解锁一个变异。出征前可携带已解锁变异（每个使Boss核心掉落翻倍），开局即生效。</div>
+                <div class="mutation-vault-hint">当前携带: <span id="mutation-active-count">0</span> 个 → 核心 × <span id="mutation-multiplier">1</span></div>
+                <div id="mutation-list"></div>
+            </div>
+
+            <!-- ════════════════════════════ tab 6: 雀理乾坤 ════════════════════════════ -->
+            <div id="panel-achievements" class="hub-panel" style="display:none">
+                <div class="achievement-title">🏆 雀士功勋</div>
+                <div class="achievement-grid" id="achievement-grid"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/entities/EquipmentRegistry.js"></script>
+    <script src="js/entities/HeroRegistry.js"></script>
+    <script src="js/config/HeroConfig.js"></script>
+    <script src="js/config/LevelConfig.js"></script>
+    <script src="js/config/AchievementConfig.js"></script>
+    <script src="js/page/main_hub.js"></script>
+    <script src="js/responsive.js"></script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>点击肉鸽 - 选档</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/save_select.css">
+    <script src="js/core/SaveManager.js"></script>
+</head>
+<body>
+    <div id="save-select-screen">
+        <div class="menu-content">
+            <h1>Click Roguelike</h1>
+            <p class="menu-subtitle">点击 · 生存 · 策略</p>
+            <div class="menu-buttons">
+                <button id="btn-newgame" class="menu-btn">开启新征程</button>
+                <button id="btn-continue" class="menu-btn" disabled>继续游戏</button>
+                <button id="btn-import" class="menu-btn menu-btn-secondary">导入本地存档</button>
+                <button id="btn-export" class="menu-btn menu-btn-secondary">导出当前存档</button>
+            </div>
+            <div class="menu-footer">
+                <button id="btn-settings" class="menu-btn menu-btn-secondary">游戏设置</button>
+                <div class="menu-stats" id="last-save-info" style="font-size:11px;color:#444;margin-top:4px;">最近存档: —</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-overlay" class="hidden">
+        <div class="settings-content">
+            <h2>游戏设置</h2>
+            <label>
+                音效开关
+                <input type="checkbox" id="setting-sound" checked>
+            </label>
+            <label>
+                难度缩放
+                <input type="range" id="setting-difficulty" min="0.5" max="3" step="0.1" value="1">
+            </label>
+            <button id="btn-settings-close" class="menu-btn">关闭</button>
+        </div>
+    </div>
+
+    <div id="save-warning-overlay" class="hidden">
+        <div class="warning-content">
+            <div class="warning-icon">⚠️</div>
+            <h2>确认开始新征程</h2>
+            <p class="warning-desc">此操作将清除所有进度（科技树、英雄解锁、核心货币、当前战局），创建一个全新的独立存档。是否先导出备份当前存档？</p>
+            <div class="warning-buttons">
+                <button id="btn-warning-export" class="menu-btn">先导出备份</button>
+                <button id="btn-warning-overwrite" class="menu-btn menu-btn-secondary" style="border-color:#ff1744;color:#ff1744;">放弃进度强行覆写</button>
+                <button id="btn-warning-cancel" class="menu-btn menu-btn-secondary">取消操作</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/page/save_select.js"></script>
+    <script src="js/responsive.js"></script>
+</body>
+</html>

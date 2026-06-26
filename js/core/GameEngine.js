@@ -1,0 +1,2398 @@
+(function() {
+
+window.GameEngine = function() {
+    this._currentLevelId = 'level_1';
+    this._heroIds = ['hero_swordsman', 'hero_colossus', 'hero_phantom'];
+
+    this.running = false;
+    this.gameOver = false;
+    this._elapsed = 0;
+    this.kills = 0;
+    this._spawnTimer = 0;
+    this._spawnInterval = 1.5;
+    this._difficultyTimer = 0;
+    this._bossTimer = 0;
+
+    this._mapW = 1500;
+    this._mapH = 1500;
+
+    this.player = null;
+    this.enemies = [];
+    this._enemyIdCounter = 0;
+    this._enemyElements = new Map();
+
+    this._activeCoins = [];
+    this._pendingReward = false;
+    this._waveCount = 0;
+    this.currentWaveSpawnedCount = 0;
+
+    this.cameraX = 0;
+    this.cameraY = 0;
+
+    this._lastTime = 0;
+    this._boundLoop = this._loop.bind(this);
+
+    this._pressedKeys = {};
+    this._joystickDX = 0;
+    this._joystickDY = 0;
+    this._joystickActive = false;
+    this._lastMoveX = 0;
+
+    this._expGems = [];
+    this._levelUpPending = false;
+    this._ignoreGemCollection = false;
+    this._mutatorTriggered = false;
+    this._activeMutator = null;
+    this._abyssPanelVisible = false;
+    this.loopCount = 0;
+    this._pendingBossLordSettle = false;
+    this.playerHitCountInLevel1 = 0;
+    this.stalkersKilledInLevel2 = 0;
+    this._godModeApplied = false;
+    this._bloodRageActive = false;
+    this._totems = [];
+    this._activeWeapons = [];
+    this._projectiles = [];
+    this._lastClickAngle = 0;
+    this._weaponSlotsEl = null;
+    this._enemyProjectiles = [];
+    this._bossLord = null;
+    this._bossLordWave = false;
+    this._bossLordSpawned = false;
+
+    this._overdriveActive = false;
+    this._overdriveTimer = 0;
+    this._vaultMutations = [];
+    this._resonanceAuraTimer = 0;
+    this._shakeTimer = 0;
+    this._shakeIntensity = 0;
+    this._witherTimer = 0;
+    this._paused = false;
+    this.pauseOverlay = null;
+    this._overdriveCount = 0;
+    this._maxGoldThisRun = 0;
+
+    this.battlefield = null;
+    this.container = null;
+    this._worldLayer = null;
+    this.playerEl = null;
+    this.playerHpFill = null;
+    this.playerHpText = null;
+    this.goldDisplay = null;
+    this.atkDisplay = null;
+    this.killsDisplay = null;
+    this.timeDisplay = null;
+    this.waveDisplay = null;
+    this.gameOverOverlay = null;
+    this.resultTime = null;
+    this.resultKills = null;
+    this.restartBtn = null;
+    this.victoryOverlay = null;
+    this.victoryTime = null;
+    this.victoryKills = null;
+    this.victoryRelics = null;
+    this.victoryTokens = null;
+    this.victoryRestartBtn = null;
+    this.victoryHubBtn = null;
+    this._joystickBase = null;
+    this._joystickKnob = null;
+    this.hubBtn = null;
+};
+
+var Gp = window.GameEngine.prototype;
+
+Gp.init = async function() {
+    if (this._initialized) return;
+    this._initialized = true;
+    this._cacheStage3DOM();
+
+    this.player = new Player(this._mapW / 2, this._mapH / 2);
+
+    await window.saveManager.init();
+
+    var data = await window.saveManager.loadActiveRun();
+        if (data && data.isRunActive === true && data.player) {
+            window.saveManager.restoreRunToEngine(this, data);
+            this._restoreWeapons(data.weapons);
+            this._pendingReward = false;
+            for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
+            this._enemyElements.clear();
+            this.enemies = [];
+            this._enemyIdCounter = 0;
+            for (var _c = 0; _c < this._activeCoins.length; _c++) this._activeCoins[_c].el.remove();
+            this._activeCoins = [];
+            this._lastMoveX = 0;
+
+            var vpW = this.battlefield.clientWidth;
+            var vpH = this.battlefield.clientHeight;
+            this.cameraX = Math.max(0, Math.min(this._mapW - vpW, this.player.x - vpW / 2));
+            this.cameraY = Math.max(0, Math.min(this._mapH - vpH, this.player.y - vpH / 2));
+
+            this.player.invulnTimer = 1.5;
+            this.gameOver = false;
+
+            if (window.rewardManager) window.rewardManager.hidePanel();
+            this._syncEntities();
+            this._syncPlayerHP();
+            this._syncUI();
+            this._beginLoop();
+        } else if (data && data.mode === 'new') {
+            this._startNewRun(data.heroId, data.levelId);
+        } else {
+            window.location.href = 's1_save_select.html';
+            return;
+        }
+
+    this._initKeyboard();
+    this._initJoystick();
+    this._bindStage3Events();
+    this._initBeforeUnload();
+
+    if (this.battlefield) {
+        var self = this;
+        this.battlefield.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+        this.battlefield.addEventListener('pointerdown', function(e) {
+            if (e.button !== 0) return;
+            if (e.target.closest && e.target.closest('#joystick-container')) return;
+            if (!self.running || self.gameOver || self._pendingReward) return;
+
+            var bfRect = self.battlefield.getBoundingClientRect();
+            var clickVX = e.clientX - bfRect.left;
+            var clickVY = e.clientY - bfRect.top;
+            var clickWX = clickVX + self.cameraX;
+            var clickWY = clickVY + self.cameraY;
+
+            /* ── 方向锁死铁律：点击即更新兵器朝向，无视目标类型 ── */
+            self._lastClickAngle = Math.atan2(clickWY - self.player.y, clickWX - self.player.x);
+            for (var _wi = 0; _wi < self._activeWeapons.length; _wi++) {
+                if (self._activeWeapons[_wi] instanceof window.ShotgunBurst) {
+                    self._activeWeapons[_wi].fireAt(clickWX, clickWY, self.player, self);
+                }
+            }
+
+            var enemyEl = e.target.closest('.enemy');
+            if (enemyEl) {
+                e.stopPropagation();
+                e.preventDefault();
+                self._onClick(e);
+                return;
+            }
+
+            /* ── 意图分离判定：走位中盲射不触发点击位移 ── */
+            var hasKeyboard = self._pressedKeys['KeyW'] || self._pressedKeys['KeyS'] ||
+                self._pressedKeys['KeyA'] || self._pressedKeys['KeyD'] ||
+                self._pressedKeys['ArrowUp'] || self._pressedKeys['ArrowDown'] ||
+                self._pressedKeys['ArrowLeft'] || self._pressedKeys['ArrowRight'];
+            if (hasKeyboard || self._joystickActive) {
+                e.preventDefault();
+                return;
+            }
+
+            self._moveTo(clickWX, clickWY);
+        }, { passive: false });
+    }
+
+    if (window.rewardManager) {
+        window.rewardManager.onPurchase = function() { self._autoSave('relic'); };
+    }
+};
+
+Gp._cacheStage3DOM = function() {
+    this.battlefield = document.getElementById('battlefield');
+    this.container = document.getElementById('game-container');
+    this._worldLayer = document.getElementById('world-layer');
+    this.playerEl = document.getElementById('player');
+    this.playerHpFill = document.getElementById('player-hp-fill');
+    this.playerHpText = document.getElementById('player-hp-text');
+    this.goldDisplay = document.getElementById('gold-display');
+    this.atkDisplay = document.getElementById('atk-display');
+    this.killsDisplay = document.getElementById('kills-display');
+    this.timeDisplay = document.getElementById('time-display');
+    this.waveDisplay = document.getElementById('wave-display');
+    this.expBarFill = document.getElementById('exp-bar-fill');
+    this.expBarText = document.getElementById('exp-bar-text');
+    this.gameOverOverlay = document.getElementById('game-over-overlay');
+    this.resultTime = document.getElementById('result-time');
+    this.resultKills = document.getElementById('result-kills');
+    this.restartBtn = document.getElementById('restart-btn');
+    this.victoryOverlay = document.getElementById('victory-overlay');
+    this.victoryTime = document.getElementById('victory-time');
+    this.victoryKills = document.getElementById('victory-kills');
+    this.victoryRelics = document.getElementById('victory-relics');
+    this.victoryTokens = document.getElementById('victory-tokens');
+    this.victoryRestartBtn = document.getElementById('victory-restart-btn');
+    this.victoryHubBtn = document.getElementById('victory-hub-btn');
+    this._joystickBase = document.getElementById('joystick-base');
+    this._joystickKnob = document.getElementById('joystick-knob');
+    this.hubBtn = document.getElementById('hub-btn');
+    this.pauseOverlay = document.getElementById('pause-overlay');
+    this.guideOverlay = document.getElementById('guide-overlay');
+    this.mutatorOverlay = document.getElementById('mutator-overlay');
+    this.mutatorChoices = document.getElementById('mutator-choices');
+    this.bossHpBar = document.getElementById('boss-hp-bar');
+    this.bossHpFill = document.getElementById('boss-hp-fill');
+    this._weaponSlotsEl = document.getElementById('weapon-slots');
+    this.rageDisplay = document.getElementById('rage-bar-fill');
+    this._pauseBtn = document.getElementById('pause-btn');
+    this._handTileGrid = document.getElementById('hand-tile-grid');
+    this._handTileBar = document.getElementById('hand-tile-bar');
+};
+
+Gp._bindStage3Events = function() {
+    /* 首次用户手势激活音频上下文（浏览器策略要求） */
+    var s0 = this;
+    var _activateAudio = function() {
+        if (window.audioManager) window.audioManager._ensureContext();
+        document.removeEventListener('pointerdown', _activateAudio);
+        document.removeEventListener('keydown', _activateAudio);
+    };
+    document.addEventListener('pointerdown', _activateAudio, { once: true });
+    document.addEventListener('keydown', _activateAudio, { once: true });
+
+    if (this.restartBtn) { var s = this; this.restartBtn.addEventListener('click', function() { s.restart(); }); }
+    if (this.victoryRestartBtn) { var s = this; this.victoryRestartBtn.addEventListener('click', function() { s.restart(); }); }
+    if (this.victoryHubBtn) { var s = this; this.victoryHubBtn.addEventListener('click', function() { s._goToSaveSelect(); }); }
+    if (this.hubBtn) { var s = this; this.hubBtn.addEventListener('click', function() { s._goToSaveSelect(); }); }
+    if (this._pauseBtn) { var s = this; this._pauseBtn.addEventListener('click', function() { s._togglePause(); }); }
+    if (this.pauseOverlay) {
+        var s = this;
+        this.pauseOverlay.querySelector('#pause-continue-btn').addEventListener('click', function() { s._togglePause(); });
+        this.pauseOverlay.querySelector('#pause-hub-btn').addEventListener('click', function() {
+            s._paused = false;
+            if (s.pauseOverlay) s.pauseOverlay.classList.remove('active');
+            s._goToSaveSelect();
+        });
+    }
+    if (this.guideOverlay) {
+        var s = this;
+        var confirmBtn = this.guideOverlay.querySelector('#guide-confirm-btn');
+        if (confirmBtn) confirmBtn.addEventListener('click', function() {
+            s.guideOverlay.classList.remove('active');
+            s._guideDismissed = true;
+            s._beginLoop();
+        });
+    }
+};
+
+Gp._initBeforeUnload = function() {
+    var self = this;
+    window.addEventListener('beforeunload', function(e) {
+        if (self.running) {
+            var snap = window.saveManager.snapshotForRun(self);
+            window.saveManager.saveActiveRun(snap);
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+};
+
+Gp._startNewRun = function(heroId, levelId) {
+    var levelCfg = window.levelConfig[levelId] || window.levelConfig.level_1;
+    this._mapW = levelCfg.mapW;
+    this._mapH = levelCfg.mapH;
+    this._currentLevelId = levelId;
+
+    for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
+    this._enemyElements.clear();
+    this.enemies = [];
+    this._enemyIdCounter = 0;
+    for (var _c = 0; _c < this._activeCoins.length; _c++) this._activeCoins[_c].el.remove();
+    this._activeCoins = [];
+
+    this._pendingReward = false;
+    this._waveCount = 0;
+    this.currentWaveSpawnedCount = 0;
+    this._elapsed = 0;
+    this.kills = 0;
+    this._spawnTimer = 0;
+    this._spawnInterval = 1.5;
+    this._difficultyTimer = 0;
+    this._bossTimer = 0;
+    this._lastMoveX = 0;
+    this._lastClickAngle = 0;
+    this._pressedKeys = {};
+    this._joystickActive = false;
+    this._joystickDX = 0;
+    this._joystickDY = 0;
+    this._expGems = [];
+    this._levelUpPending = false;
+    this._ignoreGemCollection = false;
+    this._mutatorTriggered = false;
+    this._activeMutator = null;
+    this.playerHitCountInLevel1 = 0;
+    this._playerHitCountThisRun = 0;
+    this.stalkersKilledInLevel2 = 0;
+    if (this._currentLevelId === 'level_1' || !this.loopCount) this.loopCount = 0;
+    this._clearTotems();
+    this._cleanEnemyProjectiles();
+    this._bossLord = null;
+    this._bossLordWave = false;
+    this._bossLordSpawned = false;
+
+    this._overdriveActive = false;
+    this._overdriveTimer = 0;
+    this._resonanceAuraTimer = 0;
+
+    this.player.reset(heroId);
+
+    /* ── 套装共鸣：开局提示 ── */
+    if (this.player.setResonanceSpeed) {
+        this._spawnCausalityText('◆ 套装共鸣·炎痕已激活 — 灼烧周围敌人');
+    }
+    if (this.player.setResonanceIce) {
+        this._spawnCausalityText('◆ 套装共鸣·永冻已激活 — 冻结周围敌人');
+    }
+
+    /* ── 变异保险库：开局生效 ── */
+    var _metaForVault = window.saveManager._metaCache || {};
+    this._vaultMutations = (_metaForVault.activeMutations || []).slice();
+    if (this._vaultMutations.indexOf('gravity') !== -1) {
+        this.player.magnetRadius = 0;
+    }
+
+    var meta = window.saveManager._metaCache || {};
+    var techTree = (meta && meta.techTree) || {};
+    this.player.applyTechTree(techTree);
+
+    /* ── 因果效应显化 ── */
+    this._godModeApplied = false;
+    this._bloodRageActive = false;
+    var cf = (meta && meta.causalityFlags) || {};
+    if (this._currentLevelId === 'level_2' && cf.level1NoDamage) {
+        this._godModeApplied = true;
+        this.player.atk = Math.floor(this.player.atk * 1.2);
+        this._spawnCausalityText('\u5929\u795e\u4e0b\u51e1\uff1a\u653b\u51fb\u529b +20%');
+    }
+    if (this._currentLevelId === 'level_3' && cf.level2Overkill) {
+        this._bloodRageActive = true;
+        this._spawnCausalityText('\u8840\u6d77\u72c2\u66b4\uff1a\u9886\u4e3b\u5f3a\u5316\uff0c\u6838\u5fc3 +2');
+    }
+
+    this.player.x = this._mapW / 2;
+    this.player.y = this._mapH / 2;
+    this.player.invulnTimer = 1.5;
+    this.gameOver = false;
+
+    var vpW = this.battlefield.clientWidth;
+    var vpH = this.battlefield.clientHeight;
+    this.cameraX = Math.max(0, Math.min(this._mapW - vpW, this.player.x - vpW / 2));
+    this.cameraY = Math.max(0, Math.min(this._mapH - vpH, this.player.y - vpH / 2));
+
+    this._resetAllWeapons();
+    this._initDefaultWeapons();
+    this._syncEntities();
+    this._syncPlayerHP();
+    this._renderWeaponSlots();
+    this._syncUI();
+
+    /* ── 渲染 2.5D 骨雕雀牌 ── */
+    this._renderPlayerTile();
+
+    /* ── 初始化 14 格天命手牌槽 ── */
+    this._initHandTiles();
+
+    this._freezeClock();
+    /* ── 开场引导：首次游戏显示，否则直接播报第一波 ── */
+    if (this._shouldShowGuide()) {
+        this._showGuide();
+    } else {
+        this._announceWave(0);
+    }
+};
+
+Gp._announceWave = function(waveIdx) {
+    this._unfreezeClock();
+    this._freezeClock();
+    var wa = document.getElementById('wave-announce');
+    wa.textContent = '\u7b2c ' + (waveIdx + 1) + ' \u6ce2';
+    wa.classList.add('active');
+    this._autoSave('wave');
+    var self = this;
+    setTimeout(function() {
+        wa.classList.remove('active');
+        self._beginLoop();
+    }, 1200);
+};
+
+Gp._freezeClock = function() {
+    if (this.container) this.container.classList.add('game-clock-frozen');
+};
+Gp._unfreezeClock = function() {
+    if (this.container) this.container.classList.remove('game-clock-frozen');
+};
+
+/* ── 暂停系统 ── */
+
+Gp._isPauseAllowed = function() {
+    if (!this.player || this.gameOver) return false;
+    if (this._abyssPanelVisible) return false;
+    if (this.victoryOverlay && this.victoryOverlay.classList.contains('active')) return false;
+    if (this.gameOverOverlay && this.gameOverOverlay.classList.contains('active')) return false;
+    var ro = document.getElementById('reward-overlay');
+    if (ro && ro.classList.contains('active')) return false;
+    var mo = document.getElementById('mutator-overlay');
+    if (mo && mo.classList.contains('active')) return false;
+    if (this.guideOverlay && this.guideOverlay.classList.contains('active')) return false;
+    return true;
+};
+
+Gp._togglePause = function() {
+    if (!this._paused) {
+        if (!this._isPauseAllowed()) return;
+        this._paused = true;
+        this.running = false;
+        this._freezeClock();
+        if (this.pauseOverlay) this.pauseOverlay.classList.add('active');
+    } else {
+        this._paused = false;
+        if (this.pauseOverlay) this.pauseOverlay.classList.remove('active');
+        this._beginLoop();
+    }
+};
+
+/* ── 开场引导 ── */
+
+Gp._shouldShowGuide = function() {
+    if (this._guideDismissed) return false;
+    var meta = window.saveManager && window.saveManager._metaCache;
+    if (!meta) return false;
+    if (meta.hasSeenGuide) return false;
+    /* 仅首次游戏 + level_1 + 非深渊轮回时显示 */
+    if (this._currentLevelId !== 'level_1' || this.loopCount > 0) return false;
+    return true;
+};
+
+Gp._showGuide = function() {
+    if (this.guideOverlay) this.guideOverlay.classList.add('active');
+    var meta = window.saveManager && window.saveManager._metaCache;
+    if (meta) {
+        meta.hasSeenGuide = true;
+        if (window.saveManager) window.saveManager._saveMetaToStorage();
+    }
+};
+
+Gp._beginLoop = function() {
+    this._unfreezeClock();
+    if (this.running) return;
+    this.running = true;
+    this.gameOver = false;
+    this._lastTime = performance.now();
+    requestAnimationFrame(this._boundLoop);
+};
+
+Gp._autoSave = function(trigger) {
+    var snap = window.saveManager.snapshotForRun(this);
+    window.saveManager.saveActiveRun(snap);
+};
+
+Gp._initKeyboard = function() {
+    var self = this;
+    document.addEventListener('keydown', function(e) {
+        /* Escape 暂停/继续，任何状态下均可触发 */
+        if (e.code === 'Escape') {
+            self._togglePause();
+            return;
+        }
+        if (!self.running || self.gameOver) return;
+        if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyW','KeyA','KeyS','KeyD'].includes(e.code)) e.preventDefault();
+        if (e.code === 'Space' && self.player && self.player.rage >= self.player.maxRage && !self._overdriveActive) {
+            self._pressedKeys[e.code] = false;
+            self._triggerOverdrive();
+            return;
+        }
+        self._pressedKeys[e.code] = true;
+    });
+    document.addEventListener('keyup', function(e) { self._pressedKeys[e.code] = false; });
+};
+
+Gp._initJoystick = function() {
+    var base = this._joystickBase;
+    var knob = this._joystickKnob;
+    if (!base || !knob) return;
+    var self = this;
+
+    var getOffset = function() {
+        var rect = base.getBoundingClientRect();
+        return { cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2, maxR: rect.width / 2 - knob.offsetWidth / 2 };
+    };
+
+    var updateKnob = function(clientX, clientY) {
+        var o = getOffset();
+        var dx = clientX - o.cx;
+        var dy = clientY - o.cy;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > o.maxR) { dx = (dx / dist) * o.maxR; dy = (dy / dist) * o.maxR; }
+        knob.style.left = (50 + (dx / (base.offsetWidth / 2)) * 50) + '%';
+        knob.style.top = (50 + (dy / (base.offsetHeight / 2)) * 50) + '%';
+        if (dist > 6) { self._joystickDX = dx / o.maxR; self._joystickDY = dy / o.maxR; }
+        else { self._joystickDX = 0; self._joystickDY = 0; }
+    };
+
+    var resetKnob = function() {
+        self._joystickActive = false;
+        self._joystickDX = 0;
+        self._joystickDY = 0;
+        knob.style.left = '50%';
+        knob.style.top = '50%';
+    };
+
+    var _touchId = null;
+
+    base.addEventListener('mousedown', function(e) {
+        if (e.button !== 0) return;
+        e.stopPropagation();
+        self._joystickActive = true;
+        updateKnob(e.clientX, e.clientY);
+    });
+    document.addEventListener('mousemove', function(e) {
+        if (!self._joystickActive) return;
+        updateKnob(e.clientX, e.clientY);
+    });
+    document.addEventListener('mouseup', function() { resetKnob(); });
+    base.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        self._joystickActive = true;
+        var t = e.changedTouches[0];
+        _touchId = t.identifier;
+        updateKnob(t.clientX, t.clientY);
+    }, { passive: false });
+    document.addEventListener('touchmove', function(e) {
+        if (!self._joystickActive) return;
+        updateKnob(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+    }, { passive: false });
+    document.addEventListener('touchend', function(e) {
+        if (_touchId !== null) {
+            var found = false;
+            for (var i = 0; i < e.changedTouches.length; i++) { if (e.changedTouches[i].identifier === _touchId) { found = true; break; } }
+            if (!found) return;
+            _touchId = null;
+        }
+        resetKnob();
+    });
+    document.addEventListener('touchcancel', function(e) {
+        if (_touchId !== null) { _touchId = null; resetKnob(); }
+    });
+    document.addEventListener('mouseleave', function() { if (self._joystickActive) resetKnob(); });
+};
+
+Gp._getInputVector = function() {
+    var rawX = 0;
+    var rawY = 0;
+    if (this._pressedKeys['KeyW'] || this._pressedKeys['ArrowUp']) rawY -= 1;
+    if (this._pressedKeys['KeyS'] || this._pressedKeys['ArrowDown']) rawY += 1;
+    if (this._pressedKeys['KeyA'] || this._pressedKeys['ArrowLeft']) rawX -= 1;
+    if (this._pressedKeys['KeyD'] || this._pressedKeys['ArrowRight']) rawX += 1;
+    if (rawX === 0 && rawY === 0) {
+        rawX = this._joystickDX;
+        rawY = this._joystickDY;
+    }
+    var len = Math.sqrt(rawX * rawX + rawY * rawY);
+    if (len > 1) return { x: rawX / len, y: rawY / len };
+    return { x: rawX, y: rawY };
+};
+
+Gp._loop = function(timestamp) {
+    if (!this.running || this.gameOver) return;
+    try {
+        var dt = Math.min((timestamp - this._lastTime) / 1000, 0.05);
+        this._lastTime = timestamp;
+        this._elapsed += dt;
+
+        var input = this._getInputVector();
+        this._lastMoveX = input.x;
+        this.player.update(dt, input.x, input.y, this._mapW, this._mapH);
+
+        if (!this._pendingReward) {
+            this._difficultyTimer += dt;
+            if (this._difficultyTimer >= 10) {
+                this._difficultyTimer -= 10;
+                this._spawnInterval = Math.max(0.3, this._spawnInterval * 0.9);
+            }
+
+            /* ── Boss Lord 波次 ── */
+            if (this._bossLordWave) {
+                if (!this._bossLordSpawned) {
+                    this._bossLordSpawned = true;
+                    this._spawnBossLord();
+                }
+            } else {
+                this._spawnTimer += dt;
+                while (this._spawnTimer >= this._spawnInterval) {
+                    this._spawnTimer -= this._spawnInterval;
+                    this._spawnEnemy();
+                }
+
+                this._bossTimer += dt;
+                if (this._bossTimer >= 30) {
+                    this._bossTimer = 0;
+                    var bossCount = 0;
+                    for (var _bi = 0; _bi < this.enemies.length; _bi++) { if (this.enemies[_bi].alive && this.enemies[_bi].isBoss) bossCount++; }
+                    if (bossCount < 1) this._spawnEnemy(true);
+                }
+            }
+
+            if (this.player.hasDrone) {
+                var interval = this.player.evolvedDrone ? 0.2 : this.player.droneInterval;
+                this.player.droneTimer += dt;
+                while (this.player.droneTimer >= interval) {
+                    this.player.droneTimer -= interval;
+                    if (this.player.evolvedDrone) {
+                        var withDist = [];
+                        for (var _di = 0; _di < this.enemies.length; _di++) {
+                            var _e = this.enemies[_di];
+                            if (!_e.alive) continue;
+                            var _dx = _e.x - this.player.x;
+                            var _dy = _e.y - this.player.y;
+                            withDist.push({ e: _e, d: _dx * _dx + _dy * _dy });
+                        }
+                        withDist.sort(function(a,b) { return a.d - b.d; });
+                        var targets = withDist.slice(0, 3);
+                        for (var _ti = 0; _ti < targets.length; _ti++) targets[_ti].e.takeDamage(24);
+                    } else {
+                        var nearest = null;
+                        var nearestDist = Infinity;
+                        for (var _nj = 0; _nj < this.enemies.length; _nj++) {
+                            var _ne = this.enemies[_nj];
+                            if (!_ne.alive) continue;
+                            var _ndx = _ne.x - this.player.x;
+                            var _ndy = _ne.y - this.player.y;
+                            var _nd = _ndx * _ndx + _ndy * _ndy;
+                            if (_nd < nearestDist) { nearestDist = _nd; nearest = _ne; }
+                        }
+                        if (nearest) nearest.takeDamage(12);
+                    }
+                }
+            }
+
+            var prevHp = this.player.hp;
+
+            for (var _ei = 0; _ei < this.enemies.length; _ei++) {
+                this.enemies[_ei].update(dt, this.player, this);
+            }
+
+            /* ── 图腾 buff 应用 ── */
+            for (var _toti = 0; _toti < this.enemies.length; _toti++) this.enemies[_toti]._totemBuffed = false;
+            for (var _to = 0; _to < this._totems.length; _to++) {
+                var t = this._totems[_to];
+                for (var _tei = 0; _tei < this.enemies.length; _tei++) {
+                    var te = this.enemies[_tei];
+                    if (!te.alive) continue;
+                    var tdx = te.x - t.x;
+                    var tdy = te.y - t.y;
+                    if (tdx * tdx + tdy * tdy < t.radius * t.radius) te._totemBuffed = true;
+                }
+            }
+
+            /* ── 波次突变触发器（Boss Lord 波次跳过） ── */
+            if (!this._bossLordWave && !this._mutatorTriggered && this._activeMutator === null && this.currentWaveSpawnedCount > 0) {
+                var cap = this._getWaveEnemyMax();
+                if (cap > 0 && this.currentWaveSpawnedCount >= Math.ceil(cap * 0.5)) {
+                    this._mutatorTriggered = true;
+                    this._showMutatorPanel();
+                }
+            }
+
+            if (this.player._thornCritX !== undefined) {
+                this._spawnFloatText(this.player._thornCritX, this.player._thornCritY, '\u66b4\u51fb\u53cd\u5546!', true);
+                this.player._thornCritX = undefined;
+                this.player._thornCritY = undefined;
+            }
+
+            if (this.player._dodgeSignal) {
+                this._spawnFloatText(this.player.x, this.player.y, '\u95ea\u907f!', true);
+                this.player._dodgeSignal = false;
+            }
+
+            if (this.player._healAmount > 0) {
+                this._spawnHealText(this.player.x, this.player.y, this.player._healAmount);
+                this.player._healAmount = 0;
+            }
+
+            var bossDied = [];
+            for (var _ri = this.enemies.length - 1; _ri >= 0; _ri--) {
+                var _re = this.enemies[_ri];
+                if (!_re.alive) {
+                    if (_re.isBoss) {
+                        bossDied.push(_re);
+                    } else {
+                        this._rewardKill(_re);
+                        this._removeEnemyDOM(_re);
+                        this.enemies.splice(_ri, 1);
+                    }
+                }
+            }
+
+            if (bossDied.length) {
+                var lordDead = false;
+                for (var _bdi = 0; _bdi < bossDied.length; _bdi++) {
+                    var _be = bossDied[_bdi];
+                    if (_be.type === 'Boss_Lord') lordDead = true;
+                    this._spawnCoinsAt(_be.x, _be.y, true, _be.level);
+                    this._tryDropEquipment(_be.x, _be.y, _be.type === 'Boss_Lord');
+                    this.kills++;
+                    this._removeEnemyDOM(_be);
+                    var _idx = this.enemies.indexOf(_be);
+                    if (_idx !== -1) this.enemies.splice(_idx, 1);
+                }
+                if (lordDead) {
+                    this.triggerShake(3, 500);
+                    this._cleanEnemyProjectiles();
+                    for (var _ldi = this.enemies.length - 1; _ldi >= 0; _ldi--) {
+                        var _le = this.enemies[_ldi];
+                        if (_le.alive) { this._removeEnemyDOM(_le); this.enemies.splice(_ldi, 1); }
+                    }
+                    for (var _lci = 0; _lci < this._activeCoins.length; _lci++) this._activeCoins[_lci].el.remove();
+                    this._activeCoins = [];
+                    if (this.bossHpBar) this.bossHpBar.classList.remove('active');
+                    if (this._expGems.length > 0) {
+                        this._pendingBossLordSettle = true;
+                    } else {
+                        this.running = false;
+                        this.gameOver = true;
+                        if (this._currentLevelId === 'level_3' || this.loopCount > 0) {
+                            this._showAbyssPanel();
+                        } else {
+                            this._showVictory();
+                        }
+                    }
+                    return;
+                }
+                for (var _mi = this.enemies.length - 1; _mi >= 0; _mi--) {
+                    var _me = this.enemies[_mi];
+                    if (_me.alive) {
+                        this._spawnCoinsAt(_me.x, _me.y, false, _me.level);
+                        this._spawnExpGemsAt(_me.x, _me.y, false, _me.level);
+                        this.kills++;
+                        this._removeEnemyDOM(_me);
+                        this.enemies.splice(_mi, 1);
+                    }
+                }
+                this._pendingReward = true;
+            }
+
+            if (this.player.hp < prevHp) { this._screenShake(); this._playerHitCountThisRun++; }
+        }
+
+        this._updateCoins(dt);
+        this._updateExpGems(dt);
+
+        /* ── BossLord 死亡：等待经验石吸完后再结算 ── */
+        if (this._pendingBossLordSettle && this._expGems.length === 0) {
+            if (this._levelUpPending) {
+                this._levelUpPending = false;
+                this.running = false;
+                this._freezeClock();
+                this._syncUI();
+                if (window.rewardManager) window.rewardManager.showLevelUpPanel();
+                return;
+            }
+            this._pendingBossLordSettle = false;
+            this.running = false;
+            this.gameOver = true;
+            if (this._currentLevelId === 'level_3' || this.loopCount > 0) {
+                this._showAbyssPanel();
+            } else {
+                this._showVictory();
+            }
+            return;
+        }
+
+        this._updateWeapons(dt);
+        this._updateProjectiles(dt);
+        if (!this._pendingReward) this._updateEnemyProjectiles(dt);
+
+        /* ── Overdrive 计时（游戏时间） ── */
+        /* 设计决策：面板打开时游戏循环暂停，Overdrive 计时随之暂停。
+           面板关闭后倒计时从剩余时间继续。不按真实时间流逝。 */
+        if (this._overdriveActive) {
+            this._overdriveTimer -= dt;
+            if (this._overdriveTimer <= 0) this._endOverdrive();
+        }
+
+        /* ── 屏幕震颤计时 ── */
+        if (this._shakeTimer > 0) {
+            this._shakeTimer -= dt;
+            if (this._shakeTimer <= 0) {
+                this._shakeTimer = 0;
+                if (this.container) {
+                    this.container.classList.remove('screen-shake-active');
+                    this.container.style.animationDuration = '';
+                }
+            }
+        }
+
+        /* ── 套装共鸣：焰痕（Speed ×3）── */
+        if (this.player.setResonanceSpeed && !this._pendingReward) {
+            this._flameAuraTimer = (this._flameAuraTimer || 0) + dt;
+            if (this._flameAuraTimer >= 0.5) {
+                this._flameAuraTimer = 0;
+                var _px = this.player.x;
+                var _py = this.player.y;
+                var _auraR = 80;
+                var dmg = Math.floor(this.player.atk * 0.3);
+                for (var _aei = 0; _aei < this.enemies.length; _aei++) {
+                    var _ae = this.enemies[_aei];
+                    if (!_ae.alive) continue;
+                    var _adx = _ae.x - _px;
+                    var _ady = _ae.y - _py;
+                    if (_adx * _adx + _ady * _ady <= _auraR * _auraR) {
+                        _ae.takeDamage(dmg);
+                    }
+                }
+                var _auraEl = document.createElement('div');
+                _auraEl.className = 'resonance-flame';
+                _auraEl.style.left = (_px - _auraR) + 'px';
+                _auraEl.style.top = (_py - _auraR) + 'px';
+                _auraEl.style.width = (_auraR * 2) + 'px';
+                _auraEl.style.height = (_auraR * 2) + 'px';
+                this._worldLayer.appendChild(_auraEl);
+                var _self = this;
+                setTimeout(function() { if (_auraEl.parentNode) _auraEl.remove(); }, 400);
+            }
+        }
+
+        /* ── 套装共鸣：永冻（Ice ×3）── */
+        if (this.player.setResonanceIce && !this._pendingReward) {
+            this._iceAuraTimer = (this._iceAuraTimer || 0) + dt;
+            if (this._iceAuraTimer >= 0.8) {
+                this._iceAuraTimer = 0;
+                var _px2 = this.player.x;
+                var _py2 = this.player.y;
+                var _iceR = 60;
+                var _dur = 0.5 + (this.player.iceDurationBonus || 0);
+                for (var _iei = 0; _iei < this.enemies.length; _iei++) {
+                    var _ie = this.enemies[_iei];
+                    if (!_ie.alive) continue;
+                    var _idx = _ie.x - _px2;
+                    var _idy = _ie.y - _py2;
+                    if (_idx * _idx + _idy * _idy <= _iceR * _iceR) {
+                        _ie.frozen = true;
+                        _ie.frozenTimer = _dur;
+                        if (_ie.el) _ie.el.classList.add('frozen-crystal');
+                    }
+                }
+                var _iceEl = document.createElement('div');
+                _iceEl.className = 'resonance-ice';
+                _iceEl.style.left = (_px2 - _iceR) + 'px';
+                _iceEl.style.top = (_py2 - _iceR) + 'px';
+                _iceEl.style.width = (_iceR * 2) + 'px';
+                _iceEl.style.height = (_iceR * 2) + 'px';
+                this._worldLayer.appendChild(_iceEl);
+                var _self2 = this;
+                setTimeout(function() { if (_iceEl.parentNode) _iceEl.remove(); }, 500);
+            }
+        }
+
+        /* ── 突变·枯萎：全体敌人周期性损血 ── */
+        if (this._activeMutator === 'wither' && !this._pendingReward) {
+            this._witherTimer += dt;
+            if (this._witherTimer >= 5) {
+                this._witherTimer = 0;
+                for (var _wi = 0; _wi < this.enemies.length; _wi++) {
+                    var _we = this.enemies[_wi];
+                    if (!_we.alive) continue;
+                    var dmg = Math.max(1, Math.floor(_we.maxHp * 0.05));
+                    _we.takeDamage(dmg, 'wither');
+                }
+            }
+        }
+
+        if (this.player.hp <= 0) { this._gameOver(); return; }
+
+        if (this._levelUpPending && !this._pendingReward) {
+            this._levelUpPending = false;
+            this.running = false;
+            this._freezeClock();
+            this._syncUI();
+            if (window.rewardManager) window.rewardManager.showLevelUpPanel();
+            return;
+        }
+
+        if (this._pendingReward && this._activeCoins.length === 0 && this._expGems.length === 0) {
+            if (this._levelUpPending) {
+                this._levelUpPending = false;
+                this.running = false;
+                this._freezeClock();
+                this._syncUI();
+                if (window.rewardManager) window.rewardManager.showLevelUpPanel();
+                return;
+            }
+            if (this._waveCount >= this._getMaxWaves() - 1) {
+                this.running = false;
+                this.gameOver = true;
+                this._showVictory();
+            } else {
+                this.running = false;
+                this._freezeClock();
+                this._syncUI();
+                if (window.rewardManager) window.rewardManager.showRewardPanel();
+            }
+            return;
+        }
+
+        if (!this._pendingReward && this.enemies.length === 0 && this._activeCoins.length === 0 && this._expGems.length === 0 && this.currentWaveSpawnedCount >= this._getWaveEnemyMax() && this._waveCount < this._getMaxWaves() - 1) {
+            this._pendingReward = true;
+        }
+
+        var vpW = this.battlefield.clientWidth;
+        var vpH = this.battlefield.clientHeight;
+        var targetCamX = Math.max(0, Math.min(this._mapW - vpW, this.player.x - vpW / 2));
+        var targetCamY = Math.max(0, Math.min(this._mapH - vpH, this.player.y - vpH / 2));
+        var lerpFactor = 1 - Math.exp(-10 * dt);
+        this.cameraX += (targetCamX - this.cameraX) * lerpFactor;
+        this.cameraY += (targetCamY - this.cameraY) * lerpFactor;
+
+        this._syncEntities();
+        this._syncPlayerHP();
+        this._syncUI();
+    } catch (err) { console.error('Game loop error:', err); }
+
+    if (this.running && !this.gameOver) requestAnimationFrame(this._boundLoop);
+};
+
+Gp._getMaxWaves = function() {
+    var cfg = window.levelConfig[this._currentLevelId];
+    return cfg ? cfg.maxWaves : 5;
+};
+
+Gp._getWaveEnemyMax = function() {
+    var cfg = window.levelConfig[this._currentLevelId];
+    if (!cfg || !cfg.waveEnemyMax) return 999;
+    var idx = Math.min(this._waveCount, cfg.waveEnemyMax.length - 1);
+    return cfg.waveEnemyMax[idx] || 999;
+};
+
+Gp._spawnEnemy = function(isBoss) {
+    if (!isBoss) {
+        var cap = this._getWaveEnemyMax();
+        if (this.currentWaveSpawnedCount >= cap) return;
+    }
+    var level = Math.floor(this._elapsed / 15) + 1;
+    var angle = Math.random() * Math.PI * 2;
+    var dist = 200 + Math.random() * 50;
+    var x = this.player.x + Math.cos(angle) * dist;
+    var y = this.player.y + Math.sin(angle) * dist;
+    var margin = 20;
+    x = Math.max(margin, Math.min(this._mapW - margin, x));
+    y = Math.max(margin, Math.min(this._mapH - margin, y));
+
+    var id = this._enemyIdCounter++;
+    var enemyType = 'Normal';
+    if (!isBoss) {
+        var typeRoll = Math.random();
+        if (typeRoll < 0.25) enemyType = 'Tanker';
+        else if (typeRoll < 0.55) enemyType = 'Stalker';
+        else if (typeRoll < 0.80) enemyType = 'Shaman';
+    }
+    var enemy = new Enemy(id, x, y, level, isBoss === true, enemyType);
+    var diff = 1;
+    try { diff = window.levelConfig[this._currentLevelId].difficultyFactor || 1; } catch(e) { console.warn('diff config read error', e); }
+    enemy.maxHp = Math.floor(enemy.maxHp * diff);
+    enemy.hp = enemy.maxHp;
+    enemy.atk = Math.floor(enemy.atk * diff);
+
+    if (enemy.isBoss) {
+        var waveIdx = this._waveCount;
+        var maxWaves = this._getMaxWaves();
+        if (waveIdx >= maxWaves) {
+            enemy.radius = 75;
+            var baseHp = Math.floor(20 * Math.pow(1.2, level - 1));
+            enemy.maxHp = baseHp * 20;
+            enemy.hp = enemy.maxHp;
+            enemy.hue = 0;
+        } else if (waveIdx === maxWaves - 1) {
+            enemy.speed *= 2;
+            enemy.hue = 30;
+        }
+    }
+
+    this.enemies.push(enemy);
+    if (!enemy.isBoss) this.currentWaveSpawnedCount++;
+
+    /* ── 变异保险库：血月对新生敌人生效 ── */
+    if (this._vaultMutations && this._vaultMutations.indexOf('bloodmoon') !== -1) {
+        enemy.atk = Math.floor(enemy.atk * 1.4);
+        enemy.maxHp = Math.floor(enemy.maxHp * 1.3);
+        enemy.hp = Math.floor(enemy.hp * 1.3);
+    }
+
+    var el = document.createElement('div');
+    el.className = 'enemy';
+    if (enemy.isBoss) {
+        el.classList.add('boss');
+        var maxWaves = this._getMaxWaves();
+        if (this._waveCount >= maxWaves) el.classList.add('final-boss');
+    }
+    el.dataset.id = id;
+    /* 2.5D 骨雕妖牌 */
+    el.style.background = '#2a4a3a';
+    el.style.borderRadius = '4px';
+    el.style.boxShadow = '0 3px 0 #1a3020, 0 5px 0.5px #3a5a4a, 0 6px 8px rgba(0,0,0,0.4)';
+    el.style.display = 'flex';
+    el.style.alignItems = 'center';
+    el.style.justifyContent = 'center';
+    el.style.fontSize = '12px';
+    el.style.fontWeight = '700';
+    el.style.color = '#5a8a6a';
+    if (enemyType === 'Stalker') el.style.opacity = '1';
+    var hpBar = document.createElement('div');
+    hpBar.className = 'enemy-hp-bar';
+    var hpFill = document.createElement('div');
+    hpFill.className = 'enemy-hp-fill';
+    hpBar.appendChild(hpFill);
+    el.appendChild(hpBar);
+    this._worldLayer.appendChild(el);
+    this._enemyElements.set(id, el);
+    enemy.el = el;
+};
+
+Gp._spawnCoinsAt = function(x, y, isBoss, level) {
+    level = level || 1;
+    var count = isBoss ? Math.floor(5 + level * 0.5 + Math.random() * 4) : Math.floor(3 + level * 0.3 + Math.random() * 3);
+    var _vaultBlood = this._vaultMutations && this._vaultMutations.indexOf('bloodmoon') !== -1;
+if (this._activeMutator === 'bloodmoon' || _vaultBlood) count *= 2;
+    if (this._activeMutator === 'frenzy') count = Math.floor(count * 1.5);
+    for (var i = 0; i < count; i++) {
+        var cx = x + (Math.random() - 0.5) * 20;
+        var cy = y + (Math.random() - 0.5) * 20;
+        var el = document.createElement('div');
+        el.className = 'coin-placeholder';
+        el.style.left = (cx - 6) + 'px';
+        el.style.top = (cy - 6) + 'px';
+        this._worldLayer.appendChild(el);
+        this._activeCoins.push({ x: cx, y: cy, el: el });
+    }
+};
+
+/* ── Boss 装备掉落 ── */
+Gp._tryDropEquipment = function(x, y, isBossLord) {
+    if (!window.equipmentRegistry || !window.saveManager) return;
+    var chance = isBossLord ? 1.0 : 0.25;
+    if (Math.random() > chance) return;
+    var roll = Math.random();
+    var quality = roll < 0.1 ? 'legendary' : roll < 0.4 ? 'epic' : 'rare';
+    var protoIds = Object.keys(window.equipmentRegistry.equipPool);
+    var protoId = protoIds[Math.floor(Math.random() * protoIds.length)];
+    var item = window.equipmentRegistry.createItem(protoId, quality);
+    if (!item) return;
+    var meta = window.saveManager._metaCache;
+    if (!meta) return;
+    meta.equipments = meta.equipments || [];
+    meta.equipments.push(item);
+    window.saveManager._saveMetaToStorage();
+    var qualityLabel = { rare: '稀有', epic: '史诗', legendary: '传说' }[quality] || quality;
+    this._spawnCausalityText('🎁 获得装备：' + item.name + ' (' + qualityLabel + ')');
+};
+
+Gp._spawnExpGemsAt = function(x, y, isBoss, level) {
+    var diff = 1;
+    try { diff = window.levelConfig[this._currentLevelId].difficultyFactor || 1; } catch(e) { console.warn('diff config read error', e); }
+    var _vaultBloodGem = this._vaultMutations && this._vaultMutations.indexOf('bloodmoon') !== -1;
+    var bloodMul = (this._activeMutator === 'bloodmoon' || _vaultBloodGem) ? 2 : 1;
+    var arr = window.expGems = window.expGems || [];
+    if (isBoss) {
+        var cnt = 5 + Math.floor(Math.random() * 4);
+        var avg = Math.floor(25 * bloodMul / cnt);
+        var rem = 25 * bloodMul - avg * cnt;
+        for (var gi = 0; gi < cnt; gi++) {
+            var v = avg + (gi < rem ? 1 : 0);
+            arr.push(new window.ExpGem(x, y, v));
+        }
+    } else {
+        level = level || 1;
+        var gemVal = Math.floor((1 + level * 0.5) * diff * bloodMul);
+        if (gemVal < 1) gemVal = 1;
+        arr.push(new window.ExpGem(x, y, gemVal));
+    }
+};
+
+Gp._updateCoins = function(dt) {
+    if (this._activeCoins.length === 0) return;
+    var player = this.player;
+    var collected = 0;
+    for (var i = this._activeCoins.length - 1; i >= 0; i--) {
+        var coin = this._activeCoins[i];
+        var dx = player.x - coin.x;
+        var dy = player.y - coin.y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < player.radius + 6) {
+            coin.el.remove();
+            this._activeCoins.splice(i, 1);
+            collected++;
+        } else {
+            var speed = 400;
+            var move = speed * dt;
+            coin.x += (dx / dist) * move;
+            coin.y += (dy / dist) * move;
+            coin.el.style.left = (coin.x - 6) + 'px';
+            coin.el.style.top = (coin.y - 6) + 'px';
+        }
+    }
+    if (collected > 0) {
+        player.addGold(collected);
+        player.rage = Math.min(player.maxRage, player.rage + 2 * collected);
+    }
+};
+
+Gp._updateExpGems = function(dt) {
+    if (this._expGems.length === 0 && (!window.expGems || window.expGems.length === 0)) return;
+    if (window.expGems && window.expGems.length > 0) {
+        for (var gi = 0; gi < window.expGems.length; gi++) {
+            this._expGems.push(window.expGems[gi]);
+        }
+        window.expGems = [];
+    }
+    if (this._expGems.length === 0) return;
+    var player = this.player;
+    var collected = [];
+    for (var i = this._expGems.length - 1; i >= 0; i--) {
+        var gem = this._expGems[i];
+        if (!gem.el) {
+            var el = document.createElement('div');
+            el.className = 'exp-gem';
+            var sz = 4 + Math.min(gem.value, 8);
+            el.style.width = sz + 'px';
+            el.style.height = sz + 'px';
+            this._worldLayer.appendChild(el);
+            gem.el = el;
+            gem.radius = 5;
+        }
+        var dx = player.x - gem.x;
+        var dy = player.y - gem.y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < player.radius + gem.radius) {
+            collected.push(gem);
+        } else {
+            var speed = 400;
+            var move = speed * dt;
+            if (move >= dist) {
+                gem.x = player.x;
+                gem.y = player.y;
+                collected.push(gem);
+            } else {
+                gem.x += (dx / dist) * move;
+                gem.y += (dy / dist) * move;
+            }
+        }
+        gem.el.style.left = (gem.x - 4) + 'px';
+        gem.el.style.top = (gem.y - 4) + 'px';
+    }
+    var anyLeveled = false;
+    for (var ci = 0; ci < collected.length; ci++) {
+        var cg = collected[ci];
+        if (cg.el) { cg.el.remove(); cg.el = null; }
+        if (!cg.collected) {
+            cg.collected = true;
+            var expVal = cg.value;
+            if (player.xpGainFactor && player.xpGainFactor > 1.0) {
+                expVal = Math.floor(expVal * player.xpGainFactor);
+            }
+            var leveled = player.gainExp(expVal);
+            this._spawnExpText(player.x, player.y, cg.value);
+            if (leveled) anyLeveled = true;
+        }
+        var idx = this._expGems.indexOf(cg);
+        if (idx !== -1) this._expGems.splice(idx, 1);
+    }
+    if (anyLeveled) {
+        this._levelUpPending = true;
+        this._syncExpBar();
+    }
+};
+
+Gp._rewardKill = function(enemy) {
+    this.kills++;
+    if (enemy.type === 'Stalker' && this._currentLevelId === 'level_2') {
+        this.stalkersKilledInLevel2++;
+    }
+    this._spawnCoinsAt(enemy.x, enemy.y, false, enemy.level);
+    if (!enemy.isBoss) this._spawnExpGemsAt(enemy.x, enemy.y, false, enemy.level);
+    if (this.player) {
+        this.player.rage = Math.min(this.player.maxRage, this.player.rage + 5);
+    }
+};
+
+Gp._resumeAfterReward = function() {
+    if (window.rewardManager) window.rewardManager.hidePanel();
+    for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
+    this._enemyElements.clear();
+    this.enemies = [];
+    for (var _c = 0; _c < this._activeCoins.length; _c++) this._activeCoins[_c].el.remove();
+    this._activeCoins = [];
+    this._bossTimer = 0;
+    this._spawnTimer = 0;
+    this._enemyIdCounter = 0;
+    this._pendingReward = false;
+    this._lastMoveX = 0;
+    for (var _g = 0; _g < this._expGems.length; _g++) { if (this._expGems[_g].el) this._expGems[_g].el.remove(); }
+    this._expGems = [];
+    window.expGems = [];
+    this._cleanAllProjectiles();
+    this._cleanEnemyProjectiles();
+
+    this._waveCount++;
+    this.currentWaveSpawnedCount = 0;
+    this._mutatorTriggered = false;
+    this._clearMutatorEffects();
+    this._clearTotems();
+    this._cleanEnemyProjectiles();
+
+    /* ── 检测 Boss Lord 波次 ── */
+    this._bossLordWave = (this._waveCount >= this._getMaxWaves() - 1);
+    this._bossLordSpawned = false;
+    if (this._bossLord) this._bossLord = null;
+
+    this._announceWave(this._waveCount);
+};
+
+Gp._resumeAfterLevelUp = function() {
+    if (window.rewardManager) window.rewardManager.hidePanel();
+    this._beginLoop();
+};
+
+Gp._showVictory = function() {
+    this._freezeClock();
+    this.victoryTime.textContent = this._formatTime(this._elapsed);
+    this.victoryKills.textContent = this.kills;
+
+    var relicNames = {
+        sharp_edge: '\u9510\u5229\u950b\u76f2', golden_finger: '\u9ec4\u91d1\u53f3\u624b\u6307',
+        auto_drone: '\u81ea\u52a8\u5316\u968f\u4ece', thorn_armor: '\u8346\u68d8\u53cd\u5546\u7532',
+        wind_walker: '\u75be\u98ce\u6b65', vamp_ring: '\u542e\u8840\u6307\u73af',
+        explosive_core: '\u7206\u7834\u6838\u5fc3', frost_core: '\u51b0\u971c\u6838\u5fc3',
+        evolved_drone: '\u6d88\u706d\u8005\u6d6e\u6e38\u70ae', evolved_armor: '\u592a\u9633\u795e\u5de8\u50cf\u94e0',
+        evolved_speed: '\u51cc\u6ce2\u5fae\u6b65', evolved_vamp: '\u8840\u9b54\u4e4b\u62e5'
+    };
+    var parts = [];
+    for (var id in this.player.relicLevels) {
+        var lv = this.player.relicLevels[id];
+        if (lv > 0) parts.push((relicNames[id] || id) + ' \u2605' + lv);
+    }
+    this.victoryRelics.textContent = parts.join(' | ') || '-';
+
+    var tokens = window.saveManager.calcMetaTokens(this.kills, this._elapsed);
+    this.victoryTokens.textContent = tokens;
+
+    this.victoryOverlay.classList.add('active');
+    this._syncUI();
+
+    this._settleRun(tokens);
+};
+
+Gp._showAbyssPanel = function() {
+    this._freezeClock();
+    var self = this;
+    var panel = document.createElement('div');
+    panel.id = 'abyss-panel';
+    panel.className = 'abyss-panel';
+    var loopLabel = this.loopCount > 0 ? '\u65e0\u5c3d\u88c2\u9699\u7b2c ' + this.loopCount + ' \u5c42\u2014\u2014\u701b\u706d' : '\u521d\u59cb\u901a\u5173';
+    panel.innerHTML =
+        '<div class="abyss-title">\u6df1\u6e0a\u4e4b\u95e8\u5df2\u542f</div>' +
+        '<div class="abyss-label">' + loopLabel + '</div>' +
+        '<div class="abyss-subtitle">\u662f\u5426\u732e\u796d\u5f53\u524d\u901a\u5173\u6210\u679c\uff0c\u8e0f\u5165\u65e0\u5c3d\u88c2\u9699\u7b2c ' + (this.loopCount + 1) + ' \u5c42\uff1f</div>' +
+        '<div class="abyss-warning">\u602a\u7269\u5c5e\u6027\u4e58\u4ee5 ' + (Math.pow(1.15, this.loopCount + 1)).toFixed(2) + 'x</div>' +
+        '<div class="abyss-buttons">' +
+            '<button class="abyss-btn abyss-btn-retreat">\u64a4\u9000\u5927\u672c\u8425</button>' +
+            '<button class="abyss-btn abyss-btn-enter">\u8e0f\u5165\u6df1\u6e0a</button>' +
+        '</div>';
+    this.battlefield.appendChild(panel);
+    this._abyssPanelVisible = true;
+
+    panel.querySelector('.abyss-btn-retreat').addEventListener('click', function() {
+        if (panel.parentNode) panel.remove();
+        self._abyssPanelVisible = false;
+        self._settleRun(window.saveManager.calcMetaTokens(self.kills, self._elapsed));
+        self._showVictoryOverlay();
+    });
+    panel.querySelector('.abyss-btn-enter').addEventListener('click', function() {
+        if (panel.parentNode) panel.remove();
+        self._abyssPanelVisible = false;
+        self._enterAbyss();
+    });
+};
+
+Gp._enterAbyss = function() {
+    this.loopCount++;
+    this._waveCount = 0;
+    this.currentWaveSpawnedCount = 0;
+    this._elapsed = 0;
+    this.kills = 0;
+    this._spawnTimer = 0;
+    this._spawnInterval = 1.5;
+    this._difficultyTimer = 0;
+    this._bossTimer = 0;
+    this._bossLord = null;
+    this._bossLordWave = false;
+    this._bossLordSpawned = false;
+    this._mutatorTriggered = false;
+    this._activeMutator = null;
+    this._pendingReward = false;
+    this._levelUpPending = false;
+    this.playerHitCountInLevel1 = 0;
+    this.stalkersKilledInLevel2 = 0;
+
+    /* ── 深渊轮回保留保险库变异 ── */
+    if (this._vaultMutations && this._vaultMutations.indexOf('gravity') !== -1) {
+        this.player.magnetRadius = 0;
+    }
+
+    for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
+    this._enemyElements.clear();
+    this.enemies = [];
+    this._enemyIdCounter = 0;
+    this._clearTotems();
+    this._cleanEnemyProjectiles();
+    this.gameOver = false;
+    var vpW = this.battlefield.clientWidth;
+    var vpH = this.battlefield.clientHeight;
+    this.cameraX = Math.max(0, Math.min(this._mapW - vpW, this.player.x - vpW / 2));
+    this.cameraY = Math.max(0, Math.min(this._mapH - vpH, this.player.y - vpH / 2));
+    this._syncEntities();
+    this._syncPlayerHP();
+    this._syncUI();
+    this._announceWave(0);
+};
+
+Gp._showVictoryOverlay = function() {
+    this._freezeClock();
+    this.victoryTime.textContent = this._formatTime(this._elapsed);
+    this.victoryKills.textContent = this.kills;
+    var tokens = window.saveManager.calcMetaTokens(this.kills, this._elapsed);
+    this.victoryTokens.textContent = tokens;
+    this.victoryOverlay.classList.add('active');
+    this._syncUI();
+};
+
+Gp._spawnCausalityText = function(text) {
+    var el = document.createElement('div');
+    el.textContent = text;
+    el.style.cssText = 'position:absolute;top:20%;left:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:900;color:#ffd700;text-shadow:0 0 20px rgba(255,215,0,0.8),0 0 40px rgba(255,215,0,0.4);z-index:200;pointer-events:none;white-space:nowrap;animation:floatUp 0.6s ease-out forwards;';
+    this.battlefield.appendChild(el);
+    var self = this;
+    setTimeout(function() { if (el.parentNode) el.remove(); }, 2000);
+};
+
+Gp._settleRun = async function(tokens) {
+    var meta = await window.saveManager.getMeta();
+    meta.metaTokens = (meta.metaTokens || 0) + tokens;
+    meta.totalRuns = (meta.totalRuns || 0) + 1;
+    meta.totalKills = (meta.totalKills || 0) + this.kills;
+    var bonusCores = 1;
+    if (this._bloodRageActive) bonusCores += 2;
+    /* ── 变异保险库：每携带一个异变，核心翻倍 ── */
+    if (this._vaultMutations && this._vaultMutations.length > 0) {
+        bonusCores *= Math.pow(2, this._vaultMutations.length);
+    }
+    meta.bossCores = (meta.bossCores || 0) + bonusCores;
+
+    /* ── 因果账本落盘 ── */
+    if (!meta.causalityFlags) meta.causalityFlags = { level1NoDamage: false, level2Overkill: false };
+    if (this._currentLevelId === 'level_1' && this.playerHitCountInLevel1 === 0) {
+        meta.causalityFlags.level1NoDamage = true;
+    }
+    if (this._currentLevelId === 'level_2' && this.stalkersKilledInLevel2 >= 30) {
+        meta.causalityFlags.level2Overkill = true;
+    }
+
+    /* ── 深渊最高记录 ── */
+    if (this.loopCount > (meta.highestEndlessLoop || 0)) {
+        meta.highestEndlessLoop = this.loopCount;
+    }
+
+    meta.lastSaveTimestamp = Date.now();
+    await window.saveManager.saveMeta(meta);
+    await window.saveManager.clearActiveRun();
+
+    /* ── 成就：局末型检测 ── */
+    if ((meta.totalKills || 0) >= 1)    this._checkAchievement('first_kill');
+    if ((meta.totalKills || 0) >= 100)  this._checkAchievement('hundred_kills');
+    if ((meta.totalKills || 0) >= 1000) this._checkAchievement('thousand_kills');
+    if ((meta.totalRuns || 0) >= 1)     this._checkAchievement('first_victory');
+    if ((meta.highestEndlessLoop || 0) >= 5) this._checkAchievement('deep_abyss');
+    /* 无伤通当前关 */
+    if (this.playerHitCountInLevel1 >= 0) { /* all levels */
+        if (this._currentLevelId === 'level_1' && this.playerHitCountInLevel1 === 0) {
+            meta.flawlessRuns = (meta.flawlessRuns || 0) + 1;
+        }
+        if (this._playerHitCountThisRun === 0 && !this._recordedFlawless) {
+            meta.flawlessRuns = (meta.flawlessRuns || 0) + 1;
+            this._recordedFlawless = true;
+        }
+    }
+    if ((meta.flawlessRuns || 0) >= 1) this._checkAchievement('flawless');
+    if (meta.flawlessRuns !== undefined) await window.saveManager.saveMeta(meta);
+
+    /* ── 变异保险库：20%概率解锁新突变 ── */
+    if (Math.random() < 0.2) {
+        var _allMuts = ['gravity', 'bloodmoon', 'frenzy', 'frailty', 'wither'];
+        var _unlocked = meta.unlockedMutations || [];
+        var _avail = [];
+        for (var _umi = 0; _umi < _allMuts.length; _umi++) {
+            if (_unlocked.indexOf(_allMuts[_umi]) === -1) _avail.push(_allMuts[_umi]);
+        }
+        if (_avail.length > 0) {
+            var _newMut = _avail[Math.floor(Math.random() * _avail.length)];
+            _unlocked.push(_newMut);
+            meta.unlockedMutations = _unlocked;
+            await window.saveManager.saveMeta(meta);
+            var _label = _newMut === 'gravity' ? '\u5f15\u529b\u9006\u8f6c' : '\u72c2\u66b4\u8840\u6708';
+            var _notif = document.createElement('div');
+            _notif.className = 'mutation-unlock-notif';
+            _notif.innerHTML = '\u89e3\u9501\u53d8\u5f02: ' + _label;
+            document.body.appendChild(_notif);
+            setTimeout(function() { if (_notif.parentNode) _notif.remove(); }, 3000);
+        }
+    }
+};
+
+Gp._gameOver = async function() {
+    if (this.gameOver) return;
+    this.gameOver = true;
+    this.running = false;
+    this._freezeClock();
+    for (var _c = 0; _c < this._activeCoins.length; _c++) this._activeCoins[_c].el.remove();
+    this._activeCoins = [];
+    for (var _g = 0; _g < this._expGems.length; _g++) { if (this._expGems[_g].el) this._expGems[_g].el.remove(); }
+    this._expGems = [];
+    window.expGems = [];
+    this._cleanAllProjectiles();
+    this._cleanEnemyProjectiles();
+    this._resetAllWeapons();
+    this._clearTotems();
+    this._mutatorTriggered = false;
+    this._clearMutatorEffects();
+    if (this.mutatorOverlay) this.mutatorOverlay.classList.remove('active');
+    if (this.bossHpBar) this.bossHpBar.classList.remove('active');
+    for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
+    this._enemyElements.clear();
+    this.enemies = [];
+    this._bossLord = null;
+    this._bossLordWave = false;
+    this._bossLordSpawned = false;
+    this.resultTime.textContent = this._formatTime(this._elapsed);
+    this.resultKills.textContent = this.kills;
+    this.gameOverOverlay.classList.add('active');
+
+    var tokens = window.saveManager.calcMetaTokens(this.kills, this._elapsed);
+
+    var meta = await window.saveManager.getMeta();
+    meta.metaTokens = (meta.metaTokens || 0) + tokens;
+    meta.totalRuns = (meta.totalRuns || 0) + 1;
+    meta.totalKills = (meta.totalKills || 0) + this.kills;
+    meta.lastSaveTimestamp = Date.now();
+    await window.saveManager.saveMeta(meta);
+    await window.saveManager.clearActiveRun();
+};
+
+Gp._removeEnemyDOM = function(enemy) {
+    var el = this._enemyElements.get(enemy.id);
+    if (el && el.parentNode) el.remove();
+    this._enemyElements.delete(enemy.id);
+};
+
+Gp._initHandTiles = function() {
+    if (!this._handTileGrid) return;
+    this._handTileGrid.innerHTML = '';
+    this._handTileSlots = [];
+    for (var i = 0; i < 14; i++) {
+        var slot = document.createElement('div');
+        slot.className = 'hand-tile-slot';
+        slot.dataset.index = i;
+        this._handTileGrid.appendChild(slot);
+        this._handTileSlots.push(slot);
+    }
+    if (this._handTileBar) this._handTileBar.classList.add('active');
+};
+
+Gp._placeHandTile = function(index, tileText, tileClass) {
+    if (!this._handTileSlots[index]) return;
+    var slot = this._handTileSlots[index];
+    slot.classList.add('occupied');
+    slot.innerHTML = '<div class="tile-body ' + (tileClass || '') + '">' + tileText + '</div>';
+};
+
+Gp._clearHandTile = function(index) {
+    if (!this._handTileSlots[index]) return;
+    this._handTileSlots[index].classList.remove('occupied');
+    this._handTileSlots[index].innerHTML = '';
+};
+
+Gp._syncPlayerHP = function() {
+    var pct = (this.player.hp / this.player.maxHp) * 100;
+    this.playerHpFill.style.width = Math.max(0, pct) + '%';
+    this.playerHpText.textContent = Math.max(0, Math.floor(this.player.hp)) + '/' + this.player.maxHp;
+};
+
+/* ── 2.5D 骨雕雀牌渲染 ── */
+
+Gp._renderPlayerTile = function() {
+    if (!this.playerEl) return;
+    /* 雀牌 — 骨雕麻将质感 */
+    this.playerEl.style.width = '48px';
+    this.playerEl.style.height = '64px';
+    this.playerEl.style.background = '#fbfbf7';
+    this.playerEl.style.borderRadius = '6px';
+    this.playerEl.style.boxShadow = '0 4px 0 #1a5336, 0 6px 0.5px #dfc590, 0 8px 10px rgba(0,0,0,0.5)';
+    this.playerEl.style.display = 'flex';
+    this.playerEl.style.alignItems = 'center';
+    this.playerEl.style.justifyContent = 'center';
+    this.playerEl.style.fontSize = '24px';
+    this.playerEl.style.fontWeight = '900';
+    this.playerEl.style.color = '#b62929';
+    this.playerEl.style.textShadow = '0 0 8px rgba(182,41,41,0.6)';
+    this.playerEl.textContent = '雀';
+};
+
+Gp._syncEntities = function() {
+    this._worldLayer.style.transform = 'translate(' + (-this.cameraX) + 'px, ' + (-this.cameraY) + 'px)';
+    var tilt = '';
+    if (Math.abs(this._lastMoveX) > 0.1) {
+        var deg = this._lastMoveX < -0.1 ? -6 : 6;
+        tilt = ' rotate(' + deg + 'deg)';
+    }
+    this.playerEl.style.left = this.player.x + 'px';
+    this.playerEl.style.top = this.player.y + 'px';
+    this.playerEl.style.transform = 'translate(-50%,-50%)' + tilt;
+    this.playerEl.classList.toggle('invuln', this.player.invulnTimer > 0);
+
+    /* 雀牌受击发光 */
+    if (this.player.invulnTimer > 0) {
+        this.playerEl.style.filter = 'drop-shadow(0 0 8px rgba(182,41,41,0.8))';
+    } else {
+        this.playerEl.style.filter = 'drop-shadow(0 0 6px rgba(26,83,54,0.4))';
+    }
+
+    for (var _ei = 0; _ei < this.enemies.length; _ei++) {
+        var enemy = this.enemies[_ei];
+        var el = this._enemyElements.get(enemy.id);
+        if (!el) continue;
+        el.style.left = enemy.x + 'px';
+        el.style.top = enemy.y + 'px';
+        var flash = enemy.flashTimer > 0;
+        var isFinalBoss = enemy.isBoss && enemy.radius >= 75;
+        el.classList.toggle('frozen', enemy.frozen);
+        el.style.backgroundColor = flash ? '#b62929' : (enemy.isBoss ? (isFinalBoss ? '#6a1a1a' : 'hsl(' + enemy.hue + ', 40%, 30%)') : 'hsl(' + enemy.hue + ', 25%, 28%)');
+        el.style.boxShadow = flash ? '0 0 18px rgba(182,41,41,0.6)' : (enemy.isBoss ? (isFinalBoss ? '0 0 60px rgba(182,41,41,0.7)' : '0 0 40px rgba(156,39,176,0.5)') : '0 0 10px hsla(' + enemy.hue + ', 25%, 28%, 0.35)');
+        var fill = el.querySelector('.enemy-hp-fill');
+        if (fill) {
+            var pct = (enemy.hp / enemy.maxHp) * 100;
+            fill.style.width = Math.max(0, pct) + '%';
+        }
+    }
+};
+
+Gp._checkAchievement = function(id) {
+    var meta = window.saveManager && window.saveManager._metaCache;
+    if (!meta) return;
+    meta.achievements = meta.achievements || {};
+    if (meta.achievements[id]) return; /* 已解锁 */
+    meta.achievements[id] = true;
+    meta.achievements[id + '_at'] = Date.now();
+    window.saveManager._saveMetaToStorage();
+    var cfg = window.achievementConfig;
+    for (var i = 0; i < cfg.length; i++) {
+        if (cfg[i].id === id) {
+            this._spawnAchievementText(cfg[i].icon + ' ' + cfg[i].name);
+            break;
+        }
+    }
+};
+
+/* ── 成就弹出提示：大字体，短暂停留 ── */
+Gp._spawnAchievementText = function(text) {
+    var el = document.createElement('div');
+    el.textContent = text;
+    el.style.cssText = 'position:absolute;top:15%;left:50%;transform:translate(-50%,-50%);font-size:28px;font-weight:900;color:#ffd700;text-shadow:0 0 24px rgba(255,215,0,0.9),0 0 48px rgba(255,215,0,0.5);z-index:210;pointer-events:none;white-space:nowrap;animation:achievePop 2.5s ease-out forwards;';
+    this.battlefield.appendChild(el);
+    var self = this;
+    setTimeout(function() { if (el.parentNode) el.remove(); }, 2600);
+};
+
+Gp._syncUI = function() {
+    this.waveDisplay.textContent = '\uD83C\uDF0A \u7b2c ' + (this._waveCount + 1) + ' \u6ce2';
+    this.goldDisplay.textContent = '\uD83D\uDCB0 ' + this.player.gold;
+    this.atkDisplay.textContent = '\u2694\uFE0F ' + this.player.atk;
+    this.killsDisplay.textContent = '\u2620\uFE0F ' + this.kills;
+    this.timeDisplay.textContent = '\u23F1 ' + this._formatTime(this._elapsed);
+
+    /* \u6210\u5C31\uFF1A\u91D1\u5E01\u68C0\u6D4B */
+    if (this.player.gold > (this._maxGoldThisRun || 0)) {
+        this._maxGoldThisRun = this.player.gold;
+        if (this._maxGoldThisRun >= 1000) this._checkAchievement('get_rich');
+    }
+    this._syncExpBar();
+    this._syncWeaponSlotBar();
+
+    /* ── 怒气条同步 ── */
+    if (this.rageDisplay && this.player) {
+        var ragePct = this.player.maxRage > 0 ? (this.player.rage / this.player.maxRage * 100) : 0;
+        this.rageDisplay.style.width = Math.min(100, Math.max(0, ragePct)) + '%';
+        var rtxt = document.getElementById('rage-bar-text');
+        if (rtxt) rtxt.textContent = '\u6124\u6012 ' + this.player.rage + ' / ' + this.player.maxRage;
+    }
+
+    /* ── Boss Lord 血条同步 ── */
+    if (this._bossLord && this._bossLord.alive && this.bossHpFill) {
+        var pct = (this._bossLord.hp / this._bossLord.maxHp) * 100;
+        this.bossHpFill.style.width = Math.max(0, pct) + '%';
+    }
+};
+
+Gp._syncExpBar = function() {
+    if (!this.expBarFill || !this.expBarText || !this.player) return;
+    var pct = this.player.nextLvlExp > 0 ? (this.player.currentExp / this.player.nextLvlExp * 100) : 0;
+    if (pct > 100) pct = 100;
+    this.expBarFill.style.width = pct + '%';
+    this.expBarText.textContent = 'Lv.' + this.player.currentLvl + ' [ ' + this.player.currentExp + ' / ' + this.player.nextLvlExp + ' ]';
+};
+
+Gp._moveTo = function(wx, wy) {
+    this.player.targetX = wx;
+    this.player.targetY = wy;
+    this.player._movingToTarget = true;
+};
+
+Gp._triggerKnightDodgeSlam = function() {
+    var px = this.player.x;
+    var py = this.player.y;
+    var slamRadius = 100;
+    var slamEl = document.createElement('div');
+    slamEl.className = 'knight-slam';
+    slamEl.style.left = (px - slamRadius) + 'px';
+    slamEl.style.top = (py - slamRadius) + 'px';
+    slamEl.style.width = (slamRadius * 2) + 'px';
+    slamEl.style.height = (slamRadius * 2) + 'px';
+    slamEl.style.borderRadius = '50%';
+    slamEl.style.position = 'absolute';
+    slamEl.style.border = '2px solid rgba(255,255,255,0.6)';
+    slamEl.style.pointerEvents = 'none';
+    this._worldLayer.appendChild(slamEl);
+    this.triggerShake(1, 200);
+    setTimeout(function() { if (slamEl.parentNode) slamEl.remove(); }, 300);
+    for (var i = 0; i < this.enemies.length; i++) {
+        var e = this.enemies[i];
+        if (!e.alive) continue;
+        var dx = e.x - px;
+        var dy = e.y - py;
+        if (dx * dx + dy * dy <= slamRadius * slamRadius) {
+            var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            var force = 200;
+            e.x += (dx / dist) * force;
+            e.y += (dy / dist) * force;
+            e._knockbackVelocity = 200;
+            if (typeof e._clampPosition === 'function') e._clampPosition(this);
+        }
+    }
+};
+
+Gp._onClick = function(e) {
+    var enemyEl = e.target.closest('.enemy');
+    if (!enemyEl) return;
+
+    var id = parseInt(enemyEl.dataset.id, 10);
+    var enemy = null;
+    for (var _si = 0; _si < this.enemies.length; _si++) { if (this.enemies[_si].id === id) { enemy = this.enemies[_si]; break; } }
+    if (!enemy || !enemy.alive) return;
+
+    var bfRect = this.battlefield.getBoundingClientRect();
+    var vx = e.clientX - bfRect.left;
+    var vy = e.clientY - bfRect.top;
+    var wx = vx + this.cameraX;
+    var wy = vy + this.cameraY;
+
+    var p = this.player;
+
+    if (p.freezeChance > 0 && Math.random() < p.freezeChance) {
+        enemy.frozen = true;
+        enemy.frozenTimer = 1.5 + (p.iceDurationBonus || 0);
+        if (enemy.el) enemy.el.classList.add('frozen-crystal');
+    }
+
+    var isCrit = Math.random() < p.critRate;
+    var damage = isCrit ? Math.floor(p.atk * 2.5) : p.atk;
+    if (damage === 0) return;
+
+    enemy.takeDamage(damage, this.player, undefined, undefined, isCrit ? 'crit' : undefined);
+
+    if (isCrit) this.triggerShake(2, 300);
+
+    if (p.lifestealRate > 0) {
+        var heal = Math.floor(damage * p.lifestealRate);
+        if (heal > 0) {
+            p.hp = Math.min(p.maxHp, p.hp + heal);
+            this._spawnHealText(p.x, p.y, heal);
+        }
+    }
+
+    if (p.explosionChance > 0 && Math.random() < p.explosionChance) {
+        var splashDmg = Math.floor(damage * 0.5);
+        this._spawnExplosion(wx, wy, 50, splashDmg, enemy.id);
+    }
+};
+
+Gp._spawnFloatText = function(x, y, text, isCrit) {
+    if (window.fxManager) {
+        window.fxManager.spawnText(x, y, text, isCrit ? 'crit' : 'normal');
+        return;
+    }
+    var el = document.createElement('div');
+    el.className = 'damage-float' + (isCrit ? ' crit' : '');
+    el.textContent = '-' + text;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    /* 竹翠青普通伤害，朱砂红暴击 */
+    if (isCrit) {
+        el.style.color = '#b62929';
+    } else {
+        el.style.color = '#1e6f42';
+    }
+    this._worldLayer.appendChild(el);
+    setTimeout(function() { el.remove(); }, 650);
+};
+
+Gp._spawnHealText = function(x, y, amount) {
+    if (window.fxManager) {
+        window.fxManager.spawnText(x, y - 20, '+' + amount, 'heal');
+        return;
+    }
+    var el = document.createElement('div');
+    el.className = 'damage-float heal';
+    el.textContent = '+' + amount;
+    el.style.left = x + 'px';
+    el.style.top = (y - 20) + 'px';
+    this._worldLayer.appendChild(el);
+    setTimeout(function() { el.remove(); }, 650);
+};
+
+Gp._spawnExpText = function(x, y, amount) {
+    if (window.fxManager) {
+        window.fxManager.spawnText(x - 10, y - 40, '+' + amount + 'EXP', 'exp');
+        return;
+    }
+    var el = document.createElement('div');
+    el.className = 'damage-float exp-gain';
+    el.textContent = '+' + amount + 'EXP';
+    el.style.left = (x - 10) + 'px';
+    el.style.top = (y - 40) + 'px';
+    this._worldLayer.appendChild(el);
+    setTimeout(function() { el.remove(); }, 650);
+};
+
+Gp._spawnExplosion = function(x, y, radius, damage, excludeId) {
+    for (var _ei = 0; _ei < this.enemies.length; _ei++) {
+        var e = this.enemies[_ei];
+        if (!e.alive) continue;
+        if (e.id === excludeId) continue;
+        var dx = e.x - x;
+        var dy = e.y - y;
+        if (dx * dx + dy * dy <= radius * radius) {
+            e.takeDamage(damage, 'splash');
+        }
+    }
+    var el = document.createElement('div');
+    el.className = 'explosion-effect';
+    var d = radius * 2;
+    el.style.left = (x - radius) + 'px';
+    el.style.top = (y - radius) + 'px';
+    el.style.width = d + 'px';
+    el.style.height = d + 'px';
+    this._worldLayer.appendChild(el);
+    setTimeout(function() { el.remove(); }, 400);
+};
+
+Gp._screenShake = function() {
+    this.triggerShake(1, 200);
+};
+
+Gp.triggerShake = function(intensity, duration) {
+    if (!this.container) return;
+    intensity = intensity || 1;
+    duration = duration || 200;
+    if (this._shakeTimer > 0 && this._shakeIntensity >= intensity) return;
+    this._shakeTimer = duration / 1000;
+    this._shakeIntensity = intensity;
+    this.container.classList.add('screen-shake-active');
+    if (intensity >= 2) {
+        this.container.style.animationDuration = '0.06s';
+    } else {
+        this.container.style.animationDuration = '0.1s';
+    }
+};
+
+Gp.restart = function() {
+    for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
+    this._enemyElements.clear();
+    this.enemies = [];
+    this._enemyIdCounter = 0;
+    for (var _c = 0; _c < this._activeCoins.length; _c++) this._activeCoins[_c].el.remove();
+    this._activeCoins = [];
+    for (var _g = 0; _g < this._expGems.length; _g++) { if (this._expGems[_g].el) this._expGems[_g].el.remove(); }
+    this._expGems = [];
+    window.expGems = [];
+    this._cleanAllProjectiles();
+    this._cleanEnemyProjectiles();
+    this._resetAllWeapons();
+    this._pendingReward = false;
+    this._bossTimer = 0;
+    this._waveCount = 0;
+    this.currentWaveSpawnedCount = 0;
+    this._levelUpPending = false;
+    this._ignoreGemCollection = false;
+    this._mutatorTriggered = false;
+    this._clearMutatorEffects();
+    this._clearTotems();
+    if (window.rewardManager) window.rewardManager.hidePanel();
+    this.victoryOverlay.classList.remove('active');
+    this.gameOverOverlay.classList.remove('active');
+    this.gameOver = false;
+    this.running = false;
+    this._elapsed = 0;
+    this.kills = 0;
+    this._spawnTimer = 0;
+    this._spawnInterval = 1.5;
+    this._difficultyTimer = 0;
+
+    var heroId = this.player ? this.player.heroId : 'hero_swordsman';
+    var levelId = this._currentLevelId || 'level_1';
+    this._startNewRun(heroId, levelId);
+};
+
+Gp._goToSaveSelect = function() {
+    this.running = false;
+    this.gameOver = false;
+    this.gameOverOverlay.classList.remove('active');
+    this.victoryOverlay.classList.remove('active');
+    if (window.rewardManager) window.rewardManager.hidePanel();
+    for (var _g = 0; _g < this._expGems.length; _g++) { if (this._expGems[_g].el) this._expGems[_g].el.remove(); }
+    this._expGems = [];
+    window.expGems = [];
+    this._cleanAllProjectiles();
+    this._cleanEnemyProjectiles();
+    this._resetAllWeapons();
+    this._clearTotems();
+    this._clearMutatorEffects();
+    if (this.bossHpBar) this.bossHpBar.classList.remove('active');
+    window.location.href = 's2_main_hub.html';
+};
+
+Gp._formatTime = function(sec) {
+    var m = Math.floor(sec / 60);
+    var s = Math.floor(sec % 60);
+    return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+};
+
+/* ══════════════════════════════════════════════
+   武器系统 — 初始化/更新/碰撞/清理
+   ══════════════════════════════════════════════ */
+
+Gp._initDefaultWeapons = function() {
+    this._activeWeapons = [];
+    this._projectiles = [];
+    var meta = window.saveManager._metaCache || {};
+    var weaponIds = (meta.defaultWeapons && meta.defaultWeapons.length > 0) ? meta.defaultWeapons : ['TrackingBlade'];
+    var talents = meta.talents || {};
+    if (talents.weapon_forge === 1) {
+        weaponIds = ['TrackingBlade', 'OrbitShield'];
+    }
+    for (var _i = 0; _i < weaponIds.length; _i++) {
+        var W = window[weaponIds[_i]];
+        if (W) this._activeWeapons.push(new W(1));
+    }
+    this._syncWeaponSlots();
+};
+
+Gp._restoreWeapons = function(weaponData) {
+    this._resetAllWeapons();
+    if (!weaponData || weaponData.length === 0) {
+        this._initDefaultWeapons();
+        return;
+    }
+    for (var _i = 0; _i < weaponData.length; _i++) {
+        var wd = weaponData[_i];
+        var W = window[wd.id];
+        if (W) {
+            var w = new W(wd.level || 1);
+            w.cooldownTimer = wd.cooldownTimer || 0;
+            this._activeWeapons.push(w);
+        }
+    }
+    if (this._activeWeapons.length === 0) this._initDefaultWeapons();
+    this._syncWeaponSlots();
+};
+
+Gp._cleanAllProjectiles = function() {
+    for (var _i = 0; _i < this._projectiles.length; _i++) {
+        var p = this._projectiles[_i];
+        if (p.el && p.el.parentNode) p.el.remove();
+    }
+    this._projectiles = [];
+};
+
+Gp._resetAllWeapons = function() {
+    for (var _i = 0; _i < this._activeWeapons.length; _i++) {
+        var w = this._activeWeapons[_i];
+        if (typeof w.reset === 'function') w.reset();
+    }
+    this._activeWeapons = [];
+    this._cleanAllProjectiles();
+};
+
+Gp._updateWeapons = function(dt) {
+    if (this._pendingReward) return;
+    for (var _i = 0; _i < this._activeWeapons.length; _i++) {
+        var w = this._activeWeapons[_i];
+        if (w instanceof window.LaserBeam) {
+            w.setAngle(this._lastClickAngle);
+        }
+        w.update(dt, this.player, this.enemies, this);
+        if (this._overdriveActive) w.cooldownTimer = 0;
+    }
+};
+
+Gp._updateProjectiles = function(dt) {
+    for (var _i = this._projectiles.length - 1; _i >= 0; _i--) {
+        var p = this._projectiles[_i];
+        if (!p.alive) {
+            if (p.el && p.el.parentNode) p.el.remove();
+            this._projectiles.splice(_i, 1);
+            continue;
+        }
+        p.update(dt);
+        if (!p.alive) {
+            if (p.el && p.el.parentNode) p.el.remove();
+            this._projectiles.splice(_i, 1);
+            continue;
+        }
+        for (var _j = 0; _j < this.enemies.length; _j++) {
+            var e = this.enemies[_j];
+            if (!e.alive) continue;
+            if (p.hitEnemies.has(e.id)) continue;
+            var _dx = e.x - p.x;
+            var _dy = e.y - p.y;
+            var _radiusSum = e.radius + p.radius;
+            if (_dx * _dx + _dy * _dy < _radiusSum * _radiusSum) {
+                e.takeDamage(p.damage, p);
+                p.hitEnemies.add(e.id);
+                if (p.pierceCount > 0) {
+                    p.pierceCount--;
+                    if (p.pierceCount <= 0) p.alive = false;
+                } else {
+                    p.alive = false;
+                }
+                if (!p.alive) break;
+            }
+        }
+        if (p.el) {
+            p.el.style.left = (p.x - p.radius) + 'px';
+            p.el.style.top = (p.y - p.radius) + 'px';
+        }
+        if (p.x < -100 || p.x > this._mapW + 100 || p.y < -100 || p.y > this._mapH + 100) {
+            p.alive = false;
+        }
+        if (!p.alive && p.el && p.el.parentNode) {
+            p.el.remove();
+            this._projectiles.splice(_i, 1);
+        }
+    }
+};
+
+/* ══════════════════════════════════════════════
+   波次突变系统
+   ══════════════════════════════════════════════ */
+
+Gp._showMutatorPanel = function() {
+    if (!this.mutatorOverlay || !this.mutatorChoices) return;
+    this.running = false;
+    this._freezeClock();
+    this.mutatorChoices.innerHTML = '';
+    var self = this;
+
+    var choices = [
+        { id: 'gravity', title: '\u5f15\u529b\u9006\u8f6c', desc: '\u7ecf\u9a8c\u5438\u9644\u8303\u56f4\u5f52\u96f6\uff0c\u5fc5\u987b\u8089\u8eab\u62fe\u53d6', icon: '🧲' },
+        { id: 'bloodmoon', title: '\u72c2\u66b4\u8840\u6708', desc: '\u602a\u7269\u4f53\u578b+30%\uff0c\u653b\u51fb+40%\uff0c\u6389\u843d\u7ffb\u500d', icon: '🌍' },
+        { id: 'frenzy', title: '\u72c2\u4e71', desc: '\u602a\u7269\u79fb\u901f+50%\uff0c\u91d1\u5e01\u6389\u843d+50%', icon: '⚡' },
+        { id: 'frailty', title: '\u8106\u5f31', desc: '\u653b\u51fb\u500d\u7387\u53cc\u5411\u63d0\u5347\u2014\u2014\u4f60\u6253\u5f97\u66f4\u75db\uff0c\u4f60\u4e5f\u66f4\u5bb9\u6613\u5012\u4e0b', icon: '🟡' },
+        { id: 'wither', title: '\u67af\u840e', desc: '\u5168\u4f53\u602a\u7269\u6bcf5\u79d2\u635f\u59315%\u6700\u5927HP', icon: '☠️' }
+    ];
+
+    for (var i = 0; i < choices.length; i++) {
+        var c = choices[i];
+        var card = document.createElement('div');
+        card.className = 'mutator-card';
+        card.innerHTML =
+            '<div class="mutator-card-icon">' + c.icon + '</div>' +
+            '<div class="mutator-card-title">' + c.title + '</div>' +
+            '<div class="mutator-card-desc">' + c.desc + '</div>' +
+            '<button class="mutator-btn">\u9009\u62e9</button>';
+        (function(cid, mgr) {
+            card.querySelector('.mutator-btn').addEventListener('click', function() { mgr._applyMutator(cid); });
+        })(c.id, self);
+        this.mutatorChoices.appendChild(card);
+    }
+    this.mutatorOverlay.classList.add('active');
+};
+
+Gp._applyMutator = function(mutatorId) {
+    this._activeMutator = mutatorId;
+    this.mutatorOverlay.classList.remove('active');
+    if (mutatorId === 'gravity') {
+        this._origMagnetRadius = this.player.magnetRadius;
+        this.player.magnetRadius = 0;
+    } else if (mutatorId === 'bloodmoon') {
+        for (var i = 0; i < this.enemies.length; i++) {
+            var e = this.enemies[i];
+            if (!e.alive) continue;
+            e.atk = Math.floor(e.atk * 1.4);
+            e.maxHp = Math.floor(e.maxHp * 1.3);
+            e.hp = Math.floor(e.hp * 1.3);
+            var el = this._enemyElements.get(e.id);
+            if (el) el.style.transform = 'scale(1.3)';
+        }
+    } else if (mutatorId === 'frenzy') {
+        for (var i = 0; i < this.enemies.length; i++) {
+            var e = this.enemies[i];
+            if (!e.alive) continue;
+            if (!e._frenzyStored) {
+                e._frenzyStored = true;
+                e._frenzyOrigSpeed = e.speed;
+                e.speed = Math.floor(e.speed * 1.5);
+            }
+        }
+    } else if (mutatorId === 'frailty') {
+        this._frailtyOrigPlayerAtk = this.player.atk;
+        this.player.atk = Math.floor(this.player.atk * 1.5);
+        for (var i = 0; i < this.enemies.length; i++) {
+            var e = this.enemies[i];
+            if (!e.alive) continue;
+            if (!e._frailtyStored) {
+                e._frailtyStored = true;
+                e._frailtyOrigAtk = e.atk;
+                e.atk = Math.floor(e.atk * 1.5);
+            }
+        }
+    } else if (mutatorId === 'wither') {
+        this._witherTimer = 0;
+    }
+    this._beginLoop();
+};
+
+Gp._clearMutatorEffects = function() {
+    if (this._activeMutator === 'gravity' && this._origMagnetRadius != null) {
+        this.player.magnetRadius = this._origMagnetRadius;
+    }
+    if (this._activeMutator === 'bloodmoon') {
+        for (var i = 0; i < this.enemies.length; i++) {
+            var e = this.enemies[i];
+            var el = this._enemyElements.get(e.id);
+            if (el) el.style.transform = '';
+        }
+    }
+    if (this._activeMutator === 'frenzy') {
+        for (var i = 0; i < this.enemies.length; i++) {
+            var e = this.enemies[i];
+            if (e._frenzyStored) {
+                e.speed = e._frenzyOrigSpeed || e.baseSpeed;
+                e._frenzyStored = false;
+                e._frenzyOrigSpeed = undefined;
+            }
+        }
+    }
+    if (this._activeMutator === 'frailty') {
+        if (this._frailtyOrigPlayerAtk != null) this.player.atk = this._frailtyOrigPlayerAtk;
+        for (var i = 0; i < this.enemies.length; i++) {
+            var e = this.enemies[i];
+            if (e._frailtyStored) {
+                e.atk = e._frailtyOrigAtk || e.baseAtk;
+                e._frailtyStored = false;
+                e._frailtyOrigAtk = undefined;
+            }
+        }
+    }
+    this._activeMutator = null;
+    this._origMagnetRadius = null;
+};
+
+Gp._clearTotems = function() {
+    for (var i = 0; i < this._totems.length; i++) {
+        if (this._totems[i].el && this._totems[i].el.parentNode) this._totems[i].el.remove();
+    }
+    this._totems = [];
+};
+
+/* ══════════════════════════════════════════════
+   V3.0 Overdrive 狂暴系统
+   ══════════════════════════════════════════════ */
+
+Gp._triggerOverdrive = function() {
+    if (this._overdriveActive) return;
+    this._overdriveActive = true;
+    this._overdriveTimer = 3.0;
+    this.player.rage = 0;
+    if (this._syncUI) this._syncUI();
+    this._origCdFloor = this.player.cdFloor;
+    this.player.cdFloor = 0;
+
+    for (var _oi = 0; _oi < this.enemies.length; _oi++) {
+        var _oe = this.enemies[_oi];
+        if (_oe.alive && !_oe._overdriveStored) {
+            _oe._overdriveStored = true;
+            _oe._overdriveOrigSpeed = _oe.speed;
+            _oe.speed = 0;
+        }
+    }
+
+    if (this.container) this.container.classList.add('overdrive-active');
+    this.triggerShake(0.5, 3000);
+    this._spawnCausalityText('\u2600\uFE0F\u2600\uFE0F\u2600\uFE0F Overdrive \u7206\u8f70 \u2600\uFE0F\u2600\uFE0F\u2600\uFE0F');
+
+    /* \u6210\u5C31\uFF1AOverdrive \u8BA1\u6570 */
+    this._overdriveCount = (this._overdriveCount || 0) + 1;
+    if (this._overdriveCount >= 10) this._checkAchievement('overdrive_10');
+};
+
+Gp._endOverdrive = function() {
+    if (!this._overdriveActive) return;
+    this._overdriveActive = false;
+    this._overdriveTimer = 0;
+
+    if (this.player) this.player.cdFloor = this._origCdFloor || 0.2;
+
+    for (var _oi = 0; _oi < this.enemies.length; _oi++) {
+        var _oe = this.enemies[_oi];
+        if (_oe._overdriveStored) {
+            _oe.speed = _oe._overdriveOrigSpeed || _oe.baseSpeed;
+            _oe._overdriveStored = false;
+            _oe._overdriveOrigSpeed = undefined;
+        }
+    }
+
+    if (this.container) this.container.classList.remove('overdrive-active');
+};
+
+/* ══════════════════════════════════════════════
+   终局领主 Boss Lord 系统
+   ══════════════════════════════════════════════ */
+
+Gp._spawnBossLord = function() {
+    var level = Math.floor(this._elapsed / 15) + 1;
+    var x = this._mapW / 2;
+    var y = Math.floor(this._mapH * 0.35);
+    var margin = 100;
+    x = Math.max(margin, Math.min(this._mapW - margin, x));
+    y = Math.max(margin, Math.min(this._mapH - margin, y));
+
+    var id = this._enemyIdCounter++;
+    var lord = new Enemy(id, x, y, level, true, 'Boss_Lord');
+    var diff = 1;
+    try { diff = window.levelConfig[this._currentLevelId].difficultyFactor || 1; } catch(e) { console.warn('diff config read error', e); }
+    lord.maxHp = Math.floor(lord.maxHp * diff);
+    lord.hp = lord.maxHp;
+    lord.atk = Math.floor(lord.atk * diff);
+    this.enemies.push(lord);
+    this._bossLord = lord;
+
+    /* ── 变异保险库：血月对Boss Lord生效 ── */
+    if (this._vaultMutations && this._vaultMutations.indexOf('bloodmoon') !== -1) {
+        lord.atk = Math.floor(lord.atk * 1.4);
+        lord.maxHp = Math.floor(lord.maxHp * 1.3);
+        lord.hp = Math.floor(lord.hp * 1.3);
+    }
+
+    var el = document.createElement('div');
+    el.className = 'enemy boss boss-lord';
+    el.dataset.id = id;
+    var hpBar = document.createElement('div');
+    hpBar.className = 'enemy-hp-bar';
+    var hpFill = document.createElement('div');
+    hpFill.className = 'enemy-hp-fill';
+    hpBar.appendChild(hpFill);
+    el.appendChild(hpBar);
+    this._worldLayer.appendChild(el);
+    this._enemyElements.set(id, el);
+    lord.el = el;
+
+    if (this._bloodRageActive) {
+        lord.speed = Math.floor(lord.speed * 1.2);
+        lord.baseSpeed = lord.speed;
+        if (lord.el) lord.el.classList.add('boss-blood-rage');
+        this._spawnCausalityText('\u8840\u6d77\u72c2\u66b4\uff1a\u9886\u4e3b\u901f\u5ea6 +20%');
+    }
+
+    if (this.bossHpBar) this.bossHpBar.classList.add('active');
+    this._screenShake();
+    return lord;
+};
+
+Gp._spawnEnemyType = function(type) {
+    var angle = Math.random() * Math.PI * 2;
+    var margin = 30;
+    var vpW = this.battlefield.clientWidth;
+    var vpH = this.battlefield.clientHeight;
+    var viewR = Math.sqrt(vpW * vpW + vpH * vpH) * 0.5;
+    var spawnRadius = viewR + 50;
+    var cx = this.player.x + Math.cos(angle) * spawnRadius;
+    var cy = this.player.y + Math.sin(angle) * spawnRadius;
+    cx = Math.max(margin, Math.min(this._mapW - margin, cx));
+    cy = Math.max(margin, Math.min(this._mapH - margin, cy));
+
+    var level = Math.floor(this._elapsed / 15) + 1;
+    var id = this._enemyIdCounter++;
+    var enemy = new Enemy(id, cx, cy, level, false, type);
+    this.enemies.push(enemy);
+
+    var el = document.createElement('div');
+    el.className = 'enemy';
+    el.dataset.id = id;
+    var hpBar = document.createElement('div');
+    hpBar.className = 'enemy-hp-bar';
+    var hpFill = document.createElement('div');
+    hpFill.className = 'enemy-hp-fill';
+    hpBar.appendChild(hpFill);
+    el.appendChild(hpBar);
+    this._worldLayer.appendChild(el);
+    this._enemyElements.set(id, el);
+    enemy.el = el;
+    return enemy;
+};
+
+Gp._updateEnemyProjectiles = function(dt) {
+    for (var i = this._enemyProjectiles.length - 1; i >= 0; i--) {
+        var p = this._enemyProjectiles[i];
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.lifeTime -= dt;
+        if (p.lifeTime <= 0) p.alive = false;
+
+        if (!p.el) {
+            var pel = document.createElement('div');
+            pel.className = 'enemy-projectile';
+            var d = p.radius * 2;
+            pel.style.width = d + 'px';
+            pel.style.height = d + 'px';
+            this._worldLayer.appendChild(pel);
+            p.el = pel;
+        }
+        p.el.style.left = (p.x - p.radius) + 'px';
+        p.el.style.top = (p.y - p.radius) + 'px';
+
+        if (p.x < -100 || p.x > this._mapW + 100 || p.y < -100 || p.y > this._mapH + 100) {
+            p.alive = false;
+        }
+
+        if (p.alive && this.player) {
+            var dx = this.player.x - p.x;
+            var dy = this.player.y - p.y;
+            if (dx * dx + dy * dy < (this.player.radius + p.radius) * (this.player.radius + p.radius)) {
+                if (!p._hitPlayer) {
+                    p._hitPlayer = true;
+                    this.player.takeDamage(p.damage, this._bossLord || this);
+                }
+                p.alive = false;
+            }
+        }
+
+        if (!p.alive) {
+            if (p.el && p.el.parentNode) p.el.remove();
+            this._enemyProjectiles.splice(i, 1);
+        }
+    }
+};
+
+Gp._cleanEnemyProjectiles = function() {
+    for (var i = 0; i < this._enemyProjectiles.length; i++) {
+        if (this._enemyProjectiles[i].el && this._enemyProjectiles[i].el.parentNode) {
+            this._enemyProjectiles[i].el.remove();
+        }
+    }
+    this._enemyProjectiles = [];
+};
+
+/* ══════════════════════════════════════════════
+   神兵装备栏 UI 渲染与同步
+   ══════════════════════════════════════════════ */
+
+Gp._renderWeaponSlots = function() {
+    if (!this._weaponSlotsEl) return;
+    this._weaponSlotsEl.innerHTML = '';
+    for (var i = 0; i < this._activeWeapons.length; i++) {
+        var w = this._activeWeapons[i];
+        var info = window.rewardManager && window.rewardManager.weaponInfos[w.id] ? window.rewardManager.weaponInfos[w.id] : { name: w.id, color: '#888' };
+        var pct = w.cd > 0 ? Math.max(0, Math.min(100, (1 - w.cooldownTimer / w.cd) * 100)) : 100;
+        var slot = document.createElement('div');
+        slot.className = 'weapon-slot';
+        slot.dataset.widx = i;
+        slot.innerHTML =
+            '<div class="ws-icon" style="background:' + info.color + ';color:' + info.color + '"></div>' +
+            '<div class="ws-name">' + info.name + '</div>' +
+            '<div class="ws-cd-track"><div class="ws-cd-fill" style="width:' + pct + '%"></div></div>' +
+            '<div class="ws-level">Lv.' + w.level + '</div>';
+        this._weaponSlotsEl.appendChild(slot);
+    }
+};
+
+Gp._syncWeaponSlotBar = function() {
+    if (!this._weaponSlotsEl) return;
+    var slots = this._weaponSlotsEl.children;
+    for (var i = 0; i < this._activeWeapons.length && i < slots.length; i++) {
+        var w = this._activeWeapons[i];
+        var fill = slots[i].querySelector('.ws-cd-fill');
+        if (fill) {
+            var pct = w.cd > 0 ? Math.max(0, Math.min(100, (1 - w.cooldownTimer / w.cd) * 100)) : 100;
+            fill.style.width = pct + '%';
+        }
+        var lvEl = slots[i].querySelector('.ws-level');
+        if (lvEl) lvEl.textContent = 'Lv.' + w.level;
+    }
+};
+
+/* ── 武器槽位管理 ── */
+
+Gp._syncWeaponSlots = function() {
+    if (!this.player) return;
+    this.player.weaponSlots = this._activeWeapons.map(function(w) { return { id: w.id, level: w.level }; });
+};
+
+Gp._addWeapon = function(weaponId) {
+    if (this._activeWeapons.length >= this.player.maxWeaponSlots) return null;
+    var W = window[weaponId];
+    if (!W) return null;
+    var w = new W(1);
+    this._activeWeapons.push(w);
+    this._syncWeaponSlots();
+    this._renderWeaponSlots();
+    return w;
+};
+
+Gp._replaceWeapon = function(oldIndex, newWeaponId) {
+    if (oldIndex < 0 || oldIndex >= this._activeWeapons.length) return null;
+    var old = this._activeWeapons[oldIndex];
+    if (typeof old.reset === 'function') old.reset();
+    var W = window[newWeaponId];
+    if (!W) return null;
+    var w = new W(1);
+    this._activeWeapons[oldIndex] = w;
+    this._syncWeaponSlots();
+    this._renderWeaponSlots();
+    return w;
+};
+
+Gp._upgradeWeapon = function(index) {
+    if (index < 0 || index >= this._activeWeapons.length) return false;
+    this._activeWeapons[index].upgrade();
+    this._syncWeaponSlots();
+    this._renderWeaponSlots();
+    return true;
+};
+
+/* ── 在快照中包含武器数据 ── */
+
+var _origSnapshot = window.saveManager.snapshotForRun;
+window.saveManager.snapshotForRun = function(engine) {
+    var snap = _origSnapshot.call(this, engine);
+    snap.weapons = engine._activeWeapons.map(function(w) { return { id: w.id, level: w.level, cooldownTimer: w.cooldownTimer }; });
+    return snap;
+};
+
+window.gameEngine = new window.GameEngine();
+})();
