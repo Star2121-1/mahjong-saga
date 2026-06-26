@@ -751,18 +751,30 @@ Gp._loop = function(timestamp) {
             }
 
             if (this.player._thornCritX !== undefined) {
-                this._spawnFloatText(this.player._thornCritX, this.player._thornCritY, '\u66b4\u51fb\u53cd\u5546!', true);
+                if (this._combat && this._combat.spawnFloatText) {
+                    this._combat.spawnFloatText(this, this.player._thornCritX, this.player._thornCritY, '\u66b4\u51fb\u53cd\u5546!', true);
+                } else {
+                    this._spawnFloatText(this.player._thornCritX, this.player._thornCritY, '\u66b4\u51fb\u53cd\u5546!', true);
+                }
                 this.player._thornCritX = undefined;
                 this.player._thornCritY = undefined;
             }
 
             if (this.player._dodgeSignal) {
-                this._spawnFloatText(this.player.x, this.player.y, '\u95ea\u907f!', true);
+                if (this._combat && this._combat.spawnFloatText) {
+                    this._combat.spawnFloatText(this, this.player.x, this.player.y, '\u95ea\u907f!', true);
+                } else {
+                    this._spawnFloatText(this.player.x, this.player.y, '\u95ea\u907f!', true);
+                }
                 this.player._dodgeSignal = false;
             }
 
             if (this.player._healAmount > 0) {
-                this._spawnHealText(this.player.x, this.player.y, this.player._healAmount);
+                if (this._combat && this._combat.spawnHealText) {
+                    this._combat.spawnHealText(this, this.player.x, this.player.y, this.player._healAmount);
+                } else {
+                    this._spawnHealText(this.player.x, this.player.y, this.player._healAmount);
+                }
                 this.player._healAmount = 0;
             }
 
@@ -881,31 +893,36 @@ Gp._loop = function(timestamp) {
 
         /* ── 套装共鸣：焰痕（Speed ×3）── */
         if (this.player.setResonanceSpeed && !this._pendingReward) {
-            this._flameAuraTimer = (this._flameAuraTimer || 0) + dt;
-            if (this._flameAuraTimer >= 0.5) {
-                this._flameAuraTimer = 0;
-                var _px = this.player.x;
-                var _py = this.player.y;
-                var _auraR = 80;
-                var dmg = Math.floor(this.player.atk * 0.3);
-                for (var _aei = 0; _aei < this.enemies.length; _aei++) {
-                    var _ae = this.enemies[_aei];
-                    if (!_ae.alive) continue;
-                    var _adx = _ae.x - _px;
-                    var _ady = _ae.y - _py;
-                    if (_adx * _adx + _ady * _ady <= _auraR * _auraR) {
-                        _ae.takeDamage(dmg);
+            /* Epoch 5: 委托套装共鸣到 Systems */
+            if (this._systems && this._systems.updateResonanceAuras) {
+                this._systems.updateResonanceAuras(this, dt);
+            } else {
+                this._flameAuraTimer = (this._flameAuraTimer || 0) + dt;
+                if (this._flameAuraTimer >= 0.5) {
+                    this._flameAuraTimer = 0;
+                    var _px = this.player.x;
+                    var _py = this.player.y;
+                    var _auraR = 80;
+                    var dmg = Math.floor(this.player.atk * 0.3);
+                    for (var _aei = 0; _aei < this.enemies.length; _aei++) {
+                        var _ae = this.enemies[_aei];
+                        if (!_ae.alive) continue;
+                        var _adx = _ae.x - _px;
+                        var _ady = _ae.y - _py;
+                        if (_adx * _adx + _ady * _ady <= _auraR * _auraR) {
+                            _ae.takeDamage(dmg);
+                        }
                     }
+                    var _auraEl = document.createElement('div');
+                    _auraEl.className = 'resonance-flame';
+                    _auraEl.style.left = (_px - _auraR) + 'px';
+                    _auraEl.style.top = (_py - _auraR) + 'px';
+                    _auraEl.style.width = (_auraR * 2) + 'px';
+                    _auraEl.style.height = (_auraR * 2) + 'px';
+                    this._worldLayer.appendChild(_auraEl);
+                    var _self = this;
+                    setTimeout(function() { if (_auraEl.parentNode) _auraEl.remove(); }, 400);
                 }
-                var _auraEl = document.createElement('div');
-                _auraEl.className = 'resonance-flame';
-                _auraEl.style.left = (_px - _auraR) + 'px';
-                _auraEl.style.top = (_py - _auraR) + 'px';
-                _auraEl.style.width = (_auraR * 2) + 'px';
-                _auraEl.style.height = (_auraR * 2) + 'px';
-                this._worldLayer.appendChild(_auraEl);
-                var _self = this;
-                setTimeout(function() { if (_auraEl.parentNode) _auraEl.remove(); }, 400);
             }
         }
 
@@ -943,14 +960,19 @@ Gp._loop = function(timestamp) {
 
         /* ── 突变·枯萎：全体敌人周期性损血 ── */
         if (this._activeMutator === 'wither' && !this._pendingReward) {
-            this._witherTimer += dt;
-            if (this._witherTimer >= 5) {
-                this._witherTimer = 0;
-                for (var _wi = 0; _wi < this.enemies.length; _wi++) {
-                    var _we = this.enemies[_wi];
-                    if (!_we.alive) continue;
-                    var dmg = Math.max(1, Math.floor(_we.maxHp * 0.05));
-                    _we.takeDamage(dmg, 'wither');
+            /* Epoch 5: 委托枯萎到 Systems */
+            if (this._systems && this._systems.updateWither) {
+                this._systems.updateWither(this, dt);
+            } else {
+                this._witherTimer += dt;
+                if (this._witherTimer >= 5) {
+                    this._witherTimer = 0;
+                    for (var _wi = 0; _wi < this.enemies.length; _wi++) {
+                        var _we = this.enemies[_wi];
+                        if (!_we.alive) continue;
+                        var dmg = Math.max(1, Math.floor(_we.maxHp * 0.05));
+                        _we.takeDamage(dmg, 'wither');
+                    }
                 }
             }
         }
@@ -2149,6 +2171,10 @@ Gp._updateProjectiles = function(dt) {
    ══════════════════════════════════════════════ */
 
 Gp._showMutatorPanel = function() {
+    /* Epoch 5: 委托突变面板到 Systems */
+    if (this._systems && this._systems.showMutatorPanel) {
+        return this._systems.showMutatorPanel(this);
+    }
     if (!this.mutatorOverlay || !this.mutatorChoices) return;
     this.running = false;
     this._freezeClock();
@@ -2181,6 +2207,10 @@ Gp._showMutatorPanel = function() {
 };
 
 Gp._applyMutator = function(mutatorId) {
+    /* Epoch 5: 委托突变应用到 Systems */
+    if (this._systems && this._systems.applyMutator) {
+        return this._systems.applyMutator(this, mutatorId);
+    }
     this._activeMutator = mutatorId;
     this.mutatorOverlay.classList.remove('active');
     if (mutatorId === 'gravity') {
@@ -2272,6 +2302,10 @@ Gp._clearTotems = function() {
    ══════════════════════════════════════════════ */
 
 Gp._triggerOverdrive = function() {
+    /* Epoch 5: 委托 Overdrive 到 Systems */
+    if (this._systems && this._systems.triggerOverdrive) {
+        return this._systems.triggerOverdrive(this);
+    }
     if (this._overdriveActive) return;
     this._overdriveActive = true;
     this._overdriveTimer = 3.0;
