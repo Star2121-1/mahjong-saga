@@ -658,35 +658,6 @@ Gp._loop = function(timestamp) {
             /* Epoch 5: 委托刷怪逻辑到 SpawnSystem */
             if (window.SpawnSystem) {
                 window.SpawnSystem.update(dt, this);
-            } else {
-                /* 向后兼容：旧逻辑 */
-                this._difficultyTimer += dt;
-                if (this._difficultyTimer >= 10) {
-                    this._difficultyTimer -= 10;
-                    this._spawnInterval = Math.max(0.3, this._spawnInterval - this._spawnIntervalDecay);
-                }
-
-                /* ── Boss Lord 波次 ── */
-                if (this._bossLordWave) {
-                    if (!this._bossLordSpawned) {
-                        this._bossLordSpawned = true;
-                        this._spawnBossLord();
-                    }
-                } else {
-                    this._spawnTimer += dt;
-                    while (this._spawnTimer >= this._spawnInterval) {
-                        this._spawnTimer -= this._spawnInterval;
-                        this._spawnEnemy();
-                    }
-
-                    this._bossTimer += dt;
-                    if (this._bossTimer >= 30) {
-                        this._bossTimer = 0;
-                        var bossCount = 0;
-                        for (var _bi = 0; _bi < this.enemies.length; _bi++) { if (this.enemies[_bi].alive && this.enemies[_bi].isBoss) bossCount++; }
-                        if (bossCount < 1) this._spawnEnemy(true);
-                    }
-                }
             }
 
             if (this.player.hasDrone) {
@@ -893,36 +864,8 @@ Gp._loop = function(timestamp) {
 
         /* ── 套装共鸣：焰痕（Speed ×3）── */
         if (this.player.setResonanceSpeed && !this._pendingReward) {
-            /* Epoch 5: 委托套装共鸣到 Systems */
             if (this._systems && this._systems.updateResonanceAuras) {
                 this._systems.updateResonanceAuras(this, dt);
-            } else {
-                this._flameAuraTimer = (this._flameAuraTimer || 0) + dt;
-                if (this._flameAuraTimer >= 0.5) {
-                    this._flameAuraTimer = 0;
-                    var _px = this.player.x;
-                    var _py = this.player.y;
-                    var _auraR = 80;
-                    var dmg = Math.floor(this.player.atk * 0.3);
-                    for (var _aei = 0; _aei < this.enemies.length; _aei++) {
-                        var _ae = this.enemies[_aei];
-                        if (!_ae.alive) continue;
-                        var _adx = _ae.x - _px;
-                        var _ady = _ae.y - _py;
-                        if (_adx * _adx + _ady * _ady <= _auraR * _auraR) {
-                            _ae.takeDamage(dmg);
-                        }
-                    }
-                    var _auraEl = document.createElement('div');
-                    _auraEl.className = 'resonance-flame';
-                    _auraEl.style.left = (_px - _auraR) + 'px';
-                    _auraEl.style.top = (_py - _auraR) + 'px';
-                    _auraEl.style.width = (_auraR * 2) + 'px';
-                    _auraEl.style.height = (_auraR * 2) + 'px';
-                    this._worldLayer.appendChild(_auraEl);
-                    var _self = this;
-                    setTimeout(function() { if (_auraEl.parentNode) _auraEl.remove(); }, 400);
-                }
             }
         }
 

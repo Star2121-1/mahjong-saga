@@ -13,3 +13,4 @@
 | 9 | `feat/evolution-epoch-9` | 委托 _loop 刷怪逻辑到 SpawnSystem.update | ✅ Committed |
 | 10 | `feat/evolution-epoch-10` | 委托 Combat/Systems — 飘字/Overdrive/突变/枯萎/共鸣 | ✅ Committed |
 | 11 | `feat/evolution-epoch-11` | 委托掉落/爆炸/震动/因果文本 — 委托进度达 100% | ✅ Committed |
+| 12 | `feat/evolution-epoch-12` | GameSpawner Enemy 引用兼容性修复 | ✅ Committed |
