@@ -1,5 +1,12 @@
 (function() {
 
+/* ══════════════════════════════════════════════
+   Epoch 5: 模块委托代理
+   ══════════════════════════════════════════════ */
+if (window.SpawnSystem) window.SpawnSystem.init = window.SpawnSystem.init || function(engine) { this.engine = engine; };
+if (window.CombatSystem) {}
+if (window.Systems) {}
+
 window.GameEngine = function() {
     this._currentLevelId = 'level_1';
     this._heroIds = ['hero_swordsman', 'hero_colossus', 'hero_phantom'];

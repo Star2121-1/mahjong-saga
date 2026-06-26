@@ -17,10 +17,24 @@
 
 ## 快速开始
 
+### 本地运行
+
 1. 在项目根目录启动任意静态服务器，例如：
    ```bash
    python -m http.server 8765
    ```
+2. 浏览器访问 `http://localhost:8765/s3_gameplay.html`（直接战斗）或 `http://localhost:8765/s2_main_hub.html`（大本营）。
+
+### 在线部署
+
+本项目为纯静态文件（HTML + CSS + JS），可直接部署到：
+- GitHub Pages
+- Vercel / Netlify
+- 任何静态文件服务器
+
+### 仓库
+
+源码托管于 [Star2121-1/mahjong-saga](https://github.com/Star2121-1/mahjong-saga)
 2. 浏览器访问 `http://localhost:8765/s1_save_select.html`。
 3. 点击“开启新征程”，在大本营选择英雄与关卡后“轰然出征”。
 
