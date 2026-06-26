@@ -1,0 +1,23 @@
+# Build / temp
+*.log
+.env
+.env.local
+node_modules/
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Session
+.memory/
+.claude/

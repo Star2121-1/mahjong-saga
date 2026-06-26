@@ -1007,3 +1007,43 @@
 .hand-tile-slot .tile-body.wind { color: #1a5336; }
 /* 箭牌 */
 .hand-tile-slot .tile-body.arrow { color: #b62929; }
+
+/* ══════════════════════════════════════════════
+   Epoch 1 — 动态上下文高亮
+   ══════════════════════════════════════════════ */
+
+.context-highlight {
+    animation: contextPulse 1s ease-in-out 3;
+}
+@keyframes contextPulse {
+    0% { box-shadow: 0 0 0 0 rgba(76,175,80,0); }
+    50% { box-shadow: 0 0 0 8px rgba(76,175,80,0.5), 0 0 30px rgba(76,175,80,0.3); }
+    100% { box-shadow: 0 0 0 0 rgba(76,175,80,0); }
+}
+
+/* ══════════════════════════════════════════════
+   Epoch 1 — 手牌交付飞入动画
+   ══════════════════════════════════════════════ */
+
+.tile-delivering .tile-body {
+    animation: tileDeliverIn 0.4s ease-out forwards;
+}
+@keyframes tileDeliverIn {
+    0% { opacity: 0; transform: perspective(400px) rotateX(8deg) translateY(-30px) scale(0.5); }
+    100% { opacity: 1; transform: perspective(400px) rotateX(8deg) translateY(0) scale(1); }
+}
+
+/* ══════════════════════════════════════════════
+   Epoch 1 — 引导面板步骤导航
+   ══════════════════════════════════════════════ */
+
+.guide-nav {
+    display: flex; gap: 8px; justify-content: center; margin-top: 8px;
+}
+.guide-nav button {
+    padding: 8px 20px; font-size: 13px; font-weight: 700;
+    border-radius: 6px; cursor: pointer;
+    transition: transform 0.1s, background 0.2s;
+}
+.guide-nav button:hover { transform: scale(1.04); }
+.guide-nav button:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }

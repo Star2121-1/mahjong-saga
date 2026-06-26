@@ -264,13 +264,31 @@ Gp._bindStage3Events = function() {
         });
     }
     if (this.guideOverlay) {
-        var s = this;
+        var self = this;
         var confirmBtn = this.guideOverlay.querySelector('#guide-confirm-btn');
-        if (confirmBtn) confirmBtn.addEventListener('click', function() {
-            s.guideOverlay.classList.remove('active');
-            s._guideDismissed = true;
-            s._beginLoop();
+        var nextBtn = this.guideOverlay.querySelector('#guide-next-btn');
+        var prevBtn = this.guideOverlay.querySelector('#guide-prev-btn');
+        if (confirmBtn) confirmBtn.style.display = 'none'; /* hide old button, use new nav */
+        if (nextBtn) nextBtn.addEventListener('click', function() {
+            var currentStep = self._currentGuideStep || 0;
+            var totalSteps = (self._guideSteps || []).length;
+            if (currentStep < totalSteps - 1) {
+                self._currentGuideStep = currentStep + 1;
+                self._showGuideStep(currentStep + 1);
+            } else {
+                self._completeGuide();
+            }
         });
+        if (prevBtn) prevBtn.addEventListener('click', function() {
+            var cs = self._currentGuideStep || 0;
+            if (cs > 0) {
+                self._currentGuideStep = cs - 1;
+                self._showGuideStep(cs - 1);
+            }
+        });
+        /* 初始显示第一步 */
+        this._currentGuideStep = 0;
+        this._showGuideStep(0);
     }
 };
 
@@ -463,12 +481,11 @@ Gp._shouldShowGuide = function() {
 };
 
 Gp._showGuide = function() {
+    this._defineGuideSteps();
     if (this.guideOverlay) this.guideOverlay.classList.add('active');
-    var meta = window.saveManager && window.saveManager._metaCache;
-    if (meta) {
-        meta.hasSeenGuide = true;
-        if (window.saveManager) window.saveManager._saveMetaToStorage();
-    }
+    /* 高亮引导面板 */
+    this._highlightElement('#guide-overlay', 6000);
+    /* 注意：不在这里设置 hasSeenGuide，等 _completeGuide 时再设 */
 };
 
 Gp._beginLoop = function() {
@@ -2392,6 +2409,242 @@ window.saveManager.snapshotForRun = function(engine) {
     var snap = _origSnapshot.call(this, engine);
     snap.weapons = engine._activeWeapons.map(function(w) { return { id: w.id, level: w.level, cooldownTimer: w.cooldownTimer }; });
     return snap;
+};
+
+/* ══════════════════════════════════════════════
+   Epoch 1 — 引导增强：动态高亮 + 手牌交付状态机
+   ══════════════════════════════════════════════ */
+
+Gp._highlightElement = function(selector, duration) {
+    var el = document.querySelector(selector);
+    if (!el) return null;
+    el.classList.add('context-highlight');
+    var self = this;
+    var timer = setTimeout(function() {
+        el.classList.remove('context-highlight');
+        self._highlightTimers = (self._highlightTimers || []).filter(function(t) { return t !== timer; });
+    }, duration || 3000);
+    if (!this._highlightTimers) this._highlightTimers = [];
+    this._highlightTimers.push(timer);
+    return el;
+};
+
+Gp._dimExcept = function(selectorArray) {
+    var self = this;
+    if (!this._originalOpacities) {
+        this._originalOpacities = new Map();
+    }
+    var battlefield = this.battlefield;
+    if (!battlefield) return;
+    battlefield.querySelectorAll(':scope > *:not(#guide-overlay):not(#pause-overlay):not(#reward-overlay):not(#mutator-overlay):not(#victory-overlay):not(#game-over-overlay):not(#boss-hp-bar)').forEach(function(child) {
+        var id = child.id || child.className.baseVal;
+        if (selectorArray.some(function(s) { return child.matches(s); })) {
+            self._originalOpacities.set(child, child.style.opacity || '1');
+            child.style.opacity = '1';
+        } else {
+            self._originalOpacities.set(child, child.style.opacity || '1');
+            child.style.opacity = '0.15';
+        }
+    });
+};
+
+Gp._restoreOpacity = function() {
+    if (!this._originalOpacities) return;
+    this._originalOpacities.forEach(function(val, el) {
+        if (el && el.parentNode) el.style.opacity = val;
+    });
+    this._originalOpacities.clear();
+};
+
+Gp._showGuideStep = function(stepIndex) {
+    if (!this.guideOverlay) return;
+    var steps = this._guideSteps || [];
+    if (stepIndex >= steps.length) {
+        this._completeGuide();
+        return;
+    }
+    /* 清除上一步的 dim/highlight 效果 */
+    this._restoreOpacity();
+    this._clearHighlightTimers();
+
+    var step = steps[stepIndex];
+    if (step.highlight) this._highlightElement(step.highlight, 4000);
+    if (step.dimExcept) this._dimExcept(step.dimExcept);
+    /* 更新引导面板内容 */
+    var body = this.guideOverlay.querySelector('.guide-body');
+    if (body) {
+        body.innerHTML = '';
+        step.items.forEach(function(item) {
+            var div = document.createElement('div');
+            div.className = 'guide-item';
+            div.innerHTML = item;
+            body.appendChild(div);
+        });
+    }
+    /* 更新导航按钮状态 */
+    var prevBtn = this.guideOverlay.querySelector('#guide-prev-btn');
+    var nextBtn = this.guideOverlay.querySelector('#guide-next-btn');
+    if (prevBtn) prevBtn.disabled = (stepIndex <= 0);
+    if (nextBtn) {
+        if (stepIndex >= steps.length - 1) {
+            nextBtn.textContent = '完成出征 ✓';
+        } else {
+            nextBtn.textContent = '下一步 →';
+        }
+    }
+};
+
+Gp._completeGuide = function() {
+    this._restoreOpacity();
+    this._clearHighlightTimers();
+    this.guideOverlay.classList.remove('active');
+    this._guideDismissed = true;
+    var meta = window.saveManager && window.saveManager._metaCache;
+    if (meta) {
+        meta.hasSeenGuide = true;
+        if (window.saveManager) window.saveManager._saveMetaToStorage();
+    }
+    /* 延迟启动游戏循环 */
+    var self = this;
+    setTimeout(function() { self._beginLoop(); }, 500);
+};
+
+Gp._clearHighlightTimers = function() {
+    if (this._highlightTimers) {
+        this._highlightTimers.forEach(function(t) { clearTimeout(t); });
+        this._highlightTimers = [];
+    }
+};
+
+Gp._deliverHandTile = function(tileData) {
+    /* tileData: { text, cssClass, slotIndex } */
+    var self = this;
+    /* 找到第一个空槽位 */
+    var slotIdx = -1;
+    for (var i = 0; i < 14; i++) {
+        if (this._handTileSlots && this._handTileSlots[i] && !this._handTileSlots[i].classList.contains('occupied')) {
+            slotIdx = i;
+            break;
+        }
+    }
+    if (slotIdx === -1) return; /* 手牌槽已满 */
+    /* 飞入动画 */
+    var slot = this._handTileSlots[slotIdx];
+    slot.classList.add('occupied', 'tile-delivering');
+    var tileBody = document.createElement('div');
+    tileBody.className = 'tile-body ' + (tileData.cssClass || '');
+    tileBody.textContent = tileData.text;
+    tileBody.style.opacity = '0';
+    tileBody.style.transform = 'translate3d(0,-30px,0) scale(0.5)';
+    slot.appendChild(tileBody);
+    /* 交付音效反馈 */
+    if (window.fxManager) {
+        window.fxManager.spawnText(this.player.x, this.player.y - 40, '摸牌!', 'normal');
+    }
+    /* 动画过渡 */
+    var animTimer = setTimeout(function() {
+        tileBody.style.transition = 'opacity 0.4s ease-out, transform 0.4s ease-out';
+        tileBody.style.opacity = '1';
+        tileBody.style.transform = 'translate3d(0,0,0) scale(1)';
+        slot.classList.remove('tile-delivering');
+        /* 自动保存手牌状态 */
+        self._saveHandState();
+    }, 100);
+    this._handTileDeliverTimers = this._handTileDeliverTimers || [];
+    this._handTileDeliverTimers.push(animTimer);
+};
+
+Gp._saveHandState = function() {
+    if (!this._handTileSlots) return;
+    var meta = window.saveManager._metaCache || {};
+    meta.handTiles = meta.handTiles || [];
+    meta.handTiles.length = 0;
+    for (var i = 0; i < this._handTileSlots.length; i++) {
+        var slot = this._handTileSlots[i];
+        if (slot.classList.contains('occupied')) {
+            var body = slot.querySelector('.tile-body');
+            if (body) {
+                /* 提取 tile-body 之后的所有类名 */
+                var classes = '';
+                for (var j = 0; j < body.classList.length; j++) {
+                    if (body.classList[j] !== 'tile-body') {
+                        classes += (classes ? ' ' : '') + body.classList[j];
+                    }
+                }
+                meta.handTiles.push({
+                    index: i,
+                    text: body.textContent,
+                    classes: classes
+                });
+            }
+        }
+    }
+    window.saveManager._saveMetaToStorage();
+};
+
+Gp._restoreHandState = function() {
+    if (!this._handTileSlots) return;
+    var meta = window.saveManager._metaCache || {};
+    var tiles = meta.handTiles || [];
+    tiles.forEach(function(t) {
+        if (t.index < this._handTileSlots.length) {
+            var slot = this._handTileSlots[t.index];
+            slot.classList.add('occupied');
+            var body = document.createElement('div');
+            body.className = 'tile-body ' + (t.classes || '');
+            body.textContent = t.text;
+            slot.appendChild(body);
+        }
+    }.bind(this));
+};
+
+/* 引导步骤定义 */
+Gp._defineGuideSteps = function() {
+    this._guideSteps = [
+        {
+            highlight: '#guide-overlay',
+            dimExcept: ['#guide-overlay'],
+            items: [
+                '<div class="guide-item"><span class="guide-key">WASD</span> / 方向键 移动雀士</div>',
+                '<div class="guide-item"><span class="guide-key">鼠标点击</span> 攻击范围内妖牌</div>',
+                '<div class="guide-item"><span class="guide-key">空格</span> 怒气满时触发 Overdrive 役满暴走</div>',
+                '<div class="guide-item"><span class="guide-key">Esc</span> / ⏸ 暂停游戏</div>',
+                '<div class="guide-item">击杀妖牌掉落 <strong>铜筹码</strong> 和 <strong>经验石</strong></div>',
+                '<div class="guide-item">升级时弹出三张天命麻将牌，选择一张收入底部手牌槽</div>',
+                '<div class="guide-item">凑齐顺子/刻子激活强力技能，胡牌进入 Overdrive</div>'
+            ]
+        },
+        {
+            highlight: '#player',
+            dimExcept: ['#player'],
+            items: [
+                '<div class="guide-item">你是最后一张骨雕麻将牌——<strong>「雀」</strong></div>',
+                '<div class="guide-item">羊脂玉牌面，祖母绿侧边厚度，竹骨黄夹层</div>',
+                '<div class="guide-item">朱砂红「雀」字在牌面正中闪烁</div>',
+                '<div class="guide-item">移动躲避妖牌，点击攻击消灭它们</div>'
+            ]
+        },
+        {
+            highlight: '#exp-bar-container',
+            dimExcept: ['#exp-bar-container'],
+            items: [
+                '<div class="guide-item">拾取铜筹码和经验石提升等级</div>',
+                '<div class="guide-item">经验条满后弹出三张天命牌</div>',
+                '<div class="guide-item">选择一张收入底部 14 格手牌槽</div>'
+            ]
+        },
+        {
+            highlight: '#hand-tile-bar',
+            dimExcept: ['#hand-tile-bar'],
+            items: [
+                '<div class="guide-item">底部 14 格为天命手牌槽</div>',
+                '<div class="guide-item">筒子牌（孔雀蓝）：弹跳飞环</div>',
+                '<div class="guide-item">条子牌（竹翠青）：直线剑气</div>',
+                '<div class="guide-item">万字牌（朱砂红）：范围爆裂</div>',
+                '<div class="guide-item">凑齐顺子 / 刻子激活组合技能</div>'
+            ]
+        }
+    ];
 };
 
 window.gameEngine = new window.GameEngine();
