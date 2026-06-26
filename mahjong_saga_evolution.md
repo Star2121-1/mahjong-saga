@@ -10,3 +10,4 @@
 | 6 | `feat/evolution-epoch-6` | 文档同步 — ENGINE_SPEC + GDD v4.1 + README 更新 | ✅ Committed |
 | 7 | `feat/evolution-epoch-7` | 模块集成 — SpawnSystem/Combat/Systems 代理接入 | ✅ Committed |
 | 8 | `feat/evolution-epoch-8` | 架构审计 — 模块进度评估 (3/4 已创建，待集成) | ✅ Committed |
+| 9 | `feat/evolution-epoch-9` | 委托 _loop 刷怪逻辑到 SpawnSystem.update | ✅ Committed |
