@@ -6,3 +6,4 @@
 | 2 | `feat/evolution-epoch-2` | 天赋扩展 — 6新天赋 + 雀魂护盾 + 核心共鸣 | ✅ Committed |
 | 3 | `feat/evolution-epoch-3` | 成就系统扩展 — 25成就 + 进度条 + 局末检测全覆盖 | ✅ Committed |
 | 4 | `feat/evolution-epoch-4` | 程序化关卡 — 深渊扩展 + 难度分级 + 敌人权重配置 | ✅ Committed |
+| 5 | `feat/evolution-epoch-5` | 架构解耦 — 拆分 GameEngine 为 3 模块 (Spawner/Combat/Systems) | ✅ Committed |
