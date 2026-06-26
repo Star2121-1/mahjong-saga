@@ -163,6 +163,11 @@ Gp.init = async function() {
     this._bindStage3Events();
     this._initBeforeUnload();
 
+    /* Epoch 5: 初始化模块系统 */
+    if (window.SpawnSystem) window.SpawnSystem.init(this);
+    if (window.CombatSystem) this._combat = window.CombatSystem;
+    if (window.Systems) this._systems = window.Systems;
+
     if (this.battlefield) {
         var self = this;
         this.battlefield.addEventListener('contextmenu', function(e) { e.preventDefault(); });
@@ -428,6 +433,9 @@ Gp._startNewRun = function(heroId, levelId) {
     this._syncPlayerHP();
     this._renderWeaponSlots();
     this._syncUI();
+
+    /* Epoch 5: 重置 SpawnSystem */
+    if (window.SpawnSystem) window.SpawnSystem.reset(this);
 
     /* ── 渲染 2.5D 骨雕雀牌 ── */
     this._renderPlayerTile();
