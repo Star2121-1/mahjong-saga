@@ -1139,6 +1139,10 @@ Gp._spawnEnemy = function(isBoss) {
 };
 
 Gp._spawnCoinsAt = function(x, y, isBoss, level) {
+    /* Epoch 5: 委托掉落到 CombatSystem */
+    if (this._combat && this._combat.spawnCoinsAt) {
+        return this._combat.spawnCoinsAt(this, x, y, isBoss, level);
+    }
     level = level || 1;
     var count = isBoss ? Math.floor(5 + level * 0.5 + Math.random() * 4) : Math.floor(3 + level * 0.3 + Math.random() * 3);
     var _vaultBlood = this._vaultMutations && this._vaultMutations.indexOf('bloodmoon') !== -1;
@@ -1177,6 +1181,10 @@ Gp._tryDropEquipment = function(x, y, isBossLord) {
 };
 
 Gp._spawnExpGemsAt = function(x, y, isBoss, level) {
+    /* Epoch 5: 委托经验石到 CombatSystem */
+    if (this._combat && this._combat.spawnExpGemsAt) {
+        return this._combat.spawnExpGemsAt(this, x, y, isBoss, level);
+    }
     var diff = 1;
     try { diff = window.levelConfig[this._currentLevelId].difficultyFactor || 1; } catch(e) { console.warn('diff config read error', e); }
     var _vaultBloodGem = this._vaultMutations && this._vaultMutations.indexOf('bloodmoon') !== -1;
@@ -1486,6 +1494,10 @@ Gp._showVictoryOverlay = function() {
 };
 
 Gp._spawnCausalityText = function(text) {
+    /* Epoch 5: 委托因果文本到 CombatSystem */
+    if (this._combat && this._combat.spawnCausalityText) {
+        return this._combat.spawnCausalityText(this, text);
+    }
     var el = document.createElement('div');
     el.textContent = text;
     el.style.cssText = 'position:absolute;top:20%;left:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:900;color:#ffd700;text-shadow:0 0 20px rgba(255,215,0,0.8),0 0 40px rgba(255,215,0,0.4);z-index:200;pointer-events:none;white-space:nowrap;animation:floatUp 0.6s ease-out forwards;';
@@ -1760,6 +1772,10 @@ Gp._checkAchievementInflight = function(id, currentValue) {
 
 /* ── 成就弹出提示：大字体，短暂停留 ── */
 Gp._spawnAchievementText = function(text) {
+    /* Epoch 5: 委托成就文本到 CombatSystem */
+    if (this._combat && this._combat.spawnAchievementText) {
+        return this._combat.spawnAchievementText(this, text);
+    }
     var el = document.createElement('div');
     el.textContent = text;
     el.style.cssText = 'position:absolute;top:15%;left:50%;transform:translate(-50%,-50%);font-size:28px;font-weight:900;color:#ffd700;text-shadow:0 0 24px rgba(255,215,0,0.9),0 0 48px rgba(255,215,0,0.5);z-index:210;pointer-events:none;white-space:nowrap;animation:achievePop 2.5s ease-out forwards;';
@@ -1945,6 +1961,10 @@ Gp._spawnExpText = function(x, y, amount) {
 };
 
 Gp._spawnExplosion = function(x, y, radius, damage, excludeId) {
+    /* Epoch 5: 委托爆炸到 CombatSystem */
+    if (this._combat && this._combat.spawnExplosion) {
+        return this._combat.spawnExplosion(this, x, y, radius, damage, excludeId);
+    }
     for (var _ei = 0; _ei < this.enemies.length; _ei++) {
         var e = this.enemies[_ei];
         if (!e.alive) continue;
@@ -1971,6 +1991,10 @@ Gp._screenShake = function() {
 };
 
 Gp.triggerShake = function(intensity, duration) {
+    /* Epoch 5: 委托震动到 Systems */
+    if (this._systems && this._systems.triggerShake) {
+        return this._systems.triggerShake(this, intensity, duration);
+    }
     if (!this.container) return;
     intensity = intensity || 1;
     duration = duration || 200;

@@ -62,8 +62,8 @@
 |------|------|------|
 | 主引擎 | `js/core/GameEngine.js` | 主循环调度、状态机、生命周期 |
 | 敌人生成 | `js/core/GameSpawner.js` | 刷怪逻辑、敌人类型权重、波次管理 | ✅ 已委托 |
-| 战斗系统 | `js/core/GameCombat.js` | 飘字、掉落、爆炸、屏幕震动 | ✅ 已委托 |
-| 游戏系统 | `js/core/GameSystems.js` | Overdrive、突变、套装共鸣 | ✅ 已委托 |
+| 战斗系统 | `js/core/GameCombat.js` | 飘字、掉落、爆炸、屏幕震动 | ✅ 100% 已委托 |
+| 游戏系统 | `js/core/GameSystems.js` | Overdrive、突变、套装共鸣 | ✅ 100% 已委托 |
 | 存档管理 | `js/core/SaveManager.js` | localStorage 读写、元进度持久化 |
 | 奖励系统 | `js/core/RewardManager.js` | 升级面板、圣物/武器选择 |
 | 特效管理 | `js/core/FxManager.js` | FCT 飘字对象池 |
