@@ -8,3 +8,4 @@
 | 4 | `feat/evolution-epoch-4` | 程序化关卡 — 深渊扩展 + 难度分级 + 敌人权重配置 | ✅ Committed |
 | 5 | `feat/evolution-epoch-5` | 架构解耦 — 拆分 GameEngine 为 3 模块 (Spawner/Combat/Systems) | ✅ Committed |
 | 6 | `feat/evolution-epoch-6` | 文档同步 — ENGINE_SPEC + GDD v4.1 + README 更新 | ✅ Committed |
+| 7 | `feat/evolution-epoch-7` | 模块集成 — SpawnSystem/Combat/Systems 代理接入 | ✅ Committed |
