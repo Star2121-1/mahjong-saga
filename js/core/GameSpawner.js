@@ -123,7 +123,7 @@ Ss._spawnEnemy = function(engine, isBoss) {
 
     var id = this._enemyIdCounter++;
     var enemyType = this._selectEnemyType(isBoss);
-    var enemy = new Enemy(id, x, y, level, isBoss === true, enemyType);
+    var enemy = new (window.Enemy || window.GameEngine.prototype._enemyConstructor)(id, x, y, level, isBoss === true, enemyType);
     var diff = 1;
     try {
         var cfg = window.levelConfig[this._currentLevelId];
@@ -196,7 +196,7 @@ Ss.spawnBossLord = function(engine) {
     y = Math.max(margin, Math.min(this._mapH - margin, y));
 
     var id = this._enemyIdCounter++;
-    var lord = new Enemy(id, x, y, level, true, 'Boss_Lord');
+    var lord = new (window.Enemy || window.GameEngine.prototype._enemyConstructor)(id, x, y, level, true, 'Boss_Lord');
     var diff = 1;
     try {
         var cfg = window.levelConfig[this._currentLevelId];
