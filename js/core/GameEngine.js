@@ -314,9 +314,18 @@ Gp._initBeforeUnload = function() {
 
 Gp._startNewRun = function(heroId, levelId) {
     var levelCfg = window.levelConfig[levelId] || window.levelConfig.level_1;
+    /* Epoch 4: 程序化关卡生成 */
+    if (levelCfg.isProcedural) {
+        var meta = window.saveManager._metaCache || {};
+        var abyssLevel = meta.highestEndlessLoop || 0;
+        levelCfg = window.proceduralLevelGenerator.generate(abyssLevel);
+    }
     this._mapW = levelCfg.mapW;
     this._mapH = levelCfg.mapH;
     this._currentLevelId = levelId;
+    this._spawnInterval = levelCfg.spawnIntervalMin || 1.5;
+    this._spawnIntervalDecay = levelCfg.spawnIntervalDecay || 0.02;
+    this._enemyTypeWeights = levelCfg.enemyTypes || { Normal: 0.45, Tanker: 0.20, Stalker: 0.25, Shaman: 0.10 };
 
     for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
     this._enemyElements.clear();
@@ -634,7 +643,7 @@ Gp._loop = function(timestamp) {
             this._difficultyTimer += dt;
             if (this._difficultyTimer >= 10) {
                 this._difficultyTimer -= 10;
-                this._spawnInterval = Math.max(0.3, this._spawnInterval * 0.9);
+                this._spawnInterval = Math.max(0.3, this._spawnInterval - this._spawnIntervalDecay);
             }
 
             /* ── Boss Lord 波次 ── */
@@ -1007,10 +1016,22 @@ Gp._spawnEnemy = function(isBoss) {
     var id = this._enemyIdCounter++;
     var enemyType = 'Normal';
     if (!isBoss) {
-        var typeRoll = Math.random();
-        if (typeRoll < 0.25) enemyType = 'Tanker';
-        else if (typeRoll < 0.55) enemyType = 'Stalker';
-        else if (typeRoll < 0.80) enemyType = 'Shaman';
+        /* Epoch 4: 程序化敌人类型权重 */
+        if (this._enemyTypeWeights) {
+            var weights = this._enemyTypeWeights;
+            var roll = Math.random();
+            var cumulative = 0;
+            var types = Object.keys(weights);
+            for (var ti = 0; ti < types.length; ti++) {
+                cumulative += weights[types[ti]];
+                if (roll < cumulative) { enemyType = types[ti]; break; }
+            }
+        } else {
+            var typeRoll = Math.random();
+            if (typeRoll < 0.25) enemyType = 'Tanker';
+            else if (typeRoll < 0.55) enemyType = 'Stalker';
+            else if (typeRoll < 0.80) enemyType = 'Shaman';
+        }
     }
     var enemy = new Enemy(id, x, y, level, isBoss === true, enemyType);
     var diff = 1;

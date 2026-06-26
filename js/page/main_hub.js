@@ -401,6 +401,10 @@
         DOM.levelCards.innerHTML = '';
         var levelIds = Object.keys(window.levelConfig || {});
 
+        /* Epoch 4: 添加程序化关卡卡片 */
+        var meta = window.saveManager._metaCache || {};
+        var abyssLevel = meta.highestEndlessLoop || 0;
+
         for (var i = 0; i < levelIds.length; i++) {
             var levelId = levelIds[i];
             var cfg = window.levelConfig[levelId];
@@ -408,9 +412,17 @@
             var card = document.createElement('div');
             card.className = 'level-card' + (levelId === _currentLevelId ? ' selected' : '');
             card.dataset.levelId = levelId;
-            card.textContent = cfg.name;
+            var tierColor = window.difficultyTierColors[cfg.difficultyTier] || '#888';
+            card.innerHTML = cfg.name + '<span class="level-tier-badge" style="background:' + tierColor + '">●</span>';
             DOM.levelCards.appendChild(card);
         }
+
+        /* 程序化关卡 */
+        var procCard = document.createElement('div');
+        procCard.className = 'level-card' + ('level_procedural' === _currentLevelId ? ' selected' : '');
+        procCard.dataset.levelId = 'level_procedural';
+        procCard.innerHTML = '程序裂隙 · 深渊 Lv.' + (abyssLevel + 1) + '<span class="level-tier-badge" style="background:#9c27b0">◆</span>';
+        DOM.levelCards.appendChild(procCard);
 
         refreshLevelDetail();
     }
@@ -431,9 +443,18 @@
 
     function refreshLevelDetail() {
         if (!DOM.levelDetailPanel) return;
-        var cfg = window.levelConfig[_currentLevelId];
+        var levelId = _currentLevelId || 'level_1';
+        var cfg = window.levelConfig[levelId];
         if (!cfg) {
             DOM.levelDetailPanel.textContent = '选择一个关卡';
+            return;
+        }
+        /* Epoch 4: 程序化关卡特殊处理 */
+        if (cfg.isProcedural) {
+            var meta = window.saveManager._metaCache || {};
+            var abyssLevel = meta.highestEndlessLoop || 0;
+            var gen = window.proceduralLevelGenerator.generate(abyssLevel);
+            DOM.levelDetailPanel.textContent = gen.name + ' — ' + gen.desc + ' (难度 x' + gen.difficultyFactor.toFixed(2) + ', ' + gen.maxWaves + '波)';
             return;
         }
         DOM.levelDetailPanel.textContent = cfg.name + ' — ' + cfg.desc + ' (难度 x' + cfg.difficultyFactor + ', ' + cfg.maxWaves + '波)';
