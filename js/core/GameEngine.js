@@ -655,31 +655,37 @@ Gp._loop = function(timestamp) {
         this.player.update(dt, input.x, input.y, this._mapW, this._mapH);
 
         if (!this._pendingReward) {
-            this._difficultyTimer += dt;
-            if (this._difficultyTimer >= 10) {
-                this._difficultyTimer -= 10;
-                this._spawnInterval = Math.max(0.3, this._spawnInterval - this._spawnIntervalDecay);
-            }
-
-            /* ── Boss Lord 波次 ── */
-            if (this._bossLordWave) {
-                if (!this._bossLordSpawned) {
-                    this._bossLordSpawned = true;
-                    this._spawnBossLord();
-                }
+            /* Epoch 5: 委托刷怪逻辑到 SpawnSystem */
+            if (window.SpawnSystem) {
+                window.SpawnSystem.update(dt, this);
             } else {
-                this._spawnTimer += dt;
-                while (this._spawnTimer >= this._spawnInterval) {
-                    this._spawnTimer -= this._spawnInterval;
-                    this._spawnEnemy();
+                /* 向后兼容：旧逻辑 */
+                this._difficultyTimer += dt;
+                if (this._difficultyTimer >= 10) {
+                    this._difficultyTimer -= 10;
+                    this._spawnInterval = Math.max(0.3, this._spawnInterval - this._spawnIntervalDecay);
                 }
 
-                this._bossTimer += dt;
-                if (this._bossTimer >= 30) {
-                    this._bossTimer = 0;
-                    var bossCount = 0;
-                    for (var _bi = 0; _bi < this.enemies.length; _bi++) { if (this.enemies[_bi].alive && this.enemies[_bi].isBoss) bossCount++; }
-                    if (bossCount < 1) this._spawnEnemy(true);
+                /* ── Boss Lord 波次 ── */
+                if (this._bossLordWave) {
+                    if (!this._bossLordSpawned) {
+                        this._bossLordSpawned = true;
+                        this._spawnBossLord();
+                    }
+                } else {
+                    this._spawnTimer += dt;
+                    while (this._spawnTimer >= this._spawnInterval) {
+                        this._spawnTimer -= this._spawnInterval;
+                        this._spawnEnemy();
+                    }
+
+                    this._bossTimer += dt;
+                    if (this._bossTimer >= 30) {
+                        this._bossTimer = 0;
+                        var bossCount = 0;
+                        for (var _bi = 0; _bi < this.enemies.length; _bi++) { if (this.enemies[_bi].alive && this.enemies[_bi].isBoss) bossCount++; }
+                        if (bossCount < 1) this._spawnEnemy(true);
+                    }
                 }
             }
 

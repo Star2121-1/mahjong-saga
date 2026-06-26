@@ -29,6 +29,35 @@
 
 系统已拆分为以下职责清晰的模块：
 
+| 模块 | 文件 | 行数 | 委托状态 |
+|------|------|------|----------|
+| 主引擎 | `js/core/GameEngine.js` | ~2800 | 进行中 (刷怪逻辑已委托) |
+| 敌人生成 | `js/core/GameSpawner.js` | 316 | ✅ 已集成 (_loop 委托) |
+| 战斗系统 | `js/core/GameCombat.js` | 221 | ⏳ 待集成 |
+| 游戏系统 | `js/core/GameSystems.js` | 297 | ⏳ 待集成 |
+| 存档管理 | `js/core/SaveManager.js` | ~470 | ✅ 稳定 |
+| 奖励系统 | `js/core/RewardManager.js` | ~200 | ✅ 稳定 |
+| 特效管理 | `js/core/FxManager.js` | ~80 | ✅ 稳定 |
+| 音频合成 | `js/core/AudioManager.js` | ~100 | ✅ 稳定 |
+| 玩家实体 | `js/entities/Player.js` | ~460 | ✅ 稳定 |
+| 敌人实体 | `js/entities/Enemy.js` | ~200 | ✅ 稳定 |
+| 武器系统 | `js/entities/Weapon.js` | ~300 | ✅ 稳定 |
+| 经验宝石 | `js/entities/ExpGem.js` | ~50 | ✅ 稳定 |
+| 英雄注册表 | `js/entities/HeroRegistry.js` | ~80 | ✅ 稳定 |
+| 装备注册表 | `js/entities/EquipmentRegistry.js` | ~100 | ✅ 稳定 |
+| 英雄配置 | `js/config/HeroConfig.js` | ~80 | ✅ 稳定 |
+| 关卡配置 | `js/config/LevelConfig.js` | ~120 | ✅ 稳定 (+程序化生成器) |
+| 成就配置 | `js/config/AchievementConfig.js` | ~80 | ✅ 稳定 |
+| 大本营页面 | `js/page/main_hub.js` | ~770 | ✅ 稳定 |
+| 存档选择 | `js/page/save_select.js` | ~200 | ✅ 稳定 |
+| 响应式 | `js/responsive.js` | ~25 | ✅ 稳定 |
+
+### 4.2 委托进度 (Epoch 9)
+
+- ✅ `_startNewRun` → `SpawnSystem.reset(this)`
+- ✅ `_loop` 刷怪逻辑 → `SpawnSystem.update(dt, this)`
+- ⏳ 待委托: 飘字/掉落 → `CombatSystem`, Overdrive/突变 → `Systems`
+
 | 模块 | 文件 | 职责 |
 |------|------|------|
 | 主引擎 | `js/core/GameEngine.js` | 主循环调度、状态机、生命周期 |
