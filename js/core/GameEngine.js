@@ -64,6 +64,8 @@ window.GameEngine = function() {
     this._overdriveTimer = 0;
     this._vaultMutations = [];
     this._resonanceAuraTimer = 0;
+    this._shieldActive = false;
+    this._shieldTimer = 0;
     this._shakeTimer = 0;
     this._shakeIntensity = 0;
     this._witherTimer = 0;
@@ -1265,7 +1267,30 @@ Gp._resumeAfterReward = function() {
 
 Gp._resumeAfterLevelUp = function() {
     if (window.rewardManager) window.rewardManager.hidePanel();
+    /* Epoch 2: 雀魂护盾 — 每10波触发 */
+    this._checkQqueenShield();
     this._beginLoop();
+};
+
+Gp._checkQqueenShield = function() {
+    var meta = window.saveManager._metaCache || {};
+    var shieldLv = (meta.talents || {}).雀魂_shield || 0;
+    if (shieldLv <= 0) return;
+    /* 每10波触发一次 */
+    if ((this._waveCount + 1) % 10 !== 0) return;
+    if (this._shieldActive) return; /* 已在冷却中 */
+    this._shieldActive = true;
+    this._shieldTimer = 5 + shieldLv * 2; /* 基础5秒 + 每级2秒 */
+    this.player.invulnTimer = this._shieldTimer;
+    this._spawnCausalityText('🀄 雀魂护盾激活！持续 ' + this._shieldTimer + 's');
+    if (this.container) {
+        this.container.style.boxShadow = '0 0 60px rgba(30,111,66,0.6)';
+    }
+    var self = this;
+    setTimeout(function() {
+        self._shieldActive = false;
+        if (self.container) self.container.style.boxShadow = '';
+    }, this._shieldTimer * 1000);
 };
 
 Gp._showVictory = function() {
@@ -1397,6 +1422,12 @@ Gp._settleRun = async function(tokens) {
     meta.totalKills = (meta.totalKills || 0) + this.kills;
     var bonusCores = 1;
     if (this._bloodRageActive) bonusCores += 2;
+    /* Epoch 2: 核心共鸣天赋 */
+    var metaForResonance = window.saveManager._metaCache || {};
+    var coreResLevel = (metaForResonance.talents || {}).core_resonance || 0;
+    if (coreResLevel > 0) {
+        bonusCores = Math.floor(bonusCores * (1 + coreResLevel * 0.1));
+    }
     /* ── 变异保险库：每携带一个异变，核心翻倍 ── */
     if (this._vaultMutations && this._vaultMutations.length > 0) {
         bonusCores *= Math.pow(2, this._vaultMutations.length);
@@ -1911,6 +1942,10 @@ Gp._initDefaultWeapons = function() {
     var talents = meta.talents || {};
     if (talents.weapon_forge === 1) {
         weaponIds = ['TrackingBlade', 'OrbitShield'];
+    }
+    /* Epoch 2: 开局双兵天赋 */
+    if (talents.starting_weapons > 0 && weaponIds.length < 2) {
+        weaponIds.push('OrbitShield');
     }
     for (var _i = 0; _i < weaponIds.length; _i++) {
         var W = window[weaponIds[_i]];

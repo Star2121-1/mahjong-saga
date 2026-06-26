@@ -56,7 +56,14 @@ class SaveManager {
                     health_boost: 0,
                     speed_boost: 0,
                     magnet_boost: 0,
-                    weapon_forge: 0
+                    weapon_forge: 0,
+                    /* Epoch 2 新增天赋 */
+                    listening_intuition: 0,
+                    gangpai_hardiness: 0,
+                   摸牌_speed: 0,
+                    starting_weapons: 0,
+                    core_resonance: 0,
+                   雀魂_shield: 0
                 },
                 defaultWeapons: ['TrackingBlade'],
                 equipments: [],
@@ -97,6 +104,13 @@ class SaveManager {
                 if (data.talents.speed_boost == null) data.talents.speed_boost = 0;
                 if (data.talents.magnet_boost == null) data.talents.magnet_boost = 0;
                 if (data.talents.weapon_forge == null) data.talents.weapon_forge = 0;
+                /* Epoch 2 新天赋迁移 */
+                if (data.talents.listening_intuition == null) data.talents.listening_intuition = 0;
+                if (data.talents.gangpai_hardiness == null) data.talents.gangpai_hardiness = 0;
+                if (data.talents.摸牌_speed == null) data.talents.摸牌_speed = 0;
+                if (data.talents.starting_weapons == null) data.talents.starting_weapons = 0;
+                if (data.talents.core_resonance == null) data.talents.core_resonance = 0;
+                if (data.talents.雀魂_shield == null) data.talents.雀魂_shield = 0;
             }
             if (!data.defaultWeapons) data.defaultWeapons = ['TrackingBlade'];
             if (!data.equipments) {
@@ -161,17 +175,31 @@ class SaveManager {
 
     getTalents() {
         const meta = this._metaCache || {};
-        return meta.talents || { health_boost: 0, speed_boost: 0, magnet_boost: 0, weapon_forge: 0 };
+        return meta.talents || {
+            health_boost: 0, speed_boost: 0, magnet_boost: 0, weapon_forge: 0,
+            listening_intuition: 0, gangpai_hardiness: 0, 摸牌_speed: 0,
+            starting_weapons: 0, core_resonance: 0, 雀魂_shield: 0
+        };
     }
 
     async upgradeTalent(talentId) {
         const meta = await this.getMeta();
-        if (!meta.talents) meta.talents = { health_boost: 0, speed_boost: 0, magnet_boost: 0, weapon_forge: 0 };
+        if (!meta.talents) meta.talents = {
+            health_boost: 0, speed_boost: 0, magnet_boost: 0, weapon_forge: 0,
+            listening_intuition: 0, gangpai_hardiness: 0, 摸牌_speed: 0,
+            starting_weapons: 0, core_resonance: 0, 雀魂_shield: 0
+        };
         const currentLevel = meta.talents[talentId] || 0;
-        const maxLevels = { health_boost: 5, speed_boost: 5, magnet_boost: 3, weapon_forge: 1 };
-        const maxLevel = maxLevels[talentId] || 1;
+        /* Epoch 2: 新天赋等级上限和成本 */
+        const maxLevels = {
+            health_boost: 5, speed_boost: 5, magnet_boost: 3, weapon_forge: 1,
+            listening_intuition: 5, gangpai_hardiness: 5, 摸牌_speed: 5,
+            starting_weapons: 1, core_resonance: 5, 雀魂_shield: 3
+        };
+        const maxLevel = maxLevels[talentId] || 5;
         if (currentLevel >= maxLevel) return { ok: false, reason: '已达满级' };
-        const cost = talentId === 'weapon_forge' ? 3 : (currentLevel + 1);
+        /* 成本曲线：线性增长 */
+        const cost = (currentLevel + 1) * (talentId === 'starting_weapons' ? 5 : (talentId === 'core_resonance' ? 4 : 1));
         if ((meta.bossCores || 0) < cost) return { ok: false, reason: '魔王核心不足' };
         meta.bossCores -= cost;
         meta.talents[talentId] = currentLevel + 1;
@@ -404,7 +432,14 @@ class SaveManager {
                 health_boost: 0,
                 speed_boost: 0,
                 magnet_boost: 0,
-                weapon_forge: 0
+                weapon_forge: 0,
+                /* Epoch 2 */
+                listening_intuition: 0,
+                gangpai_hardiness: 0,
+               摸牌_speed: 0,
+                starting_weapons: 0,
+                core_resonance: 0,
+               雀魂_shield: 0
             },
             defaultWeapons: ['TrackingBlade'],
             equipments: [],

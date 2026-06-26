@@ -330,10 +330,19 @@
             { id: 'health_boost', name: '生命壁垒', desc: '初始最大HP +20/级', maxLv: 5 },
             { id: 'speed_boost', name: '迅捷之风', desc: '初始移速 +15/级', maxLv: 5 },
             { id: 'magnet_boost', name: '引力场', desc: '初始吸附半径 +30/级', maxLv: 3 },
-            { id: 'weapon_forge', name: '神兵工坊', desc: '开局双神兵（飞刃+护体）', maxLv: 1 }
+            { id: 'weapon_forge', name: '神兵工坊', desc: '开局双神兵（飞刃+护体）', maxLv: 1 },
+            /* Epoch 2 新增天赋 */
+            { id: 'listening_intuition', name: '听牌直觉', desc: '暴击率 +2%/级', maxLv: 5 },
+            { id: 'gangpai_hardiness', name: '杠牌硬气', desc: '受到伤害 -3%/级', maxLv: 5 },
+            { id: '摸牌_speed', name: '摸牌速度', desc: '武器CD -5%/级', maxLv: 5 },
+            { id: 'starting_weapons', name: '开局双兵', desc: '额外初始武器槽', maxLv: 1 },
+            { id: 'core_resonance', name: '核心共鸣', desc: 'Boss掉落核心 +10%/级', maxLv: 5 },
+            { id: '雀魂_shield', name: '雀魂护盾', desc: '每10波触发1次护盾', maxLv: 3 }
         ],
         costOf: function(talentId, level) {
-            return talentId === 'weapon_forge' ? 3 : (level + 1);
+            if (talentId === 'starting_weapons') return 5;
+            if (talentId === 'core_resonance') return (level + 1) * 4;
+            return level + 1;
         }
     };
 

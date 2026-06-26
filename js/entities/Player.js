@@ -116,6 +116,11 @@ class Player {
             return false;
         }
 
+        /* Epoch 2: 杠牌硬气减伤 */
+        if (this.damageReduction > 0) {
+            dmg = Math.max(1, Math.floor(dmg * (1 - this.damageReduction)));
+        }
+
         this.hp -= dmg;
         this.invulnTimer = 0.35;
         if (dmg > 0 && window.gameEngine && window.gameEngine._currentLevelId === 'level_1') {
@@ -423,10 +428,17 @@ class Player {
         this._movingToTarget = false;
         this.weaponSlots = [];
         this.magnetRadius = 60;
+        this.damageReduction = 0;
         this.rage = 0;
         this.maxRage = 100;
         this.setResonanceSpeed = false;
         this.setResonanceIce = false;
+
+        /* Epoch 2: 新天赋开局加成（在全部重置后应用，避免被覆盖） */
+        this.critRate += (talents.listening_intuition || 0) * 0.02;
+        this.damageReduction += (talents.gangpai_hardiness || 0) * 0.03;
+        this.cdFloor = Math.max(0.05, (this.cdFloor || 0.2) - (talents.摸牌_speed || 0) * 0.01);
+
         this.relicLevels = {
             sharp_edge: 0,
             golden_finger: 0,
