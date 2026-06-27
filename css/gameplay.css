@@ -19,6 +19,12 @@
 }
 .stat { font-size: 13px; font-weight: 600; color: #fbfbf7; letter-spacing: 1px; }
 
+/* 响应式: 小高度视口缩减顶部栏 */
+@media (max-height: 600px) {
+    #top-bar { height: 28px; gap: 10px; padding-left: 8px; }
+    .stat { font-size: 11px; }
+}
+
 /* 16:9 战场主体 */
 #battlefield {
     flex: 1;

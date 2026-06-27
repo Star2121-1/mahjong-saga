@@ -10,16 +10,21 @@
     if (!containerId) return;
 
     var BASE_W = 1920, BASE_H = 1080;
+    var MIN_SCALE = 0.5; /* 最低缩放到 50%，避免内容过小 */
 
     function fit() {
         var c = document.getElementById(containerId);
         if (!c) return;
         var sx = window.innerWidth / BASE_W;
         var sy = window.innerHeight / BASE_H;
-        var s = Math.min(sx, sy, 1); /* 仅缩小，不放大 */
+        var s = Math.min(sx, sy, 1);
+        if (s < MIN_SCALE) s = MIN_SCALE; /* 不低于 50% */
         c.style.transform = 'scale(' + s + ')';
+        c.style.transformOrigin = 'center center';
     }
 
     fit();
     window.addEventListener('resize', fit);
+    /* 初始延迟适配 (某些浏览器 resize 事件延迟) */
+    setTimeout(fit, 100);
 })();

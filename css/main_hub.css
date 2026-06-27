@@ -7,9 +7,9 @@
 
 #hub-top-stats {
     position: absolute; top: 0; right: 0;
-    font-size: 13px; color: #ffd700; font-weight: 700;
+    font-size: 14px; color: #ffd700; font-weight: 700;
     text-align: right; letter-spacing: 1px;
-    padding: 8px 16px; z-index: 10;
+    padding: 10px 20px; z-index: 10;
     background: rgba(0,0,0,0.3);
 }
 .hub-stat-sep { color: rgba(255,215,0,0.3); margin: 0 4px; }
@@ -19,13 +19,13 @@
    ══════════════════════════════════════════════ */
 
 #hub-left-nav {
-    width: 15%; min-width: 120px;
+    width: 20%; min-width: 160px;
     height: 100vh;
     background: linear-gradient(180deg, #0a1a0f 0%, #0d2014 50%, #0a1a0f 100%);
     border-right: 2px solid #1a5336;
     display: flex; flex-direction: column;
-    align-items: center; padding: 60px 0 20px;
-    gap: 4px;
+    align-items: center; padding: 50px 0 20px;
+    gap: 6px;
     flex-shrink: 0;
     overflow-y: auto;
     z-index: 5;
@@ -46,13 +46,13 @@
 }
 
 .nav-item {
-    width: 90%;
-    padding: 12px 8px;
-    font-size: 12px; font-weight: 700;
+    width: 88%;
+    padding: 14px 10px;
+    font-size: 13px; font-weight: 700;
     background: rgba(26,83,54,0.1);
     color: #6a9a7a;
     border: 1px solid rgba(26,83,54,0.2);
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     letter-spacing: 1px;
     text-align: center;
@@ -81,7 +81,7 @@
     height: 100vh;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 50px 24px 24px;
+    padding: 56px 32px 32px;
     position: relative;
     perspective: 1200px;
 }
@@ -567,13 +567,13 @@
     letter-spacing: 2px; margin-bottom: 8px;
     text-shadow: 0 0 12px rgba(255,215,0,0.2);
 }
-.stats-grid { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.stats-grid { display: flex; flex-wrap: wrap; gap: 6px 20px; }
 .stat-row {
     display: flex; justify-content: space-between; align-items: center;
-    width: calc(50% - 8px); min-width: 160px;
-    padding: 6px 10px;
+    width: calc(50% - 10px); min-width: 180px;
+    padding: 8px 12px;
     background: rgba(255,255,255,0.02);
-    border-radius: 6px; font-size: 12px;
+    border-radius: 8px; font-size: 13px;
 }
 .stat-label { color: #7a9a8a; }
 .stat-value { color: #4fc3f7; font-weight: 700; }
@@ -658,3 +658,28 @@
 .history-details { font-size: 11px; color: #7a9a8a; margin-top: 2px; }
 .history-reward { font-size: 11px; color: #ffd700; font-weight: 600; margin-top: 2px; }
 .history-weekly { font-size: 10px; color: #ff9800; font-weight: 600; margin-top: 2px; }
+
+/* ══════════════════════════════════════════════
+   响应式: 窄屏/小窗口优化
+   ══════════════════════════════════════════════ */
+
+@media (max-height: 700px) {
+    #hub-left-nav { padding: 30px 0 10px; gap: 3px; }
+    .nav-item { padding: 8px 6px; font-size: 11px; }
+    #hub-right-canvas { padding: 40px 16px 16px; }
+    .hub-panel { gap: 8px; }
+    .panel-hero-header { padding: 8px 0; }
+    .panel-hero-header h2 { font-size: 18px; }
+}
+
+@media (max-width: 900px) {
+    #hub-left-nav { width: 24%; min-width: 140px; }
+    .nav-item { font-size: 12px; padding: 12px 8px; }
+}
+
+@media (max-width: 600px) {
+    #hub-left-nav { width: 30%; min-width: 120px; padding: 20px 0 10px; gap: 3px; }
+    .nav-item { font-size: 11px; padding: 8px 4px; }
+    #hub-right-canvas { padding: 40px 12px 12px; }
+    #hub-top-stats { font-size: 11px; padding: 6px 10px; }
+}

@@ -29,3 +29,17 @@
 .warning-desc { font-size: 13px; color: #aaa; line-height: 1.6; margin: 0 0 24px 0; }
 .warning-buttons { display: flex; flex-direction: column; gap: 8px; align-items: center; }
 .warning-buttons .menu-btn { width: 100%; padding: 12px 0; font-size: 14px; }
+
+/* 响应式: 小窗口适配 */
+@media (max-height: 600px) {
+    #save-select-screen { height: 600px; }
+    #save-select-screen h1 { font-size: 24px; }
+    .menu-btn { padding: 10px 0; font-size: 13px; }
+    .settings-content { padding: 20px 18px; }
+    .settings-content h2 { font-size: 18px; }
+}
+
+@media (max-width: 500px) {
+    #save-select-screen { width: 100vw; min-width: 100vw; height: 100vh; border-radius: 0; }
+    #settings-overlay { width: 100vw; height: 100vh; border-radius: 0; }
+}
