@@ -1248,6 +1248,48 @@ class SaveManager {
         var idx = Math.min(seasonNum - 1, rewards.length - 1);
         return rewards[idx];
     }
+
+    /** 每日挑战剩余时间(毫秒) */
+    getDailyChallengeCountdown() {
+        var meta = this._metaCache || {};
+        var dc = meta.dailyChallenges || {};
+        var last = dc.lastRotation || 0;
+        if (last === 0) return 86400000;
+        var remaining = 86400000 - (Date.now() - last);
+        return Math.max(0, remaining);
+    }
+
+    /** 格式化倒计时 HH:MM:SS */
+    formatCountdown(ms) {
+        var totalSec = Math.floor(ms / 1000);
+        var h = Math.floor(totalSec / 3600);
+        var m = Math.floor((totalSec % 3600) / 60);
+        var s = totalSec % 60;
+        return h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    }
+
+    /** 领取赛季奖励 */
+    claimSeasonReward() {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            var season = meta.season || {};
+            var cs = season.currentSeason || 0;
+            if (cs < 1) return Promise.resolve({ ok: false, reason: '赛季未激活' });
+            var claimed = season.claimedRewards || {};
+            var reward = self.getSeasonReward(cs);
+            if (claimed['s' + cs]) return Promise.resolve({ ok: false, reason: '已领取' });
+            if (!meta.purchasedPerks) meta.purchasedPerks = {};
+            meta.purchasedPerks['season_reward_s' + cs] = true;
+            claimed['s' + cs] = true;
+            meta.season = meta.season || {};
+            meta.season.claimedRewards = claimed;
+            meta.metaTokens = (meta.metaTokens || 0) + (reward.metaTokens || 0);
+            meta.bossCores = (meta.bossCores || 0) + (reward.bossCores || 0);
+            return self.saveMeta(meta).then(function() {
+                return { ok: true, reward: reward };
+            });
+        });
+    }
 }
 
 window.saveManager = new SaveManager();

@@ -87,9 +87,9 @@
                 refreshAchievements();
             }
             if (panelId === 'stats') {
-            if (panelId === 'history') { refreshHistoryPanel(); }
                 refreshStatsPanel();
             }
+            if (panelId === 'history') { refreshHistoryPanel(); }
         },
 
         _destroyPreviousPanel: function() {
@@ -814,7 +814,7 @@
             if (c.id === 'hundred_kills' || c.id === 'thousand_kills' || c.id === 'ten_thousand_kills') {
                 currentVal = meta.totalKills || 0;
             } else if (c.id === 'first_victory' || c.id === 'victory_10' || c.id === 'victory_50') {
-                currentVal = meta.totalRuns || 0;
+                currentVal = (meta.runStats && meta.runStats.wins) || 0;
             } else if (c.id === 'deep_abyss' || c.id === 'deep_abyss_10' || c.id === 'deep_abyss_20') {
                 currentVal = meta.highestEndlessLoop || 0;
             } else if (c.id === 'overdrive_1' || c.id === 'overdrive_10' || c.id === 'overdrive_50') {
@@ -924,6 +924,30 @@
             challengesHtml = '<div class="stats-empty">暂无活跃挑战</div>';
         }
 
+        /* Epoch 24: 每日挑战倒计时 */
+        var dailyHtml = '';
+        if (typeof window.saveManager.getDailyChallengeCountdown === 'function') {
+            var cd = window.saveManager.getDailyChallengeCountdown();
+            var formatted = typeof window.saveManager.formatCountdown === 'function' ? window.saveManager.formatCountdown(cd) : '--:--:--';
+            dailyHtml = '<div class="stat-row"><span class="stat-label">每日挑战重置</span><span class="stat-value" id="daily-countdown">' + formatted + '</span></div>';
+        }
+
+        /* Epoch 24: 赛季奖励 */
+        var seasonRewardHtml = '';
+        if (typeof window.saveManager.claimSeasonReward === 'function') {
+            var season = meta.season || {};
+            var cs = season.currentSeason || 0;
+            var claimed = (season.claimedRewards && season.claimedRewards['s' + cs]) || false;
+            var reward = cs > 0 ? window.saveManager.getSeasonReward(cs) : null;
+            seasonRewardHtml = '<div class="stat-row"><span class="stat-label">赛季奖励</span><span class="stat-value">' + (cs > 0 ? 'S' + cs : '未激活') + '</span></div>';
+            if (cs > 0 && reward && !claimed) {
+                seasonRewardHtml += '<div class="stat-row"><span class="stat-label">奖励内容</span><span class="stat-value">' + reward.metaTokens + ' 代币 | ' + reward.bossCores + ' 核心</span></div>';
+                seasonRewardHtml += '<button class="btn-perk-buy" id="season-reward-btn" style="margin-top:4px;width:100%;">领取赛季奖励</button>';
+            } else if (claimed) {
+                seasonRewardHtml += '<div class="stat-row"><span class="stat-label">赛季奖励</span><span class="stat-value">已领取 ✓</span></div>';
+            }
+        }
+
 
         /* Epoch 18/22: 每周超级挑战 */
         var weeklyHtml = '';
@@ -993,13 +1017,15 @@
             '<div class="stats-section">' +
             '<div class="stats-section-title">🎯 活跃挑战</div>' +
             '<div class="challenges-grid">' + challengesHtml + '</div>' +
+'<div class="stats-section">' +            '<div class="stats-section-title">⏱ 每日挑战</div>' +            '<div class="stats-grid">' + dailyHtml + '</div>' +            '</div>' +
 '<div class="stats-section">' +            '<div class="stats-section-title">🏆 每周超级挑战</div>' +            '<div class="challenges-grid" id="weekly-challenges-section"><div class="stats-empty">加载中...</div></div>' +            '</div>' +
             '</div>' +
             '<div class="stats-section">' +
             '<div class="stats-section-title">🛒 元代币商城</div>' +
             '<div class="perks-list">' + perksHtml + '</div>' +
-            '</div>';
+            '</div>' +
 '<div class="stats-section">' +            '<div class="stats-section-title">⭐ 声望转生</div>' +            '<div class="stats-grid">' + prestigeHtml + '</div>' +            '</div>' +
+'<div class="stats-section">' +            '<div class="stats-section-title">🌟 赛季奖励</div>' +            '<div class="stats-grid">' + seasonRewardHtml + '</div>' +            '</div>';
 
         /* 绑定购买按钮 */
         grid.querySelectorAll('.btn-perk-buy').forEach(function(btn) {
@@ -1007,6 +1033,16 @@
                 onPerkPurchase(this);
             });
         });
+
+        /* Epoch 24: 每日倒计时每秒更新 */
+        var countdownInterval = setInterval(function() {
+            var cdEl = document.getElementById('daily-countdown');
+            if (cdEl && typeof window.saveManager.getDailyChallengeCountdown === 'function') {
+                var cd = window.saveManager.getDailyChallengeCountdown();
+                cdEl.textContent = window.saveManager.formatCountdown(cd);
+            }
+        }, 1000);
+        _tabIntervals.push(countdownInterval);
 
         /* Epoch 21/16: 声望按钮 (去重) */
         var prestigeBtn = document.getElementById('prestige-btn');
@@ -1020,6 +1056,19 @@
         if (eliteBtn) {
             eliteBtn.addEventListener('click', function() {
                 onEliteToggle(this);
+            });
+        }
+
+        /* Epoch 24: 赛季奖励按钮 */
+        var seasonBtn = document.getElementById('season-reward-btn');
+        if (seasonBtn) {
+            seasonBtn.addEventListener('click', function() {
+                window.saveManager.claimSeasonReward().then(function(res) {
+                    if (res.ok) {
+                        refreshStatsPanel();
+                        refreshMainHub();
+                    }
+                }).catch(function() {});
             });
         }
     }
