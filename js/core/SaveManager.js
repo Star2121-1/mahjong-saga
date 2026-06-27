@@ -1078,6 +1078,40 @@ class SaveManager {
         }
         return { completed: completed, bonusTokens: bonusTokens, bonusCores: bonusCores };
     }
+
+    /* ── Epoch 19: 赛季事件骨架 ── */
+
+    getSeasonInfo() {
+        var meta = this._metaCache || {};
+        if (!meta.season) {
+            meta.season = { currentSeason: 0, seasonStart: Date.now(), bestRuns: {} };
+            this._metaCache = meta;
+        }
+        return meta.season;
+    }
+
+    recordPersonalBest(levelId, metric, value) {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            if (!meta.season) meta.season = { currentSeason: 0, seasonStart: Date.now(), bestRuns: {} };
+            if (!meta.season.bestRuns) meta.season.bestRuns = {};
+            if (!meta.season.bestRuns[levelId]) meta.season.bestRuns[levelId] = {};
+            var current = meta.season.bestRuns[levelId][metric];
+            if (current === undefined || value > current) {
+                meta.season.bestRuns[levelId][metric] = value;
+                return self.saveMeta(meta).then(function() { return { updated: true, value: value }; });
+            }
+            return Promise.resolve({ updated: false, value: current });
+        });
+    }
+
+    getPersonalBests(levelId) {
+        var meta = this._metaCache || {};
+        var season = meta.season || {};
+        var bests = season.bestRuns || {};
+        if (levelId) return bests[levelId] || {};
+        return bests;
+    }
 }
 
 window.saveManager = new SaveManager();

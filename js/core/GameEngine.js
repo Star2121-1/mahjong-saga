@@ -1686,6 +1686,18 @@ Gp._gameOver = async function() {
 
     meta.lastSaveTimestamp = Date.now();
     await window.saveManager.saveMeta(meta);
+
+    /* Epoch 19: 游戏死亡也记录历史 */
+    try {
+        var ur = Object.keys(this.player.relicLevels || {}).filter(function(k) { return (this.player.relicLevels[k] || 0) > 0; }).length;
+        if (typeof window.saveManager.recordRunHistory === 'function') {
+            window.saveManager.recordRunHistory(
+                this.player.heroId, this._currentLevelId, this.kills, this._elapsed,
+                false, this.loopCount || 0, ur
+            );
+        }
+    } catch(e) {}
+
     await window.saveManager.clearActiveRun();
 };
 

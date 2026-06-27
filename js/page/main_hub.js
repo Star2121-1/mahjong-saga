@@ -857,6 +857,17 @@
                 '<div class="stat-row"><span class="stat-label">圣物多样性</span><span class="stat-value">' + stats.relicVariety + ' 种</span></div>';
         } else {
             statsHtml = '<div class="stats-empty">暂无数据，开始一局游戏吧！</div>';
+
+            /* Epoch 19: 成就进度 */
+        var achHtml = '';
+        if (typeof window.achievementConfig !== 'undefined') {
+            var achMeta = meta.achievements || {};
+            var totalAch = window.achievementConfig.length;
+            var unlockedCount = Object.keys(achMeta).filter(function(k) { return !!achMeta[k]; }).length;
+            achHtml = '<div class="stat-row"><span class="stat-label">成就解锁</span><span class="stat-value">' + unlockedCount + ' / ' + totalAch + '</span></div>';
+        }
+        statsHtml += achHtml;
+
         }
 
 /* Epoch 16: 声望信息 */        var prestigeHtml = '';        if (typeof window.saveManager.getPrestigeInfo === 'function') {            var pi = window.saveManager.getPrestigeInfo();            prestigeHtml =                '<div class="stat-row"><span class="stat-label">声望等级</span><span class="stat-value">' + (pi.level || 0) + '</span></div>' +                '<div class="stat-row"><span class="stat-label">声望点</span><span class="stat-value">' + (pi.points || 0) + ' / ' + pi.potential + '</span></div>' +                '<div class="stat-row"><span class="stat-label">转生加成</span><span class="stat-value">ATK+' + Math.floor((pi.points||0)*0.5) + ' HP+' + Math.floor((pi.points||0)*2) + '</span></div>' +                (pi.canPrestige ? '<button class="btn-perk-buy" id="prestige-btn" style="margin-top:8px;width:100%;">转生 (' + (pi.potential - (pi.points||0)) + ' 点可获得)</button>' : '<div class="stat-row"><span class="stat-label">转生</span><span class="stat-value">已满级</span></div>');        }
