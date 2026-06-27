@@ -424,6 +424,13 @@ Gp._startNewRun = function(heroId, levelId) {
         this._spawnCausalityText('\ud83d\uddfa\ufe0f \u5173\u5361\u4eb2\u548c Lv.' + this.player.mapAffinityLevel + ' \u2014 \u4f24\u5bb3 -' + (affinityReduction * 100) + '%');
     }
 
+    /* ── Epoch 15: 精英模式全局加成 ── */
+    if (window.saveManager && window.saveManager.isEliteMode && window.saveManager.isEliteMode()) {
+        this._eliteModeActive = true;
+        this._eliteMultiplier = 1.5;
+        this._spawnCausalityText('⚠️ 精英模式——所有敌人 +50% 属性，核心收益×1.5');
+    }
+
     this.player.x = this._mapW / 2;
     this.player.y = this._mapH / 2;
     this.player.invulnTimer = 1.5;
@@ -1495,6 +1502,11 @@ Gp._settleRun = async function(tokens) {
     }
     meta.bossCores = (meta.bossCores || 0) + bonusCores;
 
+    /* ── Epoch 15: 精英模式核心加成 ── */
+    if (this._eliteModeActive) {
+        meta.bossCores = Math.floor(meta.bossCores * 1.5);
+    }
+
     /* ── 因果账本落盘 ── */
     if (!meta.causalityFlags) meta.causalityFlags = { level1NoDamage: false, level2Overkill: false };
     if (this._currentLevelId === 'level_1' && this.playerHitCountInLevel1 === 0) {
@@ -1565,6 +1577,17 @@ Gp._settleRun = async function(tokens) {
             setTimeout(function() { if (_notif.parentNode) _notif.remove(); }, 3000);
         }
     }
+
+    /* ── Epoch 15: 战局历史记录 ── */
+    var uniqueRelics = Object.keys(this.player.relicLevels || {}).filter(function(k) { return (this.player.relicLevels[k] || 0) > 0; }).length;
+    try {
+        if (typeof window.saveManager.recordRunHistory === 'function') {
+            window.saveManager.recordRunHistory(
+                this.player.heroId, this._currentLevelId, this.kills, this._elapsed,
+                !this.gameOver, this.loopCount || 0, uniqueRelics
+            );
+        }
+    } catch(e) {}
 };
 
 Gp._gameOver = async function() {

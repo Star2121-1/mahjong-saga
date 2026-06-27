@@ -611,3 +611,21 @@
 }
 .btn-perk-buy:hover { transform: scale(1.06); }
 .btn-perk-buy:disabled { background: #333; color: #666; cursor: not-allowed; transform: none; }
+
+/* Epoch 15: 精英模式 */
+.elite-toggle {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    background: rgba(255,23,68,0.05);
+    border: 1px solid rgba(255,23,68,0.2);
+    border-radius: 8px; font-size: 12px;
+}
+.elite-toggle.active { border-color: rgba(255,23,68,0.5); background: rgba(255,23,68,0.1); }
+.elite-btn {
+    padding: 4px 14px; font-size: 11px; font-weight: 700;
+    background: linear-gradient(135deg, #b71c1c, #d32f2f);
+    color: #fff; border: none; border-radius: 5px;
+    cursor: pointer; transition: transform 0.1s;
+}
+.elite-btn:hover { transform: scale(1.06); }
+.elite-btn.off { background: linear-gradient(135deg, #555, #777); }

@@ -103,7 +103,12 @@ class SaveManager {
                 /* Epoch 14: 挑战系统 + 运行统计 + 元货币消费 */
                 challenges: { active: [], completed: {}, lastRotation: 0 },
                 runStats: null,
-                purchasedPerks: {}
+                purchasedPerks: {},
+                /* Epoch 15: 每日登录 */
+                loginStreak: 0,
+                lastLoginDate: '',
+                dailyRewardsClaimed: {},
+                runHistory: []
             };
         } else {
             if (!data.unlockedHeroes) data.unlockedHeroes = ['Knight'];
@@ -168,6 +173,11 @@ class SaveManager {
             if (!data.challenges) data.challenges = { active: [], completed: {}, lastRotation: 0 };
             if (data.runStats == null) data.runStats = null;
             if (!data.purchasedPerks) data.purchasedPerks = {};
+            /* Epoch 15 迁移 */
+            if (data.loginStreak == null) data.loginStreak = 0;
+            if (!data.lastLoginDate) data.lastLoginDate = '';
+            if (!data.dailyRewardsClaimed) data.dailyRewardsClaimed = {};
+            if (!data.runHistory) data.runHistory = [];
             this._metaCache = data;
         }
         return this._metaCache;
@@ -668,6 +678,126 @@ class SaveManager {
 
     calcMetaTokens(kills, elapsed) {
         return Math.floor(kills * 0.1 + elapsed * 0.05);
+    }
+
+    /* ── Epoch 15: 每日登录奖励 ── */
+
+    _todayKey() {
+        var d = new Date();
+        return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+    }
+
+    checkDailyLogin() {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            var today = self._todayKey();
+            var lastLogin = meta.lastLoginDate || '';
+            var streak = meta.loginStreak || 0;
+            var claimed = meta.dailyRewardsClaimed || {};
+
+            if (lastLogin === today) {
+                return { streak: streak, claimed: !!claimed[today], reward: null };
+            }
+
+            var yesterday = new Date(Date.now() - 86400000);
+            var yKey = yesterday.getFullYear() + '-' + (yesterday.getMonth()+1) + '-' + yesterday.getDate();
+            var isNewStreak = lastLogin === yKey || lastLogin === '';
+
+            if (isNewStreak) {
+                streak++;
+            } else {
+                streak = 1;
+            }
+
+            meta.loginStreak = streak;
+            meta.lastLoginDate = today;
+
+            var reward = self._getDailyReward(streak);
+            claimed[today] = true;
+            meta.dailyRewardsClaimed = claimed;
+
+            return self.saveMeta(meta).then(function() {
+                return { streak: streak, claimed: true, reward: reward };
+            });
+        });
+    }
+
+    claimDailyReward() {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            var today = self._todayKey();
+            var claimed = meta.dailyRewardsClaimed || {};
+            if (claimed[today]) return Promise.resolve({ ok: false, reason: '今日已领取' });
+
+            var streak = meta.loginStreak || 1;
+            var reward = self._getDailyReward(streak);
+            claimed[today] = true;
+            meta.dailyRewardsClaimed = claimed;
+            return self.saveMeta(meta).then(function() {
+                return { ok: true, reward: reward, streak: streak };
+            });
+        });
+    }
+
+    _getDailyReward(streak) {
+        if (streak >= 30) return { metaTokens: 200, bossCores: 5, label: '月冠' };
+        if (streak >= 14) return { metaTokens: 100, bossCores: 3, label: '双周' };
+        if (streak >= 7)  return { metaTokens: 50, bossCores: 2, label: '周冠' };
+        if (streak >= 3)  return { metaTokens: 20, bossCores: 1, label: '连胜' };
+        return { metaTokens: 5, bossCores: 0, label: '日常' };
+    }
+
+    /* ── Epoch 15: 战局历史记录 ── */
+
+    recordRunHistory(heroId, levelId, kills, elapsed, won, loopCount, relics) {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            if (!meta.runHistory) meta.runHistory = [];
+            var entry = {
+                timestamp: Date.now(),
+                heroId: heroId,
+                levelId: levelId,
+                kills: kills,
+                elapsed: elapsed,
+                won: won,
+                loopCount: loopCount,
+                relics: relics,
+                metaTokensEarned: self.calcMetaTokens(kills, elapsed)
+            };
+            meta.runHistory.unshift(entry);
+            if (meta.runHistory.length > 50) meta.runHistory = meta.runHistory.slice(0, 50);
+            return self.saveMeta(meta).then(function() { return entry; });
+        });
+    }
+
+    getRunHistory(limit) {
+        limit = limit || 20;
+        var meta = this._metaCache || {};
+        var history = meta.runHistory || [];
+        return history.slice(0, limit);
+    }
+
+    /* ── Epoch 15: 精英模式 ── */
+
+    enableEliteMode() {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            meta.eliteMode = true;
+            return self.saveMeta(meta).then(function() { return { ok: true }; });
+        });
+    }
+
+    disableEliteMode() {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            meta.eliteMode = false;
+            return self.saveMeta(meta).then(function() { return { ok: true }; });
+        });
+    }
+
+    isEliteMode() {
+        var meta = this._metaCache || {};
+        return !!meta.eliteMode;
     }
 
     getCurrentHero() {

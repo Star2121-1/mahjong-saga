@@ -190,6 +190,20 @@
         if (DOM.hubTotalKills) DOM.hubTotalKills.textContent = meta.totalKills || 0;
         if (DOM.hubMetaTokens) DOM.hubMetaTokens.textContent = meta.metaTokens || 0;
 
+        /* Epoch 15: 精英模式指示器 */
+        if (typeof window.saveManager.isEliteMode === 'function') {
+            var eliteEl = document.getElementById('elite-mode-indicator');
+            if (eliteEl) {
+                if (window.saveManager.isEliteMode()) {
+                    eliteEl.textContent = '⚠️ 精英模式 ON';
+                    eliteEl.style.color = '#ff1744';
+                } else {
+                    eliteEl.textContent = '精英模式 OFF';
+                    eliteEl.style.color = '#666';
+                }
+            }
+        }
+
         refreshHeroCarousel();
         refreshTechTree();
         refreshTalentMarket();
@@ -877,7 +891,14 @@
             '<span class="perk-name">关卡亲和 Lv.' + (perks.token_map_affinity || 0) + '</span>' +
             '<span class="perk-desc">' + _mapAffinityDesc(perks.token_map_affinity || 0) + '</span>' +
             '<button class="btn-perk-buy' + ((perks.token_map_affinity || 0) >= 3 ? ' disabled' : '') + '" data-perk="map_affinity"' + ((perks.token_map_affinity || 0) >= 3 ? ' disabled' : '') + '>升级 (' + _mapAffinityCost(perks.token_map_affinity || 0) + ' 代币)</button>' +
-            '</div>';
+            '</div>' +
+            /* Epoch 15: 精英模式 */
+            '<div class="elite-toggle' + (window.saveManager && window.saveManager.isEliteMode && window.saveManager.isEliteMode() ? ' active' : '') + '">' +
+            '<span class="perk-name">⚠️ 精英模式</span>' +
+            '<span class="perk-desc">敌人+50%属性，通关核心×1.5</span>' +
+            '<button class="elite-btn' + (!(window.saveManager && window.saveManager.isEliteMode && window.saveManager.isEliteMode()) ? ' off' : '') + '" id="elite-toggle-btn">' +
+            (window.saveManager && window.saveManager.isEliteMode && window.saveManager.isEliteMode() ? '关闭' : '开启') +
+            '</button></div>';
 
         grid.innerHTML =
             '<div class="stats-section">' +
@@ -899,6 +920,14 @@
                 onPerkPurchase(this);
             });
         });
+
+        /* Epoch 15: 精英模式切换 */
+        var eliteBtn = document.getElementById('elite-toggle-btn');
+        if (eliteBtn) {
+            eliteBtn.addEventListener('click', function() {
+                onEliteToggle(this);
+            });
+        }
     }
 
     function _formatChallengeReward(reward) {
@@ -943,6 +972,18 @@
             btn.textContent = result.reason;
             btn.disabled = true;
             setTimeout(function() { refreshStatsPanel(); }, 1200);
+        }
+    }
+
+    /* ── Epoch 15: 精英模式切换 ── */
+    async function onEliteToggle(btn) {
+        var isOn = window.saveManager.isEliteMode();
+        var result = isOn
+            ? await window.saveManager.disableEliteMode()
+            : await window.saveManager.enableEliteMode();
+        if (result.ok) {
+            refreshStatsPanel();
+            refreshMainHub();
         }
     }
 
