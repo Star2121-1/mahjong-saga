@@ -20,8 +20,11 @@
     function fit() {
         var c = document.getElementById(containerId);
         if (!c) return;
-        var sx = window.innerWidth / BASE_W;
-        var sy = window.innerHeight / BASE_H;
+        /* 使用 visualViewport 避免 iOS 地址栏跳动 */
+        var vw = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+        var vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        var sx = vw / BASE_W;
+        var sy = vh / BASE_H;
         var s = Math.min(sx, sy, 1);
         if (s < MIN_SCALE) s = MIN_SCALE;
         c.style.transform = 'scale(' + s + ')';
@@ -30,5 +33,9 @@
 
     fit();
     window.addEventListener('resize', fit);
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', fit);
+        window.visualViewport.addEventListener('scroll', fit);
+    }
     setTimeout(fit, 100);
 })();

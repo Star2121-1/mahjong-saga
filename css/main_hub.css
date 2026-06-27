@@ -130,8 +130,12 @@
 }
 #hero-carousel-compact { display: flex; align-items: center; gap: 8px; }
 #hero-carousel-viewport {
-    display: flex; flex-direction: column; align-items: center;
-    gap: 4px; min-width: 140px;
+    width: 240px; min-width: 140px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(26,83,54,0.3);
+    border-radius: 12px; text-align: center;
 }
 .panel-hero-actions { display: flex; flex-direction: column; gap: 6px; align-items: center; flex: 1; }
 #hero-portrait { width: 72px; height: 72px; }
@@ -148,7 +152,7 @@
 }
 .carousel-arrow:hover { border-color: #4fc3f7; color: #eee; }
 #hero-carousel-viewport {
-    width: 240px;
+    width: 240px; min-width: 140px;
     display: flex; flex-direction: column; align-items: center; gap: 6px;
     padding: 12px 16px;
     background: rgba(255,255,255,0.04);
@@ -362,7 +366,7 @@
 }
 .forge-body { display: flex; gap: 12px; }
 .forge-left { flex: 1; min-width: 0; }
-.forge-right { width: 220px; min-width: 220px; }
+.forge-right { width: 220px; min-width: 160px; }
 .forge-section-label { font-size: 12px; font-weight: 700; color: #aaa; letter-spacing: 1px; margin: 8px 0 6px; }
 #forge-slots { display: flex; flex-direction: column; gap: 4px; }
 .forge-slot {
@@ -570,13 +574,14 @@
 .stats-grid { display: flex; flex-wrap: wrap; gap: 6px 20px; }
 .stat-row {
     display: flex; justify-content: space-between; align-items: center;
-    width: calc(50% - 10px); min-width: 180px;
+    width: calc(50% - 10px); min-width: 0;
     padding: 8px 12px;
     background: rgba(255,255,255,0.02);
     border-radius: 8px; font-size: 13px;
 }
 .stat-label { color: #7a9a8a; }
 .stat-value { color: #4fc3f7; font-weight: 700; }
+.stat-row > .stat-value { min-width: 0; word-break: break-all; }
 .stats-empty { color: #555; font-size: 13px; text-align: center; padding: 20px; }
 
 /* 挑战卡片 */
@@ -698,8 +703,8 @@
     .hub-secondary-btn { padding: 3px 10px; font-size: 11px; }
     .level-card { padding: 6px 10px; font-size: 12px; }
     #level-cards { gap: 4px; }
-    .tech-tree-panel { padding: 8px; }
-    .forge-workshop { padding: 8px; }
+    #tech-tree-panel { padding: 8px; }
+    #forge-workshop { padding: 8px; }
 }
 
 @media (max-height: 600px) {
@@ -714,7 +719,6 @@
     .hero-portrait.large.shape-triangle { border-left-width: 40px; border-right-width: 40px; border-bottom-width: 70px; }
     .level-card { padding: 5px 8px; font-size: 11px; }
     #level-cards { gap: 3px; }
-    .tech-tree-panel { padding: 6px; }
-    .forge-workshop { padding: 6px; }
+    #tech-tree-panel { padding: 6px; }
     #forge-workshop { padding: 6px; }
 }

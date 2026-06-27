@@ -18,6 +18,7 @@ body { position: relative; }
 /* 大本营竖版容器（废弃但保留兼容） */
 #main-hub-screen {
     width: 100vw; height: 100vh;
+    max-width: 100%;
     display: flex; flex-direction: row;
     background: linear-gradient(180deg, #0d1a12 0%, #132a1a 100%);
     overflow: hidden; position: relative;
@@ -26,6 +27,7 @@ body { position: relative; }
 /* 游戏竖版容器（废弃但保留兼容） */
 #game-container {
     width: 100vw; height: 100vh;
+    max-width: 100%;
     display: flex; flex-direction: column;
     overflow: hidden; position: relative;
     background: #133b26;
