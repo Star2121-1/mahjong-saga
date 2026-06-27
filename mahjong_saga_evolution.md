@@ -24,3 +24,4 @@
 | 20 | `feat/evolution-epoch-14` | 历史面板筛选排序/周常结算记录/赛季通胀重置 | ✅ Committed |
 | 21 | `feat/evolution-epoch-14` | 每日倒计时/赛季奖励领取/成就进度修正 | ✅ Committed |
 | 22 | `feat/evolution-epoch-14` | 布局比例/响应式优化 — 侧边栏+20%, 最小缩放50%, 3档媒体断点 | ✅ Committed |
+| 23 | `feat/evolution-epoch-14` | 战场响应式/面板可读性 — 战场3档断点+面板间距字体优化 | ✅ Committed |
