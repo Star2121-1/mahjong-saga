@@ -25,3 +25,8 @@
 | 21 | `feat/evolution-epoch-14` | 每日倒计时/赛季奖励领取/成就进度修正 | ✅ Committed |
 | 22 | `feat/evolution-epoch-14` | 布局比例/响应式优化 — 侧边栏+20%, 最小缩放50%, 3档媒体断点 | ✅ Committed |
 | 23 | `feat/evolution-epoch-14` | 战场响应式/面板可读性 — 战场3档断点+面板间距字体优化/save-select分辨率修复 | ✅ Committed |
+| 24 | `feat/evolution-epoch-14` | 响应式完善/验证 — 修复非existent类名引用/hero portrait缩放 | ✅ Committed |
+| 25 | `feat/evolution-epoch-14` | 铺满验证/滚动条消除/viewport修复 — 移除min-width防溢出 | ✅ Committed |
+| 26 | `feat/evolution-epoch-14` | hub面板布局验证/hero header/expedition — 小高度媒体断点 | ✅ Committed |
+| 27 | `feat/evolution-epoch-14` | 战场细节/overlay响应式 — victory/game-over/mutator/abyss/reward面板 | ✅ Committed |
+| 28 | `feat/evolution-epoch-14` | 审计修复 — stat-row溢出/死代码/iOS跳动/选择器错误 | ✅ Committed |
