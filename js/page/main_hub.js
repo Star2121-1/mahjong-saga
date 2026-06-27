@@ -2,6 +2,8 @@
     var _heroIds = ['hero_swordsman', 'hero_colossus', 'hero_phantom'];
     var _currentHeroIndex = 0;
     var _currentLevelId = 'level_1';
+    var _historyFilter = 'all';
+    var _historySort = 'date-desc';
 
     var DOM = {};
     var _tabLoopId = null; /* Tab 帧循环引用，用于清理 */
@@ -959,14 +961,16 @@
                         var wc = weekly.challenges[wi];
                         var progress = 0;
                         var threshold = wc.threshold || 1;
-                        /* 估算进度 */
-                        if (wc.id.indexOf('kill') !== -1 || wc.id.indexOf('屠龙') !== -1) progress = Math.min(100, Math.round((engine || {}).kills || 0 / threshold * 100));
-                        else if (wc.id.indexOf('survive') !== -1) progress = Math.min(100, Math.round(((engine || {})._elapsed || 0) / threshold * 100));
-                        else if (wc.id.indexOf('abyss') !== -1) progress = Math.min(100, Math.round(((engine || {})._currentAbyss || 0) / threshold * 100));
-                        else if (wc.id.indexOf('od') !== -1) progress = Math.min(100, Math.round(((engine || {})._overdriveCount || 0) / threshold * 100));
-                        else if (wc.id.indexOf('dodge') !== -1) progress = Math.min(100, Math.round(((engine || {})._dodgeCount || 0) / threshold * 100));
-                        else if (wc.id.indexOf('crit') !== -1) progress = Math.min(100, Math.round(((engine || {})._critCount || 0) / threshold * 100));
-                        else progress = Math.min(100, Math.round(progress / threshold * 100));
+                        /* 估算进度 — hub 页面无 gameEngine, 显示 0% */
+                        if (window.gameEngine) {
+                            var eng = window.gameEngine;
+                            if (wc.id.indexOf('kill') !== -1 || wc.id.indexOf('屠龙') !== -1) progress = Math.min(100, Math.round((eng.kills || 0) / threshold * 100));
+                            else if (wc.id.indexOf('survive') !== -1) progress = Math.min(100, Math.round((eng._elapsed || 0) / threshold * 100));
+                            else if (wc.id.indexOf('abyss') !== -1) progress = Math.min(100, Math.round((eng.loopCount || 0) / threshold * 100));
+                            else if (wc.id.indexOf('od') !== -1) progress = Math.min(100, Math.round((eng._overdriveCount || 0) / threshold * 100));
+                            else if (wc.id.indexOf('dodge') !== -1) progress = Math.min(100, Math.round((eng._totalDodgesThisRun || 0) / threshold * 100));
+                            else if (wc.id.indexOf('crit') !== -1) progress = Math.min(100, Math.round((eng._totalCritsThisRun || 0) / threshold * 100));
+                        }
                         wHtml += '<div class="challenge-card weekly-challenge">' +
                             '<div class="challenge-name">🏆 ' + wc.name + '</div>' +
                             '<div class="challenge-desc">' + wc.desc + '</div>' +
@@ -1216,9 +1220,9 @@
             return;
         }
 
-        /* Epoch 23: 排序/筛选 */
-        var filter = document.getElementById('history-filter').value || 'all';
-        var sort = document.getElementById('history-sort').value || 'date-desc';
+        /* Epoch 23: 排序/筛选 (使用存储值, 元素尚未创建) */
+        var filter = _historyFilter || 'all';
+        var sort = _historySort || 'date-desc';
 
         /* 筛选 */
         var filtered = history;
@@ -1237,16 +1241,16 @@
         var html = '';
         /* 筛选/排序控件 */
         html += '<div class="history-controls">' +
-            '<select id="history-filter" onchange="window.HubTabController.refreshPanels()">' +
-            '<option value="all">全部</option>' +
-            '<option value="won">仅通关</option>' +
-            '<option value="lost">仅失败</option>' +
+            '<select id="history-filter" onchange="window._onHistoryFilter(this.value)">' +
+            '<option value="all"' + (filter === 'all' ? ' selected' : '') + '>全部</option>' +
+            '<option value="won"' + (filter === 'won' ? ' selected' : '') + '>仅通关</option>' +
+            '<option value="lost"' + (filter === 'lost' ? ' selected' : '') + '>仅失败</option>' +
             '</select>' +
-            '<select id="history-sort" onchange="window.HubTabController.refreshPanels()">' +
-            '<option value="date-desc">最新优先</option>' +
-            '<option value="date-asc">最早优先</option>' +
-            '<option value="kills-desc">击杀最多</option>' +
-            '<option value="time-desc">用时最长</option>' +
+            '<select id="history-sort" onchange="window._onHistorySort(this.value)">' +
+            '<option value="date-desc"' + (sort === 'date-desc' ? ' selected' : '') + '>最新优先</option>' +
+            '<option value="date-asc"' + (sort === 'date-asc' ? ' selected' : '') + '>最早优先</option>' +
+            '<option value="kills-desc"' + (sort === 'kills-desc' ? ' selected' : '') + '>击杀最多</option>' +
+            '<option value="time-desc"' + (sort === 'time-desc' ? ' selected' : '') + '>用时最长</option>' +
             '</select>' +
             '<span style="color:#888;font-size:11px;">共 ' + filtered.length + ' 条</span>' +
             '</div>';
@@ -1261,6 +1265,16 @@
         }
         grid.innerHTML = html;
     }
+
+    /* Epoch 23: 历史面板筛选/排序回调 */
+    window._onHistoryFilter = function(val) {
+        _historyFilter = val;
+        refreshHistoryPanel();
+    };
+    window._onHistorySort = function(val) {
+        _historySort = val;
+        refreshHistoryPanel();
+    };
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);

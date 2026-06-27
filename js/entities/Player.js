@@ -295,7 +295,9 @@ class Player {
             rage: this.rage,
             maxRage: this.maxRage,
             setResonanceSpeed: this.setResonanceSpeed,
-            setResonanceIce: this.setResonanceIce
+            setResonanceIce: this.setResonanceIce,
+            damageReduction: this.damageReduction,
+            _reviveCount: this._reviveCount || 0
         };
     }
 
@@ -338,12 +340,89 @@ class Player {
         this.magnetRadius = data.magnetRadius || 60;
         this.rage = data.rage || 0;
         this.maxRage = data.maxRage || 100;
+        this.damageReduction = data.damageReduction || 0;
+        this._reviveCount = data._reviveCount || 0;
+        this._hasRevive = this._reviveCount > 0;
         this.setResonanceSpeed = !!data.setResonanceSpeed;
         this.setResonanceIce = !!data.setResonanceIce;
         this._thornCritX = undefined;
         this._thornCritY = undefined;
         this._healAmount = 0;
         this._dodgeSignal = false;
+
+        /* Epoch 23: restore 后重新应用天赋/声望/装备词缀 */
+        this._reapplyMetaBonuses();
+    }
+
+    /** 重新应用 meta 天赋/声望/perk 加成 (用于 restore 后) */
+    _reapplyMetaBonuses() {
+        var meta = (window.saveManager && window.saveManager._metaCache) || {};
+        var talents = meta.talents || {};
+        /* 天赋加成 */
+        var hpBoost = (talents.health_boost || 0) * 20;
+        var spdBoost = (talents.speed_boost || 0) * 15;
+        var magBoost = (talents.magnet_boost || 0) * 30;
+        this.maxHp += hpBoost;
+        this.hp = Math.min(this.hp + hpBoost, this.maxHp);
+        this.speed += spdBoost;
+        this.baseSpeed = this.speed;
+        this.magnetRadius += magBoost;
+        /* 装备词缀 */
+        var sm = window.saveManager;
+        var equipped = (sm && sm._metaCache && sm._metaCache.equipped) || { weapon: null, armor: null, talisman: null };
+        var equipments = (sm && sm._metaCache && sm._metaCache.equipments) || [];
+        var eqMap = {};
+        for (var eqi = 0; eqi < equipments.length; eqi++) eqMap[equipments[eqi].instanceId] = equipments[eqi];
+        for (var slot in equipped) {
+            var instanceId = equipped[slot];
+            if (!instanceId) continue;
+            var item = eqMap[instanceId];
+            if (!item) continue;
+            var base = item.base || {};
+            this.maxHp += base.hp_boost || 0;
+            this.hp = Math.min(this.hp, this.maxHp);
+            this.magnetRadius += base.magnet_boost || 0;
+            if (base.atk_factor) this.atk = Math.floor(this.atk * (1 + base.atk_factor));
+            if (item.affixes) {
+                for (var ai = 0; ai < item.affixes.length; ai++) {
+                    var affix = item.affixes[ai];
+                    if (affix.id === 'xp_gain') this.xpGainFactor += affix.val;
+                    if (affix.id === 'ice_bonus') this.iceDurationBonus += affix.val;
+                    if (affix.id === 'speed_pct') this.speed *= (1 + affix.val);
+                }
+            }
+        }
+        this.baseSpeed = this.speed;
+        /* 套装共鸣 */
+        var affixCounts = {};
+        for (var _asi = 0; _asi < equipments.length; _asi++) {
+            var _aitem = eqMap[equipments[_asi].instanceId];
+            if (!_aitem || !_aitem.affixes) continue;
+            var _instId = equipments[_asi].instanceId;
+            if (_instId !== equipped.weapon && _instId !== equipped.armor && _instId !== equipped.talisman) continue;
+            for (var _aai = 0; _aai < _aitem.affixes.length; _aai++) {
+                var _aff = _aitem.affixes[_aai];
+                affixCounts[_aff.id] = (affixCounts[_aff.id] || 0) + 1;
+            }
+        }
+        this.setResonanceSpeed = (affixCounts.speed_pct || 0) >= 3;
+        this.setResonanceIce = (affixCounts.ice_bonus || 0) >= 3;
+        /* 天赋额外加成 */
+        this.critRate += (talents.listening_intuition || 0) * 0.02;
+        this.damageReduction += (talents.gangpai_hardiness || 0) * 0.03;
+        this.cdFloor = Math.max(0.05, (this.cdFloor || 0.2) - (talents['摸牌_speed'] || 0) * 0.01);
+        /* perk */
+        var perks = (meta.purchasedPerks || {});
+        if (perks.token_revive > 0) {
+            this._hasRevive = true;
+            this._reviveCount = perks.token_revive;
+        }
+        if (perks.token_relic_start) this._startsWithRelic = true;
+        this.mapAffinityLevel = perks.token_map_affinity || 0;
+        /* 声望 */
+        if (window.saveManager && window.saveManager.applyPrestigeBonus) {
+            window.saveManager.applyPrestigeBonus(this);
+        }
     }
 
     reset(heroId) {

@@ -276,8 +276,10 @@ Gp._bindStage3Events = function() {
     if (this._pauseBtn) { var s = this; this._pauseBtn.addEventListener('click', function() { s._togglePause(); }); }
     if (this.pauseOverlay) {
         var s = this;
-        this.pauseOverlay.querySelector('#pause-continue-btn').addEventListener('click', function() { s._togglePause(); });
-        this.pauseOverlay.querySelector('#pause-hub-btn').addEventListener('click', function() {
+        var contBtn = this.pauseOverlay.querySelector('#pause-continue-btn');
+        var hubBtn = this.pauseOverlay.querySelector('#pause-hub-btn');
+        if (contBtn) contBtn.addEventListener('click', function() { s._togglePause(); });
+        if (hubBtn) hubBtn.addEventListener('click', function() {
             s._paused = false;
             if (s.pauseOverlay) s.pauseOverlay.classList.remove('active');
             s._goToSaveSelect();
