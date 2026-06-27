@@ -1016,6 +1016,68 @@ class SaveManager {
             return result;
         });
     }
+
+    /* ── Epoch 18: 每周超级挑战 ── */
+
+    getWeeklyChallenges() {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            if (!meta.weeklyChallenges) {
+                meta.weeklyChallenges = { challenges: [], lastReset: 0 };
+                return self._generateWeeklyChallenges(meta).then(function() { return meta.weeklyChallenges; });
+            }
+            var now = Date.now();
+            var last = meta.weeklyChallenges.lastReset || 0;
+            if (now - last > 7 * 24 * 60 * 60 * 1000) {
+                meta.weeklyChallenges = { challenges: [], lastReset: 0 };
+                return self._generateWeeklyChallenges(meta).then(function() { return meta.weeklyChallenges; });
+            }
+            return meta.weeklyChallenges;
+        });
+    }
+
+    _generateWeeklyChallenges(meta) {
+        var weeklyPool = [
+            { id: 'weekly_kill_500', name: '周常·屠龙', desc: '单局击杀 500 个敌人', reward: { metaTokens: 200, bossCores: 10 }, check: function(s) { return s.kills >= 500; }, threshold: 500 },
+            { id: 'weekly_survive_30min', name: '周常·坚守', desc: '单局存活 30 分钟', reward: { metaTokens: 150, bossCores: 8 }, check: function(s) { return s.elapsed >= 1800; }, threshold: 1800 },
+            { id: 'weekly_abyss_20', name: '周常·深渊领主', desc: '抵达深渊第 20 层', reward: { metaTokens: 300, bossCores: 15 }, check: function(s) { return s.abyssDepth >= 20; }, threshold: 20 },
+            { id: 'weekly_od_20', name: '周常·怒意沸腾', desc: '单局触发 20 次 Overdrive', reward: { metaTokens: 250, bossCores: 12 }, check: function(s) { return s.overdriveCount >= 20; }, threshold: 20 },
+            { id: 'weekly_dodge_100', name: '周常·幻影千重', desc: '单局闪避 100 次', reward: { metaTokens: 180, bossCores: 8 }, check: function(s) { return s.dodges >= 100; }, threshold: 100 },
+            { id: 'weekly_crit_200', name: '周常·天崩地裂', desc: '单局暴击 200 次', reward: { metaTokens: 160, bossCores: 8 }, check: function(s) { return s.crits >= 200; }, threshold: 200 }
+        ];
+        var now = Date.now();
+        var seed = Math.floor(now / (7 * 24 * 60 * 60 * 1000));
+        var indices = [];
+        var h = seed;
+        for (var i = 0; i < 3 && indices.length < weeklyPool.length; i++) {
+            h = (h * 1103515245 + 12345) & 0x7fffffff;
+            var idx = h % weeklyPool.length;
+            if (indices.indexOf(idx) === -1) indices.push(idx);
+        }
+        meta.weeklyChallenges = {
+            challenges: indices.map(function(ix) { return weeklyPool[ix]; }),
+            lastReset: now
+        };
+        return Promise.resolve();
+    }
+
+    checkWeeklyCompletion(stats) {
+        var meta = this._metaCache || {};
+        var weekly = meta.weeklyChallenges;
+        if (!weekly || !weekly.challenges) return { completed: [], bonusTokens: 0, bonusCores: 0 };
+        var completed = [];
+        var bonusTokens = 0;
+        var bonusCores = 0;
+        for (var i = 0; i < weekly.challenges.length; i++) {
+            var ch = weekly.challenges[i];
+            if (ch.check(stats)) {
+                completed.push(ch.id);
+                bonusTokens += (ch.reward.metaTokens || 0);
+                bonusCores += (ch.reward.bossCores || 0);
+            }
+        }
+        return { completed: completed, bonusTokens: bonusTokens, bonusCores: bonusCores };
+    }
 }
 
 window.saveManager = new SaveManager();

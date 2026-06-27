@@ -876,6 +876,27 @@
             challengesHtml = '<div class="stats-empty">暂无活跃挑战</div>';
         }
 
+
+        /* Epoch 18: 每周超级挑战 */
+        var weeklyHtml = '';
+        if (typeof window.saveManager.getWeeklyChallenges === 'function') {
+            window.saveManager.getWeeklyChallenges().then(function(weekly) {
+                if (weekly && weekly.challenges && weekly.challenges.length > 0) {
+                    var wHtml = '';
+                    for (var wi = 0; wi < weekly.challenges.length; wi++) {
+                        var wc = weekly.challenges[wi];
+                        wHtml += '<div class="challenge-card weekly-challenge">' +
+                            '<div class="challenge-name">🏆 ' + wc.name + '</div>' +
+                            '<div class="challenge-desc">' + wc.desc + '</div>' +
+                            '<div class="challenge-reward">奖励: ' + _formatChallengeReward(wc.reward) + '</div>' +
+                            '</div>';
+                    }
+                    var weeklySection = document.getElementById('weekly-challenges-section');
+                    if (weeklySection) weeklySection.innerHTML = wHtml;
+                }
+            }).catch(function() {});
+        }
+
         /* 元货币消费 */
         var perks = (meta.purchasedPerks || {});
         var perksHtml =
@@ -910,6 +931,7 @@
             '<div class="stats-section">' +
             '<div class="stats-section-title">🎯 活跃挑战</div>' +
             '<div class="challenges-grid">' + challengesHtml + '</div>' +
+'<div class="stats-section">' +            '<div class="stats-section-title">🏆 每周超级挑战</div>' +            '<div class="challenges-grid" id="weekly-challenges-section"><div class="stats-empty">加载中...</div></div>' +            '</div>' +
             '</div>' +
             '<div class="stats-section">' +
             '<div class="stats-section-title">🛒 元代币商城</div>' +
@@ -1011,10 +1033,10 @@
     }
 
     function checkChallengeCompletion(engine) {
-        /* 在结算时检查挑战完成 */
+        /* Epoch 18: 结算时检查挑战完成 + 进度追踪 */
         var meta = window.saveManager._metaCache || {};
         var challenges = meta.challenges && meta.challenges.active || [];
-        if (!challenges.length) return { completed: [], bonusTokens: 0, bonusCores: 0 };
+        if (!challenges.length) return { completed: [], bonusTokens: 0, bonusCores: 0, progress: [] };
 
         var stats = {
             kills: engine.kills || 0,
@@ -1034,10 +1056,28 @@
         var completed = [];
         var bonusTokens = 0;
         var bonusCores = 0;
+        var progress = [];
 
         for (var i = 0; i < challenges.length; i++) {
             var ch = challenges[i];
-            if (ch.check(stats)) {
+            var chProgress = ch.check(stats) ? 100 : 0;
+            /* 估算进度百分比 */
+            if (chProgress === 0) {
+                var threshold = ch.threshold || 1;
+                if (ch.id.indexOf('kill') !== -1) chProgress = Math.min(100, Math.round((stats.kills / threshold) * 100));
+                else if (ch.id.indexOf('overdrive') !== -1) chProgress = Math.min(100, Math.round((stats.overdriveCount / threshold) * 100));
+                else if (ch.id.indexOf('survive') !== -1) chProgress = Math.min(100, Math.round((stats.elapsed / threshold) * 100));
+                else if (ch.id.indexOf('gold') !== -1) chProgress = Math.min(100, Math.round((stats.maxGold / threshold) * 100));
+                else if (ch.id.indexOf('dodge') !== -1) chProgress = Math.min(100, Math.round((stats.dodges / threshold) * 100));
+                else if (ch.id.indexOf('crit') !== -1) chProgress = Math.min(100, Math.round((stats.crits / threshold) * 100));
+                else if (ch.id.indexOf('wave') !== -1) chProgress = Math.min(100, Math.round((stats.waves / threshold) * 100));
+                else if (ch.id.indexOf('relics') !== -1) chProgress = Math.min(100, Math.round((stats.uniqueRelics / threshold) * 100));
+                else if (ch.id.indexOf('abyss') !== -1) chProgress = Math.min(100, Math.round((stats.abyssDepth / threshold) * 100));
+                else if (ch.id.indexOf('boss') !== -1) chProgress = stats.bossKills > 0 ? 100 : 0;
+                else if (ch.id.indexOf('no_damage') !== -1) chProgress = stats.hitsTaken === 0 && stats.won ? 100 : Math.max(0, 100 - stats.hitsTaken * 10);
+            }
+            progress.push({ id: ch.id, name: ch.name, percent: chProgress, completed: chProgress >= 100 });
+            if (chProgress >= 100) {
                 completed.push(ch.id);
                 if (ch.reward.metaTokens) bonusTokens += ch.reward.metaTokens;
                 if (ch.reward.bossCores) bonusCores += ch.reward.bossCores;
@@ -1051,7 +1091,7 @@
             }
         }
 
-        return { completed: completed, bonusTokens: bonusTokens, bonusCores: bonusCores };
+        return { completed: completed, bonusTokens: bonusTokens, bonusCores: bonusCores, progress: progress };
     }
 
 

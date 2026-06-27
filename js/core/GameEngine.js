@@ -1659,6 +1659,19 @@ Gp._gameOver = async function() {
         this._spawnCausalityText(chText);
     }
 
+    /* Epoch 18: 每周超级挑战 */
+    try {
+        var weeklyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: this._maxGoldThisRun || 0, hitsTaken: this._playerHitCountThisRun || 0, bossKills: this._bossKillsThisRun || 0, abyssDepth: this.loopCount || 0, dodges: this._totalDodgesThisRun || 0, crits: this._totalCritsThisRun || 0, won: !this.gameOver };
+        if (typeof window.saveManager.checkWeeklyCompletion === 'function') {
+            var wc = window.saveManager.checkWeeklyCompletion(weeklyStats);
+            if (wc.completed && wc.completed.length > 0) {
+                meta.metaTokens = (meta.metaTokens || 0) + wc.bonusTokens;
+                meta.bossCores = (meta.bossCores || 0) + wc.bonusCores;
+                this._spawnCausalityText('🏆 周常完成: ' + wc.completed.length + ' 项');
+            }
+        }
+    } catch(e) {}
+
     /* ── Epoch 14: 运行统计记录 ── */
     var uniqueRelics = Object.keys(this.player.relicLevels || {}).filter(function(k) { return (this.player.relicLevels[k] || 0) > 0; }).length;
     if (typeof window.saveManager.recordRunStats === 'function') {
