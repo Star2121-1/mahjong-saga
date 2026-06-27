@@ -1,5 +1,5 @@
 /* ── 移动端响应式缩放 ── */
-/* 将固定 1920×1080 容器等比缩放适配视口，仅缩小不放大 */
+/* 不同页面有不同的设计分辨率 */
 (function() {
     var containerId = null;
     var els = ['game-container','main-hub-screen','save-select-screen'];
@@ -9,8 +9,13 @@
     }
     if (!containerId) return;
 
-    var BASE_W = 1920, BASE_H = 1080;
-    var MIN_SCALE = 0.5; /* 最低缩放到 50%，避免内容过小 */
+    /* 设计分辨率 */
+    var BASE_W, BASE_H, MIN_SCALE;
+    if (containerId === 'save-select-screen') {
+        BASE_W = 480; BASE_H = 720; MIN_SCALE = 0.6;
+    } else {
+        BASE_W = 1920; BASE_H = 1080; MIN_SCALE = 0.5;
+    }
 
     function fit() {
         var c = document.getElementById(containerId);
@@ -18,13 +23,12 @@
         var sx = window.innerWidth / BASE_W;
         var sy = window.innerHeight / BASE_H;
         var s = Math.min(sx, sy, 1);
-        if (s < MIN_SCALE) s = MIN_SCALE; /* 不低于 50% */
+        if (s < MIN_SCALE) s = MIN_SCALE;
         c.style.transform = 'scale(' + s + ')';
         c.style.transformOrigin = 'center center';
     }
 
     fit();
     window.addEventListener('resize', fit);
-    /* 初始延迟适配 (某些浏览器 resize 事件延迟) */
     setTimeout(fit, 100);
 })();
