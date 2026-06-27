@@ -22,3 +22,4 @@
 | 18 | `feat/evolution-epoch-14` | 挑战进度追踪/每周超级挑战 | ✅ Committed |
 | 19 | `feat/evolution-epoch-14` | 周常展示/通胀防护/赛季触发 | ✅ Committed |
 | 20 | `feat/evolution-epoch-14` | 历史面板筛选排序/周常结算记录/赛季通胀重置 | ✅ Committed |
+| 21 | `feat/evolution-epoch-14` | 每日倒计时/赛季奖励领取/成就进度修正 | ✅ Committed |
