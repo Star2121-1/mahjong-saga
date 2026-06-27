@@ -683,3 +683,38 @@
     #hub-right-canvas { padding: 40px 12px 12px; }
     #hub-top-stats { font-size: 11px; padding: 6px 10px; }
 }
+
+@media (max-height: 800px) {
+    .panel-hero-header { padding: 8px 12px; gap: 10px; }
+    #hero-portrait { width: 56px; height: 56px; }
+    #hero-name-display { font-size: 14px; }
+    #hero-status-display { font-size: 10px; }
+    .carousel-arrow { width: 28px; height: 28px; font-size: 13px; }
+    .hero-portrait { width: 72px; height: 72px; }
+    .hero-portrait.large { width: 100px; height: 100px; }
+    .hero-portrait.shape-triangle { border-left-width: 36px; border-right-width: 36px; border-bottom-width: 62px; }
+    .hero-portrait.large.shape-triangle { border-left-width: 50px; border-right-width: 50px; border-bottom-width: 86px; }
+    #btn-hero-main-action { padding: 4px 16px; font-size: 12px; }
+    .hub-secondary-btn { padding: 3px 10px; font-size: 11px; }
+    .level-card { padding: 6px 10px; font-size: 12px; }
+    #level-cards { gap: 4px; }
+    .tech-tree-panel { padding: 8px; }
+    .forge-workshop { padding: 8px; }
+}
+
+@media (max-height: 600px) {
+    .panel-hero-header { padding: 6px 8px; gap: 6px; }
+    #hero-portrait { width: 44px; height: 44px; }
+    #hero-name-display { font-size: 12px; }
+    #hero-status-display { font-size: 9px; }
+    .carousel-arrow { width: 24px; height: 24px; font-size: 11px; }
+    .hero-portrait { width: 56px; height: 56px; }
+    .hero-portrait.large { width: 80px; height: 80px; }
+    .hero-portrait.shape-triangle { border-left-width: 28px; border-right-width: 28px; border-bottom-width: 48px; }
+    .hero-portrait.large.shape-triangle { border-left-width: 40px; border-right-width: 40px; border-bottom-width: 70px; }
+    .level-card { padding: 5px 8px; font-size: 11px; }
+    #level-cards { gap: 3px; }
+    .tech-tree-panel { padding: 6px; }
+    .forge-workshop { padding: 6px; }
+    #forge-workshop { padding: 6px; }
+}
