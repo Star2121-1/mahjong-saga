@@ -636,6 +636,14 @@
 .elite-btn.off { background: linear-gradient(135deg, #555, #777); }
 
 /* Epoch 17: 历史记录 */
+.history-controls {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;
+}
+.history-controls select {
+    background: rgba(255,255,255,0.08); color: #ccc; border: 1px solid rgba(255,255,255,0.1);
+    padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;
+}
+.history-controls select:focus { outline: none; border-color: #ffd700; }
 .history-entry {
     padding: 8px 12px;
     background: rgba(255,255,255,0.02);
@@ -649,3 +657,4 @@
 .history-result { font-size: 12px; font-weight: 700; color: #fbfbf7; }
 .history-details { font-size: 11px; color: #7a9a8a; margin-top: 2px; }
 .history-reward { font-size: 11px; color: #ffd700; font-weight: 600; margin-top: 2px; }
+.history-weekly { font-size: 10px; color: #ff9800; font-weight: 600; margin-top: 2px; }

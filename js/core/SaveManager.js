@@ -759,7 +759,7 @@ class SaveManager {
 
     /* ── Epoch 15: 战局历史记录 ── */
 
-    recordRunHistory(heroId, levelId, kills, elapsed, won, loopCount, relics) {
+    recordRunHistory(heroId, levelId, kills, elapsed, won, loopCount, relics, weeklyCompleted) {
         var self = this;
         return this.getMeta().then(function(meta) {
             if (!meta.runHistory) meta.runHistory = [];
@@ -772,7 +772,8 @@ class SaveManager {
                 won: won,
                 loopCount: loopCount,
                 relics: relics,
-                metaTokensEarned: self.calcMetaTokens(kills, elapsed)
+                metaTokensEarned: self.calcMetaTokens(kills, elapsed),
+                weeklyCompleted: weeklyCompleted || []
             };
             meta.runHistory.unshift(entry);
             if (meta.runHistory.length > 50) meta.runHistory = meta.runHistory.slice(0, 50);
@@ -1186,6 +1187,10 @@ class SaveManager {
             if (meta.season.currentSeason>0) return Promise.resolve({ ok: false, reason: '赛季已激活' });
             meta.season.currentSeason = 1;
             meta.season.seasonStart = Date.now();
+            /* Epoch 23: 赛季激活时重置通胀计数器 */
+            if (!meta.inflationGuard) meta.inflationGuard = {};
+            meta.inflationGuard.totalMetaTokens = 0;
+            meta.inflationGuard.lastReset = Date.now();
             return self.saveMeta(meta).then(function() { return { ok: true, season: 1 }; });
         });
     }

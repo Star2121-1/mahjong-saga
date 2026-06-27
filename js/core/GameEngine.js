@@ -1578,13 +1578,13 @@ Gp._settleRun = async function(tokens) {
         }
     }
 
-    /* ── Epoch 15: 战局历史记录 ── */
+    /* ── Epoch 15/23: 战局历史记录 ── */
     var uniqueRelics = Object.keys(this.player.relicLevels || {}).filter(function(k) { return (this.player.relicLevels[k] || 0) > 0; }).length;
     try {
         if (typeof window.saveManager.recordRunHistory === 'function') {
             window.saveManager.recordRunHistory(
                 this.player.heroId, this._currentLevelId, this.kills, this._elapsed,
-                !this.gameOver, this.loopCount || 0, uniqueRelics
+                !this.gameOver, this.loopCount || 0, uniqueRelics, weeklyCompleted
             );
         }
     } catch(e) {}
@@ -1660,10 +1660,12 @@ Gp._gameOver = async function() {
     }
 
     /* Epoch 18: 每周超级挑战 */
+    var weeklyCompleted = [];
     try {
         var weeklyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: this._maxGoldThisRun || 0, hitsTaken: this._playerHitCountThisRun || 0, bossKills: this._bossKillsThisRun || 0, abyssDepth: this.loopCount || 0, dodges: this._totalDodgesThisRun || 0, crits: this._totalCritsThisRun || 0, won: !this.gameOver };
         if (typeof window.saveManager.checkWeeklyCompletion === 'function') {
             var wc = window.saveManager.checkWeeklyCompletion(weeklyStats);
+            weeklyCompleted = wc.completed || [];
             if (wc.completed && wc.completed.length > 0) {
                 meta.metaTokens = (meta.metaTokens || 0) + wc.bonusTokens;
                 meta.bossCores = (meta.bossCores || 0) + wc.bonusCores;
@@ -1693,7 +1695,7 @@ Gp._gameOver = async function() {
         if (typeof window.saveManager.recordRunHistory === 'function') {
             window.saveManager.recordRunHistory(
                 this.player.heroId, this._currentLevelId, this.kills, this._elapsed,
-                false, this.loopCount || 0, ur
+                false, this.loopCount || 0, ur, weeklyCompleted
             );
         }
     } catch(e) {}
