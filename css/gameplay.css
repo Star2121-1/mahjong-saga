@@ -1053,3 +1053,74 @@
 }
 .guide-nav button:hover { transform: scale(1.04); }
 .guide-nav button:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+/* ══════════════════════════════════════════════
+   响应式: 小视口战场优化
+   ══════════════════════════════════════════════ */
+
+/* ≤768px 高度: 缩小角色和敌人尺寸 */
+@media (max-height: 768px) {
+    #player { width: 40px; height: 54px; font-size: 20px; }
+    .enemy { width: 30px; height: 40px; font-size: 10px; }
+    .enemy.boss { width: 54px; height: 70px; }
+    .enemy.boss.final-boss { width: 70px; height: 90px; }
+    .damage-float { font-size: 14px; }
+    .heal-float { font-size: 14px; }
+    .crit-float { font-size: 20px; }
+    #player-hp-wrap { width: 60px; }
+    #player-hp-bar { height: 5px; }
+    #player-hp-text { font-size: 9px; }
+    .enemy-hp-bar { width: 24px; height: 3px; }
+    .enemy.boss .enemy-hp-bar { width: 40px; height: 4px; }
+}
+
+/* ≤600px 高度: 大幅缩小 */
+@media (max-height: 600px) {
+    #player { width: 32px; height: 44px; font-size: 16px; }
+    .enemy { width: 24px; height: 32px; font-size: 9px; }
+    .enemy.boss { width: 44px; height: 58px; }
+    .enemy.boss.final-boss { width: 56px; height: 72px; }
+    .damage-float { font-size: 12px; }
+    .heal-float { font-size: 12px; }
+    .crit-float { font-size: 16px; }
+    #player-hp-wrap { width: 50px; }
+    #player-hp-bar { height: 4px; }
+    #player-hp-text { font-size: 8px; }
+    .enemy-hp-bar { width: 20px; height: 3px; }
+    .enemy.boss .enemy-hp-bar { width: 32px; height: 3px; }
+    .pause-panel { padding: 20px 24px; }
+    .pause-title { font-size: 22px; }
+    .guide-panel { padding: 16px 18px; }
+    .guide-title { font-size: 16px; }
+    .guide-item { font-size: 12px; }
+    .guide-key { min-width: 48px; font-size: 11px; }
+    .mutator-card { width: 150px; padding: 12px 10px; }
+    .mutator-card-icon { font-size: 28px; }
+    .mutator-card-title { font-size: 14px; }
+    .mutator-card-desc { font-size: 11px; }
+    .abyss-title { font-size: 22px; }
+    .abyss-btn { padding: 10px 24px; font-size: 14px; }
+}
+
+/* ≤480px 极小视口 */
+@media (max-height: 480px) {
+    #top-bar { height: 24px; gap: 8px; }
+    .stat { font-size: 10px; }
+    #player { width: 28px; height: 38px; font-size: 14px; }
+    .enemy { width: 20px; height: 28px; font-size: 8px; }
+    .enemy.boss { width: 38px; height: 50px; }
+    .enemy.boss.final-boss { width: 48px; height: 62px; }
+    .damage-float { font-size: 10px; }
+    .crit-float { font-size: 14px; }
+    .wave-selector { padding: 6px 10px; }
+    .ws-name { font-size: 8px; }
+    .ws-level { font-size: 7px; }
+}
+
+/* 超宽屏: 战场居中 */
+@media (min-aspect-ratio: 2/1) {
+    #battlefield {
+        margin: 0 auto;
+        max-width: 1600px;
+    }
+}

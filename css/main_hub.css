@@ -222,13 +222,13 @@
     letter-spacing: 2px; margin-bottom: 6px;
     text-shadow: 0 0 16px rgba(255,215,0,0.2);
 }
-#hero-nodes { display: flex; flex-direction: column; gap: 5px; }
+#hero-nodes { display: flex; flex-direction: column; gap: 6px; }
 .hero-node {
     display: flex; flex-wrap: wrap; align-items: center;
-    gap: 4px 8px; padding: 6px 10px;
+    gap: 6px 10px; padding: 8px 12px;
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 8px; font-size: 12px;
+    border-radius: 10px; font-size: 13px;
     transition: border-color 0.2s;
 }
 .hero-node.locked { filter: grayscale(1); opacity: 0.55; }
@@ -266,20 +266,20 @@
     border-radius: 12px; padding: 12px;
     background: rgba(19,59,38,0.1);
 }
-#tech-tree-nodes { display: flex; flex-direction: column; gap: 6px; }
+#tech-tree-nodes { display: flex; flex-direction: column; gap: 8px; }
 .tech-node {
     display: flex; flex-wrap: wrap; align-items: center;
-    gap: 6px 10px; padding: 8px 12px;
+    gap: 8px 12px; padding: 10px 14px;
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 8px; font-size: 12px;
+    border-radius: 10px; font-size: 13px;
 }
-.tech-name { font-weight: 700; color: #fbfbf7; min-width: 68px; }
+.tech-name { font-weight: 700; color: #fbfbf7; min-width: 72px; }
 .tech-level { color: #4fc3f7; font-weight: 600; }
-.tech-effect { color: #7a9a8a; font-size: 11px; flex: 1; min-width: 90px; }
-.tech-cost { color: #ffd700; font-weight: 600; font-size: 11px; }
+.tech-effect { color: #7a9a8a; font-size: 12px; flex: 1; min-width: 100px; }
+.tech-cost { color: #ffd700; font-weight: 600; font-size: 12px; }
 .btn-tech-upgrade {
-    padding: 4px 14px; font-size: 12px;
+    padding: 5px 16px; font-size: 13px;
     background: linear-gradient(135deg, #1a5336, #0d3020);
     color: #fbfbf7; border: none; border-radius: 6px;
     cursor: pointer; font-weight: 700; transition: transform 0.1s;
@@ -360,17 +360,17 @@
     letter-spacing: 2px; margin-bottom: 6px;
     text-shadow: 0 0 16px rgba(79,195,247,0.2);
 }
-.forge-body { display: flex; gap: 10px; }
+.forge-body { display: flex; gap: 12px; }
 .forge-left { flex: 1; min-width: 0; }
-.forge-right { width: 200px; min-width: 200px; }
-.forge-section-label { font-size: 11px; font-weight: 700; color: #aaa; letter-spacing: 1px; margin: 6px 0 4px; }
-#forge-slots { display: flex; flex-direction: column; gap: 3px; }
+.forge-right { width: 220px; min-width: 220px; }
+.forge-section-label { font-size: 12px; font-weight: 700; color: #aaa; letter-spacing: 1px; margin: 8px 0 6px; }
+#forge-slots { display: flex; flex-direction: column; gap: 4px; }
 .forge-slot {
-    display: flex; align-items: center; gap: 6px;
-    padding: 4px 8px;
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 10px;
     background: rgba(255,255,255,0.02);
     border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 6px; font-size: 11px;
+    border-radius: 8px; font-size: 12px;
     cursor: pointer; transition: border-color 0.2s;
 }
 .forge-slot:hover { border-color: rgba(79,195,247,0.3); }
@@ -380,13 +380,13 @@
 .forge-slot .quality-rare { color: #4fc3f7; }
 .forge-slot .quality-epic { color: #ce93d8; }
 .forge-slot .quality-legendary { color: #ffd740; }
-#inventory-grid { display: flex; flex-wrap: wrap; gap: 4px; max-height: 120px; overflow-y: auto; }
+#inventory-grid { display: flex; flex-wrap: wrap; gap: 6px; max-height: 140px; overflow-y: auto; }
 .equip-card {
-    width: 72px; padding: 4px;
+    width: 78px; padding: 6px;
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 6px; cursor: pointer;
-    text-align: center; font-size: 9px;
+    border-radius: 8px; cursor: pointer;
+    text-align: center; font-size: 10px;
     transition: border-color 0.2s;
 }
 .equip-card:hover { border-color: rgba(79,195,247,0.4); }
@@ -470,28 +470,28 @@
     letter-spacing: 2px;
     text-shadow: 0 0 16px rgba(76,175,80,0.3);
 }
-.mutation-vault-desc { font-size: 11px; color: #7a9a8a; line-height: 1.4; padding: 0 2px; }
+.mutation-vault-desc { font-size: 12px; color: #7a9a8a; line-height: 1.4; padding: 0 2px; }
 .mutation-vault-hint {
-    font-size: 12px; color: #ffd740; font-weight: 700;
-    padding: 4px 8px; background: rgba(0,0,0,0.2);
-    border-radius: 6px; display: inline-block;
+    font-size: 13px; color: #ffd740; font-weight: 700;
+    padding: 6px 10px; background: rgba(0,0,0,0.2);
+    border-radius: 8px; display: inline-block;
 }
-#mutation-list { display: flex; flex-direction: column; gap: 6px; }
+#mutation-list { display: flex; flex-direction: column; gap: 8px; }
 .mutation-vault-card {
     display: flex; flex-wrap: wrap; align-items: center;
-    gap: 6px 10px; padding: 8px 12px;
+    gap: 8px 12px; padding: 10px 14px;
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 10px; font-size: 12px;
+    border-radius: 12px; font-size: 13px;
     transition: border-color 0.2s;
 }
 .mutation-vault-card.active { border-color: rgba(76,175,80,0.5); background: rgba(76,175,80,0.06); }
 .mutation-vault-card.locked { filter: grayscale(1); opacity: 0.5; }
-.mutation-vault-icon { font-size: 24px; line-height: 1; }
-.mutation-vault-name { font-weight: 700; color: #fbfbf7; min-width: 60px; }
-.mutation-vault-status { color: #666; font-size: 11px; font-weight: 600; }
+.mutation-vault-icon { font-size: 26px; line-height: 1; }
+.mutation-vault-name { font-weight: 700; color: #fbfbf7; min-width: 64px; }
+.mutation-vault-status { color: #666; font-size: 12px; font-weight: 600; }
 .mutation-vault-toggle {
-    padding: 4px 14px; font-size: 11px;
+    padding: 5px 16px; font-size: 12px;
     background: linear-gradient(135deg, #1a5336, #0d3020);
     color: #fff; border: none; border-radius: 6px;
     cursor: pointer; font-weight: 700; transition: transform 0.1s;
@@ -529,11 +529,11 @@
 }
 .achievement-card.unlocked { border-color: rgba(255,215,0,0.3); background: rgba(255,215,0,0.04); }
 .achievement-card.locked { opacity: 0.35; }
-.achievement-icon { font-size: 24px; flex-shrink: 0; width: 32px; text-align: center; }
+.achievement-icon { font-size: 26px; flex-shrink: 0; width: 36px; text-align: center; }
 .achievement-info { flex: 1; min-width: 0; }
-.achievement-name { font-size: 13px; font-weight: 700; color: #fbfbf7; }
+.achievement-name { font-size: 14px; font-weight: 700; color: #fbfbf7; }
 .achievement-card.unlocked .achievement-name { color: #ffd700; }
-.achievement-desc { font-size: 10px; color: #7a9a8a; margin-top: 2px; }
+.achievement-desc { font-size: 11px; color: #7a9a8a; margin-top: 2px; }
 .achievement-progress {
     width: 100%; height: 4px; background: rgba(255,255,255,0.06);
     border-radius: 2px; overflow: hidden; margin-top: 4px;
@@ -597,18 +597,18 @@
 .progress-text { font-size: 10px; color: #ffd700; margin-top: 2px; display: block; }
 
 /* 元货币商城 */
-.perks-list { display: flex; flex-direction: column; gap: 6px; }
+.perks-list { display: flex; flex-direction: column; gap: 8px; }
 .perk-row {
-    display: flex; align-items: center; gap: 8px;
-    padding: 6px 10px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px;
     background: rgba(255,255,255,0.02);
-    border-radius: 6px; font-size: 12px;
+    border-radius: 8px; font-size: 13px;
 }
-.perk-name { font-weight: 700; color: #fbfbf7; min-width: 80px; }
-.perk-count { color: #4fc3f7; font-weight: 600; min-width: 50px; text-align: center; }
-.perk-desc { color: #7a9a8a; font-size: 11px; flex: 1; }
+.perk-name { font-weight: 700; color: #fbfbf7; min-width: 88px; }
+.perk-count { color: #4fc3f7; font-weight: 600; min-width: 56px; text-align: center; }
+.perk-desc { color: #7a9a8a; font-size: 12px; flex: 1; }
 .btn-perk-buy {
-    padding: 3px 12px; font-size: 11px;
+    padding: 4px 14px; font-size: 12px;
     background: linear-gradient(135deg, #b8860b, #daa520);
     color: #fff; border: none; border-radius: 5px;
     cursor: pointer; font-weight: 700; transition: transform 0.1s;
@@ -619,15 +619,15 @@
 
 /* Epoch 15: 精英模式 */
 .elite-toggle {
-    display: flex; align-items: center; gap: 8px;
-    padding: 8px 12px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
     background: rgba(255,23,68,0.05);
     border: 1px solid rgba(255,23,68,0.2);
-    border-radius: 8px; font-size: 12px;
+    border-radius: 10px; font-size: 13px;
 }
 .elite-toggle.active { border-color: rgba(255,23,68,0.5); background: rgba(255,23,68,0.1); }
 .elite-btn {
-    padding: 4px 14px; font-size: 11px; font-weight: 700;
+    padding: 5px 16px; font-size: 12px; font-weight: 700;
     background: linear-gradient(135deg, #b71c1c, #d32f2f);
     color: #fff; border: none; border-radius: 5px;
     cursor: pointer; transition: transform 0.1s;
