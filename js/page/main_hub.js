@@ -87,6 +87,7 @@
                 refreshAchievements();
             }
             if (panelId === 'stats') {
+            if (panelId === 'history') { refreshHistoryPanel(); }
                 refreshStatsPanel();
             }
         },
@@ -1051,6 +1052,29 @@
         }
 
         return { completed: completed, bonusTokens: bonusTokens, bonusCores: bonusCores };
+    }
+
+
+    /* Epoch 17: 战局历史面板 */
+    function refreshHistoryPanel() {
+        var grid = document.getElementById('history-grid');
+        if (!grid) return;
+        if (typeof window.saveManager.getRunHistory !== 'function') return;
+        var history = window.saveManager.getRunHistory(20);
+        if (!history || history.length === 0) {
+            grid.innerHTML = '<div class="stats-empty">暂无历史记录，开始一局游戏吧！</div>';
+            return;
+        }
+        var html = '';
+        for (var i = 0; i < history.length; i++) {
+            var e = history[i];
+            var ts = new Date(e.timestamp);
+            var ds = ts.getFullYear()+'/'+(ts.getMonth()+1)+'/'+ts.getDate()+' '+ts.getHours()+':'+String(ts.getMinutes()).padStart(2,'0');
+            var rc = e.won ? 'history-won' : 'history-lost';
+            var ri = e.won ? '通关' : '失败';
+            html += '<div class="history-entry '+rc+'"><div class="history-time">'+ds+'</div><div class="history-result">'+ri+'</div><div class="history-details">英雄: '+(e.heroId||'-')+' | 关卡: '+(e.levelId||'-')+' | 击杀: '+e.kills+' | 用时: '+Math.round(e.elapsed/60)+'分'+(e.loopCount?' | 深渊: '+e.loopCount+'层':'')+'</div><div class="history-reward">奖励: +'+e.metaTokensEarned+' 代币</div></div>';
+        }
+        grid.innerHTML = html;
     }
 
     if (document.readyState === 'loading') {

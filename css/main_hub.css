@@ -629,3 +629,18 @@
 }
 .elite-btn:hover { transform: scale(1.06); }
 .elite-btn.off { background: linear-gradient(135deg, #555, #777); }
+
+/* Epoch 17: 历史记录 */
+.history-entry {
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    border-left: 3px solid #444;
+    margin-bottom: 4px;
+}
+.history-won { border-left-color: #4caf50; background: rgba(76,175,80,0.05); }
+.history-lost { border-left-color: #f44336; }
+.history-time { font-size: 10px; color: #666; }
+.history-result { font-size: 12px; font-weight: 700; color: #fbfbf7; }
+.history-details { font-size: 11px; color: #7a9a8a; margin-top: 2px; }
+.history-reward { font-size: 11px; color: #ffd700; font-weight: 600; margin-top: 2px; }

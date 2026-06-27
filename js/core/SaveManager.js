@@ -931,6 +931,91 @@ class SaveManager {
             player.hp = Math.max(player.hp, player.maxHp);
         }
     }
+
+    /* ── Epoch 17: 元货币消费扩展 ── */
+
+    spendMetaTokens(itemId, cost) {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            if ((meta.metaTokens || 0) < cost) return Promise.resolve({ ok: false, reason: '元代币不足' });
+
+            var result = null;
+            switch (itemId) {
+                case 'token_revive': {
+                    if (!meta.purchasedPerks) meta.purchasedPerks = {};
+                    if (!meta.purchasedPerks.token_revive) meta.purchasedPerks.token_revive = 0;
+                    meta.purchasedPerks.token_revive++;
+                    meta.metaTokens -= cost;
+                    result = self.saveMeta(meta).then(function() { return { ok: true, perk: 'revive' }; });
+                    break;
+                }
+                case 'token_relic_start': {
+                    if (!meta.purchasedPerks) meta.purchasedPerks = {};
+                    if (meta.purchasedPerks.token_relic_start) return Promise.resolve({ ok: false, reason: '已购买' });
+                    meta.purchasedPerks.token_relic_start = true;
+                    meta.metaTokens -= cost;
+                    result = self.saveMeta(meta).then(function() { return { ok: true, perk: 'relic_start' }; });
+                    break;
+                }
+                case 'token_map_affinity_level1': {
+                    if (!meta.purchasedPerks) meta.purchasedPerks = {};
+                    if ((meta.purchasedPerks.token_map_affinity || 0) < 1) {
+                        meta.purchasedPerks.token_map_affinity = 1;
+                        meta.metaTokens -= cost;
+                        result = self.saveMeta(meta).then(function() { return { ok: true, perk: 'map_affinity_1' }; });
+                    } else {
+                        result = Promise.resolve({ ok: false, reason: '已拥有更高级别' });
+                    }
+                    break;
+                }
+                case 'token_map_affinity_level2': {
+                    if (!meta.purchasedPerks) meta.purchasedPerks = {};
+                    if ((meta.purchasedPerks.token_map_affinity || 0) < 2) {
+                        meta.purchasedPerks.token_map_affinity = 2;
+                        meta.metaTokens -= cost;
+                        result = self.saveMeta(meta).then(function() { return { ok: true, perk: 'map_affinity_2' }; });
+                    } else {
+                        result = Promise.resolve({ ok: false, reason: '已拥有更高级别' });
+                    }
+                    break;
+                }
+                case 'token_map_affinity_level3': {
+                    if (!meta.purchasedPerks) meta.purchasedPerks = {};
+                    if ((meta.purchasedPerks.token_map_affinity || 0) < 3) {
+                        meta.purchasedPerks.token_map_affinity = 3;
+                        meta.metaTokens -= cost;
+                        result = self.saveMeta(meta).then(function() { return { ok: true, perk: 'map_affinity_3' }; });
+                    } else {
+                        result = Promise.resolve({ ok: false, reason: '已拥有更高级别' });
+                    }
+                    break;
+                }
+                /* Epoch 17 新增 */
+                case 'token_reset_talents': {
+                    if (!meta.talents) return Promise.resolve({ ok: false, reason: '无天赋可重置' });
+                    var refunded = 0;
+                    for (var k in meta.talents) { if (typeof meta.talents[k] === 'number') refunded += meta.talents[k]; }
+                    meta.talents = { health_boost: 0, speed_boost: 0, magnet_boost: 0, weapon_forge: 0, listening_intuition: 0, gangpai_hardiness: 0, 摸牌_speed: 0, starting_weapons: 0, core_resonance: 0, 雀魂_shield: 0 };
+                    meta.bossCores = (meta.bossCores || 0) + refunded;
+                    meta.metaTokens -= cost;
+                    result = self.saveMeta(meta).then(function() { return { ok: true, refunded: refunded }; });
+                    break;
+                }
+                case 'token_extra_weapon_slot': {
+                    if (!meta.purchasedPerks) meta.purchasedPerks = {};
+                    var extraSlots = meta.purchasedPerks.extra_weapon_slots || 0;
+                    if (extraSlots >= 3) return Promise.resolve({ ok: false, reason: '已达上限' });
+                    meta.purchasedPerks.extra_weapon_slots = extraSlots + 1;
+                    meta.metaTokens -= cost;
+                    result = self.saveMeta(meta).then(function() { return { ok: true, perk: 'extra_slot', totalSlots: 6 + extraSlots + 1 }; });
+                    break;
+                }
+                default:
+                    return Promise.resolve({ ok: false, reason: '未知商品' });
+            }
+            return result;
+        });
+    }
 }
 
 window.saveManager = new SaveManager();
