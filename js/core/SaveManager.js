@@ -875,6 +875,62 @@ class SaveManager {
         await this._saveMetaToStorage();
         return { ok: true, newItem: item };
     }
+
+    /* ── Epoch 16: 声望/转生系统 ── */
+
+    getPrestigeInfo() {
+        var meta = this._metaCache || {};
+        var prestigeLevel = meta.prestigeLevel || 0;
+        var prestigePoints = meta.prestigePoints || 0;
+        var totalRuns = meta.totalRuns || 0;
+        var potential = Math.floor(Math.pow(totalRuns, 0.6));
+        return {
+            level: prestigeLevel,
+            points: prestigePoints,
+            totalRuns: totalRuns,
+            potential: potential,
+            canPrestige: potential > prestigePoints
+        };
+    }
+
+    doPrestige() {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            var currentPoints = meta.prestigePoints || 0;
+            var totalRuns = meta.totalRuns || 0;
+            var potential = Math.floor(Math.pow(totalRuns, 0.6));
+            if (potential <= currentPoints) return Promise.resolve({ ok: false, reason: '声望点不足' });
+
+            var gained = potential - currentPoints;
+            meta.prestigePoints = potential;
+            meta.prestigeLevel = (meta.prestigeLevel || 0) + 1;
+            meta.prestigeHistory = meta.prestigeHistory || [];
+            meta.prestigeHistory.push({
+                timestamp: Date.now(),
+                runsAtPrestige: totalRuns,
+                pointsGained: gained
+            });
+
+            var prestigeBonus = meta.prestigeBonus || {};
+            prestigeBonus.globalAtkBonus = (prestigeBonus.globalAtkBonus || 0) + gained * 0.5;
+            prestigeBonus.globalHpBonus = (prestigeBonus.globalHpBonus || 0) + gained * 2;
+            meta.prestigeBonus = prestigeBonus;
+
+            return self.saveMeta(meta).then(function() {
+                return { ok: true, gained: gained, level: meta.prestigeLevel };
+            });
+        });
+    }
+
+    applyPrestigeBonus(player) {
+        var meta = this._metaCache || {};
+        var bonus = meta.prestigeBonus || {};
+        if (bonus.globalAtkBonus) player.atk += Math.floor(bonus.globalAtkBonus);
+        if (bonus.globalHpBonus) {
+            player.maxHp += Math.floor(bonus.globalHpBonus);
+            player.hp = Math.max(player.hp, player.maxHp);
+        }
+    }
 }
 
 window.saveManager = new SaveManager();

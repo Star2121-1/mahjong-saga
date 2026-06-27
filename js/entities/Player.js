@@ -464,6 +464,10 @@ class Player {
             this._startsWithRelic = true;
         }
         var mapAffinity = perks.token_map_affinity || 0;
+        /* Epoch 16: 转生加成 */
+        if (window.saveManager && window.saveManager.applyPrestigeBonus) {
+            window.saveManager.applyPrestigeBonus(this);
+        }
         this.mapAffinityLevel = mapAffinity;
 
         this.relicLevels = {

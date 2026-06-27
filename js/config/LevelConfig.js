@@ -115,3 +115,77 @@ window.proceduralLevelGenerator = {
         };
     }
 };
+
+/* Epoch 16: 程序化种子系统 */
+window.proceduralSeedGenerator = {
+    /* 简单 mulberry32 PRNG */
+    createSeed: function(seedStr) {
+        var h = 0;
+        for (var i = 0; i < (seedStr || '').length; i++) {
+            h = Math.imul(31, h) + (seedStr.charCodeAt(i) | 0) | 0;
+        }
+        return function() {
+            h |= 0; h = h + 0x6D2B79F5 | 0;
+            var t = Math.imul(h ^ h >>> 15, 1 | h);
+            t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+            return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        };
+    },
+
+    generateWithSeed: function(abyssLevel, seed) {
+        var rng = this.createSeed(seed);
+        var base = window.levelConfig.level_procedural;
+        var scaling = base.abyssScaling;
+        var diffMult = Math.pow(scaling.enemyHpMult, abyssLevel);
+        var atkMult = Math.pow(scaling.enemyAtkMult, abyssLevel);
+        var spawnMult = Math.pow(scaling.spawnCountMult, abyssLevel);
+        var intervalReduction = Math.max(0.3, base.spawnIntervalMin - abyssLevel * scaling.intervalReduce);
+        var effectiveWaves = base.maxWaves + Math.floor(abyssLevel * scaling.maxWavesBonus);
+
+        /* 种子影响的随机偏移 */
+        var hpOffset = 1 + (rng() - 0.5) * 0.1;  /* ±5% HP 浮动 */
+        var atkOffset = 1 + (rng() - 0.5) * 0.1;  /* ±5% ATK 浮动 */
+        var typeBias = rng();  /* 决定哪类敌人偏多 */
+
+        var waveEnemyMax = [];
+        for (var i = 0; i < effectiveWaves; i++) {
+            var baseCount = 20 + i * 10;
+            var count = Math.floor(baseCount * spawnMult * (1 + (rng() - 0.5) * 0.15));
+            waveEnemyMax.push(count);
+        }
+        waveEnemyMax[effectiveWaves - 1] = 1;
+
+        /* 根据种子调整敌人类型权重 */
+        var enemyTypes = { Normal: 0.15, Tanker: 0.25, Stalker: 0.25, Shaman: 0.35 };
+        if (typeBias < 0.33) { enemyTypes.Stalker += 0.1; enemyTypes.Normal -= 0.1; }
+        else if (typeBias < 0.66) { enemyTypes.Shaman += 0.1; enemyTypes.Tanker -= 0.1; }
+        else { enemyTypes.Tanker += 0.1; enemyTypes.Shaman -= 0.1; }
+
+        var seedHash = '';
+        var hv = 0;
+        for (var ci = 0; ci < (seed || '').length; ci++) hv = ((hv << 5) - hv) + seed.charCodeAt(ci) | 0;
+        seedHash = 's' + Math.abs(hv).toString(36);
+
+        return {
+            id: 'level_seeded_' + seedHash + '_' + abyssLevel,
+            name: '程序裂隙 · 第 ' + (abyssLevel + 1) + ' 层 [' + seedHash + ']',
+            desc: '深渊层数 x' + (abyssLevel + 1) + '，种子 ' + seedHash + '，HP±' + (hpOffset * 100).toFixed(0) + '%',
+            mapW: base.mapW,
+            mapH: base.mapH,
+            maxWaves: effectiveWaves,
+            difficultyFactor: base.difficultyFactor * diffMult * hpOffset,
+            waveEnemyMax: waveEnemyMax,
+            enemyTypes: enemyTypes,
+            spawnIntervalMin: intervalReduction,
+            spawnIntervalDecay: base.spawnIntervalDecay + abyssLevel * 0.005,
+            bossThreshold: effectiveWaves,
+            difficultyTier: base.difficultyTier,
+            abyssLevel: abyssLevel,
+            isProcedural: true,
+            isSeeded: true,
+            seed: seedHash,
+            hpMultiplier: hpOffset,
+            atkMultiplier: atkOffset
+        };
+    }
+};
