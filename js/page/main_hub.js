@@ -909,6 +909,7 @@
         }
 
         /* 元货币消费 */
+        var pi = typeof window.saveManager.getPrestigeInfo === 'function' ? window.saveManager.getPrestigeInfo() : null;
         var perks = (meta.purchasedPerks || {});
         var perksHtml =
             '<div class="perk-row">' +
@@ -958,6 +959,14 @@
         });
 
         /* Epoch 15: 精英模式切换 */
+        /* Epoch 21: 声望按钮 */
+        var prestigeBtn = document.getElementById('prestige-btn');
+        if (prestigeBtn) {
+            prestigeBtn.addEventListener('click', function() {
+                onPrestigeToggle(this);
+            });
+        }
+
         var eliteBtn = document.getElementById('elite-toggle-btn');
         if (eliteBtn) {
             eliteBtn.addEventListener('click', function() {
@@ -993,6 +1002,18 @@
     function _mapAffinityCost(current) {
         var costs = [20, 40, 60];
         return costs[current] || '已满级';
+    }
+
+    async function onPrestigeToggle(btn) {
+        var result = await window.saveManager.doPrestige();
+        if (result.ok) {
+            refreshStatsPanel();
+            refreshMainHub();
+        } else {
+            btn.textContent = result.reason;
+            btn.disabled = true;
+            setTimeout(function() { refreshStatsPanel(); }, 1200);
+        }
     }
 
     async function onPerkPurchase(btn) {
