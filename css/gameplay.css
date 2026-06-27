@@ -29,6 +29,9 @@
     .ws-icon { width: 8px; height: 8px; }
     .ws-name { font-size: 8px; max-width: 36px; }
     .ws-level { font-size: 7px; }
+    #boss-hp-bar { height: 16px; padding: 0 6px; gap: 4px; }
+    #boss-hp-bar .hp-bar-track { height: 6px; }
+    #boss-hp-label { font-size: 9px; }
 }
 
 /* 16:9 战场主体 */
@@ -1129,4 +1132,31 @@
         margin: 0 auto;
         max-width: 1600px;
     }
+}
+
+/* 覆盖层小高度适配 */
+@media (max-height: 600px) {
+    #victory-overlay h1 { font-size: 24px; letter-spacing: 2px; }
+    .result { font-size: 14px; }
+    #game-over-overlay h1 { font-size: 24px; }
+    .game-over-buttons { gap: 6px; }
+    .game-over-buttons button { padding: 6px 16px; font-size: 12px; }
+    #mutator-overlay .mutator-title { font-size: 18px; }
+    #mutator-overlay .mutator-subtitle { font-size: 11px; }
+    .mutator-card { width: 140px; padding: 10px 8px; }
+    .mutator-card-icon { font-size: 24px; }
+    .mutator-card-title { font-size: 13px; }
+    .mutator-card-desc { font-size: 10px; }
+    #mutator-overlay .mutator-btn { padding: 6px 16px; font-size: 12px; }
+    .abyss-title { font-size: 20px; letter-spacing: 2px; }
+    .abyss-subtitle { font-size: 13px; }
+    .abyss-warning { font-size: 15px; }
+    .abyss-btn { padding: 8px 20px; font-size: 13px; }
+    #reward-overlay h2 { font-size: 22px; }
+    .reward-card { width: 150px; padding: 12px 10px; }
+    .relic-name { font-size: 12px; }
+    .relic-stars { font-size: 10px; }
+    .relic-desc { font-size: 10px; }
+    .relic-cost { font-size: 11px; }
+    #reward-overlay .relic-btn { padding: 5px 14px; font-size: 11px; }
 }
