@@ -1112,6 +1112,73 @@ class SaveManager {
         if (levelId) return bests[levelId] || {};
         return bests;
     }
+
+    /* Epoch 19: 声望/转生 */
+    getPrestigeInfo() {
+        var meta = this._metaCache || {};
+        var pl = meta.prestigeLevel||0, pp = meta.prestigePoints||0, tr = meta.totalRuns||0;
+        var pot = Math.floor(Math.pow(tr, 0.6));
+        return { level: pl, points: pp, totalRuns: tr, potential: pot, canPrestige: pot > pp };
+    }
+    doPrestige() {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            var pp = meta.prestigePoints||0, tr = meta.totalRuns||0;
+            var pot = Math.floor(Math.pow(tr, 0.6));
+            if (pot <= pp) return Promise.resolve({ ok: false, reason: '声望点不足' });
+            var gained = pot - pp;
+            meta.prestigePoints = pot;
+            meta.prestigeLevel = (meta.prestigeLevel||0)+1;
+            meta.prestigeHistory = meta.prestigeHistory||[];
+            meta.prestigeHistory.push({ timestamp: Date.now(), runsAtPrestige: tr, pointsGained: gained });
+            var pb = meta.prestigeBonus||{};
+            pb.globalAtkBonus = (pb.globalAtkBonus||0)+gained*0.5;
+            pb.globalHpBonus = (pb.globalHpBonus||0)+gained*2;
+            meta.prestigeBonus = pb;
+            return self.saveMeta(meta).then(function() { return { ok: true, gained: gained, level: meta.prestigeLevel }; });
+        });
+    }
+    applyPrestigeBonus(player) {
+        var meta = this._metaCache||{}, bonus = meta.prestigeBonus||{};
+        if (bonus.globalAtkBonus) player.atk += Math.floor(bonus.globalAtkBonus);
+        if (bonus.globalHpBonus) { player.maxHp += Math.floor(bonus.globalHpBonus); player.hp = Math.max(player.hp, player.maxHp); }
+    }
+    /* Epoch 20: 每日挑战轮换 */
+    checkDailyChallengeRotation() {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            if (!meta.dailyChallenges) meta.dailyChallenges = { active: [], lastRotation: 0 };
+            var now = Date.now(), last = meta.dailyChallenges.lastRotation||0;
+            if (now-last < 86400000) return meta.dailyChallenges;
+            var pool = SaveManager.CHALLENGE_POOL||[];
+            if (pool.length===0) return meta.dailyChallenges;
+            var seed = Math.floor(now/86400000), indices=[], h = seed;
+            for (var i=0; i<3 && indices.length<pool.length; i++) {
+                h = (h*1103515245+12345) & 0x7fffffff;
+                var idx = h % pool.length;
+                if (indices.indexOf(idx)===-1) indices.push(idx);
+            }
+            meta.dailyChallenges = { active: indices.map(function(ix){return pool[ix];}), lastRotation: now };
+            return self.saveMeta(meta).then(function() { return meta.dailyChallenges; });
+        });
+    }
+    /* Epoch 20: 赛季激活 */
+    getSeasonStatus() {
+        var meta = this._metaCache||{}, season = meta.season||{};
+        var cs = season.currentSeason||0, ss = season.seasonStart||0;
+        var de = ss>0 ? Math.floor((Date.now()-ss)/86400000) : 0;
+        return { season: cs, daysElapsed: de, isActive: cs>0 };
+    }
+    activateSeason() {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            if (!meta.season) meta.season = { currentSeason: 0, seasonStart: Date.now(), bestRuns: {} };
+            if (meta.season.currentSeason>0) return Promise.resolve({ ok: false, reason: '赛季已激活' });
+            meta.season.currentSeason = 1;
+            meta.season.seasonStart = Date.now();
+            return self.saveMeta(meta).then(function() { return { ok: true, season: 1 }; });
+        });
+    }
 }
 
 window.saveManager = new SaveManager();
