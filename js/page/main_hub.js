@@ -205,6 +205,43 @@
             }
         }
 
+        /* Epoch 22: 登录streak + 赛季状态 */
+        var streakEl = document.getElementById('login-streak-indicator');
+        if (streakEl && typeof window.saveManager.checkDailyLogin === 'function') {
+            window.saveManager.checkDailyLogin().then(function(streak) {
+                if (streak && streak.streakDays > 0) {
+                    streakEl.textContent = '🔥 Streak: ' + streak.streakDays + 'd';
+                    streakEl.style.color = streak.streakDays >= 7 ? '#ff6f00' : '#ffd700';
+                }
+            }).catch(function() {});
+        }
+
+        var seasonEl = document.getElementById('season-indicator');
+        if (seasonEl && typeof window.saveManager.getSeasonStatus === 'function') {
+            var ss = window.saveManager.getSeasonStatus();
+            if (ss.isActive) {
+                seasonEl.textContent = '🌟 赛季' + ss.season + ' (D' + ss.daysElapsed + ')';
+                seasonEl.style.color = '#7c4dff';
+            } else {
+                seasonEl.textContent = '赛季未激活';
+                seasonEl.style.color = '#666';
+            }
+        }
+
+        /* Epoch 22: 赛季触发检查 */
+        if (typeof window.saveManager.checkSeasonTrigger === 'function') {
+            window.saveManager.checkSeasonTrigger().then(function(res) {
+                if (res.triggered && res.ok) {
+                    var seasonEl = document.getElementById('season-indicator');
+                    if (seasonEl) {
+                        seasonEl.textContent = '🌟 新赛季激活！';
+                        seasonEl.style.color = '#7c4dff';
+                    }
+                    refreshMainHub();
+                }
+            }).catch(function() {});
+        }
+
         refreshHeroCarousel();
         refreshTechTree();
         refreshTalentMarket();
@@ -888,7 +925,7 @@
         }
 
 
-        /* Epoch 18: 每周超级挑战 */
+        /* Epoch 18/22: 每周超级挑战 */
         var weeklyHtml = '';
         if (typeof window.saveManager.getWeeklyChallenges === 'function') {
             window.saveManager.getWeeklyChallenges().then(function(weekly) {
@@ -896,11 +933,24 @@
                     var wHtml = '';
                     for (var wi = 0; wi < weekly.challenges.length; wi++) {
                         var wc = weekly.challenges[wi];
+                        var progress = 0;
+                        var threshold = wc.threshold || 1;
+                        /* 估算进度 */
+                        if (wc.id.indexOf('kill') !== -1 || wc.id.indexOf('屠龙') !== -1) progress = Math.min(100, Math.round((engine || {}).kills || 0 / threshold * 100));
+                        else if (wc.id.indexOf('survive') !== -1) progress = Math.min(100, Math.round(((engine || {})._elapsed || 0) / threshold * 100));
+                        else if (wc.id.indexOf('abyss') !== -1) progress = Math.min(100, Math.round(((engine || {})._currentAbyss || 0) / threshold * 100));
+                        else if (wc.id.indexOf('od') !== -1) progress = Math.min(100, Math.round(((engine || {})._overdriveCount || 0) / threshold * 100));
+                        else if (wc.id.indexOf('dodge') !== -1) progress = Math.min(100, Math.round(((engine || {})._dodgeCount || 0) / threshold * 100));
+                        else if (wc.id.indexOf('crit') !== -1) progress = Math.min(100, Math.round(((engine || {})._critCount || 0) / threshold * 100));
+                        else progress = Math.min(100, Math.round(progress / threshold * 100));
                         wHtml += '<div class="challenge-card weekly-challenge">' +
                             '<div class="challenge-name">🏆 ' + wc.name + '</div>' +
                             '<div class="challenge-desc">' + wc.desc + '</div>' +
                             '<div class="challenge-reward">奖励: ' + _formatChallengeReward(wc.reward) + '</div>' +
-                            '</div>';
+                            '<div class="challenge-progress">' +
+                            '<div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div>' +
+                            '<span class="progress-text">' + progress + '%</span>' +
+                            '</div></div>';
                     }
                     var weeklySection = document.getElementById('weekly-challenges-section');
                     if (weeklySection) weeklySection.innerHTML = wHtml;
@@ -958,8 +1008,7 @@
             });
         });
 
-        /* Epoch 15: 精英模式切换 */
-        /* Epoch 21: 声望按钮 */
+        /* Epoch 21/16: 声望按钮 (去重) */
         var prestigeBtn = document.getElementById('prestige-btn');
         if (prestigeBtn) {
             prestigeBtn.addEventListener('click', function() {
@@ -971,13 +1020,6 @@
         if (eliteBtn) {
             eliteBtn.addEventListener('click', function() {
                 onEliteToggle(this);
-            });
-        }
-        /* Epoch 16: 声望按钮 */
-        var prestigeBtn = document.getElementById('prestige-btn');
-        if (prestigeBtn) {
-            prestigeBtn.addEventListener('click', function() {
-                onPrestigeToggle(this);
             });
         }
     }
@@ -1039,20 +1081,7 @@
         }
     }
 
-    /* ── Epoch 16: 声望转生 ── */
-    async function onPrestigeToggle(btn) {
-        var result = await window.saveManager.doPrestige();
-        if (result.ok) {
-            refreshStatsPanel();
-            refreshMainHub();
-        } else {
-            btn.textContent = result.reason;
-            btn.disabled = true;
-            setTimeout(function() { refreshStatsPanel(); }, 1200);
-        }
-    }
-
-    /* ── Epoch 15: 精英模式切换 ── */
+    /* ── Epoch 15: 精英模式切换 ── */    /* ── Epoch 15: 精英模式切换 ── */
     async function onEliteToggle(btn) {
         var isOn = window.saveManager.isEliteMode();
         var result = isOn

@@ -248,8 +248,12 @@ class SaveManager {
         };
         const maxLevel = maxLevels[talentId] || 5;
         if (currentLevel >= maxLevel) return { ok: false, reason: '已达满级' };
-        /* Epoch 14: 指数成本曲线 base * 1.3^level */
-        const cost = this._talentCostExponential(talentId, currentLevel);
+        /* Epoch 14: 指数成本 base * 1.3^level；Epoch 22: 通胀调整 */
+        var cost = this._talentCostExponential(talentId, currentLevel);
+        if (meta.inflationGuard) {
+            var factor = 1 + Math.min((meta.inflationGuard.totalMetaTokens || 0) / 5000, 1.0);
+            cost = Math.ceil(cost * factor);
+        }
         if ((meta.bossCores || 0) < cost) return { ok: false, reason: '魔王核心不足' };
         meta.bossCores -= cost;
         meta.talents[talentId] = currentLevel + 1;
@@ -656,6 +660,12 @@ class SaveManager {
                 }
                 default:
                     return Promise.resolve({ ok: false, reason: '未知商品' });
+            }
+            if (result) {
+                result = result.then(function(r) {
+                    self.recordInflation(cost);
+                    return r;
+                });
             }
             return result;
         });
@@ -1178,6 +1188,60 @@ class SaveManager {
             meta.season.seasonStart = Date.now();
             return self.saveMeta(meta).then(function() { return { ok: true, season: 1 }; });
         });
+    }
+
+    /* ── Epoch 22: 通胀防护 ── */
+
+    /** 返回 talent 实际成本（含通胀系数） */
+    getTalentCostWithInflation(talentId, level) {
+        var meta = this._metaCache || {};
+        var spent = meta.inflationGuard || {};
+        var totalSpent = spent.totalMetaTokens || 0;
+        var factor = 1 + Math.min(totalSpent / 5000, 1.0); // 最多 +100%
+        var base = this._talentCostExponential(talentId, level);
+        return Math.ceil(base * factor);
+    }
+
+    /** 记录通胀计量 */
+    recordInflation(metaTokensSpent) {
+        var meta = this._metaCache || {};
+        if (!meta.inflationGuard) meta.inflationGuard = {};
+        meta.inflationGuard.totalMetaTokens = (meta.inflationGuard.totalMetaTokens || 0) + (metaTokensSpent || 0);
+        meta.inflationGuard.lastReset = Date.now();
+    }
+
+    /** 重置通胀计数器（赛季开始时） */
+    resetInflationCounter() {
+        var meta = this._metaCache || {};
+        if (!meta.inflationGuard) meta.inflationGuard = {};
+        meta.inflationGuard.totalMetaTokens = 0;
+        meta.inflationGuard.lastReset = Date.now();
+    }
+
+    /* ── Epoch 22: 赛季触发 ── */
+
+    /** 检查并触发赛季激活条件 */
+    checkSeasonTrigger() {
+        var meta = this._metaCache || {};
+        var season = meta.season || {};
+        if (season.currentSeason > 0) return { triggered: false };
+        var totalRuns = meta.totalRuns || 0;
+        var bestAbyss = meta.highestEndlessLoop || 0;
+        var totalWins = meta.runStats && meta.runStats.wins || 0;
+        if (totalWins >= 5) return this.activateSeason();
+        if (bestAbyss >= 10) return this.activateSeason();
+        return { triggered: false, reason: '未满足赛季激活条件（需 5 胜或深渊 10 层）' };
+    }
+
+    /** 获取赛季奖励 */
+    getSeasonReward(seasonNum) {
+        var rewards = [
+            { metaTokens: 100, bossCores: 5 },
+            { metaTokens: 200, bossCores: 10 },
+            { metaTokens: 400, bossCores: 20 }
+        ];
+        var idx = Math.min(seasonNum - 1, rewards.length - 1);
+        return rewards[idx];
     }
 }
 

@@ -590,6 +590,11 @@
 .challenge-name { font-size: 13px; font-weight: 700; color: #ffd700; }
 .challenge-desc { font-size: 11px; color: #7a9a8a; margin-top: 2px; }
 .challenge-reward { font-size: 11px; color: #81c784; font-weight: 600; margin-top: 4px; }
+.weekly-challenge { border-color: rgba(255,215,0,0.2); }
+.challenge-progress { margin-top: 6px; }
+.progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #ffd700, #ffab00); transition: width 0.3s; }
+.progress-text { font-size: 10px; color: #ffd700; margin-top: 2px; display: block; }
 
 /* 元货币商城 */
 .perks-list { display: flex; flex-direction: column; gap: 6px; }
