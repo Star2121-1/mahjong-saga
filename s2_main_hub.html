@@ -27,6 +27,7 @@
             <div class="nav-item" data-panel="expedition">⚔ 血战到底</div>
             <div class="nav-item" data-panel="mutation">🧬 变异保险库</div>
             <div class="nav-item" data-panel="achievements">🏆 雀理乾坤</div>
+            <div class="nav-item" data-panel="stats">📊 战绩统计</div>
         </aside>
 
         <!-- ════════════════════════════ 右侧内容画布 (85%) ════════════════════════════ -->
@@ -140,6 +141,12 @@
                 <div class="mutation-vault-desc">每通关结算时有20%概率解锁一个变异。出征前可携带已解锁变异（每个使Boss核心掉落翻倍），开局即生效。</div>
                 <div class="mutation-vault-hint">当前携带: <span id="mutation-active-count">0</span> 个 → 核心 × <span id="mutation-multiplier">1</span></div>
                 <div id="mutation-list"></div>
+            </div>
+
+            <!-- ════════════════════════════ tab 7: 战绩统计 ════════════════════════════ -->
+            <div id="panel-stats" class="hub-panel" style="display:none">
+                <div class="stats-title">📊 雀士战绩统计</div>
+                <div id="stats-grid"></div>
             </div>
 
             <!-- ════════════════════════════ tab 6: 雀理乾坤 ════════════════════════════ -->

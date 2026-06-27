@@ -1,4 +1,22 @@
 class SaveManager {
+    static CHALLENGE_POOL = [
+        { id: 'kill_50', name: '初露锋芒', desc: '单局击杀 50 个敌人', reward: { metaTokens: 30 }, check: function(stats) { return stats.kills >= 50; } },
+        { id: 'kill_100', name: '百人斩', desc: '单局击杀 100 个敌人', reward: { metaTokens: 60 }, check: function(stats) { return stats.kills >= 100; } },
+        { id: 'overdrive_3', name: '怒意沸腾', desc: '单局触发 3 次 Overdrive', reward: { bossCores: 1 }, check: function(stats) { return stats.overdriveCount >= 3; } },
+        { id: 'overdrive_10', name: '狂怒不息', desc: '单局触发 10 次 Overdrive', reward: { bossCores: 3 }, check: function(stats) { return stats.overdriveCount >= 10; } },
+        { id: 'survive_300', name: '久经沙场', desc: '单局存活 5 分钟', reward: { metaTokens: 40 }, check: function(stats) { return stats.elapsed >= 300; } },
+        { id: 'survive_600', name: '百战不殆', desc: '单局存活 10 分钟', reward: { metaTokens: 80 }, check: function(stats) { return stats.elapsed >= 600; } },
+        { id: 'gold_500', name: '财源广进', desc: '单局获取 500 金币', reward: { metaTokens: 25 }, check: function(stats) { return stats.maxGold >= 500; } },
+        { id: 'gold_1000', name: '金玉满堂', desc: '单局获取 1000 金币', reward: { metaTokens: 50 }, check: function(stats) { return stats.maxGold >= 1000; } },
+        { id: 'no_damage', name: '毫发无伤', desc: '单局 0 受击通关', reward: { bossCores: 2 }, check: function(stats) { return stats.hitsTaken === 0 && stats.won; } },
+        { id: 'relics_10', name: '博采众长', desc: '单局收集 10 种不同圣物', reward: { metaTokens: 35 }, check: function(stats) { return stats.uniqueRelics >= 10; } },
+        { id: 'boss_lord_kill', name: '斩首行动', desc: '击杀 Boss Lord', reward: { metaTokens: 20 }, check: function(stats) { return stats.bossKills >= 1; } },
+        { id: 'abyss_5', name: '深渊行者', desc: '抵达深渊第 5 层', reward: { bossCores: 2 }, check: function(stats) { return stats.abyssDepth >= 5; } },
+        { id: 'dodge_20', name: '幻影身法', desc: '单局闪避 20 次', reward: { metaTokens: 30 }, check: function(stats) { return stats.dodges >= 20; } },
+        { id: 'crit_30', name: '致命一击', desc: '单局暴击 30 次', reward: { metaTokens: 25 }, check: function(stats) { return stats.crits >= 30; } },
+        { id: 'wave_15', name: 'waves 不息', desc: '单局完成 15 波', reward: { metaTokens: 45 }, check: function(stats) { return stats.waves >= 15; } }
+    ];
+
     constructor() {
         this._metaCache = null;
     }
@@ -81,7 +99,11 @@ class SaveManager {
                 finalBossKills: 0,
                 totalCrits: 0,
                 totalDodges: 0,
-                fullSetActivated: false
+                fullSetActivated: false,
+                /* Epoch 14: 挑战系统 + 运行统计 + 元货币消费 */
+                challenges: { active: [], completed: {}, lastRotation: 0 },
+                runStats: null,
+                purchasedPerks: {}
             };
         } else {
             if (!data.unlockedHeroes) data.unlockedHeroes = ['Knight'];
@@ -142,6 +164,10 @@ class SaveManager {
             if (data.totalCrits == null) data.totalCrits = 0;
             if (data.totalDodges == null) data.totalDodges = 0;
             if (data.fullSetActivated == null) data.fullSetActivated = false;
+            /* Epoch 14 迁移 */
+            if (!data.challenges) data.challenges = { active: [], completed: {}, lastRotation: 0 };
+            if (data.runStats == null) data.runStats = null;
+            if (!data.purchasedPerks) data.purchasedPerks = {};
             this._metaCache = data;
         }
         return this._metaCache;
@@ -212,8 +238,8 @@ class SaveManager {
         };
         const maxLevel = maxLevels[talentId] || 5;
         if (currentLevel >= maxLevel) return { ok: false, reason: '已达满级' };
-        /* 成本曲线：线性增长 */
-        const cost = (currentLevel + 1) * (talentId === 'starting_weapons' ? 5 : (talentId === 'core_resonance' ? 4 : 1));
+        /* Epoch 14: 指数成本曲线 base * 1.3^level */
+        const cost = this._talentCostExponential(talentId, currentLevel);
         if ((meta.bossCores || 0) < cost) return { ok: false, reason: '魔王核心不足' };
         meta.bossCores -= cost;
         meta.talents[talentId] = currentLevel + 1;
@@ -482,6 +508,160 @@ class SaveManager {
             elapsed: 0
         });
         this._metaCache = defaults;
+    }
+
+    /* ── Epoch 14: 挑战系统 ── */
+
+    _initChallenges() {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            if (!meta.challenges) {
+                meta.challenges = {
+                    active: [],
+                    completed: {},
+                    lastRotation: 0
+                };
+                return self._rotateChallenges(meta).then(function() { return meta.challenges; });
+            }
+            return meta.challenges;
+        });
+    }
+
+    _rotateChallenges(meta) {
+        var now = Date.now();
+        var last = meta.challenges && meta.challenges.lastRotation ? meta.challenges.lastRotation : 0;
+        /* 每 6 小时轮换一次 */
+        if (now - last < 6 * 60 * 60 * 1000) return Promise.resolve(false);
+
+        var rng = Math.floor(now / 1000) % SaveManager.CHALLENGE_POOL.length;
+        var active = [];
+        for (var i = 0; i < 3; i++) {
+            var idx = (rng + i) % SaveManager.CHALLENGE_POOL.length;
+            active.push(SaveManager.CHALLENGE_POOL[idx]);
+        }
+        meta.challenges.active = active;
+        meta.challenges.lastRotation = now;
+        return this.saveMeta(meta).then(function() { return true; });
+    }
+
+    /* ── Epoch 14: 运行统计 ── */
+
+    recordRunStats(kills, elapsed, gold, overdriveCount, dodges, crits, waves, bossKills, abyssDepth, won, hitsTaken, uniqueRelics) {
+        var meta = this._metaCache || {};
+        if (!meta.runStats) meta.runStats = {
+            totalRuns: 0, totalKills: 0, totalElapsed: 0,
+            wins: 0, losses: 0, bestAbyssDepth: 0,
+            avgTime: 0, fastestRun: Infinity, slowestRun: 0,
+            totalGold: 0, totalDodges: 0, totalCrits: 0, totalBossKills: 0,
+            totalOverdrives: 0, totalWaves: 0, totalHitsTaken: 0,
+            perfectRuns: 0, relicVariety: 0
+        };
+        var s = meta.runStats;
+        s.totalRuns++;
+        s.totalKills += kills;
+        s.totalElapsed += elapsed;
+        s.avgTime = s.totalElapsed / s.totalRuns;
+        if (won) {
+            s.wins++;
+        } else {
+            s.losses++;
+        }
+        if (elapsed < s.fastestRun) s.fastestRun = elapsed;
+        if (elapsed > s.slowestRun) s.slowestRun = elapsed;
+        if (abyssDepth > s.bestAbyssDepth) s.bestAbyssDepth = abyssDepth;
+        s.totalGold += gold;
+        s.totalDodges += dodges;
+        s.totalCrits += crits;
+        s.totalBossKills += bossKills;
+        s.totalOverdrives += overdriveCount;
+        s.totalWaves += waves;
+        s.totalHitsTaken += hitsTaken;
+        if (hitsTaken === 0 && won) s.perfectRuns++;
+        if (uniqueRelics > s.relicVariety) s.relicVariety = uniqueRelics;
+        return s;
+    }
+
+    getRunStats() {
+        var meta = this._metaCache || {};
+        return meta.runStats || null;
+    }
+
+    /* ── Epoch 14: 元货币消费 ── */
+
+    spendMetaTokens(itemId, cost) {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            if ((meta.metaTokens || 0) < cost) return Promise.resolve({ ok: false, reason: '元代币不足' });
+
+            var result = null;
+            switch (itemId) {
+                case 'token_revive': {
+                    if (!meta.purchasedPerks) meta.purchasedPerks = {};
+                    if (!meta.purchasedPerks.token_revive) meta.purchasedPerks.token_revive = 0;
+                    meta.purchasedPerks.token_revive++;
+                    meta.metaTokens -= cost;
+                    result = self.saveMeta(meta).then(function() { return { ok: true, perk: 'revive' }; });
+                    break;
+                }
+                case 'token_relic_start': {
+                    if (!meta.purchasedPerks) meta.purchasedPerks = {};
+                    if (meta.purchasedPerks.token_relic_start) return Promise.resolve({ ok: false, reason: '已购买' });
+                    meta.purchasedPerks.token_relic_start = true;
+                    meta.metaTokens -= cost;
+                    result = self.saveMeta(meta).then(function() { return { ok: true, perk: 'relic_start' }; });
+                    break;
+                }
+                case 'token_map_affinity_level1': {
+                    if (!meta.purchasedPerks) meta.purchasedPerks = {};
+                    if (meta.purchasedPerks.token_map_affinity < 1) {
+                        meta.purchasedPerks.token_map_affinity = 1;
+                        meta.metaTokens -= cost;
+                        result = self.saveMeta(meta).then(function() { return { ok: true, perk: 'map_affinity_1' }; });
+                    } else {
+                        result = Promise.resolve({ ok: false, reason: '已拥有更高级别' });
+                    }
+                    break;
+                }
+                case 'token_map_affinity_level2': {
+                    if (!meta.purchasedPerks) meta.purchasedPerks = {};
+                    if ((meta.purchasedPerks.token_map_affinity || 0) < 2) {
+                        meta.purchasedPerks.token_map_affinity = 2;
+                        meta.metaTokens -= cost;
+                        result = self.saveMeta(meta).then(function() { return { ok: true, perk: 'map_affinity_2' }; });
+                    } else {
+                        result = Promise.resolve({ ok: false, reason: '已拥有更高级别' });
+                    }
+                    break;
+                }
+                case 'token_map_affinity_level3': {
+                    if (!meta.purchasedPerks) meta.purchasedPerks = {};
+                    if ((meta.purchasedPerks.token_map_affinity || 0) < 3) {
+                        meta.purchasedPerks.token_map_affinity = 3;
+                        meta.metaTokens -= cost;
+                        result = self.saveMeta(meta).then(function() { return { ok: true, perk: 'map_affinity_3' }; });
+                    } else {
+                        result = Promise.resolve({ ok: false, reason: '已拥有更高级别' });
+                    }
+                    break;
+                }
+                default:
+                    return Promise.resolve({ ok: false, reason: '未知商品' });
+            }
+            return result;
+        });
+    }
+
+    /* ── Epoch 14: 天赋成本指数曲线 ── */
+
+    _talentCostExponential(talentId, level) {
+        /* base * (1.3 ^ level)，替代原来的线性 (level + 1) */
+        var bases = {
+            health_boost: 1, speed_boost: 1, magnet_boost: 1, weapon_forge: 1,
+            listening_intuition: 1, gangpai_hardiness: 1, '摸牌_speed': 1,
+            starting_weapons: 5, core_resonance: 4, '雀魂_shield': 2
+        };
+        var base = bases[talentId] || 1;
+        return Math.floor(base * Math.pow(1.3, level));
     }
 
     /* ── 结算代币 ── */

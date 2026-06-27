@@ -161,6 +161,16 @@ class Player {
         return this.hp <= 0;
     }
 
+    /* ── Epoch 14: 复活检查 ── */
+    shouldRevive(engine) {
+        if (!this._hasRevive || !this._reviveCount || this._reviveCount <= 0) return false;
+        this._reviveCount--;
+        this.hp = Math.floor(this.maxHp * 0.3);
+        this.invulnTimer = 3.0;
+        if (this._reviveCount <= 0) this._hasRevive = false;
+        return true;
+    }
+
     addGold(amount) {
         this.gold += amount;
         if (this.gold < 0) this.gold = 0;
@@ -443,6 +453,18 @@ class Player {
         this.critRate += (talents.listening_intuition || 0) * 0.02;
         this.damageReduction += (talents.gangpai_hardiness || 0) * 0.03;
         this.cdFloor = Math.max(0.05, (this.cdFloor || 0.2) - (talents.摸牌_speed || 0) * 0.01);
+
+        /* Epoch 14: 元货币购买加成 */
+        var perks = (meta.purchasedPerks || {});
+        if (perks.token_revive > 0) {
+            this._hasRevive = true;
+            this._reviveCount = perks.token_revive;
+        }
+        if (perks.token_relic_start) {
+            this._startsWithRelic = true;
+        }
+        var mapAffinity = perks.token_map_affinity || 0;
+        this.mapAffinityLevel = mapAffinity;
 
         this.relicLevels = {
             sharp_edge: 0,

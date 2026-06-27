@@ -86,6 +86,9 @@
             if (panelId === 'achievements') {
                 refreshAchievements();
             }
+            if (panelId === 'stats') {
+                refreshStatsPanel();
+            }
         },
 
         _destroyPreviousPanel: function() {
@@ -340,6 +343,11 @@
             { id: '雀魂_shield', name: '雀魂护盾', desc: '每10波触发1次护盾', maxLv: 3 }
         ],
         costOf: function(talentId, level) {
+            /* Epoch 14: 使用 SaveManager 的指数成本函数 */
+            if (window.saveManager && typeof window.saveManager._talentCostExponential === 'function') {
+                return window.saveManager._talentCostExponential(talentId, level);
+            }
+            /* 回退到旧线性公式 */
             if (talentId === 'starting_weapons') return 5;
             if (talentId === 'core_resonance') return (level + 1) * 4;
             return level + 1;
@@ -791,6 +799,195 @@
                 '</div>';
         }
         grid.innerHTML = html;
+    }
+
+    window.mainHubCheckChallenge = checkChallengeCompletion;
+
+    /* ── Epoch 14: 元货币商城购买 ── */
+    window.mainHubPerkPurchase = onPerkPurchase;
+
+    function refreshStatsPanel() {
+        var grid = document.getElementById('stats-grid');
+        if (!grid) return;
+        var meta = window.saveManager._metaCache || {};
+        var stats = meta.runStats || null;
+        var challenges = (meta.challenges && meta.challenges.active) || [];
+
+        /* 总体统计 */
+        var totalRuns = meta.totalRuns || 0;
+        var totalKills = meta.totalKills || 0;
+        var bestAbyss = meta.highestEndlessLoop || 0;
+        var totalCores = meta.bossCores || 0;
+        var totalTokens = meta.metaTokens || 0;
+
+        var statsHtml = '';
+        if (stats) {
+            var winRate = stats.totalRuns > 0 ? Math.round((stats.wins / stats.totalRuns) * 100) : 0;
+            var avgTime = Math.round(stats.avgTime / 60);
+            var perfectRate = stats.totalRuns > 0 ? Math.round((stats.perfectRuns / stats.totalRuns) * 100) : 0;
+            statsHtml =
+                '<div class="stat-row"><span class="stat-label">总场次</span><span class="stat-value">' + totalRuns + '</span></div>' +
+                '<div class="stat-row"><span class="stat-label">总击杀</span><span class="stat-value">' + stats.totalKills + '</span></div>' +
+                '<div class="stat-row"><span class="stat-label">胜率</span><span class="stat-value">' + winRate + '%</span></div>' +
+                '<div class="stat-row"><span class="stat-label">平均用时</span><span class="stat-value">' + avgTime + ' 分钟</span></div>' +
+                '<div class="stat-row"><span class="stat-label">最快通关</span><span class="stat-value">' + (stats.fastestRun < Infinity ? Math.round(stats.fastestRun / 60) : '-') + ' 分钟</span></div>' +
+                '<div class="stat-row"><span class="stat-label">深渊最深</span><span class="stat-value">' + stats.bestAbyssDepth + ' 层</span></div>' +
+                '<div class="stat-row"><span class="stat-label">无伤通关</span><span class="stat-value">' + stats.perfectRuns + ' (' + perfectRate + '%)</span></div>' +
+                '<div class="stat-row"><span class="stat-label">总 Overdrive</span><span class="stat-value">' + stats.totalOverdrives + '</span></div>' +
+                '<div class="stat-row"><span class="stat-label">总闪避</span><span class="stat-value">' + stats.totalDodges + '</span></div>' +
+                '<div class="stat-row"><span class="stat-label">总暴击</span><span class="stat-value">' + stats.totalCrits + '</span></div>' +
+                '<div class="stat-row"><span class="stat-label">总 Boss 击杀</span><span class="stat-value">' + stats.totalBossKills + '</span></div>' +
+                '<div class="stat-row"><span class="stat-label">总波次</span><span class="stat-value">' + stats.totalWaves + '</span></div>' +
+                '<div class="stat-row"><span class="stat-label">总金币</span><span class="stat-value">' + stats.totalGold.toLocaleString() + '</span></div>' +
+                '<div class="stat-row"><span class="stat-label">圣物多样性</span><span class="stat-value">' + stats.relicVariety + ' 种</span></div>';
+        } else {
+            statsHtml = '<div class="stats-empty">暂无数据，开始一局游戏吧！</div>';
+        }
+
+        /* 挑战列表 */
+        var challengesHtml = '';
+        if (challenges.length > 0) {
+            for (var i = 0; i < challenges.length; i++) {
+                var ch = challenges[i];
+                challengesHtml +=
+                    '<div class="challenge-card">' +
+                    '<div class="challenge-name">' + ch.name + '</div>' +
+                    '<div class="challenge-desc">' + ch.desc + '</div>' +
+                    '<div class="challenge-reward">' + _formatChallengeReward(ch.reward) + '</div>' +
+                    '</div>';
+            }
+        } else {
+            challengesHtml = '<div class="stats-empty">暂无活跃挑战</div>';
+        }
+
+        /* 元货币消费 */
+        var perks = (meta.purchasedPerks || {});
+        var perksHtml =
+            '<div class="perk-row">' +
+            '<span class="perk-name">复活机会</span>' +
+            '<span class="perk-count">x' + (perks.token_revive || 0) + '</span>' +
+            '<button class="btn-perk-buy" data-perk="token_revive" data-cost="50">购买 (50 代币)</button>' +
+            '</div>' +
+            '<div class="perk-row">' +
+            '<span class="perk-name">开局圣物</span>' +
+            '<span class="perk-count">' + (perks.token_relic_start ? '已拥有' : '未购买') + '</span>' +
+            '<button class="btn-perk-buy' + (perks.token_relic_start ? ' disabled' : '') + '" data-perk="token_relic_start" data-cost="30"' + (perks.token_relic_start ? ' disabled' : '') + '>购买 (30 代币)</button>' +
+            '</div>' +
+            '<div class="perk-row">' +
+            '<span class="perk-name">关卡亲和 Lv.' + (perks.token_map_affinity || 0) + '</span>' +
+            '<span class="perk-desc">' + _mapAffinityDesc(perks.token_map_affinity || 0) + '</span>' +
+            '<button class="btn-perk-buy' + ((perks.token_map_affinity || 0) >= 3 ? ' disabled' : '') + '" data-perk="map_affinity"' + ((perks.token_map_affinity || 0) >= 3 ? ' disabled' : '') + '>升级 (' + _mapAffinityCost(perks.token_map_affinity || 0) + ' 代币)</button>' +
+            '</div>';
+
+        grid.innerHTML =
+            '<div class="stats-section">' +
+            '<div class="stats-section-title">📊 总体战绩</div>' +
+            '<div class="stats-grid">' + statsHtml + '</div>' +
+            '</div>' +
+            '<div class="stats-section">' +
+            '<div class="stats-section-title">🎯 活跃挑战</div>' +
+            '<div class="challenges-grid">' + challengesHtml + '</div>' +
+            '</div>' +
+            '<div class="stats-section">' +
+            '<div class="stats-section-title">🛒 元代币商城</div>' +
+            '<div class="perks-list">' + perksHtml + '</div>' +
+            '</div>';
+
+        /* 绑定购买按钮 */
+        grid.querySelectorAll('.btn-perk-buy').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                onPerkPurchase(this);
+            });
+        });
+    }
+
+    function _formatChallengeReward(reward) {
+        var parts = [];
+        if (reward.metaTokens) parts.push('+' + reward.metaTokens + ' 元代币');
+        if (reward.bossCores) parts.push('+' + reward.bossCores + ' 核心');
+        return parts.join(' | ');
+    }
+
+    function _mapAffinityDesc(level) {
+        switch (parseInt(level)) {
+            case 0: return '无加成';
+            case 1: return '关卡伤害 -10%';
+            case 2: return '关卡伤害 -20%';
+            case 3: return '关卡伤害 -30%';
+            default: return '已满级';
+        }
+    }
+
+    function _mapAffinityCost(current) {
+        var costs = [20, 40, 60];
+        return costs[current] || '已满级';
+    }
+
+    async function onPerkPurchase(btn) {
+        var perkId = btn.dataset.perk;
+        var cost = parseInt(btn.dataset.cost);
+        if (perkId === 'map_affinity') {
+            var meta = await window.saveManager.getMeta();
+            var level = (meta.purchasedPerks && meta.purchasedPerks.token_map_affinity) || 0;
+            if (level >= 3) return;
+            cost = _mapAffinityCost(level);
+            if (level === 0) perkId = 'token_map_affinity_level1';
+            else if (level === 1) perkId = 'token_map_affinity_level2';
+            else perkId = 'token_map_affinity_level3';
+        }
+        var result = await window.saveManager.spendMetaTokens(perkId, cost);
+        if (result.ok) {
+            refreshStatsPanel();
+            refreshMainHub();
+        } else {
+            btn.textContent = result.reason;
+            btn.disabled = true;
+            setTimeout(function() { refreshStatsPanel(); }, 1200);
+        }
+    }
+
+    function checkChallengeCompletion(engine) {
+        /* 在结算时检查挑战完成 */
+        var meta = window.saveManager._metaCache || {};
+        var challenges = meta.challenges && meta.challenges.active || [];
+        if (!challenges.length) return { completed: [], bonusTokens: 0, bonusCores: 0 };
+
+        var stats = {
+            kills: engine.kills || 0,
+            elapsed: engine._elapsed || 0,
+            overdriveCount: engine._overdriveCount || 0,
+            maxGold: engine._maxGoldThisRun || 0,
+            hitsTaken: engine._playerHitCountThisRun || 0,
+            won: engine.gameOver === false && engine._pendingReward === false,
+            bossKills: engine._bossKillsThisRun || 0,
+            abyssDepth: engine.loopCount || 0,
+            dodges: engine._totalDodgesThisRun || 0,
+            crits: engine._totalCritsThisRun || 0,
+            waves: engine._waveCount || 0,
+            uniqueRelics: Object.keys(engine.player.relicLevels || {}).filter(function(k) { return (engine.player.relicLevels[k] || 0) > 0; }).length
+        };
+
+        var completed = [];
+        var bonusTokens = 0;
+        var bonusCores = 0;
+
+        for (var i = 0; i < challenges.length; i++) {
+            var ch = challenges[i];
+            if (ch.check(stats)) {
+                completed.push(ch.id);
+                if (ch.reward.metaTokens) bonusTokens += ch.reward.metaTokens;
+                if (ch.reward.bossCores) bonusCores += ch.reward.bossCores;
+            }
+        }
+
+        if (completed.length > 0) {
+            if (!meta.challenges.completed) meta.challenges.completed = {};
+            for (var j = 0; j < completed.length; j++) {
+                meta.challenges.completed[completed[j]] = (meta.challenges.completed[completed[j]] || 0) + 1;
+            }
+        }
+
+        return { completed: completed, bonusTokens: bonusTokens, bonusCores: bonusCores };
     }
 
     if (document.readyState === 'loading') {

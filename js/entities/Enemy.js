@@ -137,7 +137,12 @@ class Enemy {
                 this.attackTimer = this.attackCooldown;
                 if (dist <= attackRange + 5) {
                     this.flashTimer = 0.12;
-                    player.takeDamage(this.atk, this);
+                    var dmg = this.atk;
+                    /* Epoch 14: 关卡亲和减伤 */
+                    if (engine && engine._mapAffinityReduction) {
+                        dmg = Math.max(1, Math.floor(dmg * (1 - engine._mapAffinityReduction)));
+                    }
+                    player.takeDamage(dmg, this);
                 }
             }
             if (dist > attackRange + 5) this.reachedPlayer = false;
@@ -187,7 +192,7 @@ class Enemy {
                 if (this.el) this.el.style.opacity = '1';
                 if (dist <= attackRange + 5) {
                     this.flashTimer = 0.12;
-                    player.takeDamage(Math.floor(this.atk * 1.5), this);
+                    player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * 1.5), engine), this);
                 }
             }
             return;
@@ -205,7 +210,7 @@ class Enemy {
                     this.attackTimer = this.attackCooldown;
                     if (dist <= attackRange + 5) {
                         this.flashTimer = 0.12;
-                        player.takeDamage(this.atk, this);
+                        player.takeDamage(this._applyMapAffinityDmg(this.atk, engine), this);
                     }
                 }
                 if (dist > attackRange + 5) this.reachedPlayer = false;
@@ -226,7 +231,7 @@ class Enemy {
                 this.attackTimer = this.attackCooldown;
                 if (dist <= attackRange + 5) {
                     this.flashTimer = 0.12;
-                    player.takeDamage(this.atk, this);
+                    player.takeDamage(this._applyMapAffinityDmg(this.atk, engine), this);
                 }
             }
             if (dist > attackRange + 5) this.reachedPlayer = false;
@@ -293,7 +298,7 @@ class Enemy {
                 this.attackTimer = this.attackCooldown;
                 if (dist <= attackRange + 5) {
                     this.flashTimer = 0.12;
-                    player.takeDamage(this.atk, this);
+                    player.takeDamage(this._applyMapAffinityDmg(this.atk, engine), this);
                 }
             }
             if (dist > attackRange + 5) this.reachedPlayer = false;
@@ -378,7 +383,7 @@ class Enemy {
                     var pdx = player.x - this.x;
                     var pdy = player.y - this.y;
                     if (pdx * pdx + pdy * pdy <= 120 * 120) {
-                        player.takeDamage(Math.floor(this.atk * 2.5), this);
+                        player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * 2.5), engine), this);
                     }
                     if (this._bossWarningEl && this._bossWarningEl.parentNode) this._bossWarningEl.remove();
                     this._bossWarningEl = null;
@@ -443,7 +448,7 @@ class Enemy {
             if (this._bossContactTimer <= 0) {
                 this._bossContactTimer = 0.5;
                 var contactDmg = this._bossEnraged ? Math.floor(this.atk * 2) : this.atk;
-                player.takeDamage(contactDmg, this);
+                player.takeDamage(this._applyMapAffinityDmg(contactDmg, engine), this);
             }
         }
     }
@@ -452,6 +457,14 @@ class Enemy {
         var margin = this.radius;
         this.x = Math.max(margin, Math.min(engine._mapW - margin, this.x));
         this.y = Math.max(margin, Math.min(engine._mapH - margin, this.y));
+    }
+
+    /* ── Epoch 14: 关卡亲和减伤辅助 ── */
+    _applyMapAffinityDmg(dmg, engine) {
+        if (engine && engine._mapAffinityReduction) {
+            return Math.max(1, Math.floor(dmg * (1 - engine._mapAffinityReduction)));
+        }
+        return dmg;
     }
 
     takeDamage(dmg, source, sourceX, sourceY, _fctTypeOverride) {

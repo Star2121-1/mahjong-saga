@@ -545,3 +545,69 @@
 .achievement-progress-text {
     font-size: 9px; color: #666; margin-top: 2px; text-align: right;
 }
+
+/* ══════════════════════════════════════════════
+   Epoch 14: 战绩统计面板
+   ══════════════════════════════════════════════ */
+
+.stats-title {
+    font-size: 18px; font-weight: 800; color: #4fc3f7;
+    text-align: center; letter-spacing: 2px;
+    margin-bottom: 12px;
+    text-shadow: 0 0 20px rgba(79,195,247,0.3);
+}
+#stats-grid { display: flex; flex-direction: column; gap: 12px; }
+.stats-section {
+    border: 1px solid rgba(26,83,54,0.3);
+    border-radius: 12px; padding: 12px;
+    background: rgba(19,59,38,0.1);
+}
+.stats-section-title {
+    font-size: 13px; font-weight: 800; color: #ffd700;
+    letter-spacing: 2px; margin-bottom: 8px;
+    text-shadow: 0 0 12px rgba(255,215,0,0.2);
+}
+.stats-grid { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.stat-row {
+    display: flex; justify-content: space-between; align-items: center;
+    width: calc(50% - 8px); min-width: 160px;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 6px; font-size: 12px;
+}
+.stat-label { color: #7a9a8a; }
+.stat-value { color: #4fc3f7; font-weight: 700; }
+.stats-empty { color: #555; font-size: 13px; text-align: center; padding: 20px; }
+
+/* 挑战卡片 */
+.challenges-grid { display: flex; flex-direction: column; gap: 6px; }
+.challenge-card {
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+}
+.challenge-name { font-size: 13px; font-weight: 700; color: #ffd700; }
+.challenge-desc { font-size: 11px; color: #7a9a8a; margin-top: 2px; }
+.challenge-reward { font-size: 11px; color: #81c784; font-weight: 600; margin-top: 4px; }
+
+/* 元货币商城 */
+.perks-list { display: flex; flex-direction: column; gap: 6px; }
+.perk-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 6px; font-size: 12px;
+}
+.perk-name { font-weight: 700; color: #fbfbf7; min-width: 80px; }
+.perk-count { color: #4fc3f7; font-weight: 600; min-width: 50px; text-align: center; }
+.perk-desc { color: #7a9a8a; font-size: 11px; flex: 1; }
+.btn-perk-buy {
+    padding: 3px 12px; font-size: 11px;
+    background: linear-gradient(135deg, #b8860b, #daa520);
+    color: #fff; border: none; border-radius: 5px;
+    cursor: pointer; font-weight: 700; transition: transform 0.1s;
+    white-space: nowrap;
+}
+.btn-perk-buy:hover { transform: scale(1.06); }
+.btn-perk-buy:disabled { background: #333; color: #666; cursor: not-allowed; transform: none; }

@@ -14,3 +14,5 @@
 | 10 | `feat/evolution-epoch-10` | 委托 Combat/Systems — 飘字/Overdrive/突变/枯萎/共鸣 | ✅ Committed |
 | 11 | `feat/evolution-epoch-11` | 委托掉落/爆炸/震动/因果文本 — 委托进度达 100% | ✅ Committed |
 | 12 | `feat/evolution-epoch-12` | GameSpawner Enemy 引用兼容性修复 | ✅ Committed |
+| 13 | `feat/evolution-epoch-13` | 移除焰痕共鸣 else 存根 — GameEngine 2842→2785 行 (-57) | ✅ Committed |
+| 14 | `feat/evolution-epoch-14` | 元进度经济扩展 — 挑战系统/元代币商城/战绩统计/指数天赋成本/关卡亲和/复活 | ✅ Committed |

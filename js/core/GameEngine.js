@@ -417,6 +417,13 @@ Gp._startNewRun = function(heroId, levelId) {
         this._spawnCausalityText('\u8840\u6d77\u72c2\u66b4\uff1a\u9886\u4e3b\u5f3a\u5316\uff0c\u6838\u5fc3 +2');
     }
 
+    /* \u2500\u2500 Epoch 14: \u5173\u5361\u4eb2\u548c\u51cf\u4f24 \u2500\u2500 */
+    if (this.player && this.player.mapAffinityLevel > 0) {
+        var affinityReduction = this.player.mapAffinityLevel * 0.1;
+        this._mapAffinityReduction = affinityReduction;
+        this._spawnCausalityText('\ud83d\uddfa\ufe0f \u5173\u5361\u4eb2\u548c Lv.' + this.player.mapAffinityLevel + ' \u2014 \u4f24\u5bb3 -' + (affinityReduction * 100) + '%');
+    }
+
     this.player.x = this._mapW / 2;
     this.player.y = this._mapH / 2;
     this.player.invulnTimer = 1.5;
@@ -920,7 +927,16 @@ Gp._loop = function(timestamp) {
             }
         }
 
-        if (this.player.hp <= 0) { this._gameOver(); return; }
+        if (this.player.hp <= 0) {
+            /* Epoch 14: 复活机会 */
+            if (this.player.shouldRevive && this.player.shouldRevive(this)) {
+                this._spawnCausalityText('💀 复活！元气恢复 30%');
+                this.triggerShake(1.5, 500);
+                return;
+            }
+            this._gameOver();
+            return;
+        }
 
         if (this._levelUpPending && !this._pendingReward) {
             this._levelUpPending = false;
@@ -1585,6 +1601,53 @@ Gp._gameOver = async function() {
     meta.metaTokens = (meta.metaTokens || 0) + tokens;
     meta.totalRuns = (meta.totalRuns || 0) + 1;
     meta.totalKills = (meta.totalKills || 0) + this.kills;
+
+    /* Epoch 14: 挑战检查（死亡也触发） */
+    try {
+        if (typeof window.mainHubCheckChallenge === 'function') {
+            var cr = window.mainHubCheckChallenge(this);
+            if (cr.completed && cr.completed.length > 0) {
+                meta.metaTokens = (meta.metaTokens || 0) + (cr.bonusTokens || 0);
+                meta.bossCores = (meta.bossCores || 0) + (cr.bonusCores || 0);
+            }
+        }
+    } catch(e) {}
+
+    /* Epoch 14: 运行统计 */
+    try {
+        var ur = Object.keys(this.player.relicLevels || {}).filter(function(k) { return (this.player.relicLevels[k] || 0) > 0; }).length;
+        if (typeof window.saveManager.recordRunStats === 'function') {
+            window.saveManager.recordRunStats(this.kills, this._elapsed, this._maxGoldThisRun || 0, this._overdriveCount || 0, this._totalDodgesThisRun || 0, this._totalCritsThisRun || 0, this._waveCount, this._bossKillsThisRun || 0, this.loopCount || 0, false, this._playerHitCountThisRun || 0, ur);
+        }
+    } catch(e) {}
+    /* ── Epoch 14: 挑战完成检查 ── */
+    var challengeResults = null;
+    try {
+        if (typeof window.mainHubCheckChallenge === 'function') {
+            challengeResults = window.mainHubCheckChallenge(this);
+        }
+    } catch(e) {}
+    if (challengeResults && challengeResults.completed && challengeResults.completed.length > 0) {
+        meta.metaTokens = (meta.metaTokens || 0) + (challengeResults.bonusTokens || 0);
+        meta.bossCores = (meta.bossCores || 0) + (challengeResults.bonusCores || 0);
+        var chText = '🎯 挑战完成: ' + challengeResults.completed.length + ' 项';
+        if (challengeResults.bonusTokens) chText += ' +' + challengeResults.bonusTokens + ' 代币';
+        if (challengeResults.bonusCores) chText += ' +' + challengeResults.bonusCores + ' 核心';
+        this._spawnCausalityText(chText);
+    }
+
+    /* ── Epoch 14: 运行统计记录 ── */
+    var uniqueRelics = Object.keys(this.player.relicLevels || {}).filter(function(k) { return (this.player.relicLevels[k] || 0) > 0; }).length;
+    if (typeof window.saveManager.recordRunStats === 'function') {
+        window.saveManager.recordRunStats(
+            this.kills, this._elapsed, this._maxGoldThisRun || 0,
+            this._overdriveCount || 0, this._totalDodgesThisRun || 0,
+            this._totalCritsThisRun || 0, this._waveCount,
+            this._bossKillsThisRun || 0, this.loopCount || 0,
+            !this.gameOver, this._playerHitCountThisRun || 0, uniqueRelics
+        );
+    }
+
     meta.lastSaveTimestamp = Date.now();
     await window.saveManager.saveMeta(meta);
     await window.saveManager.clearActiveRun();
@@ -2436,7 +2499,12 @@ Gp._updateEnemyProjectiles = function(dt) {
             if (dx * dx + dy * dy < (this.player.radius + p.radius) * (this.player.radius + p.radius)) {
                 if (!p._hitPlayer) {
                     p._hitPlayer = true;
-                    this.player.takeDamage(p.damage, this._bossLord || this);
+                    var dmg = p.damage;
+                    /* Epoch 14: 关卡亲和减伤 */
+                    if (this._mapAffinityReduction) {
+                        dmg = Math.max(1, Math.floor(dmg * (1 - this._mapAffinityReduction)));
+                    }
+                    this.player.takeDamage(dmg, this._bossLord || this);
                 }
                 p.alive = false;
             }
