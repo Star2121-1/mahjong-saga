@@ -19,6 +19,25 @@
 }
 .stat { font-size: 13px; font-weight: 600; color: #fbfbf7; letter-spacing: 1px; }
 
+/* Mutator badge + Resonance pills */
+.mutator-badge {
+    padding: 2px 8px; background: rgba(182,41,41,0.25);
+    border: 1px solid #b62929; border-radius: 4px;
+    font-size: 11px; color: #ff8a80; font-weight: 700;
+    white-space: nowrap;
+}
+.mutator-badge.bloodmoon { background: rgba(182,41,41,0.4); border-color: #b62929; color: #ff5252; }
+.mutator-badge.frenzy { background: rgba(255,152,0,0.25); border-color: #ff9800; color: #ffab40; }
+.mutator-badge.gravity { background: rgba(156,39,176,0.25); border-color: #9c27b0; color: #ea80fc; }
+.mutator-badge.frailty { background: rgba(255,235,59,0.2); border-color: #ffeb3b; color: #fff176; }
+.mutator-badge.wither { background: rgba(76,175,80,0.25); border-color: #4caf50; color: #a5d6a7; }
+.resonance-pills { display: flex; gap: 4px; }
+.resonance-pill {
+    padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 700;
+}
+.resonance-speed { background: rgba(255,109,0,0.2); color: #ff8a65; border: 1px solid #ff6d00; }
+.resonance-ice { background: rgba(76,175,80,0.2); color: #a5d6a7; border: 1px solid #4caf50; }
+
 /* 响应式: 小高度视口缩减顶部栏 */
 @media (max-height: 600px) {
     #top-bar { height: 28px; gap: 10px; padding-left: 8px; }
@@ -859,6 +878,12 @@
     filter: saturate(1.6) hue-rotate(-10deg) brightness(1.15);
     transition: filter 0.15s;
 }
+/* Epoch 38: Mutator screen tinting */
+#game-container.mutator-bloodmoon #battlefield { filter: sepia(0.3) saturate(1.5) hue-rotate(-20deg); }
+#game-container.mutator-frenzy #battlefield { filter: saturate(1.4) brightness(1.05); }
+#game-container.mutator-gravity #battlefield { filter: contrast(1.15) brightness(0.95); }
+#game-container.mutator-frailty #battlefield { filter: saturate(0.7) brightness(1.1); }
+#game-container.mutator-wither #battlefield { filter: saturate(0.5) brightness(0.9) hue-rotate(40deg); }
 #game-container.overdrive-active #player {
     filter: drop-shadow(0 0 20px #b62929) drop-shadow(0 0 40px #b62929);
     box-shadow: 0 0 60px rgba(182,41,41,0.6), inset 0 0 20px rgba(255,255,255,0.15);

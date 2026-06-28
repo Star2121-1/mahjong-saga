@@ -318,6 +318,16 @@ class Enemy {
         else this._bossPhase = 3;
 
         if (prevPhase !== this._bossPhase) {
+            /* Epoch 38: Boss 阶段过渡庆祝 */
+            var phaseLabels = { 1: 'Phase 1', 2: 'Phase 2 — 能力觉醒', 3: 'Phase 3 — 暴怒！' };
+            var phaseColors = { 1: '#888', 2: '#ff9800', 3: '#b62929' };
+            if (engine && engine._spawnCausalityText) {
+                engine._spawnCausalityText('BOSS ' + phaseLabels[this._bossPhase], phaseColors[this._bossPhase]);
+            }
+            if (engine && engine.triggerShake) engine.triggerShake(1, 600);
+            if (this._bossPhase === 3) {
+                if (window.audioManager) window.audioManager.play('boss');
+            }
             if (this._bossPhase === 3 && !this._bossEnraged) {
                 this._bossEnraged = true;
                 this.speed = this.baseSpeed * 1.8;

@@ -257,6 +257,8 @@ Gp._cacheStage3DOM = function() {
     this.guideOverlay = document.getElementById('guide-overlay');
     this.mutatorOverlay = document.getElementById('mutator-overlay');
     this.mutatorChoices = document.getElementById('mutator-choices');
+    this.mutatorBadge = document.getElementById('mutator-badge');
+    this.resonancePills = document.getElementById('resonance-pills');
     this.bossHpBar = document.getElementById('boss-hp-bar');
     this.bossHpFill = document.getElementById('boss-hp-fill');
     this._weaponSlotsEl = document.getElementById('weapon-slots');
@@ -404,6 +406,8 @@ Gp._startNewRun = function(heroId, levelId) {
     if (this.player.setResonanceIce) {
         this._spawnCausalityText('◆ 套装共鸣·永冻已激活 — 冻结周围敌人');
     }
+    /* Epoch 38: 初始共振指示 */
+    this._updateResonancePills();
 
     /* ── 变异保险库：开局生效 ── */
     var _metaForVault = window.saveManager._metaCache || {};
@@ -908,42 +912,10 @@ Gp._loop = function(timestamp) {
             }
         }
 
-        /* ── 套装共鸣：焰痕（Speed ×3）── */
-        if (this.player.setResonanceSpeed && !this._pendingReward) {
+        /* ── 套装共鸣：焰痕 + 永冻（委托给 Systems）── */
+        if ((this.player.setResonanceSpeed || this.player.setResonanceIce) && !this._pendingReward) {
             if (this._systems && this._systems.updateResonanceAuras) {
                 this._systems.updateResonanceAuras(this, dt);
-            }
-        }
-
-        /* ── 套装共鸣：永冻（Ice ×3）── */
-        if (this.player.setResonanceIce && !this._pendingReward) {
-            this._iceAuraTimer = (this._iceAuraTimer || 0) + dt;
-            if (this._iceAuraTimer >= 0.8) {
-                this._iceAuraTimer = 0;
-                var _px2 = this.player.x;
-                var _py2 = this.player.y;
-                var _iceR = 60;
-                var _dur = 0.5 + (this.player.iceDurationBonus || 0);
-                for (var _iei = 0; _iei < this.enemies.length; _iei++) {
-                    var _ie = this.enemies[_iei];
-                    if (!_ie.alive) continue;
-                    var _idx = _ie.x - _px2;
-                    var _idy = _ie.y - _py2;
-                    if (_idx * _idx + _idy * _idy <= _iceR * _iceR) {
-                        _ie.frozen = true;
-                        _ie.frozenTimer = _dur;
-                        if (_ie.el) _ie.el.classList.add('frozen-crystal');
-                    }
-                }
-                var _iceEl = document.createElement('div');
-                _iceEl.className = 'resonance-ice';
-                _iceEl.style.left = (_px2 - _iceR) + 'px';
-                _iceEl.style.top = (_py2 - _iceR) + 'px';
-                _iceEl.style.width = (_iceR * 2) + 'px';
-                _iceEl.style.height = (_iceR * 2) + 'px';
-                this._worldLayer.appendChild(_iceEl);
-                var _self2 = this;
-                setTimeout(function() { if (_iceEl.parentNode) _iceEl.remove(); }, 500);
             }
         }
 
@@ -2071,6 +2043,9 @@ Gp._syncUI = function() {
         var pct = (this._bossLord.hp / this._bossLord.maxHp) * 100;
         this.bossHpFill.style.width = Math.max(0, pct) + '%';
     }
+
+    /* Epoch 38: 共振指示 */
+    this._updateResonancePills();
 };
 
 Gp._syncExpBar = function() {
@@ -2608,6 +2583,8 @@ Gp._applyMutator = function(mutatorId) {
         return this._systems.applyMutator(this, mutatorId);
     }
     this._activeMutator = mutatorId;
+    /* Epoch 38: Mutator 视觉反馈 */
+    this._updateMutatorBadge();
     /* Epoch 32: 图鉴记录突变 */
     if (window.saveManager) window.saveManager.recordCompendiumEntry('mutations', mutatorId);
     this.mutatorOverlay.classList.remove('active');
@@ -2686,6 +2663,39 @@ Gp._clearMutatorEffects = function() {
     }
     this._activeMutator = null;
     this._origMagnetRadius = null;
+    /* Epoch 38: 清除 Mutator 视觉反馈 */
+    this._updateMutatorBadge();
+};
+
+/* ── Epoch 38: Mutator 徽章 + 共振指示 ── */
+
+Gp._updateMutatorBadge = function() {
+    if (!this.mutatorBadge) return;
+    if (this._activeMutator) {
+        var labels = { gravity:'引力逆转', bloodmoon:'狂暴血月', frenzy:'狂乱', frailty:'脆弱', wither:'枯萎' };
+        this.mutatorBadge.textContent = labels[this._activeMutator] || this._activeMutator;
+        this.mutatorBadge.className = 'mutator-badge ' + this._activeMutator;
+        this.mutatorBadge.style.display = '';
+        /* Screen tinting */
+        var gc = this.container;
+        if (gc) {
+            gc.className = gc.className.replace(/mutator-\S+/g, '').trim();
+            gc.classList.add('mutator-' + this._activeMutator);
+        }
+    } else {
+        this.mutatorBadge.style.display = 'none';
+        var gc = this.container;
+        if (gc) gc.className = gc.className.replace(/mutator-\S+/g, '').trim();
+    }
+};
+
+Gp._updateResonancePills = function() {
+    if (!this.resonancePills) return;
+    var p = this.player;
+    var html = '';
+    if (p.setResonanceSpeed) html += '<span class="resonance-pill resonance-speed">🔥 炎痕</span>';
+    if (p.setResonanceIce) html += '<span class="resonance-pill resonance-ice">❄️ 永冻</span>';
+    this.resonancePills.innerHTML = html;
 };
 
 Gp._clearTotems = function() {
