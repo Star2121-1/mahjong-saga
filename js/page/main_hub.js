@@ -796,7 +796,10 @@
 
         var allMuts = [
             { id: 'gravity', name: '引力逆转', desc: '经验吸附范围归零，必须肉身拾取', icon: '🧲' },
-            { id: 'bloodmoon', name: '狂暴血月', desc: '怪物体型+30%，攻击+40%，掉落翻倍', icon: '🌍' }
+            { id: 'bloodmoon', name: '狂暴血月', desc: '怪物体型+30%，攻击+40%，掉落翻倍', icon: '🌍' },
+            { id: 'frenzy', name: '狂乱之夜', desc: '敌人攻击速度+50%', icon: '🗡' },
+            { id: 'frailty', name: '虚弱诅咒', desc: '玩家攻击力-20%', icon: '💀' },
+            { id: 'wither', name: '凋零领域', desc: '每秒损失 1% 最大生命', icon: '🌑' },
         ];
 
         listEl.innerHTML = '';

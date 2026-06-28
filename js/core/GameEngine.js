@@ -353,6 +353,8 @@ Gp._startNewRun = function(heroId, levelId) {
     }
     this._mapW = levelCfg.mapW;
     this._mapH = levelCfg.mapH;
+    this._vpW = 0;
+    this._vpH = 0;
     this._currentLevelId = levelId;
     this._spawnInterval = levelCfg.spawnIntervalMin || 1.5;
     this._spawnIntervalDecay = levelCfg.spawnIntervalDecay || 0.02;
@@ -1002,8 +1004,14 @@ Gp._loop = function(timestamp) {
             this._pendingReward = true;
         }
 
-        var vpW = this.battlefield.clientWidth;
-        var vpH = this.battlefield.clientHeight;
+        var vpW = this._vpW;
+        var vpH = this._vpH;
+        if (!vpW || !vpH) {
+            vpW = this.battlefield.clientWidth;
+            vpH = this.battlefield.clientHeight;
+            this._vpW = vpW;
+            this._vpH = vpH;
+        }
         var targetCamX = Math.max(0, Math.min(this._mapW - vpW, this.player.x - vpW / 2));
         var targetCamY = Math.max(0, Math.min(this._mapH - vpH, this.player.y - vpH / 2));
         var lerpFactor = 1 - Math.exp(-10 * dt);
@@ -2085,8 +2093,9 @@ Gp._syncEntities = function() {
         el.classList.toggle('frozen', enemy.frozen);
         el.style.backgroundColor = flash ? '#b62929' : (enemy.isBoss ? (isFinalBoss ? '#6a1a1a' : 'hsl(' + enemy.hue + ', 40%, 30%)') : 'hsl(' + enemy.hue + ', 25%, 28%)');
         el.style.boxShadow = flash ? '0 0 18px rgba(182,41,41,0.6)' : (enemy.isBoss ? (isFinalBoss ? '0 0 60px rgba(182,41,41,0.7)' : '0 0 40px rgba(156,39,176,0.5)') : '0 0 10px hsla(' + enemy.hue + ', 25%, 28%, 0.35)');
-        var fill = el.querySelector('.enemy-hp-fill');
+        var fill = enemy._hpFill || el.querySelector('.enemy-hp-fill');
         if (fill) {
+            if (!enemy._hpFill) enemy._hpFill = fill;
             var pct = (enemy.hp / enemy.maxHp) * 100;
             fill.style.width = Math.max(0, pct) + '%';
         }

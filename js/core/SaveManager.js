@@ -980,7 +980,6 @@ class SaveManager {
         total += weaponIds.length;
         total += enemyIds.length;
         total += equipIds.length;
-        total += enemyIds.length;
         /* mutations: count from game engine active mutators */
         var mutatorIds = ['gravity','bloodmoon','frenzy','frailty','wither'];
         total += mutatorIds.length;
@@ -1089,6 +1088,21 @@ class SaveManager {
         if (totalWins >= 5) return this.activateSeason();
         if (bestAbyss >= 10) return this.activateSeason();
         return { triggered: false, reason: '未满足赛季激活条件（需 5 胜或深渊 10 层）' };
+    }
+
+    /** 激活赛季 */
+    activateSeason() {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            var season = meta.season || {};
+            season.currentSeason = (season.currentSeason || 0) + 1;
+            season.startDate = Date.now();
+            season.day = 1;
+            meta.season = season;
+            return self.saveMeta(meta).then(function() {
+                return { triggered: true, season: season.currentSeason };
+            });
+        });
     }
 
     /** Epoch 35: 获取当前赛季状态 */
