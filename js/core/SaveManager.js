@@ -108,6 +108,7 @@ class SaveManager {
                 loginStreak: 0,
                 lastLoginDate: '',
                 dailyRewardsClaimed: {},
+                makeupTokens: 0,
                 runHistory: [],
                 /* Epoch 32: 图鉴系统 */
                 compendium: { relics: [], weapons: [], enemies: [], equips: [], mutations: [] }
@@ -179,6 +180,7 @@ class SaveManager {
             if (data.loginStreak == null) data.loginStreak = 0;
             if (!data.lastLoginDate) data.lastLoginDate = '';
             if (!data.dailyRewardsClaimed) data.dailyRewardsClaimed = {};
+            if (data.makeupTokens == null) data.makeupTokens = 0;
             if (!data.runHistory) data.runHistory = [];
             if (!data.compendium) data.compendium = { relics: [], weapons: [], enemies: [], equips: [], mutations: [] };
             this._metaCache = data;
@@ -637,9 +639,10 @@ class SaveManager {
             var lastLogin = meta.lastLoginDate || '';
             var streak = meta.loginStreak || 0;
             var claimed = meta.dailyRewardsClaimed || {};
+            var makeup = meta.makeupTokens || 0;
 
             if (lastLogin === today) {
-                return { streak: streak, claimed: !!claimed[today], reward: null };
+                return { streak: streak, claimed: !!claimed[today], reward: null, makeupTokens: makeup };
             }
 
             var yesterday = new Date(Date.now() - 86400000);
@@ -649,7 +652,13 @@ class SaveManager {
             if (isNewStreak) {
                 streak++;
             } else {
-                streak = 1;
+                /* 断签：尝试消耗补签 token */
+                if (makeup > 0) {
+                    meta.makeupTokens = makeup - 1;
+                    /* 保持原 streak 不变（相当于没断） */
+                } else {
+                    streak = 1;
+                }
             }
 
             meta.loginStreak = streak;
@@ -660,7 +669,7 @@ class SaveManager {
             meta.dailyRewardsClaimed = claimed;
 
             return self.saveMeta(meta).then(function() {
-                return { streak: streak, claimed: true, reward: reward };
+                return { streak: streak, claimed: true, reward: reward, makeupTokens: meta.makeupTokens || 0 };
             });
         });
     }
@@ -688,6 +697,35 @@ class SaveManager {
         if (streak >= 7)  return { metaTokens: 50, bossCores: 2, label: '周冠' };
         if (streak >= 3)  return { metaTokens: 20, bossCores: 1, label: '连胜' };
         return { metaTokens: 5, bossCores: 0, label: '日常' };
+    }
+
+    /** 补签：消耗 1 个补签 token 恢复断签前的 streak */
+    claimMakeup() {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            var makeup = meta.makeupTokens || 0;
+            if (makeup <= 0) return Promise.resolve({ ok: false, reason: '没有补签 token' });
+            if (meta.lastLoginDate === self._todayKey()) return Promise.resolve({ ok: false, reason: '今日已登录' });
+
+            var yesterday = new Date(Date.now() - 86400000);
+            var yKey = yesterday.getFullYear() + '-' + (yesterday.getMonth()+1) + '-' + yesterday.getDate();
+            /* 只能补昨天 */
+            if (meta.lastLoginDate !== yKey && meta.lastLoginDate !== '') {
+                return Promise.resolve({ ok: false, reason: '无法补签' });
+            }
+
+            meta.makeupTokens = makeup - 1;
+            meta.loginStreak = (meta.loginStreak || 0) + 1;
+            meta.lastLoginDate = self._todayKey();
+            var claimed = meta.dailyRewardsClaimed || {};
+            claimed[self._todayKey()] = true;
+            meta.dailyRewardsClaimed = claimed;
+
+            var reward = self._getDailyReward(meta.loginStreak);
+            return self.saveMeta(meta).then(function() {
+                return { ok: true, streak: meta.loginStreak, reward: reward, makeupTokens: meta.makeupTokens };
+            });
+        });
     }
 
     /* ── Epoch 15: 战局历史记录 ── */

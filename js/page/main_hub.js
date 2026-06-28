@@ -174,6 +174,22 @@
         DOM.levelCards.addEventListener('click', function(e) { onLevelSelect(e); });
         DOM.btnHubStart.addEventListener('click', onHubStart);
 
+        /* 补签按钮 */
+        var makeupBtn = $('makeup-token-btn');
+        if (makeupBtn) {
+            makeupBtn.addEventListener('click', function() {
+                window.saveManager.claimMakeup().then(function(res) {
+                    if (res.ok) {
+                        makeupBtn.style.display = 'none';
+                        refreshMainHub();
+                    } else {
+                        makeupBtn.textContent = res.reason;
+                        setTimeout(function() { refreshMainHub(); }, 1200);
+                    }
+                }).catch(function() {});
+            });
+        }
+
         if (window.HubTabController) window.HubTabController.init();
 
         window.saveManager.init().then(function() {
@@ -215,6 +231,17 @@
                 if (streak && streak.streak > 0) {
                     streakEl.textContent = '🔥 Streak: ' + streak.streak + 'd';
                     streakEl.style.color = streak.streak >= 7 ? '#ff6f00' : '#ffd700';
+                } else if (streak) {
+                    streakEl.textContent = '🔥 Streak: 0d';
+                    streakEl.style.color = '#ffd700';
+                }
+                /* 补签按钮 */
+                if (streak && streak.makeupTokens > 0) {
+                    var makeupEl = document.getElementById('makeup-token-btn');
+                    if (makeupEl) {
+                        makeupEl.style.display = '';
+                        makeupEl.textContent = '💾 补签 x' + streak.makeupTokens;
+                    }
                 }
             }).catch(function() {});
         }
