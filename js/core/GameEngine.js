@@ -131,6 +131,15 @@ Gp.init = async function() {
     this._initialized = true;
     this._cacheStage3DOM();
 
+    /* 尽早注册音频激活监听器 — 在 await 之前 */
+    var _activateAudio = function() {
+        if (window.audioManager) window.audioManager._ensureContext();
+        document.removeEventListener('pointerdown', _activateAudio);
+        document.removeEventListener('keydown', _activateAudio);
+    };
+    document.addEventListener('pointerdown', _activateAudio, { once: true });
+    document.addEventListener('keydown', _activateAudio, { once: true });
+
     this.player = new Player(this._mapW / 2, this._mapH / 2);
 
     await window.saveManager.init();
@@ -275,16 +284,6 @@ Gp._cacheStage3DOM = function() {
 };
 
 Gp._bindStage3Events = function() {
-    /* 首次用户手势激活音频上下文（浏览器策略要求） */
-    var s0 = this;
-    var _activateAudio = function() {
-        if (window.audioManager) window.audioManager._ensureContext();
-        document.removeEventListener('pointerdown', _activateAudio);
-        document.removeEventListener('keydown', _activateAudio);
-    };
-    document.addEventListener('pointerdown', _activateAudio, { once: true });
-    document.addEventListener('keydown', _activateAudio, { once: true });
-
     if (this.restartBtn) { var s = this; this.restartBtn.addEventListener('click', function() { s.restart(); }); }
     if (this.victoryRestartBtn) { var s = this; this.victoryRestartBtn.addEventListener('click', function() { s.restart(); }); }
     if (this.victoryContinueBtn) { var s = this; this.victoryContinueBtn.addEventListener('click', function() { s._continueChallenge(); }); }
@@ -447,6 +446,11 @@ Gp._startNewRun = function(heroId, levelId) {
     if (this._currentLevelId === 'level_3' && cf.level2Overkill) {
         this._bloodRageActive = true;
         this._spawnCausalityText('\u8840\u6d77\u72c2\u66b4\uff1a\u9886\u4e3b\u5f3a\u5316\uff0c\u6838\u5fc3 +2');
+    }
+
+    /* Epoch 2: weapon_forge \u5929\u8d4b \u2014 \u5f00\u5c40\u53cc\u795e\u5175 */
+    if (meta && meta.talents && meta.talents.weapon_forge >= 1) {
+        this._spawnCausalityText('\u2694 \u53cc\u795e\u5175\u5f00\u5c40\uff1a\u98de\u5203 + \u73af\u5f62\u62a4\u4f53');
     }
 
     /* \u2500\u2500 Epoch 14: \u5173\u5361\u4eb2\u548c\u51cf\u4f24 \u2500\u2500 */

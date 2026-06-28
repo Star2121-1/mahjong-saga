@@ -781,8 +781,9 @@ class SaveManager {
             var cost = 100;
             if ((meta.metaTokens || 0) < cost) return { ok: false, reason: '元代币不足' };
             meta.metaTokens -= cost;
-            if (!meta.purchasedPerks) meta.purchasedPerks = [];
-            meta.purchasedPerks.push({ id: perkId, time: Date.now() });
+            if (!meta.purchasedPerks) meta.purchasedPerks = {};
+            if (!meta.purchasedPerks[perkId]) meta.purchasedPerks[perkId] = 0;
+            meta.purchasedPerks[perkId]++;
             return self.saveMeta(meta).then(function() { return { ok: true }; });
         });
     }

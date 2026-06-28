@@ -14,10 +14,11 @@ Ap._ensureContext = function() {
     if (this._initialized) return;
     try {
         var AC = window.AudioContext || window.webkitAudioContext;
-        if (!AC) return;
+        if (!AC) { this._initialized = true; return; }
         this._ctx = new AC();
         this._initialized = true;
     } catch (e) {
+        console.warn('[AudioManager] _ensureContext failed:', e);
         this._ctx = null;
     }
 };
@@ -59,7 +60,7 @@ Ap._osc = function(type, freq, startTime, duration, vol, rampEndFreq) {
         g.connect(this._ctx.destination);
         o.start(startTime);
         o.stop(startTime + duration + 0.01);
-    } catch(e) {}
+    } catch(e) { console.warn('[AudioManager] _osc error:', e); }
 };
 
 Ap._sine = function(freq, dur, vol, rampEndFreq) {
@@ -89,7 +90,7 @@ Ap._noise = function(dur, vol) {
         g.connect(this._ctx.destination);
         src.start(t);
         src.stop(t + dur + 0.01);
-    } catch(e) {}
+    } catch(e) { console.warn('[AudioManager] _osc error:', e); }
 };
 Ap._sweep = function(from, to, dur, vol) {
     try {
@@ -105,7 +106,7 @@ Ap._sweep = function(from, to, dur, vol) {
         g.connect(this._ctx.destination);
         o.start(t);
         o.stop(t + dur + 0.01);
-    } catch(e) {}
+    } catch(e) { console.warn('[AudioManager] _osc error:', e); }
 };
 Ap._chord = function(freqs, dur, vol) {
     var self = this;
