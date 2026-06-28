@@ -1503,6 +1503,15 @@ Gp._enterAbyss = function() {
     this._levelUpPending = false;
     this.playerHitCountInLevel1 = 0;
     this.stalkersKilledInLevel2 = 0;
+    this._interWaveEvent = null;
+    this._interWaveTimer = 0;
+    this._tempEnemyAtkDebuff = 0;
+    this._tempEnemySpeedDebuff = 0;
+    this._tempBerserkBonus = false;
+    this._tempGoldMult = 1;
+    this._tempCritBonus = 0;
+    this._tempShield = 0;
+    this._extraEliteCount = 0;
 
     /* ── 深渊轮回保留保险库变异 ── */
     if (this._vaultMutations && this._vaultMutations.indexOf('gravity') !== -1) {
@@ -2310,7 +2319,13 @@ Gp._updateWeapons = function(dt) {
         if (w instanceof window.LaserBeam) {
             w.setAngle(this._lastClickAngle);
         }
+        /* Epoch 34: Overdrive 期间武器伤害翻倍 */
+        if (this._overdriveActive) {
+            if (!w._origAtkFactor) w._origAtkFactor = w.atkFactor;
+            w.atkFactor = (w._origAtkFactor || 1) * 2;
+        }
         w.update(dt, this.player, this.enemies, this);
+        if (this._overdriveActive) w.atkFactor = w._origAtkFactor || w.atkFactor;
         if (this._overdriveActive) w.cooldownTimer = 0;
     }
 };
