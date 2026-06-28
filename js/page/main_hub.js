@@ -865,8 +865,8 @@
                 currentVal = meta.totalDodges || 0;
             } else if (c.id === 'full_set') {
                 currentVal = meta.fullSetActivated ? 1 : 0;
-            } else if (c.id === 'gold_10k') {
-                currentVal = meta.maxGoldThisRun || 0;
+            } else if (c.id === 'speed_demon') {
+                currentVal = (meta.runStats && meta.runStats.fastestRun != null && meta.runStats.fastestRun < 9999) ? Math.round(meta.runStats.fastestRun) : 9999;
             }
             progress = Math.min(100, Math.round((currentVal / threshold) * 100));
             html +=
@@ -1406,7 +1406,7 @@
         var unlocked = meta.defaultWeapons || ['TrackingBlade'];
 
         var html = '';
-        var weaponKeys = ['TrackingBlade', 'OrbitShield', 'ShotgunBurst', 'GroundSlammer', 'LaserBeam', 'NovaPulse'];
+        var weaponKeys = Object.keys(weaponData);
         for (var wi = 0; wi < weaponKeys.length; wi++) {
             var key = weaponKeys[wi];
             var w = weaponData[key];

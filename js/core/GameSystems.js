@@ -89,7 +89,7 @@ Sys.showMutatorPanel = function(engine) {
                 Sys.applyMutator(self, cid);
             });
         })(c.id);
-        this.mutatorChoices.appendChild(card);
+        engine.mutatorChoices.appendChild(card);
     }
     engine.mutatorOverlay.classList.add('active');
 };

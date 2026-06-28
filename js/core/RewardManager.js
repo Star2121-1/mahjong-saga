@@ -511,12 +511,13 @@ class RewardManager {
         var self = this;
         var p = window.gameEngine.player;
         if (!p) return;
+        var discovered = p._discoveredSecrets || [];
         for (var si = 0; si < this.secrets.length; si++) {
             var s = this.secrets[si];
-            if (p._discoveredSecrets && p._discoveredSecrets.indexOf(s.id) !== -1) continue;
+            if (discovered.indexOf(s.id) !== -1) continue;
             if (s.check(p)) {
-                p._discoveredSecrets = p._discoveredSecrets || [];
-                p._discoveredSecrets.push(s.id);
+                discovered.push(s.id);
+                p._discoveredSecrets = discovered;
                 s.reward(p);
                 if (window.saveManager) {
                     window.saveManager.recordDiscoveredSecret(s.id);
@@ -525,7 +526,7 @@ class RewardManager {
                     window.gameEngine._spawnCausalityText('🔮 秘密发现: ' + s.name + ' — ' + s.desc);
                 }
                 this._showFloatingText('🔮 ' + s.name, '#ff00ff');
-                break;
+                // 不 break — 继续检查其他秘密
             }
         }
     }

@@ -1756,7 +1756,7 @@ Gp._settleRun = async function(tokens) {
                 !this.gameOver, this.loopCount || 0, uniqueRelics, _wc
             );
         }
-    } catch(e) {}
+    } catch(e) { console.warn('[GameEngine] error:', e); }
 };
 
 Gp._gameOver = async function() {
@@ -1815,7 +1815,7 @@ Gp._gameOver = async function() {
                 meta.bossCores = (meta.bossCores || 0) + (cr.bonusCores || 0);
             }
         }
-    } catch(e) {}
+    } catch(e) { console.warn('[GameEngine] error:', e); }
 
     /* Epoch 14: 运行统计 */
     try {
@@ -1823,14 +1823,14 @@ Gp._gameOver = async function() {
         if (typeof window.saveManager.recordRunStats === 'function') {
             window.saveManager.recordRunStats(this.kills, this._elapsed, this._maxGoldThisRun || 0, this._overdriveCount || 0, this._totalDodgesThisRun || 0, this._totalCritsThisRun || 0, this._waveCount, this._bossKillsThisRun || 0, this.loopCount || 0, false, this._playerHitCountThisRun || 0, ur);
         }
-    } catch(e) {}
+    } catch(e) { console.warn('[GameEngine] error:', e); }
     /* ── Epoch 14: 挑战完成检查 ── */
     var challengeResults = null;
     try {
         if (typeof window.mainHubCheckChallenge === 'function') {
             challengeResults = window.mainHubCheckChallenge(this);
         }
-    } catch(e) {}
+    } catch(e) { console.warn('[GameEngine] error:', e); }
     if (challengeResults && challengeResults.completed && challengeResults.completed.length > 0) {
         meta.metaTokens = (meta.metaTokens || 0) + (challengeResults.bonusTokens || 0);
         meta.bossCores = (meta.bossCores || 0) + (challengeResults.bonusCores || 0);
@@ -1853,7 +1853,7 @@ Gp._gameOver = async function() {
                 this._spawnCausalityText('🏆 周常完成: ' + wc.completed.length + ' 项');
             }
         }
-    } catch(e) {}
+    } catch(e) { console.warn('[GameEngine] error:', e); }
 
     /* Epoch 31: 每日任务完成检查 */
     try {
@@ -1864,7 +1864,7 @@ Gp._gameOver = async function() {
                 this._spawnCausalityText('✅ 每日任务完成: ' + completedQuests.join(', '));
             }
         }
-    } catch(e) {}
+    } catch(e) { console.warn('[GameEngine] error:', e); }
 
     /* ── Epoch 14: 运行统计记录 ── */
     var uniqueRelics = Object.keys(this.player.relicLevels || {}).filter(function(k) { return (this.player.relicLevels[k] || 0) > 0; }).length;
@@ -1890,7 +1890,7 @@ Gp._gameOver = async function() {
                 false, this.loopCount || 0, ur, weeklyCompleted
             );
         }
-    } catch(e) {}
+    } catch(e) { console.warn('[GameEngine] error:', e); }
 
     /* Epoch 31: 死亡奖励 */
     try {
@@ -1900,7 +1900,7 @@ Gp._gameOver = async function() {
             meta.bossCores = (meta.bossCores || 0) + deathReward.bossCores;
             this._spawnCausalityText('💀 死亡补偿: +' + deathReward.metaTokens + ' 代币' + (deathReward.bossCores > 0 ? ' +' + deathReward.bossCores + ' 核心' : ''));
         }
-    } catch(e) {}
+    } catch(e) { console.warn('[GameEngine] error:', e); }
 
     /* Epoch 31: 更新本地排行榜 */
     try {
@@ -1915,7 +1915,7 @@ Gp._gameOver = async function() {
         if (typeof window.saveManager.updateLeaderboard === 'function') {
             window.saveManager.updateLeaderboard(lbStats);
         }
-    } catch(e) {}
+    } catch(e) { console.warn('[GameEngine] error:', e); }
 
     await window.saveManager.clearActiveRun();
 };
@@ -2591,7 +2591,7 @@ Gp._spawnCoinBurst = function(count) {
         var cy = py + Math.sin(angle) * dist;
         this.player.addGold(1);
     }
-    this.fxManager && this.fxManager.spawn(px, py, '+' + count + ' 🪙', '#ffd700', 24, 1500);
+    if (window.fxManager) window.fxManager.spawnText(px, py, '+' + count + ' 🪙', '#ffd700', 24, 1500);
 };
 
 /* ══════════════════════════════════════════════

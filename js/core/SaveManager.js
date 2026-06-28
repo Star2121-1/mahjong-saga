@@ -751,6 +751,144 @@ class SaveManager {
         });
     }
 
+    /* ── Epoch 15: 声望/周常/每日 ── */
+
+    /** 声望系统骨架 */
+    getPrestigeInfo() {
+        var meta = this._metaCache || {};
+        var cores = meta.bossCores || 0;
+        var level = Math.floor(Math.sqrt(cores));
+        return { cores: cores, level: level, nextLevelCores: (level+1)*(level+1), perks: [] };
+    }
+
+    doPrestige() {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            var info = self.getPrestigeInfo();
+            if (info.cores < (info.level+1)*(info.level+1)) return { ok: false, reason: '核心不足' };
+            meta.bossCores = info.cores - (info.level+1)*(info.level+1);
+            meta.prestigeLevel = (info.level || 0) + 1;
+            meta.prestigeCoresSpent = (meta.prestigeCoresSpent || 0) + (info.level+1)*(info.level+1);
+            return self.saveMeta(meta).then(function() {
+                return { ok: true, newLevel: meta.prestigeLevel };
+            });
+        });
+    }
+
+    spendMetaTokens(perkId) {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            var cost = 100;
+            if ((meta.metaTokens || 0) < cost) return { ok: false, reason: '元代币不足' };
+            meta.metaTokens -= cost;
+            if (!meta.purchasedPerks) meta.purchasedPerks = [];
+            meta.purchasedPerks.push({ id: perkId, time: Date.now() });
+            return self.saveMeta(meta).then(function() { return { ok: true }; });
+        });
+    }
+
+    /** 周常挑战生成 */
+    getWeeklyChallenges() {
+        var meta = this._metaCache || {};
+        var weekKey = meta.currentWeek || '';
+        if (meta.weeklyChallenges && meta.weeklyChallenges.week === weekKey) {
+            return meta.weeklyChallenges.challenges || [];
+        }
+        var allChallenges = [
+            { id: 'kill_50', type: 'kills', target: 50, reward: { metaTokens: 20, bossCores: 1 } },
+            { id: 'kill_200', type: 'kills', target: 200, reward: { metaTokens: 50, bossCores: 3 } },
+            { id: 'win_3', type: 'wins', target: 3, reward: { metaTokens: 30, bossCores: 2 } },
+            { id: 'win_10', type: 'wins', target: 10, reward: { metaTokens: 80, bossCores: 5 } },
+            { id: 'overdrive_5', type: 'overdrives', target: 5, reward: { metaTokens: 25, bossCores: 1 } },
+            { id: 'abyss_2', type: 'abyss', target: 2, reward: { metaTokens: 40, bossCores: 2 } },
+            { id: 'no_hit', type: 'flawless', target: 1, reward: { metaTokens: 60, bossCores: 4 } },
+            { id: 'boss_5', type: 'bossKills', target: 5, reward: { metaTokens: 35, bossCores: 2 } },
+        ];
+        var shuffled = allChallenges.slice().sort(function() { return Math.random() - 0.5; });
+        var picked = shuffled.slice(0, 4);
+        picked.forEach(function(c) { c.progress = 0; c.completed = false; });
+        meta.currentWeek = weekKey || this._weekKey();
+        meta.weeklyChallenges = { week: meta.currentWeek, challenges: picked };
+        this.saveMeta(meta);
+        return picked;
+    }
+
+    checkWeeklyCompletion(stats) {
+        var meta = this._metaCache || {};
+        if (!meta.weeklyChallenges) return { completed: [], bonusTokens: 0, bonusCores: 0 };
+        var chs = meta.weeklyChallenges.challenges || [];
+        var completed = [];
+        var bonusTokens = 0;
+        var bonusCores = 0;
+        for (var i = 0; i < chs.length; i++) {
+            var c = chs[i];
+            var val = stats && stats[c.type] || 0;
+            if (val >= c.target && !c.completed) {
+                c.completed = true;
+                completed.push(c.id);
+                bonusTokens += (c.reward && c.reward.metaTokens) || 0;
+                bonusCores += (c.reward && c.reward.bossCores) || 0;
+            }
+        }
+        if (completed.length > 0) {
+            meta.weeklyChallenges.challenges = chs;
+            this.saveMeta(meta);
+        }
+        return { completed: completed, bonusTokens: bonusTokens, bonusCores: bonusCores };
+    }
+
+    /** 每周 vault 操作 */
+    openWeeklyVault() {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            if (!meta.weeklyVault) meta.weeklyVault = { active: null, history: [] };
+            if (meta.weeklyVault.active) return Promise.resolve({ ok: false, reason: '已有活跃挑战' });
+            var pool = [
+                { id: 'gold_fever', name: '金币狂热', desc: '金币掉落+50%', reward: { metaTokens: 10 }, duration: 3 },
+                { id: 'xp_boost', name: '经验 boosted', desc: '经验值+100%', reward: { metaTokens: 15 }, duration: 5 },
+                { id: 'enemy_weaken', name: '怪物削弱', desc: '敌人攻击-30%', reward: { metaTokens: 12 }, duration: 3 },
+                { id: 'rare_drop', name: '稀有掉落', desc: '圣物掉落翻倍', reward: { metaTokens: 20 }, duration: 1 },
+            ];
+            var challenge = pool[Math.floor(Math.random() * pool.length)];
+            challenge.startTime = Date.now();
+            challenge.completed = false;
+            meta.weeklyVault.active = challenge;
+            return self.saveMeta(meta).then(function() { return { ok: true, challenge: challenge }; });
+        });
+    }
+
+    abandonWeeklyVault() {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            if (!meta.weeklyVault || !meta.weeklyVault.active) return Promise.resolve({ ok: false, reason: '没有活跃挑战' });
+            var abandoned = meta.weeklyVault.active;
+            meta.weeklyVault.history = meta.weeklyVault.history || [];
+            meta.weeklyVault.history.push(abandoned);
+            meta.weeklyVault.active = null;
+            return self.saveMeta(meta).then(function() { return { ok: true }; });
+        });
+    }
+
+    claimWeeklyVault(stats) {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            if (!meta.weeklyVault || !meta.weeklyVault.active) return Promise.resolve({ ok: false, reason: '没有活跃挑战' });
+            var v = meta.weeklyVault.active;
+            v.completed = true;
+            meta.weeklyVault.history = meta.weeklyVault.history || [];
+            meta.weeklyVault.history.push(v);
+            meta.weeklyVault.active = null;
+            return self.saveMeta(meta).then(function() {
+                return { ok: true, reward: v.reward };
+            });
+        });
+    }
+
+    getWeeklyVault() {
+        var meta = this._metaCache || {};
+        return meta.weeklyVault || { active: null, history: [] };
+    }
+
     /* ── Epoch 15: 战局历史记录 ── */
 
     recordRunHistory(heroId, levelId, kills, elapsed, won, loopCount, relics, weeklyCompleted) {
