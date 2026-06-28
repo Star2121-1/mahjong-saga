@@ -618,7 +618,7 @@ class RewardManager {
         if (!window.fxManager) return;
         var cx = window.innerWidth / 2;
         var cy = window.innerHeight / 2;
-        window.fxManager.spawn(cx, cy, text, color, 28, 2000);
+        window.fxManager.spawnText(cx, cy, text, 'normal');
     }
 }
 

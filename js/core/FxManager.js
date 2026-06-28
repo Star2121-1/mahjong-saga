@@ -26,13 +26,18 @@ Fp.init = function() {
     }
 };
 
-Fp.spawnText = function(x, y, text, type) {
+Fp.spawnText = function(x, y, text, typeOrColor, size, duration) {
     if (!this._layer) this.init();
     var node = this._borrowNode();
     if (!node) return;
+    var type = (typeof typeOrColor === 'string' && typeOrColor.startsWith('#')) ? 'normal' : typeOrColor;
+    var color = typeOrColor;
+    if (typeof typeOrColor === 'string' && typeOrColor.startsWith('#')) color = typeOrColor;
     type = type || 'normal';
     node.textContent = text;
     node.className = 'fct-node fct-' + type;
+    if (color) node.style.color = color;
+    if (size) node.style.fontSize = size + 'px';
     node.style.left = x + 'px';
     node.style.top = y + 'px';
     node._fctActive = true;
