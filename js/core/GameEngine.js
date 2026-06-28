@@ -1527,6 +1527,7 @@ Gp._enterAbyss = function() {
     this._tempCritBonus = 0;
     this._tempShield = 0;
     this._extraEliteCount = 0;
+    this._milestoneShown = false;
 
     /* ── 深渊轮回保留保险库变异 ── */
     if (this._vaultMutations && this._vaultMutations.indexOf('gravity') !== -1) {
@@ -1797,7 +1798,21 @@ Gp._gameOver = async function() {
 
     this.resultTime.textContent = this._formatTime(this._elapsed);
     this.resultKills.textContent = this.kills;
+    this.resultWave.textContent = (this._waveCount || 0) + ' / ' + (this._totalWaves || 0);
     this.gameOverOverlay.classList.add('active');
+
+    /* 死亡提示 */
+    var deathTips = document.getElementById('death-tips');
+    if (deathTips) {
+        var tips = [];
+        if (this.kills < 10) tips.push('💡 尝试先提升攻击力，圣物选择优先锐利锋芒');
+        else if (this.kills < 50) tips.push('💡 装备系统可提供额外防御，回大本营查看');
+        else if (this._elapsed < 60) tips.push('💡 速度很快！尝试挑战深渊之门获取额外奖励');
+        else tips.push('💡 坚持得不错！试试选择不同的英雄或升级天赋');
+        deathTips.textContent = tips[0];
+    }
+
+    /* 补偿信息 — 元代币将在下方 meta 结算后显示 */
 
     var tokens = window.saveManager.calcMetaTokens(this.kills, this._elapsed);
 
@@ -1880,6 +1895,12 @@ Gp._gameOver = async function() {
 
     meta.lastSaveTimestamp = Date.now();
     await window.saveManager.saveMeta(meta);
+
+    /* 显示补偿信息 */
+    var compEl = document.getElementById('death-compensation');
+    if (compEl) {
+        compEl.textContent = '💰 获得 ' + tokens + ' 元代币' + (weeklyCompleted.length > 0 ? ' | 周常+' + weeklyCompleted.length : '');
+    }
 
     /* Epoch 19: 游戏死亡也记录历史 */
     try {

@@ -243,6 +243,32 @@
                         makeupEl.textContent = '💾 补签 x' + streak.makeupTokens;
                     }
                 }
+                /* 里程碑预览 */
+                if (streak && streakEl) {
+                    var s = streak.streak || 0;
+                    var milestones = [
+                        { day: 3, tokens: 20, cores: 1, label: '连胜' },
+                        { day: 7, tokens: 50, cores: 2, label: '周冠' },
+                        { day: 14, tokens: 100, cores: 3, label: '双周' },
+                        { day: 30, tokens: 200, cores: 5, label: '月冠' },
+                    ];
+                    var nextIdx = milestones.findIndex(function(m) { return m.day > s; });
+                    var nextLabel = '';
+                    if (nextIdx === -1) {
+                        nextLabel = '🏆 已达最高';
+                    } else {
+                        var m = milestones[nextIdx];
+                        nextLabel = '→ ' + m.label + ' (' + m.day + '天): +' + m.tokens + '代币 +' + m.cores + '核心';
+                    }
+                    var badge = streakEl.parentNode.querySelector('.streak-milestone');
+                    if (!badge) {
+                        badge = document.createElement('span');
+                        badge.className = 'streak-milestone';
+                        badge.style.cssText = 'display:block;font-size:10px;color:#aaa;margin-top:1px;';
+                        streakEl.parentNode.appendChild(badge);
+                    }
+                    badge.textContent = nextLabel;
+                }
             }).catch(function() {});
         }
 

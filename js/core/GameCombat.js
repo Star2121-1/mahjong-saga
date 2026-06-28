@@ -55,18 +55,10 @@ Cs.spawnExpGemsAt = function(engine, x, y, isBoss, level) {
     }
 };
 
-/* ── 击杀奖励 ── */
+/* ── 击杀奖励（已委托给 GameEngine._rewardKill，此函数保留作为别名） ── */
 
 Cs.rewardKill = function(engine, enemy) {
-    engine.kills++;
-    if (enemy.type === 'Stalker' && engine._currentLevelId === 'level_2') {
-        engine.stalkersKilledInLevel2++;
-    }
-    Cs.spawnCoinsAt(engine, enemy.x, enemy.y, false, enemy.level);
-    if (!enemy.isBoss) Cs.spawnExpGemsAt(engine, enemy.x, enemy.y, false, enemy.level);
-    if (engine.player) {
-        engine.player.rage = Math.min(engine.player.maxRage, engine.player.rage + 5);
-    }
+    engine._rewardKill(enemy);
 };
 
 /* ── 装备掉落 ── */
