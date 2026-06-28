@@ -32,6 +32,15 @@ class RewardManager {
         this.overlay = document.getElementById('reward-overlay');
         this.cardsContainer = this.overlay.querySelector('.reward-cards');
         this._replaceWeaponId = null;
+
+        /* ── 牺牲选项池 ── */
+        this.sacrificeOptions = [
+            { id: 'sacrifice_metatoken', name: '献祭之祭坛', icon: '🔥', desc: '献祭一个圣物，获得 3 元代币', type: 'metatoken', value: 3 },
+            { id: 'sacrifice_gold', name: '贪婪契约', icon: '💎', desc: '献祭一个圣物，获得当前等级 50% 的元宝', type: 'gold', value: 0.5 },
+            { id: 'sacrifice_temp_atk', name: '血怒仪式', icon: '⚡', desc: '献祭一个圣物，获得 +50% 攻击力临时增益（30秒）', type: 'temp_buff', buff: 'atkBoost', duration: 30, value: 0.5 },
+            { id: 'sacrifice_temp_hp', name: '铁壁祷言', icon: '🛡', desc: '献祭一个圣物，获得 +100 最大HP临时增益（30秒）', type: 'temp_buff', buff: 'tempHp', duration: 30, value: 100 },
+            { id: 'sacrifice_double_coin', name: '双倍诅咒', icon: '🪙', desc: '献祭一个圣物，下一波金币收益翻倍', type: 'double_coin', value: 1 }
+        ];
     }
 
     /* ── 波次宝箱 ── */
@@ -53,6 +62,9 @@ class RewardManager {
         if (titleEl) titleEl.textContent = '升级奖励（免费）';
         var pool = this._buildPool();
         var selected = pool.length > 0 ? this._pickFrom(pool) : [];
+        /* 牺牲选项 — 仅升级时出现 */
+        var sacrificeItem = this._buildSacrificeOption();
+        if (sacrificeItem) selected.push(sacrificeItem);
         this._renderCards(selected, true, titleEl, originalTitle);
     }
 
@@ -139,6 +151,21 @@ class RewardManager {
                     front.querySelector('.relic-btn').addEventListener('click', function() {
                         mgr._animateSuckIn(cardContainer, function() {
                             mgr._onWeaponUpClick(cardItem, isFree, titleEl, originalTitle);
+                        });
+                    });
+                })(item, self, container);
+            } else if (type === 'sacrifice') {
+                var opt = cardData;
+                front.innerHTML =
+                    '<div class="relic-name" style="color:#ff4444">' + opt.icon + ' ' + opt.name + '</div>' +
+                    '<div class="relic-desc">' + opt.desc + '</div>' +
+                    '<div class="relic-cost" style="color:#ff6600">⚠ 献祭一个圣物</div>' +
+                    '<div class="sacrifice-banner"><span>RISKY TRADE</span></div>' +
+                    '<button class="relic-btn" style="background:#cc2200">献祭</button>';
+                (function(cardItem, mgr, cardContainer) {
+                    front.querySelector('.relic-btn').addEventListener('click', function() {
+                        mgr._animateSuckIn(cardContainer, function() {
+                            mgr._onSacrificeClick(cardItem, titleEl, originalTitle);
                         });
                     });
                 })(item, self, container);
@@ -240,6 +267,8 @@ class RewardManager {
         var eng = window.gameEngine;
         if (eng._activeWeapons.length < eng.player.maxWeaponSlots) {
             eng._addWeapon(item.id);
+            /* Epoch 32: 图鉴记录武器 */
+            if (window.saveManager) window.saveManager.recordCompendiumEntry('weapons', item.id);
         } else {
             this._showReplacePanel(item.id);
             return;
@@ -274,6 +303,8 @@ class RewardManager {
         if (!isFree && relic.cost > 0 && player.gold < relic.cost) return;
         if (!isFree && relic.cost > 0) player.addGold(-relic.cost);
         player.addRelic(relic.id);
+        /* Epoch 32: 图鉴记录 */
+        if (window.saveManager) window.saveManager.recordCompendiumEntry('relics', relic.id);
         if (titleEl) titleEl.textContent = originalTitle;
         gameEngine._syncUI();
         if (isFree) gameEngine._resumeAfterLevelUp();
@@ -403,6 +434,95 @@ class RewardManager {
 
     _renderStars(level) {
         return '★'.repeat(level) + '☆'.repeat(5 - level);
+    }
+
+    /* ── 牺牲选项 ── */
+
+    _buildSacrificeOption() {
+        var p = window.gameEngine.player;
+        /* 至少有一个 Lv≥1 的圣物才能牺牲 */
+        var sacrificeCandidates = [];
+        for (var rid in p.relicLevels) {
+            if ((p.relicLevels[rid] || 0) >= 1) sacrificeCandidates.push(rid);
+        }
+        if (sacrificeCandidates.length === 0) return null;
+
+        /* 随机选一个牺牲类型 */
+        var optIdx = Math.floor(Math.random() * this.sacrificeOptions.length);
+        var opt = this.sacrificeOptions[optIdx];
+
+        return {
+            type: 'sacrifice',
+            id: 'sacrifice_' + opt.id,
+            name: opt.name,
+            icon: opt.icon,
+            desc: opt.desc,
+            sacrificeType: opt.type,
+            value: opt.value,
+            duration: opt.duration,
+            cardData: opt
+        };
+    }
+
+    _onSacrificeClick(item, titleEl, originalTitle) {
+        var eng = window.gameEngine;
+        var p = eng.player;
+
+        /* 找到最高等级的圣物作为牺牲目标 */
+        var bestRelic = null;
+        var bestLevel = 0;
+        for (var rid in p.relicLevels) {
+            var lv = p.relicLevels[rid] || 0;
+            if (lv > bestLevel) { bestLevel = lv; bestRelic = rid; }
+        }
+        if (!bestRelic) return;
+
+        /* 降一级 */
+        p.relicLevels[bestRelic] = bestLevel - 1;
+        if (p.relicLevels[bestRelic] <= 0) delete p.relicLevels[bestRelic];
+
+        /* 应用奖励 */
+        switch (item.sacrificeType) {
+            case 'metatoken':
+                saveManager.addMetaTokens(item.value);
+                this._showFloatingText('+' + item.value + ' 元代币', '#ff4444');
+                break;
+            case 'gold':
+                var goldReward = Math.floor(p.gold * item.value);
+                if (goldReward < 1) goldReward = 50;
+                p.addGold(goldReward);
+                this._showFloatingText('+' + goldReward + ' 金', '#ffd700');
+                break;
+            case 'temp_buff':
+                if (item.buff === 'atkBoost') {
+                    p._tempAtkBoost = (p._tempAtkBoost || 0) + item.value;
+                    p._tempBuffEnd = Date.now() / 1000 + item.duration;
+                    this._showFloatingText('+50% 攻击 30s', '#ff8800');
+                } else if (item.buff === 'tempHp') {
+                    p._tempHpBonus = (p._tempHpBonus || 0) + item.value;
+                    p._tempBuffEnd = Date.now() / 1000 + item.duration;
+                    this._showFloatingText('+100 HP 30s', '#4488ff');
+                }
+                break;
+            case 'double_coin':
+                p._doubleCoinNextWave = true;
+                this._showFloatingText('下波金币翻倍', '#ffdd00');
+                break;
+        }
+
+        /* 通知主面板刷新 */
+        if (this.onPurchase) this.onPurchase();
+
+        if (titleEl) titleEl.textContent = originalTitle;
+        eng._syncUI();
+        eng._resumeAfterLevelUp();
+    }
+
+    _showFloatingText(text, color) {
+        if (!window.fxManager) return;
+        var cx = window.innerWidth / 2;
+        var cy = window.innerHeight / 2;
+        fxManager.spawn(cx, cy, text, color, 28, 2000);
     }
 }
 

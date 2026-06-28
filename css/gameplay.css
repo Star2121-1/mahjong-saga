@@ -261,6 +261,12 @@
     0% { opacity: 0.3; transform: scaleX(0.6); }
     100% { opacity: 1; transform: scaleX(1); }
 }
+.sacrifice-banner span {
+    font-size: 9px; font-weight: 900; color: #ff4444;
+    text-shadow: 0 0 12px rgba(255,68,68,0.8);
+    letter-spacing: 2px; transform: skewX(-15deg);
+    animation: bannerBlink 0.8s ease-in-out infinite alternate;
+}
 .new-weapon-banner span {
     font-size: 9px; font-weight: 900; color: #ffd700;
     text-shadow: 0 0 12px rgba(255,215,0,0.8);

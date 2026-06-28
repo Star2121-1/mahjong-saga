@@ -79,6 +79,14 @@ class Player {
     }
 
     update(dt, moveX, moveY, mapW, mapH) {
+        /* Epoch 32: 临时HP增益 */
+        var tempHpBonus = this._tempHpBonus || 0;
+        if (tempHpBonus > 0) {
+            this.maxHp = (this._baseMaxHp || this.maxHp) + tempHpBonus;
+            this.hp = Math.min(this.hp + dt * 2, this.maxHp); /* 每秒回2HP */
+        } else {
+            this.maxHp = this._baseMaxHp || this.maxHp;
+        }
         if (this.invulnTimer > 0) {
             this.invulnTimer -= dt;
             if (this.invulnTimer < 0) this.invulnTimer = 0;
@@ -297,7 +305,8 @@ class Player {
             setResonanceSpeed: this.setResonanceSpeed,
             setResonanceIce: this.setResonanceIce,
             damageReduction: this.damageReduction,
-            _reviveCount: this._reviveCount || 0
+            _reviveCount: this._reviveCount || 0,
+            _baseMaxHp: this._baseMaxHp || this.maxHp
         };
     }
 
@@ -342,6 +351,7 @@ class Player {
         this.maxRage = data.maxRage || 100;
         this.damageReduction = data.damageReduction || 0;
         this._reviveCount = data._reviveCount || 0;
+        this._baseMaxHp = data._baseMaxHp || this.maxHp;
         this._hasRevive = this._reviveCount > 0;
         this.setResonanceSpeed = !!data.setResonanceSpeed;
         this.setResonanceIce = !!data.setResonanceIce;
@@ -448,6 +458,8 @@ class Player {
         var talents = meta.talents || {};
         this.maxHp += (talents.health_boost || 0) * 20;
         this.hp = this.maxHp;
+        /* 保存基础maxHp用于临时增益恢复 */
+        this._baseMaxHp = this.maxHp;
         this.speed += (talents.speed_boost || 0) * 15;
         this.baseSpeed = this.speed;
         this.magnetRadius += (talents.magnet_boost || 0) * 30;

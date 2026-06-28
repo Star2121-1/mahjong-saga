@@ -32,6 +32,8 @@ window.GameEngine = function() {
     this._pendingReward = false;
     this._waveCount = 0;
     this.currentWaveSpawnedCount = 0;
+    this._interWaveEvent = null;
+    this._interWaveTimer = 0;
 
     this.cameraX = 0;
     this.cameraY = 0;
@@ -372,6 +374,8 @@ Gp._startNewRun = function(heroId, levelId) {
     this._playerHitCountThisRun = 0;
     this._recordedFlawless = false;
     this.stalkersKilledInLevel2 = 0;
+    this._interWaveEvent = null;
+    this._interWaveTimer = 0;
     if (this._currentLevelId === 'level_1' || !this.loopCount) this.loopCount = 0;
     this._clearTotems();
     this._cleanEnemyProjectiles();
@@ -666,6 +670,15 @@ Gp._loop = function(timestamp) {
         this._lastTime = timestamp;
         this._elapsed += dt;
 
+        /* Epoch 32: 临时增益过期检查 */
+        var p = this.player;
+        if (p._tempBuffEnd && Date.now() / 1000 >= p._tempBuffEnd) {
+            p._tempAtkBoost = 0;
+            p._tempHpBonus = 0;
+            p._doubleCoinNextWave = false;
+            p._tempBuffEnd = 0;
+        }
+
         var input = this._getInputVector();
         this._lastMoveX = input.x;
         this.player.update(dt, input.x, input.y, this._mapW, this._mapH);
@@ -827,7 +840,17 @@ Gp._loop = function(timestamp) {
                 this._pendingReward = true;
             }
 
-            if (this.player.hp < prevHp) { this._screenShake(); this._playerHitCountThisRun++; }
+            if (this.player.hp < prevHp) {
+                /* Epoch 32: 临时护盾吸收 */
+                if (this._tempShield > 0) {
+                    var absorbed = Math.min(this._tempShield, prevHp - this.player.hp);
+                    this._tempShield -= absorbed;
+                    this.player.hp = Math.min(this.player.maxHp, this.player.hp + absorbed);
+                    if (this._tempShield <= 0) this._tempShield = 0;
+                }
+                this._screenShake();
+                this._playerHitCountThisRun++;
+            }
         }
 
         this._updateCoins(dt);
@@ -970,6 +993,11 @@ Gp._loop = function(timestamp) {
                 this.gameOver = true;
                 this._showVictory();
             } else {
+                /* Epoch 32: 波次间事件 */
+                if (this._waveCount >= 1 && Math.random() < 0.6) {
+                    this._triggerInterWaveEvent();
+                    return;
+                }
                 this.running = false;
                 this._freezeClock();
                 this._syncUI();
@@ -1074,6 +1102,14 @@ Gp._spawnEnemy = function(isBoss) {
         enemy.atk = Math.floor(enemy.atk * 1.4);
         enemy.maxHp = Math.floor(enemy.maxHp * 1.3);
         enemy.hp = Math.floor(enemy.hp * 1.3);
+    }
+
+    /* Epoch 32: 波次间事件的临时敌方debuff */
+    if (this._tempEnemyAtkDebuff > 0) {
+        enemy.atk = Math.floor(enemy.atk * this._tempEnemyAtkDebuff);
+    }
+    if (this._tempEnemySpeedDebuff > 0) {
+        enemy.speed *= this._tempEnemySpeedDebuff;
     }
 
     var el = document.createElement('div');
@@ -1197,6 +1233,16 @@ Gp._updateCoins = function(dt) {
         }
     }
     if (collected > 0) {
+        /* Epoch 32: 双倍金币诅咒 */
+        if (player._doubleCoinNextWave) {
+            collected *= 2;
+            player._doubleCoinNextWave = false;
+        }
+        /* Epoch 32: 点金术临时加成 */
+        if (this._tempGoldMult > 1) {
+            collected *= this._tempGoldMult;
+            this._tempGoldMult = 1;
+        }
         player.addGold(collected);
         player.rage = Math.min(player.maxRage, player.rage + 2 * collected);
     }
@@ -1270,6 +1316,8 @@ Gp._updateExpGems = function(dt) {
 
 Gp._rewardKill = function(enemy) {
     this.kills++;
+    /* Epoch 32: 图鉴记录敌人类型 */
+    if (window.saveManager && enemy.type) window.saveManager.recordCompendiumEntry('enemies', enemy.type);
     /* Epoch 3: Boss 击杀计数 */
     if (enemy.isBoss) {
         this._bossKillsThisRun = (this._bossKillsThisRun || 0) + 1;
@@ -1283,7 +1331,8 @@ Gp._rewardKill = function(enemy) {
     this._spawnCoinsAt(enemy.x, enemy.y, false, enemy.level);
     if (!enemy.isBoss) this._spawnExpGemsAt(enemy.x, enemy.y, false, enemy.level);
     if (this.player) {
-        this.player.rage = Math.min(this.player.maxRage, this.player.rage + 5);
+        this.player.rage = Math.min(this.player.maxRage, this.player.rage + 5 + (this._tempBerserkBonus ? 10 : 0));
+        if (this._tempBerserkBonus) this._tempBerserkBonus = false;
     }
 };
 
@@ -1978,8 +2027,11 @@ Gp._onClick = function(e) {
         if (enemy.el) enemy.el.classList.add('frozen-crystal');
     }
 
-    var isCrit = Math.random() < p.critRate;
-    var damage = isCrit ? Math.floor(p.atk * 2.5) : p.atk;
+    var isCrit = Math.random() < (p.critRate + (this._tempCritBonus || 0));
+    if (this._tempCritBonus) this._tempCritBonus = 0;
+    /* Epoch 32: 临时攻击增益 */
+    var atkMult = 1 + (p._tempAtkBoost || 0);
+    var damage = isCrit ? Math.floor(p.atk * atkMult * 2.5) : Math.floor(p.atk * atkMult);
     if (damage === 0) return;
 
     enemy.takeDamage(damage, this.player, undefined, undefined, isCrit ? 'crit' : undefined);
@@ -2285,6 +2337,100 @@ Gp._updateProjectiles = function(dt) {
 };
 
 /* ══════════════════════════════════════════════
+   Epoch 32: 波次间事件系统
+   ══════════════════════════════════════════════ */
+
+Gp._interWaveEvents = [
+    { id: 'coin_rush', name: '金币雨', icon: '🪙', desc: '场上立即掉落 20 金币！', weight: 40, apply: function() { this.player.addGold(20); this._spawnCoinBurst(20); } },
+    { id: 'meditation', name: '冥想泉源', icon: '🧘', desc: '恢复 30% HP，下波怪物 -20% 攻击力', weight: 25, apply: function() { this.player.hp = Math.min(this.player.maxHp, this.player.hp + Math.floor(this.player.maxHp * 0.3)); this._tempEnemyAtkDebuff = 0.8; } },
+    { id: 'monster_surge', name: '怪物潮', icon: '👹', desc: '额外生成 5 个精英怪！但掉落翻倍', weight: 20, apply: function() { this._extraEliteCount = 5; this._monsterSurgeDoubleDrops = true; } },
+    { id: 'time_dilation', name: '时光缓流', icon: '⏳', desc: '下波怪物移速 -30%', weight: 20, apply: function() { this._tempEnemySpeedDebuff = 0.7; } },
+    { id: 'berserk', name: '狂战士祝福', icon: '⚔', desc: '下波击杀额外 +10 怒气', weight: 15, apply: function() { this._tempBerserkBonus = true; } },
+    { id: 'golden_touch', name: '点金术', icon: '✨', desc: '下波金币收益 ×3', weight: 15, apply: function() { this._tempGoldMult = 3; } },
+    { id: 'iron_fist', name: '铁拳', icon: '👊', desc: '下波暴击率 +25%', weight: 20, apply: function() { this._tempCritBonus = 0.25; } },
+    { id: 'shield_of_faith', name: '信仰护盾', icon: '🛡', desc: '获得可吸收 50 伤害的护盾（持续 15 秒）', weight: 15, apply: function() { this._tempShield = 50; this._tempShieldEnd = Date.now() / 1000 + 15; } }
+];
+
+Gp._pickInterWaveEvent = function() {
+    var totalWeight = 0;
+    for (var i = 0; i < this._interWaveEvents.length; i++) totalWeight += this._interWaveEvents[i].weight;
+    var roll = Math.random() * totalWeight;
+    var cumulative = 0;
+    for (var i = 0; i < this._interWaveEvents.length; i++) {
+        cumulative += this._interWaveEvents[i].weight;
+        if (roll < cumulative) return this._interWaveEvents[i];
+    }
+    return this._interWaveEvents[0];
+};
+
+Gp._triggerInterWaveEvent = function() {
+    var evt = this._pickInterWaveEvent();
+    this._interWaveEvent = evt;
+    this._freezeClock();
+
+    var overlay = document.getElementById('reward-overlay');
+    var titleEl = overlay.querySelector('.reward-title');
+    var origTitle = titleEl ? titleEl.textContent : '';
+    if (titleEl) titleEl.textContent = evt.icon + ' ' + evt.name;
+
+    var cardsDiv = overlay.querySelector('.reward-cards');
+    cardsDiv.innerHTML =
+        '<div style="text-align:center;padding:20px;">' +
+        '<div style="font-size:48px;margin:10px;">' + evt.icon + '</div>' +
+        '<div style="font-size:18px;font-weight:800;color:#ffd700;margin-bottom:8px;">' + evt.name + '</div>' +
+        '<div style="font-size:14px;color:#ccc;margin-bottom:16px;">' + evt.desc + '</div>' +
+        '<button class="relic-btn" id="interevent-accept" style="background:#cc8800;">接受恩赐</button>' +
+        '</div>';
+
+    overlay.classList.add('active');
+    var self = this;
+    document.getElementById('interevent-accept').addEventListener('click', function() {
+        overlay.classList.remove('active');
+        overlay.classList.remove('levelup-mode');
+        self._pendingReward = false;
+        self._interWaveEvent = null;
+        self._interWaveTimer = 0;
+        evt.apply.call(self);
+        self._syncUI();
+        self._continueAfterInterWave();
+    }, { once: true });
+};
+
+Gp._continueAfterInterWave = function() {
+    if (this._extraEliteCount > 0) {
+        for (var i = 0; i < this._extraEliteCount; i++) {
+            this._spawnEnemy(false, true);
+        }
+        this._extraEliteCount = 0;
+    }
+    this._monsterSurgeDoubleDrops = false;
+    this._tempEnemyAtkDebuff = 0;
+    this._tempEnemySpeedDebuff = 0;
+    this._tempBerserkBonus = false;
+    this._tempGoldMult = 1;
+    this._tempCritBonus = 0;
+    this._tempShield = 0;
+
+    this.running = true;
+    this._lastTime = performance.now();
+    requestAnimationFrame(this._boundLoop);
+};
+
+Gp._spawnCoinBurst = function(count) {
+    if (!this.battlefield) return;
+    var px = this.player.x;
+    var py = this.player.y;
+    for (var i = 0; i < count; i++) {
+        var angle = (Math.PI * 2 / count) * i + Math.random() * 0.5;
+        var dist = 30 + Math.random() * 40;
+        var cx = px + Math.cos(angle) * dist;
+        var cy = py + Math.sin(angle) * dist;
+        this.player.addGold(1);
+    }
+    this.fxManager && this.fxManager.spawn(px, py, '+' + count + ' 🪙', '#ffd700', 24, 1500);
+};
+
+/* ══════════════════════════════════════════════
    波次突变系统
    ══════════════════════════════════════════════ */
 
@@ -2330,6 +2476,8 @@ Gp._applyMutator = function(mutatorId) {
         return this._systems.applyMutator(this, mutatorId);
     }
     this._activeMutator = mutatorId;
+    /* Epoch 32: 图鉴记录突变 */
+    if (window.saveManager) window.saveManager.recordCompendiumEntry('mutations', mutatorId);
     this.mutatorOverlay.classList.remove('active');
     if (mutatorId === 'gravity') {
         this._origMagnetRadius = this.player.magnetRadius;

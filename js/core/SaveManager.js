@@ -108,7 +108,9 @@ class SaveManager {
                 loginStreak: 0,
                 lastLoginDate: '',
                 dailyRewardsClaimed: {},
-                runHistory: []
+                runHistory: [],
+                /* Epoch 32: 图鉴系统 */
+                compendium: { relics: [], weapons: [], enemies: [], mutations: [] }
             };
         } else {
             if (!data.unlockedHeroes) data.unlockedHeroes = ['Knight'];
@@ -178,6 +180,7 @@ class SaveManager {
             if (!data.lastLoginDate) data.lastLoginDate = '';
             if (!data.dailyRewardsClaimed) data.dailyRewardsClaimed = {};
             if (!data.runHistory) data.runHistory = [];
+            if (!data.compendium) data.compendium = { relics: [], weapons: [], enemies: [], mutations: [] };
             this._metaCache = data;
         }
         return this._metaCache;
@@ -775,6 +778,49 @@ class SaveManager {
     async _saveMetaToStorage() {
         var data = JSON.stringify(this._metaCache);
         localStorage.setItem('cr_meta.json', data);
+    }
+
+    /* ── Epoch 32: 图鉴系统 ── */
+
+    recordCompendiumEntry(category, id) {
+        if (!this._metaCache) return;
+        var arr = this._metaCache.compendium[category];
+        if (!arr) return;
+        if (arr.indexOf(id) === -1) {
+            arr.push(id);
+            this._saveMetaToStorage();
+        }
+    }
+
+    getCompendiumProgress() {
+        if (!this._metaCache) return { relics: 0, weapons: 0, enemies: 0, mutations: 0, total: 0, seen: 0 };
+        var c = this._metaCache.compendium;
+        var total = 0, seen = 0;
+        /* 已知总数 */
+        var relicIds = ['sharp_edge','golden_finger','auto_drone','thorn_armor','wind_walker','vamp_ring','explosive_core','frost_core','gravity_core','weapon_amplify'];
+        var weaponIds = Object.keys(window.rewardManager && window.rewardManager.weaponInfos || {});
+        var enemyIds = ['basic','fast','ranged','shaman','tanker','stalker'];
+        total += relicIds.length;
+        total += weaponIds.length;
+        total += enemyIds.length;
+        total += (c.mutations || []).length;
+        seen += (c.relics || []).length;
+        seen += (c.weapons || []).length;
+        seen += (c.enemies || []).length;
+        seen += (c.mutations || []).length;
+        return {
+            relics: (c.relics || []).length,
+            relicsTotal: relicIds.length,
+            weapons: (c.weapons || []).length,
+            weaponsTotal: weaponIds.length,
+            enemies: (c.enemies || []).length,
+            enemiesTotal: enemyIds.length,
+            mutations: (c.mutations || []).length,
+            mutationsTotal: total - relicIds.length - weaponIds.length - enemyIds.length,
+            total: total,
+            seen: seen,
+            pct: total > 0 ? Math.round(seen / total * 100) : 0
+        };
     }
 
     equipItem(instanceId) {

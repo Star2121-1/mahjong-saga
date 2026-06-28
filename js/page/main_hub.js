@@ -910,6 +910,18 @@
         }
 
 /* Epoch 16: 声望信息 */        var prestigeHtml = '';        if (typeof window.saveManager.getPrestigeInfo === 'function') {            var pi = window.saveManager.getPrestigeInfo();            prestigeHtml =                '<div class="stat-row"><span class="stat-label">声望等级</span><span class="stat-value">' + (pi.level || 0) + '</span></div>' +                '<div class="stat-row"><span class="stat-label">声望点</span><span class="stat-value">' + (pi.points || 0) + ' / ' + pi.potential + '</span></div>' +                '<div class="stat-row"><span class="stat-label">转生加成</span><span class="stat-value">ATK+' + Math.floor((pi.points||0)*0.5) + ' HP+' + Math.floor((pi.points||0)*2) + '</span></div>' +                (pi.canPrestige ? '<button class="btn-perk-buy" id="prestige-btn" style="margin-top:8px;width:100%;">转生 (' + (pi.potential - (pi.points||0)) + ' 点可获得)</button>' : '<div class="stat-row"><span class="stat-label">转生</span><span class="stat-value">已满级</span></div>');        }
+
+        /* Epoch 32: 图鉴进度 */
+        var compendiumHtml = '';
+        if (typeof window.saveManager.getCompendiumProgress === 'function') {
+            var prog = window.saveManager.getCompendiumProgress();
+            compendiumHtml =
+                '<div class="stat-row"><span class="stat-label">总进度</span><span class="stat-value">' + prog.pct + '% (' + prog.seen + '/' + prog.total + ')</span></div>' +
+                '<div class="stat-row"><span class="stat-label">圣物</span><span class="stat-value">' + prog.relics + '/' + prog.relicsTotal + '</span></div>' +
+                '<div class="stat-row"><span class="stat-label">武器</span><span class="stat-value">' + prog.weapons + '/' + prog.weaponsTotal + '</span></div>' +
+                '<div class="stat-row"><span class="stat-label">敌人</span><span class="stat-value">' + prog.enemies + '/' + prog.enemiesTotal + '</span></div>' +
+                '<div class="stat-row"><span class="stat-label">突变</span><span class="stat-value">' + prog.mutations + '/' + prog.mutationsTotal + '</span></div>';
+        }
         /* 挑战列表 */
         var challengesHtml = '';
         if (challenges.length > 0) {
@@ -1056,6 +1068,7 @@
             '<div class="perks-list">' + perksHtml + '</div>' +
             '</div>' +
 '<div class="stats-section">' +            '<div class="stats-section-title">⭐ 声望转生</div>' +            '<div class="stats-grid">' + prestigeHtml + '</div>' +            '</div>' +
+'<div class="stats-section">' +            '<div class="stats-section-title">📖 图鉴收集</div>' +            '<div class="stats-grid">' + compendiumHtml + '</div>' +            '</div>' +
 '<div class="stats-section">' +            '<div class="stats-section-title">🌟 赛季奖励</div>' +            '<div class="stats-grid">' + seasonRewardHtml + '</div>' +            '</div>';
 
         /* 绑定购买按钮 */
