@@ -519,7 +519,22 @@ class SaveManager {
             finalBossKills: 0,
             totalCrits: 0,
             totalDodges: 0,
-            fullSetActivated: false
+            fullSetActivated: false,
+            /* Epoch 14+: 元进度系统 */
+            challenges: { active: [], completed: {}, lastRotation: 0 },
+            runStats: null,
+            purchasedPerks: {},
+            /* Epoch 15+: 每日登录 */
+            loginStreak: 0,
+            lastLoginDate: '',
+            dailyRewardsClaimed: {},
+            makeupTokens: 0,
+            runHistory: [],
+            /* Epoch 32+: 图鉴 */
+            compendium: { relics: [], weapons: [], enemies: [], equips: [], mutations: [] },
+            discoveredSecrets: [],
+            /* Epoch 41: 每周金库 */
+            weeklyVault: { active: false, challenge: null, bet: 0, completed: false, reward: null }
         };
         this._writeJSON('meta.json', defaults);
         this._writeJSON('active_run.json', {
@@ -824,6 +839,15 @@ class SaveManager {
     async _saveMetaToStorage() {
         var data = JSON.stringify(this._metaCache);
         localStorage.setItem('cr_meta.json', data);
+    }
+
+    /* ── Epoch 45: 元代币辅助 ── */
+
+    addMetaTokens(amount) {
+        var meta = this._metaCache || {};
+        meta.metaTokens = (meta.metaTokens || 0) + amount;
+        this._metaCache = meta;
+        this._saveMetaToStorage();
     }
 
     /* ── Epoch 32: 图鉴系统 ── */

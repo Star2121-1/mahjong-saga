@@ -1186,6 +1186,9 @@
         });
 
         /* Epoch 24: 每日倒计时每秒更新 */
+        /* Clear existing countdown interval to prevent duplicates */
+        for (var _ci = 0; _ci < _tabIntervals.length; _ci++) clearInterval(_tabIntervals[_ci]);
+        _tabIntervals = [];
         var countdownInterval = setInterval(function() {
             var cdEl = document.getElementById('daily-countdown');
             if (cdEl && typeof window.saveManager.getDailyChallengeCountdown === 'function') {

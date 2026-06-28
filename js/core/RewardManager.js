@@ -578,7 +578,7 @@ class RewardManager {
         /* 应用奖励 */
         switch (item.sacrificeType) {
             case 'metatoken':
-                saveManager.addMetaTokens(item.value);
+                window.saveManager.addMetaTokens(item.value);
                 this._showFloatingText('+' + item.value + ' 元代币', '#ff4444');
                 break;
             case 'gold':
@@ -617,7 +617,7 @@ class RewardManager {
         if (!window.fxManager) return;
         var cx = window.innerWidth / 2;
         var cy = window.innerHeight / 2;
-        fxManager.spawn(cx, cy, text, color, 28, 2000);
+        window.fxManager.spawn(cx, cy, text, color, 28, 2000);
     }
 }
 

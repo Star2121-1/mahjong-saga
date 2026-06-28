@@ -1748,11 +1748,12 @@ Gp._settleRun = async function(tokens) {
 
     /* ── Epoch 15/23: 战局历史记录 ── */
     var uniqueRelics = Object.keys(this.player.relicLevels || {}).filter(function(k) { return (this.player.relicLevels[k] || 0) > 0; }).length;
+    var _wc = [];
     try {
         if (typeof window.saveManager.recordRunHistory === 'function') {
             window.saveManager.recordRunHistory(
                 this.player.heroId, this._currentLevelId, this.kills, this._elapsed,
-                !this.gameOver, this.loopCount || 0, uniqueRelics, weeklyCompleted
+                !this.gameOver, this.loopCount || 0, uniqueRelics, _wc
             );
         }
     } catch(e) {}

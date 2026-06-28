@@ -556,7 +556,7 @@
 .game-clock-frozen #boss-gamble-panel,
 .game-clock-frozen #boss-gamble-panel *,
 .game-clock-frozen #boss-gamble-panel *::before,
-.game-clock-frozen #boss-gamble-panel *::after,
+.game-clock-frozen #boss-gamble-panel *::after {
     animation-play-state: running !important;
     transition-property: all !important;
 }
