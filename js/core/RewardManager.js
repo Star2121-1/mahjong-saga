@@ -21,12 +21,12 @@ class RewardManager {
         ];
 
         this.weaponInfos = {
-            TrackingBlade: { name: '追踪飞刃', desc: '自动追踪最近敌人，穿透+3，远程切割', color: '#ff8f00' },
-            OrbitShield: { name: '环形护体', desc: '3 枚光星 120° 公转，持续摩擦伤害', color: '#2962ff' },
-            ShotgunBurst: { name: '扇形散射', desc: '点击发射 5 发散弹，近距叠吃多段', color: '#ff6d00' },
-            GroundSlammer: { name: '区域震荡', desc: '4s 冷却大范围震波扩散 + 击退', color: '#ffc107' },
-            LaserBeam: { name: '持续线杀', desc: '300px 激光高频融化，朝鼠标方向', color: '#ff1744' },
-            NovaPulse: { name: '全屏脉冲', desc: '7s 蓄力全屏清场蒸发级伤害', color: '#d50000' }
+            TrackingBlade: { name: '追踪飞刃', desc: '自动追踪最近敌人，穿透+3，远程切割', color: '#ff8f00', category: '单体', synergizes: ['auto_drone', 'weapon_amplify'], atkFactor: 1.0, cd: 0.8 },
+            OrbitShield:   { name: '环形护体', desc: '3 枚光星 120° 公转，持续摩擦伤害', color: '#2962ff', category: '持续', synergizes: ['explosive_core', 'frost_core'], atkFactor: 0.5, cd: 0.3 },
+            ShotgunBurst:  { name: '扇形散射', desc: '点击发射 5 发散弹，近距叠吃多段', color: '#ff6d00', category: '爆发', synergizes: ['golden_finger', 'sharp_edge'], atkFactor: 0.6, cd: 0.4 },
+            GroundSlammer: { name: '区域震荡', desc: '4s 冷却大范围震波扩散 + 击退', color: '#ffc107', category: '范围', synergizes: ['wind_walker', 'gravity_core'], atkFactor: 1.5, cd: 1.8 },
+            LaserBeam:     { name: '持续线杀', desc: '300px 激光高频融化，朝鼠标方向', color: '#ff1744', category: '持续', synergizes: ['vamp_ring', 'weapon_amplify'], atkFactor: 1.2, cd: 0.3 },
+            NovaPulse:     { name: '全屏脉冲', desc: '7s 蓄力全屏清场蒸发级伤害', color: '#d50000', category: '终极', synergizes: ['explosive_core', 'frost_core', 'weapon_amplify'], atkFactor: 5.0, cd: 7.0 }
         };
 
         this.overlay = document.getElementById('reward-overlay');
@@ -409,7 +409,19 @@ class RewardManager {
         for (var wid in this.weaponInfos) {
             if (currentIds[wid]) continue;
             var info = this.weaponInfos[wid];
-            pool.push({ type: 'weapon_new', id: wid, name: info.name, desc: info.desc, cost: 0, cardData: info });
+            var weight = 1;
+            /* Epoch 14: 未拥有的武器 +2x */
+            var metaWeapons = (window.saveManager && window.saveManager._metaCache) ? (window.saveManager._metaCache.defaultWeapons || []) : [];
+            if (metaWeapons.indexOf(wid) === -1) weight *= 2;
+            /* Epoch 14: 协同加成 */
+            if (info.synergizes) {
+                for (var syi = 0; syi < info.synergizes.length; syi++) {
+                    var rid = info.synergizes[syi];
+                    var rlvl = p.relicLevels[rid] || 0;
+                    if (rlvl > 0) weight += rlvl * 0.4;
+                }
+            }
+            pool.push({ type: 'weapon_new', id: wid, name: info.name, desc: info.desc, cost: 0, cardData: info, _weight: weight });
         }
 
         for (var ai = 0; ai < eng._activeWeapons.length; ai++) {
@@ -424,12 +436,57 @@ class RewardManager {
     }
 
     _pickFrom(pool) {
-        var shuffled = pool.slice();
+        var self = this;
+        /* 分离加权武器项和其他项 */
+        var weaponItems = [];
+        var otherItems = [];
+        for (var pi = 0; pi < pool.length; pi++) {
+            if (pool[pi].type === 'weapon_new' && pool[pi]._weight != null)
+                weaponItems.push(pool[pi]);
+            else
+                otherItems.push(pool[pi]);
+        }
+
+        var picked = [];
+        /* 从加权池中抽 1~2 个武器 */
+        if (weaponItems.length > 0) {
+            var wCount = Math.min(weaponItems.length, Math.random() < 0.6 ? 2 : 1);
+            var tempW = weaponItems.slice();
+            for (var wi = 0; wi < wCount; wi++) {
+                var totalW = 0;
+                for (var twi = 0; twi < tempW.length; twi++) totalW += tempW[twi]._weight;
+                var r = Math.random() * totalW;
+                var cum = 0;
+                var chosen = tempW[0];
+                for (var ci = 0; ci < tempW.length; ci++) {
+                    cum += tempW[ci]._weight;
+                    if (r <= cum) { chosen = tempW[ci]; break; }
+                }
+                picked.push(chosen);
+                /* 从临时池中移除已选的 */
+                for (var ri = 0; ri < tempW.length; ri++) {
+                    if (tempW[ri] === chosen) { tempW.splice(ri, 1); break; }
+                }
+            }
+        }
+
+        /* 其余从非武器池中随机抽 */
+        var remaining = 3 - picked.length;
+        var shuffled = otherItems.slice();
         for (var i = shuffled.length - 1; i > 0; i--) {
             var j = Math.floor(Math.random() * (i + 1));
             var tmp = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = tmp;
         }
-        return shuffled.slice(0, 3);
+        for (var k = 0; k < Math.min(remaining, shuffled.length); k++) {
+            picked.push(shuffled[k]);
+        }
+
+        /* 最终打乱顺序 */
+        for (var f = picked.length - 1; f > 0; f--) {
+            var g = Math.floor(Math.random() * (f + 1));
+            var tmp2 = picked[f]; picked[f] = picked[g]; picked[g] = tmp2;
+        }
+        return picked;
     }
 
     _renderStars(level) {

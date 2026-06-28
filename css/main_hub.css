@@ -512,6 +512,44 @@
 .mutation-vault-remove:hover { transform: scale(1.06); background: rgba(76,175,80,0.12); }
 
 /* ══════════════════════════════════════════════
+   武器图鉴
+   ══════════════════════════════════════════════ */
+
+#panel-compendium { gap: 6px; }
+.compendium-title {
+    font-size: 15px; font-weight: 800; color: #ff8f00;
+    letter-spacing: 2px;
+    text-shadow: 0 0 16px rgba(255,143,0,0.3);
+}
+.compendium-desc { font-size: 12px; color: #7a9a8a; line-height: 1.4; padding: 0 2px; }
+#weapon-compendium-grid { display: flex; flex-direction: column; gap: 8px; }
+.compendium-weapon-card {
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px; font-size: 13px;
+    border-left: 3px solid transparent;
+    transition: border-color 0.2s;
+}
+.compendium-weapon-card.unlocked { border-left-color: #4caf50; }
+.compendium-weapon-card.locked { opacity: 0.45; filter: grayscale(0.5); }
+.compendium-weapon-header {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+    border-top: 2px solid; padding-top: 4px;
+}
+.compendium-weapon-name { font-weight: 700; color: #fbfbf7; font-size: 14px; }
+.compendium-weapon-badge {
+    font-size: 9px; font-weight: 700; padding: 2px 6px;
+    border-radius: 4px; letter-spacing: 1px;
+}
+.compendium-weapon-badge:not(.locked-badge) { background: rgba(76,175,80,0.15); color: #81c784; border: 1px solid rgba(76,175,80,0.3); }
+.compendium-weapon-badge.locked-badge { background: rgba(255,255,255,0.05); color: #666; border: 1px solid rgba(255,255,255,0.1); }
+.compendium-weapon-cat { font-size: 10px; color: #aaa; font-weight: 600; margin-bottom: 4px; }
+.compendium-weapon-stats { display: flex; gap: 12px; font-size: 12px; color: #4fc3f7; margin-bottom: 4px; }
+.compendium-weapon-desc { font-size: 11px; color: #7a9a8a; line-height: 1.3; }
+.compendium-weapon-synergy { font-size: 11px; color: #ffd740; margin-top: 4px; }
+
+/* ══════════════════════════════════════════════
    成就系统
    ══════════════════════════════════════════════ */
 

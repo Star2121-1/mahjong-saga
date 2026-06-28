@@ -92,6 +92,7 @@
                 refreshStatsPanel();
             }
             if (panelId === 'history') { refreshHistoryPanel(); }
+            if (panelId === 'compendium') { renderWeaponCompendium(); }
         },
 
         _destroyPreviousPanel: function() {
@@ -1260,7 +1261,50 @@
     }
 
 
-    /* Epoch 17: 战局历史面板 */
+    /* ── 武器图鉴 ── */
+
+    function renderWeaponCompendium() {
+        var grid = document.getElementById('weapon-compendium-grid');
+        if (!grid) return;
+        var weaponData = (window.rewardManager && window.rewardManager.weaponInfos) || {};
+        var meta = window.saveManager._metaCache || {};
+        var unlocked = meta.defaultWeapons || ['TrackingBlade'];
+
+        var html = '';
+        var weaponKeys = ['TrackingBlade', 'OrbitShield', 'ShotgunBurst', 'GroundSlammer', 'LaserBeam', 'NovaPulse'];
+        for (var wi = 0; wi < weaponKeys.length; wi++) {
+            var key = weaponKeys[wi];
+            var w = weaponData[key];
+            if (!w) continue;
+            var isUnlocked = unlocked.indexOf(key) !== -1;
+            var synergyNames = [];
+            if (w.synergizes) {
+                for (var si = 0; si < w.synergizes.length; si++) {
+                    var rel = (window.rewardManager && window.rewardManager.baseRelics) || [];
+                    for (var ri = 0; ri < rel.length; ri++) {
+                        if (rel[ri].id === w.synergizes[si]) { synergyNames.push(rel[ri].name); break; }
+                    }
+                }
+            }
+            html +=
+                '<div class="compendium-weapon-card' + (isUnlocked ? ' unlocked' : ' locked') + '">' +
+                '<div class="compendium-weapon-header" style="border-top-color:' + w.color + '">' +
+                '<span class="compendium-weapon-name">' + w.name + '</span>' +
+                (isUnlocked ? '<span class="compendium-weapon-badge">已拥有</span>' : '<span class="compendium-weapon-badge locked-badge">未解锁</span>') +
+                '</div>' +
+                '<div class="compendium-weapon-cat">' + w.category + '</div>' +
+                '<div class="compendium-weapon-stats">' +
+                '<span>攻倍率: ' + (w.atkFactor || '?') + '</span>' +
+                '<span>冷却: ' + (w.cd || '?') + 's</span>' +
+                '</div>' +
+                '<div class="compendium-weapon-desc">' + w.desc + '</div>' +
+                (synergyNames.length ? '<div class="compendium-weapon-synergy">协同: ' + synergyNames.join('、') + '</div>' : '') +
+                '</div>';
+        }
+        grid.innerHTML = html;
+    }
+
+    /* ── Epoch 17: 战局历史面板 ── */
     function refreshHistoryPanel() {
         var grid = document.getElementById('history-grid');
         if (!grid) return;
