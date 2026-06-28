@@ -34,3 +34,14 @@
 | 30 | `feat/evolution-epoch-14` | 登录奖励/战局历史/精英模式 | ✅ Committed |
 | 31 | `feat/evolution-epoch-31` | 每日任务/死亡奖励/排行榜 | ✅ Committed |
 | 32 | `feat/evolution-epoch-32` | 牺牲选项/波次间事件/图鉴系统 | ✅ Committed |
+| 33 | `feat/evolution-epoch-33` | 圣物随机词条 | ✅ Committed |
+| 34 | `feat/evolution-epoch-34` | Overdrive武器伤害翻倍 | ✅ Committed |
+| 35 | `feat/evolution-epoch-35` | 审计修复 | ✅ Committed |
+| 36 | `feat/evolution-epoch-36` | 合成音效系统 | ✅ Committed |
+| 37 | `feat/evolution-epoch-37` | 胜利引导/继续挑战/波次里程碑 | ✅ Committed |
+| 38 | `feat/evolution-epoch-38` | Mutator视觉反馈/Boss阶段庆祝/共振指示 | ✅ Committed |
+| 39 | `feat/evolution-epoch-39` | 武器智能推荐/图鉴面板 | ✅ Committed |
+| 40 | `feat/evolution-epoch-40` | 登录补签系统 | ✅ Committed |
+| 41 | `feat/evolution-epoch-41` | 每周金库挑战 | ✅ Committed |
+| 42 | `feat/evolution-epoch-42` | 秘密合成系统 | ✅ Committed |
+| 43 | `feat/evolution-epoch-43` | Boss豪赌系统 | ✅ Committed |
