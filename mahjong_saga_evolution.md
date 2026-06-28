@@ -30,3 +30,7 @@
 | 26 | `feat/evolution-epoch-14` | hub面板布局验证/hero header/expedition — 小高度媒体断点 | ✅ Committed |
 | 27 | `feat/evolution-epoch-14` | 战场细节/overlay响应式 — victory/game-over/mutator/abyss/reward面板 | ✅ Committed |
 | 28 | `feat/evolution-epoch-14` | 审计修复 — stat-row溢出/死代码/iOS跳动/选择器错误 | ✅ Committed |
+| 29 | `feat/evolution-epoch-14` | 每日任务/死亡奖励/排行榜/赛季骨架 | ✅ Committed |
+| 30 | `feat/evolution-epoch-14` | 登录奖励/战局历史/精英模式 | ✅ Committed |
+| 31 | `feat/evolution-epoch-31` | 每日任务/死亡奖励/排行榜 | ✅ Committed |
+| 32 | `feat/evolution-epoch-32` | 牺牲选项/波次间事件/图鉴系统 | ✅ Committed |
