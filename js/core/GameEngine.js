@@ -1676,6 +1676,17 @@ Gp._gameOver = async function() {
         }
     } catch(e) {}
 
+    /* Epoch 31: 每日任务完成检查 */
+    try {
+        var dailyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: this._maxGoldThisRun || 0, hitsTaken: this._playerHitCountThisRun || 0, won: !this.gameOver, waves: this._waveCount || 0, crits: this._totalCritsThisRun || 0, dodges: this._totalDodgesThisRun || 0, abyssDepth: this.loopCount || 0 };
+        if (typeof window.saveManager.checkDailyQuestCompletion === 'function') {
+            var completedQuests = window.saveManager.checkDailyQuestCompletion(dailyStats);
+            if (completedQuests.length > 0) {
+                this._spawnCausalityText('✅ 每日任务完成: ' + completedQuests.join(', '));
+            }
+        }
+    } catch(e) {}
+
     /* ── Epoch 14: 运行统计记录 ── */
     var uniqueRelics = Object.keys(this.player.relicLevels || {}).filter(function(k) { return (this.player.relicLevels[k] || 0) > 0; }).length;
     if (typeof window.saveManager.recordRunStats === 'function') {
@@ -1699,6 +1710,31 @@ Gp._gameOver = async function() {
                 this.player.heroId, this._currentLevelId, this.kills, this._elapsed,
                 false, this.loopCount || 0, ur, weeklyCompleted
             );
+        }
+    } catch(e) {}
+
+    /* Epoch 31: 死亡奖励 */
+    try {
+        var deathReward = window.saveManager.calcDeathReward(this.kills, this._maxGoldThisRun || 0, this._elapsed);
+        if (deathReward.metaTokens > 0 || deathReward.bossCores > 0) {
+            meta.metaTokens = (meta.metaTokens || 0) + deathReward.metaTokens;
+            meta.bossCores = (meta.bossCores || 0) + deathReward.bossCores;
+            this._spawnCausalityText('💀 死亡补偿: +' + deathReward.metaTokens + ' 代币' + (deathReward.bossCores > 0 ? ' +' + deathReward.bossCores + ' 核心' : ''));
+        }
+    } catch(e) {}
+
+    /* Epoch 31: 更新本地排行榜 */
+    try {
+        var lbStats = {
+            won: !this.gameOver,
+            elapsed: this._elapsed,
+            bestAbyssDepth: this.loopCount || 0,
+            totalKills: (meta.totalKills || 0) + this.kills,
+            totalGold: (meta.runStats && meta.runStats.totalGold) || 0,
+            perfectRuns: (meta.runStats && meta.runStats.perfectRuns) || 0
+        };
+        if (typeof window.saveManager.updateLeaderboard === 'function') {
+            window.saveManager.updateLeaderboard(lbStats);
         }
     } catch(e) {}
 

@@ -934,6 +934,32 @@
             dailyHtml = '<div class="stat-row"><span class="stat-label">每日挑战重置</span><span class="stat-value" id="daily-countdown">' + formatted + '</span></div>';
         }
 
+        /* Epoch 31: 每日任务 */
+        var dailyQuestHtml = '';
+        if (typeof window.saveManager.getDailyQuests === 'function') {
+            var dq = window.saveManager.getDailyQuests();
+            var pool = SaveManager.DAILY_QUEST_POOL || [];
+            var poolMap = {};
+            for (var qi = 0; qi < pool.length; qi++) poolMap[pool[qi].id] = pool[qi];
+            var questHtml = '';
+            if (dq && dq.quests) {
+                for (var i = 0; i < dq.quests.length; i++) {
+                    var q = dq.quests[i];
+                    var def = poolMap[q.id];
+                    if (!def) continue;
+                    var claimBtn = (q.completed && !dq.claimed && !dq.claimed[q.id])
+                        ? '<button class="btn-perk-buy" data-quest="' + q.id + '" style="margin-top:4px;width:100%;font-size:11px;">领取 (' + (def.reward.metaTokens||0) + '代币' + (def.reward.bossCores ? '|' + def.reward.bossCores + '核心' : '') + ')</button>'
+                        : '';
+                    questHtml += '<div class="stat-row" style="flex-direction:column;align-items:flex-start;gap:4px;">' +
+                        '<span class="stat-label">' + (q.completed ? '✅ ' : '⬜ ') + def.name + '</span>' +
+                        '<span class="stat-value" style="font-size:11px;color:#aaa;">' + def.desc + '</span>' +
+                        claimBtn +
+                        '</div>';
+                }
+            }
+            dailyQuestHtml = questHtml;
+        }
+
         /* Epoch 24: 赛季奖励 */
         var seasonRewardHtml = '';
         if (typeof window.saveManager.claimSeasonReward === 'function') {
@@ -1022,6 +1048,7 @@
             '<div class="stats-section-title">🎯 活跃挑战</div>' +
             '<div class="challenges-grid">' + challengesHtml + '</div>' +
 '<div class="stats-section">' +            '<div class="stats-section-title">⏱ 每日挑战</div>' +            '<div class="stats-grid">' + dailyHtml + '</div>' +            '</div>' +
+'<div class="stats-section">' +            '<div class="stats-section-title">📋 每日任务</div>' +            '<div class="stats-grid">' + dailyQuestHtml + '</div>' +            '</div>' +
 '<div class="stats-section">' +            '<div class="stats-section-title">🏆 每周超级挑战</div>' +            '<div class="challenges-grid" id="weekly-challenges-section"><div class="stats-empty">加载中...</div></div>' +            '</div>' +
             '</div>' +
             '<div class="stats-section">' +
@@ -1047,6 +1074,16 @@
             }
         }, 1000);
         _tabIntervals.push(countdownInterval);
+
+        /* Epoch 31: 每日任务领取按钮 */
+        grid.querySelectorAll('[data-quest]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var questId = this.dataset.quest;
+                window.saveManager.claimDailyQuestReward(questId).then(function(res) {
+                    if (res.ok) refreshStatsPanel();
+                }).catch(function() {});
+            });
+        });
 
         /* Epoch 21/16: 声望按钮 (去重) */
         var prestigeBtn = document.getElementById('prestige-btn');

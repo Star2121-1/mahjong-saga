@@ -914,6 +914,112 @@ class SaveManager {
             });
         });
     }
+
+    /* ── Epoch 31: 每日任务 ── */
+    static DAILY_QUEST_POOL = [
+        { id: 'dq_kill_30', name: '连斩30', desc: '单局击杀 30 个敌人', check: function(s) { return s.kills >= 30; }, reward: { metaTokens: 20, bossCores: 1 } },
+        { id: 'dq_gold_300', name: '掘金', desc: '单局获取 300 金币', check: function(s) { return s.maxGold >= 300; }, reward: { metaTokens: 15 } },
+        { id: 'dq_no_hit_1', name: '无畏', desc: '单局 0 受击通关', check: function(s) { return s.hitsTaken === 0 && s.won; }, reward: { metaTokens: 30, bossCores: 2 } },
+        { id: 'dq_overdrive_2', name: '怒意', desc: '单局触发 2 次 Overdrive', check: function(s) { return s.overdriveCount >= 2; }, reward: { bossCores: 1 } },
+        { id: 'dq_wave_10', name: '坚守', desc: '通关 10 波', check: function(s) { return s.waves >= 10; }, reward: { metaTokens: 25 } },
+        { id: 'dq_crit_15', name: '暴击大师', desc: '单局暴击 15 次', check: function(s) { return s.crits >= 15; }, reward: { metaTokens: 20 } },
+        { id: 'dq_dodge_10', name: '幻影', desc: '单局闪避 10 次', check: function(s) { return s.dodges >= 10; }, reward: { metaTokens: 15 } },
+        { id: 'dq_abyss_3', name: '深渊探索', desc: '抵达深渊第 3 层', check: function(s) { return s.abyssDepth >= 3; }, reward: { metaTokens: 30, bossCores: 2 } }
+    ];
+
+    /** 获取/刷新每日任务 */
+    getDailyQuests() {
+        var meta = this._metaCache || {};
+        if (!meta.dailyQuests) meta.dailyQuests = { quests: [], lastDate: 0 };
+        var today = new Date().toISOString().slice(0, 10);
+        if (meta.dailyQuests.lastDate !== today) {
+            /* 新的一天 — 随机选3个任务 */
+            var pool = SaveManager.DAILY_QUEST_POOL;
+            var seed = today.charCodeAt(today.length - 1) + today.charCodeAt(0);
+            var indices = [];
+            var h = seed;
+            for (var i = 0; i < 3 && indices.length < pool.length; i++) {
+                h = (h * 1103515245 + 12345) & 0x7fffffff;
+                var idx = h % pool.length;
+                if (indices.indexOf(idx) === -1) indices.push(idx);
+            }
+            meta.dailyQuests = {
+                quests: indices.map(function(ix) { return { id: pool[ix].id, completed: false }; }),
+                lastDate: today,
+                claimed: {}
+            };
+        }
+        return meta.dailyQuests;
+    }
+
+    /** 检查每日任务完成 */
+    checkDailyQuestCompletion(stats) {
+        var dq = this.getDailyQuests();
+        var pool = SaveManager.DAILY_QUEST_POOL;
+        var poolMap = {};
+        for (var i = 0; i < pool.length; i++) poolMap[pool[i].id] = pool[i];
+        var completed = [];
+        for (var i = 0; i < dq.quests.length; i++) {
+            var q = dq.quests[i];
+            if (q.completed) continue;
+            var def = poolMap[q.id];
+            if (def && def.check(stats)) {
+                dq.quests[i].completed = true;
+                completed.push(q.id);
+            }
+        }
+        return completed;
+    }
+
+    /** 领取每日任务奖励 */
+    claimDailyQuestReward(questId) {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            var dq = meta.dailyQuests || {};
+            var claimed = dq.claimed || {};
+            if (claimed[questId]) return Promise.resolve({ ok: false, reason: '已领取' });
+            var pool = SaveManager.DAILY_QUEST_POOL;
+            var def = null;
+            for (var i = 0; i < pool.length; i++) { if (pool[i].id === questId) { def = pool[i]; break; } }
+            if (!def) return Promise.resolve({ ok: false, reason: '未知任务' });
+            var quest = dq.quests && dq.quests.find(function(q) { return q.id === questId; });
+            if (!quest || !quest.completed) return Promise.resolve({ ok: false, reason: '未完成' });
+            claimed[questId] = true;
+            dq.claimed = claimed;
+            meta.dailyQuests = dq;
+            meta.metaTokens = (meta.metaTokens || 0) + (def.reward.metaTokens || 0);
+            meta.bossCores = (meta.bossCores || 0) + (def.reward.bossCores || 0);
+            return self.saveMeta(meta).then(function() { return { ok: true, reward: def.reward }; });
+        });
+    }
+
+    /* ── Epoch 31: 死亡奖励 ── */
+    calcDeathReward(kills, gold, elapsed) {
+        /* 死亡时获得部分奖励: 10%金币 + 每50击杀1核心 */
+        var metaTokens = Math.floor(gold / 10);
+        var bossCores = Math.floor(kills / 50);
+        if (elapsed < 60) { metaTokens = Math.floor(metaTokens * 0.5); bossCores = 0; } /* 过早死亡减半 */
+        return { metaTokens: metaTokens, bossCores: bossCores };
+    }
+
+    /* ── Epoch 31: 本地排行榜 ── */
+    getLeaderboard() {
+        var meta = this._metaCache || {};
+        if (!meta.leaderboard) meta.leaderboard = { fastestClear: 0, deepestAbyss: 0, mostKills: 0, mostGold: 0, perfectRuns: 0 };
+        return meta.leaderboard;
+    }
+
+    updateLeaderboard(stats) {
+        var lb = this.getLeaderboard();
+        if (stats.won) {
+            if (lb.fastestClear === 0 || stats.elapsed < lb.fastestClear) lb.fastestClear = stats.elapsed;
+            if (stats.bestAbyssDepth > lb.deepestAbyss) lb.deepestAbyss = stats.bestAbyssDepth;
+        }
+        if (stats.totalKills > lb.mostKills) lb.mostKills = stats.totalKills;
+        if (stats.totalGold > lb.mostGold) lb.mostGold = stats.totalGold;
+        if (stats.perfectRuns > lb.perfectRuns) lb.perfectRuns = stats.perfectRuns;
+        return lb;
+    }
 }
 
 window.saveManager = new SaveManager();
