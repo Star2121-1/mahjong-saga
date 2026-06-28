@@ -1259,6 +1259,8 @@ Gp._updateCoins = function(dt) {
         }
     }
     if (collected > 0) {
+        /* Epoch 36: 拾取音效 */
+        window.audioManager && window.audioManager.play('pickup');
         /* Epoch 32: 双倍金币诅咒 */
         if (player._doubleCoinNextWave) {
             collected *= 2;
@@ -1336,6 +1338,7 @@ Gp._updateExpGems = function(dt) {
     }
     if (anyLeveled) {
         this._levelUpPending = true;
+        window.audioManager && window.audioManager.play('levelup');
         this._syncExpBar();
     }
 };
@@ -1424,6 +1427,7 @@ Gp._checkQqueenShield = function() {
 };
 
 Gp._showVictory = function() {
+    window.audioManager && window.audioManager.play('victory');
     this._freezeClock();
     this.victoryTime.textContent = this._formatTime(this._elapsed);
     this.victoryKills.textContent = this.kills;
@@ -1678,6 +1682,7 @@ Gp._settleRun = async function(tokens) {
 
 Gp._gameOver = async function() {
     if (this.gameOver) return;
+    window.audioManager && window.audioManager.play('gameover');
     this.gameOver = true;
     this.running = false;
     this._freezeClock();
@@ -2070,6 +2075,12 @@ Gp._onClick = function(e) {
     if (damage === 0) return;
 
     enemy.takeDamage(damage, this.player, undefined, undefined, isCrit ? 'crit' : undefined);
+    /* Epoch 36: 攻击音效 */
+    if (isCrit) window.audioManager && window.audioManager.play('crit');
+    else window.audioManager && window.audioManager.play('attack');
+    if (p.freezeChance > 0 && Math.random() < p.freezeChance) {
+        window.audioManager && window.audioManager.play('freeze');
+    }
 
     /* Epoch 3: 暴击计数 */
     if (isCrit) {
@@ -2088,6 +2099,7 @@ Gp._onClick = function(e) {
     }
 
     if (p.explosionChance > 0 && Math.random() < p.explosionChance) {
+        window.audioManager && window.audioManager.play('explode');
         var splashDmg = Math.floor(damage * 0.5);
         this._spawnExplosion(wx, wy, 50, splashDmg, enemy.id);
     }
@@ -2114,6 +2126,7 @@ Gp._spawnFloatText = function(x, y, text, isCrit) {
 };
 
 Gp._spawnHealText = function(x, y, amount) {
+    window.audioManager && window.audioManager.play('heal', { volume: 0.3 });
     if (window.fxManager) {
         window.fxManager.spawnText(x, y - 20, '+' + amount, 'heal');
         return;
@@ -2611,6 +2624,7 @@ Gp._clearTotems = function() {
    ══════════════════════════════════════════════ */
 
 Gp._triggerOverdrive = function() {
+    window.audioManager && window.audioManager.play('overdrive');
     /* Epoch 5: 委托 Overdrive 到 Systems */
     if (this._systems && this._systems.triggerOverdrive) {
         return this._systems.triggerOverdrive(this);
@@ -2667,6 +2681,7 @@ Gp._endOverdrive = function() {
    ══════════════════════════════════════════════ */
 
 Gp._spawnBossLord = function() {
+    window.audioManager && window.audioManager.play('boss');
     var level = Math.floor(this._elapsed / 15) + 1;
     var x = this._mapW / 2;
     var y = Math.floor(this._mapH * 0.35);
