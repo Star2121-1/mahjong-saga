@@ -951,6 +951,29 @@
                 '<div class="stat-row"><span class="stat-label">装备</span><span class="stat-value">' + prog.equips + '/' + prog.equipsTotal + '</span></div>' +
                 '<div class="stat-row"><span class="stat-label">突变</span><span class="stat-value">' + prog.mutations + '/' + prog.mutationsTotal + '</span></div>';
         }
+
+        /* 秘密发现 */
+        var secretsHtml = '';
+        if (typeof window.saveManager.getDiscoveredSecrets === 'function') {
+            var totalSecrets = window.rewardManager && window.rewardManager.secrets ? window.rewardManager.secrets.length : 0;
+            var discovered = window.saveManager.getDiscoveredSecrets();
+            var foundCount = discovered.length;
+            secretsHtml =
+                '<div class="stat-row"><span class="stat-label">秘密发现</span><span class="stat-value">' + foundCount + ' / ' + totalSecrets + '</span></div>';
+            if (totalSecrets > 0 && foundCount > 0) {
+                for (var si = 0; si < discovered.length; si++) {
+                    var sDef = null;
+                    if (window.rewardManager && window.rewardManager.secrets) {
+                        for (var sj = 0; sj < window.rewardManager.secrets.length; sj++) {
+                            if (window.rewardManager.secrets[sj].id === discovered[si]) { sDef = window.rewardManager.secrets[sj]; break; }
+                        }
+                    }
+                    if (sDef) {
+                        secretsHtml += '<div class="stat-row"><span class="stat-value" style="font-size:11px;color:#da70d6;">🔮 ' + sDef.name + '</span></div>';
+                    }
+                }
+            }
+        }
         /* 挑战列表 */
         var challengesHtml = '';
         if (challenges.length > 0) {
@@ -1152,6 +1175,7 @@
             '</div>' +
 '<div class="stats-section">' +            '<div class="stats-section-title">⭐ 声望转生</div>' +            '<div class="stats-grid">' + prestigeHtml + '</div>' +            '</div>' +
 '<div class="stats-section">' +            '<div class="stats-section-title">📖 图鉴收集</div>' +            '<div class="stats-grid">' + compendiumHtml + '</div>' +            '</div>' +
+'<div class="stats-section">' +            '<div class="stats-section-title">🔮 秘密发现</div>' +            '<div class="stats-grid">' + secretsHtml + '</div>' +            '</div>' +
 '<div class="stats-section">' +            '<div class="stats-section-title">🌟 赛季奖励</div>' +            '<div class="stats-grid">' + seasonRewardHtml + '</div>' +            '</div>';
 
         /* 绑定购买按钮 */

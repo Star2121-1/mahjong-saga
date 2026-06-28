@@ -112,6 +112,8 @@ class SaveManager {
                 runHistory: [],
                 /* Epoch 32: 图鉴系统 */
                 compendium: { relics: [], weapons: [], enemies: [], equips: [], mutations: [] },
+                /* 秘密发现 */
+                discoveredSecrets: [],
                 /* Epoch 36: 每周金库 */
                 weeklyVault: { active: false, challenge: null, bet: 0, completed: false, reward: null }
             };
@@ -187,6 +189,8 @@ class SaveManager {
             if (!data.compendium) data.compendium = { relics: [], weapons: [], enemies: [], equips: [], mutations: [] };
             /* Epoch 36: 每周金库迁移 */
             if (!data.weeklyVault) data.weeklyVault = { active: false, challenge: null, bet: 0, completed: false, reward: null };
+            /* 秘密发现迁移 */
+            if (!data.discoveredSecrets) data.discoveredSecrets = [];
             this._metaCache = data;
         }
         return this._metaCache;
@@ -832,6 +836,25 @@ class SaveManager {
             arr.push(id);
             this._saveMetaToStorage();
         }
+    }
+
+    /* ── 秘密发现记录 ── */
+
+    recordDiscoveredSecret(secretId) {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            if (!meta.discoveredSecrets) meta.discoveredSecrets = [];
+            if (meta.discoveredSecrets.indexOf(secretId) === -1) {
+                meta.discoveredSecrets.push(secretId);
+                return self.saveMeta(meta);
+            }
+            return meta;
+        });
+    }
+
+    getDiscoveredSecrets() {
+        var meta = this._metaCache || {};
+        return meta.discoveredSecrets || [];
     }
 
     getCompendiumProgress() {

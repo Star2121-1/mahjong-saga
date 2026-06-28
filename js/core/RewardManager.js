@@ -34,6 +34,16 @@ class RewardManager {
         this._replaceWeaponId = null;
 
         /* ── 牺牲选项池 ── */
+        /* ── 秘密图鉴 ── */
+
+        this.secrets = [
+            { id: 'dragon_formation', name: '龙形阵', desc: '锐利锋芒Lv3+荆棘反伤甲Lv3+爆破核心Lv2 → 永久+10攻击力', check: function(p) { return (p.relicLevels.sharp_edge||0)>=3 && (p.relicLevels.thorn_armor||0)>=3 && (p.relicLevels.explosive_core||0)>=2; }, reward: function(p) { p.atk += 10; } },
+            { id: 'frost_blade', name: '霜刃', desc: '锐利锋芒Lv3+冰霜核心Lv3 → 暴击伤害+50%', check: function(p) { return (p.relicLevels.sharp_edge||0)>=3 && (p.relicLevels.frost_core||0)>=3; }, reward: function(p) { p.critDamageBonus = (p.critDamageBonus||1) + 0.5; } },
+            { id: 'thorn_garden', name: '荆棘花园', desc: '荆棘反伤甲Lv5+吮血指环Lv3 → 反伤伤害同时触发吸血', check: function(p) { return (p.relicLevels.thorn_armor||0)>=5 && (p.relicLevels.vamp_ring||0)>=3; }, reward: function(p) { p.thornsLifesteal = true; } },
+            { id: 'wind_fury', name: '狂风之怒', desc: '疾风步Lv3+黄金右手指Lv2 → 移速+25%, 闪避+10%', check: function(p) { return (p.relicLevels.wind_walker||0)>=3 && (p.relicLevels.golden_finger||0)>=2; }, reward: function(p) { p.speedMultiplier = (p.speedMultiplier||1) + 0.25; p.dodgeRate = Math.min(1, (p.dodgeRate||0) + 0.1); } },
+            { id: 'gravity_mastery', name: '引力 mastery', desc: '引力核心Lv3+兵器增幅Lv2 → 经验吸附范围+100px, 武器冷却-15%', check: function(p) { return (p.relicLevels.gravity_core||0)>=3 && (p.relicLevels.weapon_amplify||0)>=2; }, reward: function(p) { p.magnetRadius = (p.magnetRadius||60) + 100; } }
+        ];
+
         this.sacrificeOptions = [
             { id: 'sacrifice_metatoken', name: '献祭之祭坛', icon: '🔥', desc: '献祭一个圣物，获得 3 元代币', type: 'metatoken', value: 3 },
             { id: 'sacrifice_gold', name: '贪婪契约', icon: '💎', desc: '献祭一个圣物，获得当前等级 50% 的元宝', type: 'gold', value: 0.5 },
@@ -305,6 +315,8 @@ class RewardManager {
         player.addRelic(relic.id);
         /* Epoch 32: 图鉴记录 */
         if (window.saveManager) window.saveManager.recordCompendiumEntry('relics', relic.id);
+        /* 秘密检测 */
+        if (window.rewardManager) window.rewardManager._checkSecrets();
         if (titleEl) titleEl.textContent = originalTitle;
         window.gameEngine._syncUI();
         if (isFree) window.gameEngine._resumeAfterLevelUp();
@@ -491,6 +503,31 @@ class RewardManager {
 
     _renderStars(level) {
         return '★'.repeat(level) + '☆'.repeat(5 - level);
+    }
+
+    /* ── 秘密发现 ── */
+
+    _checkSecrets() {
+        var self = this;
+        var p = window.gameEngine.player;
+        if (!p) return;
+        for (var si = 0; si < this.secrets.length; si++) {
+            var s = this.secrets[si];
+            if (p._discoveredSecrets && p._discoveredSecrets.indexOf(s.id) !== -1) continue;
+            if (s.check(p)) {
+                p._discoveredSecrets = p._discoveredSecrets || [];
+                p._discoveredSecrets.push(s.id);
+                s.reward(p);
+                if (window.saveManager) {
+                    window.saveManager.recordDiscoveredSecret(s.id);
+                }
+                if (window.gameEngine && typeof window.gameEngine._spawnCausalityText === 'function') {
+                    window.gameEngine._spawnCausalityText('🔮 秘密发现: ' + s.name + ' — ' + s.desc);
+                }
+                this._showFloatingText('🔮 ' + s.name, '#ff00ff');
+                break;
+            }
+        }
     }
 
     /* ── 牺牲选项 ── */
