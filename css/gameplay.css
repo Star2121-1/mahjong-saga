@@ -460,6 +460,10 @@
 .ws-cd-track { flex: 1; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; min-width: 12px; }
 .ws-cd-fill { height: 100%; background: #1e6f42; border-radius: 2px; transition: width 0.08s linear; }
 .ws-level { font-size: 8px; color: #888; font-weight: 700; flex-shrink: 0; min-width: 16px; text-align: right; }
+.ws-cd-text { font-size: 7px; color: #aaa; font-weight: 600; flex-shrink: 0; min-height: 10px; text-align: center; }
+.weapon-slot.on-cd .ws-name { opacity: 0.4; }
+.weapon-slot.on-cd .ws-icon { opacity: 0.4; }
+.weapon-slot-bar .ws-limit { font-size: 10px; color: #aaa; font-weight: 600; }
 
 /* ══════════════════════════════════════════════
    暂停界面
