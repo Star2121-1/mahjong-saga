@@ -1134,6 +1134,71 @@ Gp._spawnEnemy = function(isBoss) {
     enemy.el = el;
 };
 
+/** Spawn a specific enemy type (for boss summons, interwave events) */
+Gp._spawnEnemyType = function(type) {
+    var level = Math.floor(this._elapsed / 15) + 1;
+    var angle = Math.random() * Math.PI * 2;
+    var dist = 200 + Math.random() * 50;
+    var x = this.player.x + Math.cos(angle) * dist;
+    var y = this.player.y + Math.sin(angle) * dist;
+    var margin = 20;
+    x = Math.max(margin, Math.min(this._mapW - margin, x));
+    y = Math.max(margin, Math.min(this._mapH - margin, y));
+    var id = this._enemyIdCounter++;
+    var enemy = new Enemy(id, x, y, level, false, type);
+    enemy.el = document.createElement('div');
+    enemy.el.className = 'enemy';
+    /* 2.5D 骨雕妖牌 */
+    enemy.el.style.background = '#2a4a3a';
+    enemy.el.style.borderRadius = '4px';
+    enemy.el.style.boxShadow = '0 3px 0 #1a3020, 0 5px 0.5px #3a5a4a, 0 6px 8px rgba(0,0,0,0.4)';
+    enemy.el.style.display = 'flex';
+    enemy.el.style.alignItems = 'center';
+    enemy.el.style.justifyContent = 'center';
+    enemy.el.style.fontSize = '12px';
+    enemy.el.style.fontWeight = '700';
+    enemy.el.style.color = '#5a8a6a';
+    /* Mahjong tile face */
+    var face = document.createElement('div');
+    face.style.position = 'relative';
+    face.style.width = '32px';
+    face.style.height = '42px';
+    face.style.background = '#f5f5dc';
+    face.style.border = '1px solid #bbb';
+    face.style.borderRadius = '3px';
+    face.style.boxShadow = 'inset 0 -2px 0 #ddd, 0 2px 4px rgba(0,0,0,0.2)';
+    face.style.display = 'flex';
+    face.style.alignItems = 'center';
+    face.style.justifyContent = 'center';
+    face.style.fontSize = '16px';
+    face.style.fontWeight = 'bold';
+    face.style.color = '#333';
+    face.textContent = enemy.type.charAt(0);
+    enemy.el.appendChild(face);
+    /* HP bar */
+    var hpBar = document.createElement('div');
+    hpBar.className = 'enemy-hpbar';
+    hpBar.style.width = '36px';
+    hpBar.style.height = '4px';
+    hpBar.style.background = '#333';
+    hpBar.style.borderRadius = '2px';
+    hpBar.style.position = 'absolute';
+    hpBar.style.bottom = '-6px';
+    hpBar.style.overflow = 'hidden';
+    var hpFill = document.createElement('div');
+    hpFill.className = 'enemy-hpbar-fill';
+    hpFill.style.width = '100%';
+    hpFill.style.height = '100%';
+    hpFill.style.background = '#4caf50';
+    hpFill.style.transition = 'width 0.15s';
+    hpBar.appendChild(hpFill);
+    enemy.el.appendChild(hpBar);
+    this._worldLayer.appendChild(enemy.el);
+    this._enemyElements.set(id, enemy.el);
+    enemy.el = enemy.el;
+    this.enemies.push(enemy);
+};
+
 Gp._spawnCoinsAt = function(x, y, isBoss, level) {
     /* Epoch 5: 委托掉落到 CombatSystem */
     if (this._combat && this._combat.spawnCoinsAt) {
@@ -1822,17 +1887,6 @@ Gp._gameOver = async function() {
     meta.totalRuns = (meta.totalRuns || 0) + 1;
     meta.totalKills = (meta.totalKills || 0) + this.kills;
 
-    /* Epoch 14: 挑战检查（死亡也触发） */
-    try {
-        if (typeof window.mainHubCheckChallenge === 'function') {
-            var cr = window.mainHubCheckChallenge(this);
-            if (cr.completed && cr.completed.length > 0) {
-                meta.metaTokens = (meta.metaTokens || 0) + (cr.bonusTokens || 0);
-                meta.bossCores = (meta.bossCores || 0) + (cr.bonusCores || 0);
-            }
-        }
-    } catch(e) { console.warn('[GameEngine] error:', e); }
-
     /* Epoch 14: 运行统计 */
     try {
         var ur = Object.keys(this.player.relicLevels || {}).filter(function(k) { return (this.player.relicLevels[k] || 0) > 0; }).length;
@@ -1859,7 +1913,7 @@ Gp._gameOver = async function() {
     /* Epoch 18: 每周超级挑战 */
     var weeklyCompleted = [];
     try {
-        var weeklyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: this._maxGoldThisRun || 0, hitsTaken: this._playerHitCountThisRun || 0, bossKills: this._bossKillsThisRun || 0, abyssDepth: this.loopCount || 0, dodges: this._totalDodgesThisRun || 0, crits: this._totalCritsThisRun || 0, won: !this.gameOver };
+        var weeklyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: this._maxGoldThisRun || 0, hitsTaken: this._playerHitCountThisRun || 0, bossKills: this._bossKillsThisRun || 0, abyssDepth: this.loopCount || 0, dodges: this._totalDodgesThisRun || 0, crits: this._totalCritsThisRun || 0, won: false };
         if (typeof window.saveManager.checkWeeklyCompletion === 'function') {
             var wc = window.saveManager.checkWeeklyCompletion(weeklyStats);
             weeklyCompleted = wc.completed || [];

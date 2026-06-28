@@ -1120,36 +1120,40 @@
         /* Epoch 18/22: 每周超级挑战 */
         var weeklyHtml = '';
         if (typeof window.saveManager.getWeeklyChallenges === 'function') {
-            window.saveManager.getWeeklyChallenges().then(function(weekly) {
-                if (weekly && weekly.challenges && weekly.challenges.length > 0) {
-                    var wHtml = '';
-                    for (var wi = 0; wi < weekly.challenges.length; wi++) {
-                        var wc = weekly.challenges[wi];
-                        var progress = 0;
-                        var threshold = wc.threshold || 1;
-                        /* 估算进度 — hub 页面无 gameEngine, 显示 0% */
-                        if (window.gameEngine) {
-                            var eng = window.gameEngine;
-                            if (wc.id.indexOf('kill') !== -1 || wc.id.indexOf('屠龙') !== -1) progress = Math.min(100, Math.round((eng.kills || 0) / threshold * 100));
-                            else if (wc.id.indexOf('survive') !== -1) progress = Math.min(100, Math.round((eng._elapsed || 0) / threshold * 100));
-                            else if (wc.id.indexOf('abyss') !== -1) progress = Math.min(100, Math.round((eng.loopCount || 0) / threshold * 100));
-                            else if (wc.id.indexOf('od') !== -1) progress = Math.min(100, Math.round((eng._overdriveCount || 0) / threshold * 100));
-                            else if (wc.id.indexOf('dodge') !== -1) progress = Math.min(100, Math.round((eng._totalDodgesThisRun || 0) / threshold * 100));
-                            else if (wc.id.indexOf('crit') !== -1) progress = Math.min(100, Math.round((eng._totalCritsThisRun || 0) / threshold * 100));
-                        }
-                        wHtml += '<div class="challenge-card weekly-challenge">' +
-                            '<div class="challenge-name">🏆 ' + wc.name + '</div>' +
-                            '<div class="challenge-desc">' + wc.desc + '</div>' +
-                            '<div class="challenge-reward">奖励: ' + _formatChallengeReward(wc.reward) + '</div>' +
-                            '<div class="challenge-progress">' +
-                            '<div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div>' +
-                            '<span class="progress-text">' + progress + '%</span>' +
-                            '</div></div>';
+            var weekly = window.saveManager.getWeeklyChallenges();
+            if (weekly && weekly.length > 0) {
+                var wHtml = '';
+                for (var wi = 0; wi < weekly.length; wi++) {
+                    var wc = weekly[wi];
+                    var progress = 0;
+                    var threshold = wc.target || 1;
+                    /* 估算进度 — hub 页面无 gameEngine, 显示 0% */
+                    if (window.gameEngine) {
+                        var eng = window.gameEngine;
+                        if (wc.type === 'kills') progress = Math.min(100, Math.round((eng.kills || 0) / threshold * 100));
+                        else if (wc.type === 'wins') progress = Math.min(100, Math.round((eng.kills || 0) / threshold * 100));
+                        else if (wc.type === 'overdrives') progress = Math.min(100, Math.round((eng._overdriveCount || 0) / threshold * 100));
+                        else if (wc.type === 'abyss') progress = Math.min(100, Math.round((eng.loopCount || 0) / threshold * 100));
+                        else if (wc.type === 'flawless') progress = Math.min(100, Math.round((eng._playerHitCountThisRun || 0) > 0 ? 0 : 100));
+                        else if (wc.type === 'bossKills') progress = Math.min(100, Math.round((eng._bossKillsThisRun || 0) / threshold * 100));
                     }
-                    var weeklySection = document.getElementById('weekly-challenges-section');
-                    if (weeklySection) weeklySection.innerHTML = wHtml;
+                    var rewardText = '';
+                    if (wc.reward) {
+                        if (wc.reward.metaTokens) rewardText += '+' + wc.reward.metaTokens + '代币';
+                        if (wc.reward.bossCores) rewardText += ' +' + wc.reward.bossCores + '核心';
+                    }
+                    wHtml += '<div class="challenge-card weekly-challenge">' +
+                        '<div class="challenge-name">🏆 ' + wc.name + '</div>' +
+                        '<div class="challenge-desc">' + wc.desc + '</div>' +
+                        '<div class="challenge-reward">奖励: ' + rewardText + '</div>' +
+                        '<div class="challenge-progress">' +
+                        '<div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div>' +
+                        '<span class="progress-text">' + progress + '%</span>' +
+                        '</div></div>';
                 }
-            }).catch(function() {});
+                var weeklySection = document.getElementById('weekly-challenges-section');
+                if (weeklySection) weeklySection.innerHTML = wHtml;
+            }
         }
 
         /* 元货币消费 */

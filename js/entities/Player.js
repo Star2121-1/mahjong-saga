@@ -644,8 +644,6 @@ class Player {
         this.damageReduction = 0;
         this.rage = 0;
         this.maxRage = 100;
-        this.setResonanceSpeed = false;
-        this.setResonanceIce = false;
 
         /* Epoch 2: 新天赋开局加成（在全部重置后应用，避免被覆盖） */
         this.critRate += (talents.listening_intuition || 0) * 0.02;
