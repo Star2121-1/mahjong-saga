@@ -1018,6 +1018,56 @@
         }
 
 
+        /* Epoch 36: 每周金库 */
+        var vaultHtml = '';
+        if (typeof window.saveManager.openWeeklyVault === 'function') {
+            var vault = window.saveManager.getWeeklyVault();
+            var meta = window.saveManager._metaCache || {};
+            var tokens = meta.metaTokens || 0;
+
+            if (vault.active && vault.challenge && !vault.completed) {
+                /* 活跃金库 — 展示挑战和押注 */
+                var rewardParts = [];
+                if (vault.challenge.reward.metaTokens) rewardParts.push(vault.challenge.reward.metaTokens + ' 代币');
+                if (vault.challenge.reward.bossCores) rewardParts.push(vault.challenge.reward.bossCores + ' 核心');
+                vaultHtml =
+                    '<div class="vault-card active">' +
+                    '<div class="vault-title">🔐 每周金库</div>' +
+                    '<div class="vault-challenge"><strong>' + vault.challenge.name + '</strong><br>' + vault.challenge.desc + '</div>' +
+                    '<div class="vault-bet">押注: ' + vault.bet + ' 代币 (×' + (vault.multiplier||1) + ' 倍率)</div>' +
+                    '<div class="vault-reward">奖励: ' + rewardParts.join(' | ') + '</div>' +
+                    '<div class="vault-status">⏳ 挑战进行中 — 通关后自动评估</div>' +
+                    '<button class="btn-perk-buy" id="vault-abandon-btn" style="margin-top:8px;width:100%;background:#a33;">放弃金库 (返还 ' + vault.bet + ' 代币)</button>' +
+                    '</div>';
+            } else if (vault.completed && vault.reward) {
+                /* 已完成待领取 */
+                var rParts = [];
+                if (vault.reward.metaTokens) rParts.push(vault.reward.metaTokens + ' 代币');
+                if (vault.reward.bossCores) rParts.push(vault.reward.bossCores + ' 核心');
+                vaultHtml =
+                    '<div class="vault-card completed">' +
+                    '<div class="vault-title">🔐 每周金库</div>' +
+                    '<div class="vault-challenge"><strong>' + vault.challenge.name + '</strong><br>' + vault.challenge.desc + '</div>' +
+                    '<div class="vault-reward">奖励: ' + rParts.join(' | ') + '</div>' +
+                    '<div class="vault-status">✅ 挑战完成！等待领取</div>' +
+                    '<button class="btn-perk-buy" id="vault-claim-btn" style="margin-top:8px;width:100%;">领取金库奖励</button>' +
+                    '</div>';
+            } else {
+                /* 无活跃金库 — 展示开库选项 */
+                vaultHtml =
+                    '<div class="vault-card">' +
+                    '<div class="vault-title">🔐 每周金库</div>' +
+                    '<div class="vault-desc">押注元代币接受高倍率周挑战，完成后奖励翻倍！</div>' +
+                    '<div class="vault-tiers">' +
+                    '<button class="btn-perk-buy vault-tier-btn" data-bet="10" style="margin:2px;">入门押 10 (×1)</button>' +
+                    '<button class="btn-perk-buy vault-tier-btn" data-bet="25" style="margin:2px;">进阶押 25 (×2)</button>' +
+                    '<button class="btn-perk-buy vault-tier-btn" data-bet="50" style="margin:2px;">豪赌押 50 (×3)</button>' +
+                    '</div>' +
+                    '<div class="vault-meta">当前代币: ' + tokens + '</div>' +
+                    '</div>';
+            }
+        }
+
         /* Epoch 18/22: 每周超级挑战 */
         var weeklyHtml = '';
         if (typeof window.saveManager.getWeeklyChallenges === 'function') {
@@ -1091,6 +1141,10 @@
 '<div class="stats-section">' +            '<div class="stats-section-title">⏱ 每日挑战</div>' +            '<div class="stats-grid">' + dailyHtml + '</div>' +            '</div>' +
 '<div class="stats-section">' +            '<div class="stats-section-title">📋 每日任务</div>' +            '<div class="stats-grid">' + dailyQuestHtml + '</div>' +            '</div>' +
 '<div class="stats-section">' +            '<div class="stats-section-title">🏆 每周超级挑战</div>' +            '<div class="challenges-grid" id="weekly-challenges-section"><div class="stats-empty">加载中...</div></div>' +            '</div>' +
+            '<div class="stats-section">' +
+            '<div class="stats-section-title">🔐 每周金库</div>' +
+            '<div class="vaults-grid">' + vaultHtml + '</div>' +
+            '</div>' +
             '</div>' +
             '<div class="stats-section">' +
             '<div class="stats-section-title">🛒 元代币商城</div>' +
@@ -1154,6 +1208,33 @@
                 }).catch(function() {});
             });
         }
+
+        /* Epoch 36: 金库按钮 */
+        var claimBtn = document.getElementById('vault-claim-btn');
+        if (claimBtn) {
+            claimBtn.addEventListener('click', function() {
+                window.saveManager.claimWeeklyVaultReward().then(function(res) {
+                    if (res.ok) refreshStatsPanel();
+                }).catch(function() {});
+            });
+        }
+        var abandonBtn = document.getElementById('vault-abandon-btn');
+        if (abandonBtn) {
+            abandonBtn.addEventListener('click', function() {
+                window.saveManager.abandonWeeklyVault().then(function(res) {
+                    if (res.ok) refreshStatsPanel();
+                }).catch(function() {});
+            });
+        }
+        document.querySelectorAll('.vault-tier-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var bet = parseInt(this.dataset.bet);
+                window.saveManager.openWeeklyVault(bet).then(function(res) {
+                    if (res.ok) refreshStatsPanel();
+                    else alert(res.reason);
+                }).catch(function() {});
+            });
+        });
     }
 
     function _formatChallengeReward(reward) {

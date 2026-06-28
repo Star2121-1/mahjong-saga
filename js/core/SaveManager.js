@@ -111,7 +111,9 @@ class SaveManager {
                 makeupTokens: 0,
                 runHistory: [],
                 /* Epoch 32: 图鉴系统 */
-                compendium: { relics: [], weapons: [], enemies: [], equips: [], mutations: [] }
+                compendium: { relics: [], weapons: [], enemies: [], equips: [], mutations: [] },
+                /* Epoch 36: 每周金库 */
+                weeklyVault: { active: false, challenge: null, bet: 0, completed: false, reward: null }
             };
         } else {
             if (!data.unlockedHeroes) data.unlockedHeroes = ['Knight'];
@@ -183,6 +185,8 @@ class SaveManager {
             if (data.makeupTokens == null) data.makeupTokens = 0;
             if (!data.runHistory) data.runHistory = [];
             if (!data.compendium) data.compendium = { relics: [], weapons: [], enemies: [], equips: [], mutations: [] };
+            /* Epoch 36: 每周金库迁移 */
+            if (!data.weeklyVault) data.weeklyVault = { active: false, challenge: null, bet: 0, completed: false, reward: null };
             this._metaCache = data;
         }
         return this._metaCache;
@@ -1126,6 +1130,120 @@ class SaveManager {
         if (stats.totalGold > lb.mostGold) lb.mostGold = stats.totalGold;
         if (stats.perfectRuns > lb.perfectRuns) lb.perfectRuns = stats.perfectRuns;
         return lb;
+    }
+
+    /* ── Epoch 36: 每周金库 ── */
+    static _vaultMultipliers = [
+        { bet: 10,  multiplier: 1, label: '入门 (押注 10)' },
+        { bet: 25,  multiplier: 2, label: '进阶 (押注 25)' },
+        { bet: 50,  multiplier: 3, label: '豪赌 (押注 50)' }
+    ];
+
+    /** 获取金库状态 */
+    getWeeklyVault() {
+        var meta = this._metaCache || {};
+        return meta.weeklyVault || { active: false, challenge: null, bet: 0, completed: false, reward: null };
+    }
+
+    /** 打开金库 — 从挑战池随机选一个挑战，奖励翻倍 */
+    openWeeklyVault(betTier) {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            var vault = meta.weeklyVault || {};
+            if (vault.active && !vault.completed) return Promise.resolve({ ok: false, reason: '已有活跃金库挑战' });
+            if (vault.active && vault.completed) return Promise.resolve({ ok: false, reason: '已完成，请领取奖励' });
+
+            /* 找倍率档位 */
+            var tier = null;
+            for (var i = 0; i < SaveManager._vaultMultipliers.length; i++) {
+                if (SaveManager._vaultMultipliers[i].bet === betTier) { tier = SaveManager._vaultMultipliers[i]; break; }
+            }
+            if (!tier) return Promise.resolve({ ok: false, reason: '无效押注档位' });
+
+            /* 扣除押注 */
+            if ((meta.metaTokens || 0) < tier.bet) return Promise.resolve({ ok: false, reason: '元代币不足' });
+            meta.metaTokens -= tier.bet;
+
+            /* 随机选挑战，奖励翻倍 */
+            var pool = SaveManager.CHALLENGE_POOL;
+            var idx = Math.floor(Math.random() * pool.length);
+            var challenge = pool[idx];
+            var doubledReward = {};
+            if (challenge.reward.metaTokens) doubledReward.metaTokens = challenge.reward.metaTokens * tier.multiplier;
+            if (challenge.reward.bossCores) doubledReward.bossCores = challenge.reward.bossCores * tier.multiplier;
+
+            vault.active = true;
+            vault.challenge = { id: challenge.id, name: challenge.name, desc: challenge.desc, reward: doubledReward, checkFn: challenge.check };
+            vault.bet = tier.bet;
+            vault.multiplier = tier.multiplier;
+            vault.completed = false;
+            vault.reward = null;
+            meta.weeklyVault = vault;
+
+            return self.saveMeta(meta).then(function() {
+                return { ok: true, challenge: vault.challenge, bet: tier.bet };
+            });
+        });
+    }
+
+    /** 放弃金库 — 返还押注 */
+    abandonWeeklyVault() {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            var vault = meta.weeklyVault || {};
+            if (!vault.active) return Promise.resolve({ ok: false, reason: '没有活跃金库' });
+            if (vault.completed) return Promise.resolve({ ok: false, reason: '已完成的金库不能放弃' });
+
+            meta.metaTokens = (meta.metaTokens || 0) + vault.bet;
+            vault.active = false;
+            vault.challenge = null;
+            vault.bet = 0;
+            vault.completed = false;
+            vault.reward = null;
+            meta.weeklyVault = vault;
+            return self.saveMeta(meta).then(function() {
+                return { ok: true };
+            });
+        });
+    }
+
+    /** 评估金库挑战是否完成 — 在 run 结算时调用 */
+    evaluateWeeklyVault(runStats) {
+        var meta = this._metaCache || {};
+        var vault = meta.weeklyVault || {};
+        if (!vault.active || !vault.challenge || vault.completed) return { evaluated: false };
+
+        var checkFn = vault.challenge.checkFn;
+        if (checkFn && checkFn(runStats)) {
+            vault.completed = true;
+            vault.reward = vault.challenge.reward;
+            meta.weeklyVault = vault;
+            this._metaCache = meta;
+            return { evaluated: true, completed: true, reward: vault.reward };
+        }
+        return { evaluated: true, completed: false };
+    }
+
+    /** 领取金库奖励 */
+    claimWeeklyVaultReward() {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            var vault = meta.weeklyVault || {};
+            if (!vault.completed) return Promise.resolve({ ok: false, reason: '未完成金库挑战' });
+            if (vault.reward) {
+                meta.metaTokens = (meta.metaTokens || 0) + (vault.reward.metaTokens || 0);
+                meta.bossCores = (meta.bossCores || 0) + (vault.reward.bossCores || 0);
+            }
+            vault.active = false;
+            vault.challenge = null;
+            vault.bet = 0;
+            vault.completed = false;
+            vault.reward = null;
+            meta.weeklyVault = vault;
+            return self.saveMeta(meta).then(function() {
+                return { ok: true };
+            });
+        });
     }
 }
 

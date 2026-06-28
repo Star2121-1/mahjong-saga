@@ -1645,6 +1645,29 @@ Gp._settleRun = async function(tokens) {
     }
 
     meta.lastSaveTimestamp = Date.now();
+
+    /* ── Epoch 36: 每周金库结算 ── */
+    if (typeof window.saveManager.evaluateWeeklyVault === 'function') {
+        var runStats = {
+            kills: this.kills,
+            overdriveCount: this._overdriveCount || 0,
+            elapsed: this._elapsed,
+            maxGold: this._maxGoldThisRun || 0,
+            uniqueRelics: Object.keys(this.player.relicLevels || {}).filter(function(k) { return (this.player.relicLevels[k] || 0) > 0; }).length,
+            bossKills: this._bossKillsThisRun || 0,
+            abyssDepth: this.loopCount || 0,
+            dodges: this._totalDodgesThisRun || 0,
+            crits: this._totalCritsThisRun || 0,
+            waves: this._waveCount || 0,
+            hitsTaken: this._playerHitCountThisRun || 0,
+            won: !this.gameOver
+        };
+        var vaultResult = window.saveManager.evaluateWeeklyVault(runStats);
+        if (vaultResult.evaluated && vaultResult.completed) {
+            console.log('[Vault] 金库挑战完成:', vaultResult.reward);
+        }
+    }
+
     await window.saveManager.saveMeta(meta);
     await window.saveManager.clearActiveRun();
 
