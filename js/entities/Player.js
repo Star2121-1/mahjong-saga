@@ -203,6 +203,11 @@ class Player {
         this.relicLevels[id] = (this.relicLevels[id] || 0) + 1;
         const lv = this.relicLevels[id];
 
+        /* Epoch 33: 圣物随机词条 — 3级和5级时可能获得 */
+        if (lv === 3 || lv === 5) {
+            this._rollRelicAffix(id, lv);
+        }
+
         switch (id) {
             case 'sharp_edge':
                 this.atk += 3;
@@ -269,6 +274,64 @@ class Player {
         }
     }
 
+    /* ── Epoch 33: 圣物随机词条 ── */
+
+    _rollRelicAffix(relicId, level) {
+        var affixes = this._getRelicAffixPool(relicId);
+        if (affixes.length === 0) return;
+        var affix = affixes[Math.floor(Math.random() * affixes.length)];
+        /* 存储词条到 player */
+        this._relicAffixes = this._relicAffixes || {};
+        this._relicAffixes[relicId] = this._relicAffixes[relicId] || [];
+        if (this._relicAffixes[relicId].indexOf(affix.id) === -1) {
+            this._relicAffixes[relicId].push(affix.id);
+            affix.apply(this);
+        }
+    }
+
+    _getRelicAffixPool(relicId) {
+        /* 每个圣物有专属词条池 */
+        var POOL = {
+            sharp_edge: [
+                { id: 'se_pierce', name: '穿透', apply: function(p) { p.atk += 5; } },
+                { id: 'se_splash', name: '溅射', apply: function(p) { p.explosionChance = Math.min(1, (p.explosionChance || 0) + 0.15); } }
+            ],
+            golden_finger: [
+                { id: 'gf_lifesteal', name: '吸血', apply: function(p) { p.lifestealRate = Math.min(0.8, (p.lifestealRate || 0) + 0.1); } },
+                { id: 'gf_thorns', name: '反伤', apply: function(p) { p.thornsRate = Math.min(1, (p.thornsRate || 0) + 0.1); } }
+            ],
+            thorn_armor: [
+                { id: 'ta_hp', name: '坚韧', apply: function(p) { p.maxHp += 30; p.hp = Math.min(p.hp + 30, p.maxHp); } },
+                { id: 'ta_crit', name: '暴击', apply: function(p) { p.critRate = Math.min(1, (p.critRate || 0) + 0.1); } }
+            ],
+            wind_walker: [
+                { id: 'ww_dodge', name: '闪避', apply: function(p) { p.dodgeRate = Math.min(1, (p.dodgeRate || 0) + 0.1); } },
+                { id: 'ww_speed', name: '极速', apply: function(p) { p.speedMultiplier = (p.speedMultiplier || 1) + 0.15; p.speed = p.baseSpeed * p.speedMultiplier; } }
+            ],
+            vamp_ring: [
+                { id: 'vr_crit', name: '暴击', apply: function(p) { p.critRate = Math.min(1, (p.critRate || 0) + 0.1); } },
+                { id: 'vr_atk', name: '强击', apply: function(p) { p.atk += 5; } }
+            ],
+            explosive_core: [
+                { id: 'ec_range', name: '广域', apply: function(p) { p.magnetRadius = (p.magnetRadius || 60) + 30; } },
+                { id: 'ec_power', name: '强化', apply: function(p) { p.atk += 3; } }
+            ],
+            frost_core: [
+                { id: 'fc_duration', name: '长效', apply: function(p) { p.iceDurationBonus = (p.iceDurationBonus || 0) + 0.5; } },
+                { id: 'fc_chance', name: '极寒', apply: function(p) { p.freezeChance = Math.min(0.8, (p.freezeChance || 0) + 0.1); } }
+            ],
+            gravity_core: [
+                { id: 'gc_xp', name: '慧根', apply: function(p) { p.xpGainFactor = (p.xpGainFactor || 1) + 0.15; } },
+                { id: 'gc_magnet', name: '巨吸', apply: function(p) { p.magnetRadius = (p.magnetRadius || 60) + 50; } }
+            ],
+            weapon_amplify: [
+                { id: 'wa_cd', name: '迅捷', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { eng._activeWeapons[i].cd = Math.max(eng.player.cdFloor || 0.2, eng._activeWeapons[i].cd * 0.9); } } } },
+                { id: 'wa_atk', name: '强化', apply: function(p) { p.atk += 5; } }
+            ]
+        };
+        return POOL[relicId] || [];
+    }
+
     snapshot() {
         return {
             heroId: this.heroId,
@@ -306,7 +369,8 @@ class Player {
             setResonanceIce: this.setResonanceIce,
             damageReduction: this.damageReduction,
             _reviveCount: this._reviveCount || 0,
-            _baseMaxHp: this._baseMaxHp || this.maxHp
+            _baseMaxHp: this._baseMaxHp || this.maxHp,
+            _relicAffixes: this._relicAffixes ? { ...this._relicAffixes } : {}
         };
     }
 
@@ -352,6 +416,7 @@ class Player {
         this.damageReduction = data.damageReduction || 0;
         this._reviveCount = data._reviveCount || 0;
         this._baseMaxHp = data._baseMaxHp || this.maxHp;
+        this._relicAffixes = data._relicAffixes ? { ...data._relicAffixes } : {};
         this._hasRevive = this._reviveCount > 0;
         this.setResonanceSpeed = !!data.setResonanceSpeed;
         this.setResonanceIce = !!data.setResonanceIce;
@@ -429,10 +494,52 @@ class Player {
         }
         if (perks.token_relic_start) this._startsWithRelic = true;
         this.mapAffinityLevel = perks.token_map_affinity || 0;
+        /* Epoch 33: 应用圣物词条 */
+        this._applyRelicAffixes();
         /* 声望 */
         if (window.saveManager && window.saveManager.applyPrestigeBonus) {
             window.saveManager.applyPrestigeBonus(this);
         }
+    }
+
+    /* ── Epoch 33: 应用圣物词条 ── */
+
+    _applyRelicAffixes() {
+        if (!this._relicAffixes) return;
+        var affixDefs = this._getAllRelicAffixDefs();
+        for (var relicId in this._relicAffixes) {
+            var ids = this._relicAffixes[relicId];
+            for (var i = 0; i < ids.length; i++) {
+                var def = affixDefs[ids[i]];
+                if (def) def.apply(this);
+            }
+        }
+    }
+
+    _getAllRelicAffixDefs() {
+        var POOL = [
+            { id: 'se_pierce', apply: function(p) { p.atk += 5; } },
+            { id: 'se_splash', apply: function(p) { p.explosionChance = Math.min(1, (p.explosionChance || 0) + 0.15); } },
+            { id: 'gf_lifesteal', apply: function(p) { p.lifestealRate = Math.min(0.8, (p.lifestealRate || 0) + 0.1); } },
+            { id: 'gf_thorns', apply: function(p) { p.thornsRate = Math.min(1, (p.thornsRate || 0) + 0.1); } },
+            { id: 'ta_hp', apply: function(p) { p.maxHp += 30; p.hp = Math.min(p.hp + 30, p.maxHp); } },
+            { id: 'ta_crit', apply: function(p) { p.critRate = Math.min(1, (p.critRate || 0) + 0.1); } },
+            { id: 'ww_dodge', apply: function(p) { p.dodgeRate = Math.min(1, (p.dodgeRate || 0) + 0.1); } },
+            { id: 'ww_speed', apply: function(p) { p.speedMultiplier = (p.speedMultiplier || 1) + 0.15; p.speed = p.baseSpeed * p.speedMultiplier; } },
+            { id: 'vr_crit', apply: function(p) { p.critRate = Math.min(1, (p.critRate || 0) + 0.1); } },
+            { id: 'vr_atk', apply: function(p) { p.atk += 5; } },
+            { id: 'ec_range', apply: function(p) { p.magnetRadius = (p.magnetRadius || 60) + 30; } },
+            { id: 'ec_power', apply: function(p) { p.atk += 3; } },
+            { id: 'fc_duration', apply: function(p) { p.iceDurationBonus = (p.iceDurationBonus || 0) + 0.5; } },
+            { id: 'fc_chance', apply: function(p) { p.freezeChance = Math.min(0.8, (p.freezeChance || 0) + 0.1); } },
+            { id: 'gc_xp', apply: function(p) { p.xpGainFactor = (p.xpGainFactor || 1) + 0.15; } },
+            { id: 'gc_magnet', apply: function(p) { p.magnetRadius = (p.magnetRadius || 60) + 50; } },
+            { id: 'wa_cd', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { eng._activeWeapons[i].cd = Math.max(p.cdFloor || 0.2, eng._activeWeapons[i].cd * 0.9); } } } },
+            { id: 'wa_atk', apply: function(p) { p.atk += 5; } }
+        ];
+        var map = {};
+        for (var i = 0; i < POOL.length; i++) map[POOL[i].id] = POOL[i];
+        return map;
     }
 
     reset(heroId) {

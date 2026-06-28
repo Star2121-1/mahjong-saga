@@ -799,7 +799,7 @@ class SaveManager {
         /* 已知总数 */
         var relicIds = ['sharp_edge','golden_finger','auto_drone','thorn_armor','wind_walker','vamp_ring','explosive_core','frost_core','gravity_core','weapon_amplify'];
         var weaponIds = Object.keys(window.rewardManager && window.rewardManager.weaponInfos || {});
-        var enemyIds = ['basic','fast','ranged','shaman','tanker','stalker'];
+        var enemyIds = ['Normal','Tanker','Stalker','Shaman','Boss_Lord'];
         total += relicIds.length;
         total += weaponIds.length;
         total += enemyIds.length;
