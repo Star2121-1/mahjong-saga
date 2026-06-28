@@ -135,6 +135,12 @@ Ss._spawnEnemy = function(engine, isBoss) {
 
     /* Boss Lord 特殊处理 */
     if (isBoss && enemyType === 'Boss_Lord') {
+        /* Boss Gamble: 先显示选择面板，玩家决定后再生成领主 */
+        if (this.engine._showBossGamble) {
+            this.engine._showBossGamble();
+        }
+        /* _showBossGamble 返回后检查：如果玩家还没做出选择，提前返回 */
+        if (this.engine._pendingBossGamble) return;
         var waveIdx = this._waveCount;
         var maxWaves = this._getMaxWaves();
         if (waveIdx >= maxWaves) {

@@ -117,6 +117,11 @@ window.GameEngine = function() {
     this._joystickBase = null;
     this._joystickKnob = null;
     this.hubBtn = null;
+
+    /* ── Boss Gamble ── */
+    this._gambleActive = false;
+    this._gambleType = null;
+    this._gambleStaked = 0;
 };
 
 var Gp = window.GameEngine.prototype;
@@ -391,6 +396,13 @@ Gp._startNewRun = function(heroId, levelId) {
     this._bossLord = null;
     this._bossLordWave = false;
     this._bossLordSpawned = false;
+
+    /* ── Boss Gamble 重置 ── */
+    this._gambleActive = false;
+    this._gambleType = null;
+    this._gambleStaked = 0;
+    this._pendingBossGamble = false;
+    this._gambleAbyssBonus = false;
 
     this._overdriveActive = false;
     this._overdriveTimer = 0;
@@ -1442,6 +1454,11 @@ Gp._showVictory = function() {
     this.victoryOverlay.classList.add('active');
     this._syncUI();
 
+    /* ── Boss Gamble 结算 ── */
+    if (this._gambleActive) {
+        this._resolveGamble(true);
+    }
+
     this._settleRun(tokens);
 };
 
@@ -1490,6 +1507,11 @@ Gp._enterAbyss = function() {
     this._bossLord = null;
     this._bossLordWave = false;
     this._bossLordSpawned = false;
+    this._gambleActive = false;
+    this._gambleType = null;
+    this._gambleStaked = 0;
+    this._pendingBossGamble = false;
+    this._gambleAbyssBonus = false;
     this._mutatorTriggered = false;
     this._activeMutator = null;
     this._pendingReward = false;
@@ -1761,6 +1783,17 @@ Gp._gameOver = async function() {
     this._bossLord = null;
     this._bossLordWave = false;
     this._bossLordSpawned = false;
+
+    /* ── Boss Gamble 失败结算 ── */
+    if (this._gambleActive) {
+        this._resolveGamble(false);
+    }
+    this._gambleActive = false;
+    this._gambleType = null;
+    this._gambleStaked = 0;
+    this._pendingBossGamble = false;
+    this._gambleAbyssBonus = false;
+
     this.resultTime.textContent = this._formatTime(this._elapsed);
     this.resultKills.textContent = this.kills;
     this.gameOverOverlay.classList.add('active');
@@ -2788,6 +2821,173 @@ Gp._endOverdrive = function() {
 /* ══════════════════════════════════════════════
    终局领主 Boss Lord 系统
    ══════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════
+   Boss Gamble — 决战前风险/回报选择
+   ══════════════════════════════════════════════ */
+
+Gp._showBossGamble = function() {
+    if (!this.battlefield) return;
+    this._freezeClock();
+    this.running = false;
+    this._pendingBossGamble = true;
+
+    var meta = window.saveManager._metaCache || {};
+    var tokens = meta.metaTokens || 0;
+    var gold50 = Math.floor(this.player.gold * 0.5);
+    var canGamble = gold50 > 0;
+    var canAbyss = tokens >= 1;
+
+    var panel = document.createElement('div');
+    panel.id = 'boss-gamble-panel';
+    panel.className = 'boss-gamble-panel';
+    panel.innerHTML =
+        '<div class="gamble-title">🎲 决战豪赌</div>' +
+        '<div class="gamble-subtitle">深渊领主即将降临，是否押注？</div>' +
+        '<div class="gamble-choices">' +
+            '<div class="gamble-card gamble-safe">' +
+                '<div class="gamble-card-icon">🛡️</div>' +
+                '<div class="gamble-card-title">稳妥前进</div>' +
+                '<div class="gamble-card-desc">正常迎战领主，不押注任何资源</div>' +
+                '<button class="gamble-btn" data-choice="safe">安全出征</button>' +
+            '</div>' +
+            '<div class="gamble-card gamble-gold' + (!canGamble ? ' disabled' : '') + '">' +
+                '<div class="gamble-card-icon">💰</div>' +
+                '<div class="gamble-card-title">金币豪赌</div>' +
+                '<div class="gamble-card-desc">押 ' + gold50 + ' 金币 · 胜: 3x 返还 · 负: 全输</div>' +
+                '<button class="gamble-btn' + (!canGamble ? ' disabled' : '') + '" data-choice="gold"' + (!canGamble ? ' disabled' : '') + '>金币豪赌</button>' +
+            '</div>' +
+            '<div class="gamble-card gamble-abyss' + (!canAbyss ? ' disabled' : '') + '">' +
+                '<div class="gamble-card-icon">🌀</div>' +
+                '<div class="gamble-card-title">深渊试炼</div>' +
+                '<div class="gamble-card-desc">押 1 元代币 · 领主 +50% HP · 装备掉落 3x</div>' +
+                '<button class="gamble-btn' + (!canAbyss ? ' disabled' : '') + '" data-choice="abyss"' + (!canAbyss ? ' disabled' : '') + '>深渊试炼</button>' +
+            '</div>' +
+        '</div>';
+    this.battlefield.appendChild(panel);
+
+    var self = this;
+    var btns = panel.querySelectorAll('.gamble-btn');
+    for (var i = 0; i < btns.length; i++) {
+        btns[i].addEventListener('click', (function(choice) {
+            return function() {
+                if (panel.parentNode) panel.remove();
+                self._resolveGambleChoice(choice);
+            };
+        })(btns[i].getAttribute('data-choice')), { once: true });
+    }
+};
+
+Gp._resolveGambleChoice = function(choice) {
+    this._pendingBossGamble = false;
+    if (choice === 'safe') {
+        this._gambleActive = false;
+        this._gambleType = null;
+        this._gambleStaked = 0;
+    } else if (choice === 'gold') {
+        this._gambleActive = true;
+        this._gambleType = 'gold';
+        this._gambleStaked = Math.floor(this.player.gold * 0.5);
+        this.player.gold -= this._gambleStaked;
+        this._syncUI();
+    } else if (choice === 'abyss') {
+        var meta = window.saveManager._metaCache || {};
+        if ((meta.metaTokens || 0) >= 1) {
+            this._gambleActive = true;
+            this._gambleType = 'abyss';
+            this._gambleStaked = 1;
+            meta.metaTokens -= 1;
+            window.saveManager._metaCache = meta;
+            window.saveManager._saveMetaToStorage();
+        } else {
+            this._gambleActive = false;
+        }
+    }
+    /* 生成领主（无论是否赌注） */
+    this._spawnBossLordFromGamble();
+    this._beginLoop();
+};
+
+Gp._spawnBossLordFromGamble = function() {
+    /* 玩家做出选择后，实际生成领主 */
+    if (this._bossLordSpawned) return;
+    var level = Math.floor(this._elapsed / 15) + 1;
+    var x = this._mapW / 2;
+    var y = Math.floor(this._mapH * 0.35);
+    var margin = 100;
+    x = Math.max(margin, Math.min(this._mapW - margin, x));
+    y = Math.max(margin, Math.min(this._mapH - margin, y));
+
+    var id = this._enemyIdCounter++;
+    var lord = new Enemy(id, x, y, level, true, 'Boss_Lord');
+    var diff = 1;
+    try { diff = window.levelConfig[this._currentLevelId].difficultyFactor || 1; } catch(e) {}
+    lord.maxHp = Math.floor(lord.maxHp * diff);
+    lord.hp = lord.maxHp;
+    lord.atk = Math.floor(lord.atk * diff);
+    this.enemies.push(lord);
+    this._bossLord = lord;
+    this._bossLordSpawned = true;
+
+    /* Gamble: 深渊试炼增加领主HP */
+    if (this._gambleType === 'abyss' && this._gambleActive) {
+        lord.maxHp = Math.floor(lord.maxHp * 1.5);
+        lord.hp = lord.maxHp;
+        this._spawnCausalityText('⚠️ 深渊试炼激活：领主 +50% HP');
+    }
+
+    /* ── 变异保险库：血月对Boss Lord生效 ── */
+    if (this._vaultMutations && this._vaultMutations.indexOf('bloodmoon') !== -1) {
+        lord.atk = Math.floor(lord.atk * 1.4);
+        lord.maxHp = Math.floor(lord.maxHp * 1.3);
+        lord.hp = Math.floor(lord.hp * 1.3);
+    }
+
+    var el = document.createElement('div');
+    el.className = 'enemy boss boss-lord';
+    el.dataset.id = id;
+    var hpBar = document.createElement('div');
+    hpBar.className = 'enemy-hp-bar';
+    var hpFill = document.createElement('div');
+    hpFill.className = 'enemy-hp-fill';
+    hpBar.appendChild(hpFill);
+    el.appendChild(hpBar);
+    this._worldLayer.appendChild(el);
+    this._enemyElements.set(id, el);
+    lord.el = el;
+
+    if (this._bloodRageActive) {
+        lord.speed = Math.floor(lord.speed * 1.2);
+        lord.baseSpeed = lord.speed;
+        if (lord.el) lord.el.classList.add('boss-blood-rage');
+    }
+
+    if (this.bossHpBar) this.bossHpBar.classList.add('active');
+    this._screenShake();
+};
+
+Gp._resolveGamble = function(won) {
+    if (!this._gambleActive) return;
+    if (this._gambleType === 'gold') {
+        if (won) {
+            var bonus = this._gambleStaked * 3;
+            this.player.addGold(bonus);
+            this._spawnCausalityText('💰 金币豪赌胜利！+' + bonus + ' 金币');
+        } else {
+            this._spawnCausalityText('💰 金币豪赌失败... 金币已输掉');
+        }
+    } else if (this._gambleType === 'abyss') {
+        if (won) {
+            this._gambleAbyssBonus = true;
+            this._spawnCausalityText('🌀 深渊试炼胜利！下次装备掉落 3x');
+        } else {
+            this._spawnCausalityText('🌀 深渊试炼失败... 元代币已损失');
+        }
+    }
+    this._gambleActive = false;
+    this._gambleType = null;
+    this._gambleStaked = 0;
+};
 
 Gp._spawnBossLord = function() {
     window.audioManager && window.audioManager.play('boss');
