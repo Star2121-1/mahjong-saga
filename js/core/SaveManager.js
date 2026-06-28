@@ -837,58 +837,6 @@ class SaveManager {
         return { completed: completed, bonusTokens: bonusTokens, bonusCores: bonusCores };
     }
 
-    /** 每周 vault 操作 */
-    openWeeklyVault() {
-        var self = this;
-        return this.getMeta().then(function(meta) {
-            if (!meta.weeklyVault) meta.weeklyVault = { active: null, history: [] };
-            if (meta.weeklyVault.active) return Promise.resolve({ ok: false, reason: '已有活跃挑战' });
-            var pool = [
-                { id: 'gold_fever', name: '金币狂热', desc: '金币掉落+50%', reward: { metaTokens: 10 }, duration: 3 },
-                { id: 'xp_boost', name: '经验 boosted', desc: '经验值+100%', reward: { metaTokens: 15 }, duration: 5 },
-                { id: 'enemy_weaken', name: '怪物削弱', desc: '敌人攻击-30%', reward: { metaTokens: 12 }, duration: 3 },
-                { id: 'rare_drop', name: '稀有掉落', desc: '圣物掉落翻倍', reward: { metaTokens: 20 }, duration: 1 },
-            ];
-            var challenge = pool[Math.floor(Math.random() * pool.length)];
-            challenge.startTime = Date.now();
-            challenge.completed = false;
-            meta.weeklyVault.active = challenge;
-            return self.saveMeta(meta).then(function() { return { ok: true, challenge: challenge }; });
-        });
-    }
-
-    abandonWeeklyVault() {
-        var self = this;
-        return this.getMeta().then(function(meta) {
-            if (!meta.weeklyVault || !meta.weeklyVault.active) return Promise.resolve({ ok: false, reason: '没有活跃挑战' });
-            var abandoned = meta.weeklyVault.active;
-            meta.weeklyVault.history = meta.weeklyVault.history || [];
-            meta.weeklyVault.history.push(abandoned);
-            meta.weeklyVault.active = null;
-            return self.saveMeta(meta).then(function() { return { ok: true }; });
-        });
-    }
-
-    claimWeeklyVault(stats) {
-        var self = this;
-        return this.getMeta().then(function(meta) {
-            if (!meta.weeklyVault || !meta.weeklyVault.active) return Promise.resolve({ ok: false, reason: '没有活跃挑战' });
-            var v = meta.weeklyVault.active;
-            v.completed = true;
-            meta.weeklyVault.history = meta.weeklyVault.history || [];
-            meta.weeklyVault.history.push(v);
-            meta.weeklyVault.active = null;
-            return self.saveMeta(meta).then(function() {
-                return { ok: true, reward: v.reward };
-            });
-        });
-    }
-
-    getWeeklyVault() {
-        var meta = this._metaCache || {};
-        return meta.weeklyVault || { active: null, history: [] };
-    }
-
     /* ── Epoch 15: 战局历史记录 ── */
 
     recordRunHistory(heroId, levelId, kills, elapsed, won, loopCount, relics, weeklyCompleted) {
@@ -1227,7 +1175,7 @@ class SaveManager {
     getDailyQuests() {
         var meta = this._metaCache || {};
         if (!meta.dailyQuests) meta.dailyQuests = { quests: [], lastDate: 0 };
-        var today = new Date().toISOString().slice(0, 10);
+        var today = this._todayKey();
         if (meta.dailyQuests.lastDate !== today) {
             /* 新的一天 — 随机选3个任务 */
             var pool = SaveManager.DAILY_QUEST_POOL;

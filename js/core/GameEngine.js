@@ -244,6 +244,7 @@ Gp._cacheStage3DOM = function() {
     this.gameOverOverlay = document.getElementById('game-over-overlay');
     this.resultTime = document.getElementById('result-time');
     this.resultKills = document.getElementById('result-kills');
+    this.resultWave = document.getElementById('result-wave');
     this.restartBtn = document.getElementById('restart-btn');
     this.victoryOverlay = document.getElementById('victory-overlay');
     this.victoryTime = document.getElementById('victory-time');
