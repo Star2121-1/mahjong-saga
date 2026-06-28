@@ -211,9 +211,9 @@
         var streakEl = document.getElementById('login-streak-indicator');
         if (streakEl && typeof window.saveManager.checkDailyLogin === 'function') {
             window.saveManager.checkDailyLogin().then(function(streak) {
-                if (streak && streak.streakDays > 0) {
-                    streakEl.textContent = '🔥 Streak: ' + streak.streakDays + 'd';
-                    streakEl.style.color = streak.streakDays >= 7 ? '#ff6f00' : '#ffd700';
+                if (streak && streak.streak > 0) {
+                    streakEl.textContent = '🔥 Streak: ' + streak.streak + 'd';
+                    streakEl.style.color = streak.streak >= 7 ? '#ff6f00' : '#ffd700';
                 }
             }).catch(function() {});
         }

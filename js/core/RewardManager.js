@@ -87,8 +87,8 @@ class RewardManager {
             var skipBtn = document.getElementById('relic-skip-btn');
             skipBtn.addEventListener('click', function() {
                 if (titleEl) titleEl.textContent = originalTitle;
-                if (isFree) gameEngine._resumeAfterLevelUp();
-                else gameEngine._resumeAfterReward();
+                if (isFree) window.gameEngine._resumeAfterLevelUp();
+                else window.gameEngine._resumeAfterReward();
             }, { once: true });
             return;
         }
@@ -171,7 +171,7 @@ class RewardManager {
                 })(item, self, container);
             } else {
                 var relic = cardData;
-                var player = gameEngine.player;
+                var player = window.gameEngine.player;
                 var currentLevel = player.relicLevels[relic.id] || 0;
                 var starsStr = this._renderStars(currentLevel);
                 var canAfford = relic.cost === 0 || player.gold >= relic.cost;
@@ -187,7 +187,7 @@ class RewardManager {
                 (function(cardItem, mgr, cardContainer) {
                     front.querySelector('.relic-btn').addEventListener('click', function() {
                         var r = cardItem.cardData;
-                        if (r.cost > 0 && gameEngine.player.gold < r.cost) return;
+                        if (r.cost > 0 && window.gameEngine.player.gold < r.cost) return;
                         mgr._animateSuckIn(cardContainer, function() {
                             mgr._selectReward(cardItem, isFree, titleEl, originalTitle);
                         });
@@ -298,7 +298,7 @@ class RewardManager {
     /* ── 圣物选择（原版 _selectReward） ── */
 
     _selectReward(item, isFree, titleEl, originalTitle) {
-        var player = gameEngine.player;
+        var player = window.gameEngine.player;
         var relic = item.cardData;
         if (!isFree && relic.cost > 0 && player.gold < relic.cost) return;
         if (!isFree && relic.cost > 0) player.addGold(-relic.cost);
@@ -306,9 +306,9 @@ class RewardManager {
         /* Epoch 32: 图鉴记录 */
         if (window.saveManager) window.saveManager.recordCompendiumEntry('relics', relic.id);
         if (titleEl) titleEl.textContent = originalTitle;
-        gameEngine._syncUI();
-        if (isFree) gameEngine._resumeAfterLevelUp();
-        else gameEngine._resumeAfterReward();
+        window.gameEngine._syncUI();
+        if (isFree) window.gameEngine._resumeAfterLevelUp();
+        else window.gameEngine._resumeAfterReward();
         if (this.onPurchase) this.onPurchase();
     }
 
@@ -494,11 +494,12 @@ class RewardManager {
                 this._showFloatingText('+' + goldReward + ' 金', '#ffd700');
                 break;
             case 'temp_buff':
-                if (item.buff === 'atkBoost') {
+                var b = item.cardData && item.cardData.buff;
+                if (b === 'atkBoost') {
                     p._tempAtkBoost = (p._tempAtkBoost || 0) + item.value;
                     p._tempBuffEnd = Date.now() / 1000 + item.duration;
                     this._showFloatingText('+50% 攻击 30s', '#ff8800');
-                } else if (item.buff === 'tempHp') {
+                } else if (b === 'tempHp') {
                     p._tempHpBonus = (p._tempHpBonus || 0) + item.value;
                     p._tempBuffEnd = Date.now() / 1000 + item.duration;
                     this._showFloatingText('+100 HP 30s', '#4488ff');

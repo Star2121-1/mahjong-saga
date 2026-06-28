@@ -916,6 +916,21 @@ class SaveManager {
         return { triggered: false, reason: '未满足赛季激活条件（需 5 胜或深渊 10 层）' };
     }
 
+    /** Epoch 35: 获取当前赛季状态 */
+    getSeasonStatus() {
+        var meta = this._metaCache || {};
+        var season = meta.season || {};
+        if (!season.currentSeason || season.currentSeason <= 0) return { isActive: false };
+        var startDate = season.startDate || Date.now();
+        var daysElapsed = Math.floor((Date.now() - startDate) / 86400000);
+        return {
+            isActive: true,
+            season: season.currentSeason,
+            daysElapsed: daysElapsed,
+            rewardClaimed: !!season.lastRewardClaimed
+        };
+    }
+
     /** 获取赛季奖励 */
     getSeasonReward(seasonNum) {
         var rewards = [
