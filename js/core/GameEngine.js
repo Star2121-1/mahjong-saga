@@ -111,6 +111,9 @@ window.GameEngine = function() {
     this.victoryTokens = null;
     this.victoryRestartBtn = null;
     this.victoryHubBtn = null;
+    this.victoryContinueBtn = null;
+    this.victoryTipsEl = null;
+    this.waveMilestoneBanner = null;
     this._joystickBase = null;
     this._joystickKnob = null;
     this.hubBtn = null;
@@ -244,6 +247,9 @@ Gp._cacheStage3DOM = function() {
     this.victoryTokens = document.getElementById('victory-tokens');
     this.victoryRestartBtn = document.getElementById('victory-restart-btn');
     this.victoryHubBtn = document.getElementById('victory-hub-btn');
+    this.victoryContinueBtn = document.getElementById('victory-continue-btn');
+    this.victoryTipsEl = document.getElementById('victory-tips');
+    this.waveMilestoneBanner = document.getElementById('wave-milestone-banner');
     this._joystickBase = document.getElementById('joystick-base');
     this._joystickKnob = document.getElementById('joystick-knob');
     this.hubBtn = document.getElementById('hub-btn');
@@ -273,6 +279,7 @@ Gp._bindStage3Events = function() {
 
     if (this.restartBtn) { var s = this; this.restartBtn.addEventListener('click', function() { s.restart(); }); }
     if (this.victoryRestartBtn) { var s = this; this.victoryRestartBtn.addEventListener('click', function() { s.restart(); }); }
+    if (this.victoryContinueBtn) { var s = this; this.victoryContinueBtn.addEventListener('click', function() { s._continueChallenge(); }); }
     if (this.victoryHubBtn) { var s = this; this.victoryHubBtn.addEventListener('click', function() { s._goToSaveSelect(); }); }
     if (this.hubBtn) { var s = this; this.hubBtn.addEventListener('click', function() { s._goToSaveSelect(); }); }
     if (this._pauseBtn) { var s = this; this._pauseBtn.addEventListener('click', function() { s._togglePause(); }); }
@@ -1450,6 +1457,16 @@ Gp._showVictory = function() {
     var tokens = window.saveManager.calcMetaTokens(this.kills, this._elapsed);
     this.victoryTokens.textContent = tokens;
 
+    /* Contextual tips */
+    this._buildVictoryTips();
+
+    /* Show continue button on final level */
+    if (this._currentLevelId === 'level_3') {
+        this.victoryContinueBtn.style.display = '';
+    } else {
+        this.victoryContinueBtn.style.display = 'none';
+    }
+
     this.victoryOverlay.classList.add('active');
     this._syncUI();
 
@@ -1545,8 +1562,52 @@ Gp._showVictoryOverlay = function() {
     this.victoryKills.textContent = this.kills;
     var tokens = window.saveManager.calcMetaTokens(this.kills, this._elapsed);
     this.victoryTokens.textContent = tokens;
+
+    /* Contextual tips */
+    this._buildVictoryTips();
+
+    /* Show continue button on final level */
+    if (this._currentLevelId === 'level_3') {
+        this.victoryContinueBtn.style.display = '';
+    } else {
+        this.victoryContinueBtn.style.display = 'none';
+    }
+
     this.victoryOverlay.classList.add('active');
     this._syncUI();
+};
+
+Gp._buildVictoryTips = function() {
+    var self = this;
+    var meta = window.saveManager._metaCache || {};
+    var tokens = meta.metaTokens || 0;
+    var heroes = meta.unlockedHeroes || ['Knight'];
+    var parts = [];
+
+    /* Loop-based tip */
+    if (this.loopCount === 0) {
+        parts.push('<span class="tip-first">🏆 首次通关！再次击败最终BOSS可进入无尽深渊轮回</span>');
+    } else {
+        var mult = Math.pow(1.15, this.loopCount + 1).toFixed(2);
+        parts.push('<span class="tip-abyss">🌀 无尽深渊第 ' + this.loopCount + ' 层 — 怪物属性 ×' + mult + '</span>');
+    }
+
+    /* Meta token tip */
+    if (tokens >= 100) {
+        parts.push('<span class="tip-gold">💰 你有 ' + tokens + ' 元代币 — 可在主界面商城解锁强力perk</span>');
+    }
+
+    /* Single hero tip */
+    if (heroes.length <= 1) {
+        parts.push('<span class="tip-hero">🗡️ 尝试在主界面酒馆解锁其他英雄体验不同玩法</span>');
+    }
+
+    this.victoryTipsEl.innerHTML = parts.join('<br>');
+};
+
+Gp._continueChallenge = function() {
+    this.victoryOverlay.classList.remove('active');
+    this._enterAbyss();
 };
 
 Gp._spawnCausalityText = function(text) {
@@ -1969,6 +2030,21 @@ Gp._spawnAchievementText = function(text) {
 
 Gp._syncUI = function() {
     this.waveDisplay.textContent = '\uD83C\uDF0A \u7b2c ' + (this._waveCount + 1) + ' \u6ce2';
+
+    /* \u2500\u2500 Wave milestone banner at 75% \u2500\u2500 */
+    var maxWaves = this._getMaxWaves();
+    if (this.waveMilestoneBanner && maxWaves > 0 && this._waveCount > 0) {
+        var threshold75 = Math.ceil(maxWaves * 0.75);
+        if (this._waveCount >= threshold75 && !this._milestoneShown) {
+            this.waveMilestoneBanner.textContent = '\uD83D\uDD25 \u7EC8\u5C40\u903C\u8FD1 \u2014 \u6700\u540E ' + (maxWaves - this._waveCount) + ' \u6ce2\uFF01';
+            this.waveMilestoneBanner.classList.add('visible');
+            this._milestoneShown = true;
+        } else if (this._waveCount < threshold75) {
+            this.waveMilestoneBanner.classList.remove('visible');
+            this._milestoneShown = false;
+        }
+    }
+
     this.goldDisplay.textContent = '\uD83D\uDCB0 ' + this.player.gold;
     this.atkDisplay.textContent = '\u2694\uFE0F ' + this.player.atk;
     this.killsDisplay.textContent = '\u2620\uFE0F ' + this.kills;

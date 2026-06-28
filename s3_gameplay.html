@@ -12,6 +12,7 @@
     <div id="game-container">
         <div id="top-bar">
             <div class="stat" id="wave-display">🌊 第 1 波</div>
+            <div id="wave-milestone-banner" class="wave-milestone-banner"></div>
             <div class="stat" id="gold-display">💰 0</div>
             <div class="stat" id="atk-display">⚔️ 10</div>
             <div class="stat" id="kills-display">☠️ 0</div>
@@ -62,7 +63,9 @@
                 <div class="result">击杀数：<span id="victory-kills">0</span></div>
                 <div class="result">圣物：<span id="victory-relics">-</span></div>
                 <div class="result">获得核心：<span id="victory-tokens">0</span></div>
+                <div id="victory-tips" class="victory-tips"></div>
                 <button id="victory-restart-btn">🔄 再来一局</button>
+                <button id="victory-continue-btn" style="display:none">🌀 继续挑战</button>
                 <button id="victory-hub-btn">返回大本营</button>
             </div>
 

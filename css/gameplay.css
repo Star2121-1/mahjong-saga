@@ -362,6 +362,39 @@
 }
 #victory-hub-btn:hover { border-color: #666; color: #ccc; }
 
+/* Victory tips */
+.victory-tips {
+    font-size: 14px; color: #9ab; text-align: center;
+    line-height: 1.6; max-width: 360px; margin: 4px 0;
+}
+.victory-tips .tip-first { color: #ffd700; font-weight: 700; }
+.victory-tips .tip-abyss { color: #4caf50; font-weight: 600; }
+.victory-tips .tip-gold { color: #ffb74d; font-weight: 600; }
+.victory-tips .tip-hero { color: #7c4dff; font-weight: 600; }
+
+/* Continue button */
+#victory-continue-btn {
+    padding: 14px 0; font-size: 16px; font-weight: 700;
+    background: linear-gradient(135deg, #1a3a53, #0d2030);
+    color: #4fc3f7; border: 1px solid rgba(79,195,247,0.3);
+    border-radius: 10px; cursor: pointer;
+    width: 200px; box-shadow: 0 0 30px rgba(26,58,83,0.35);
+    transition: transform 0.1s, box-shadow 0.2s;
+    letter-spacing: 2px;
+}
+#victory-continue-btn:hover { transform: scale(1.04); box-shadow: 0 0 40px rgba(79,195,247,0.35); }
+#victory-continue-btn:active { transform: scale(0.97); }
+
+/* Wave milestone banner */
+.wave-milestone-banner {
+    display: none;
+    font-size: 12px; color: #ffb74d; font-weight: 600;
+    text-align: center; margin: 2px 0;
+    text-shadow: 0 0 8px rgba(255,183,77,0.4);
+    letter-spacing: 1px;
+}
+.wave-milestone-banner.visible { display: block; }
+
 /* ══════════════════════════════════════════════
    虚拟摇杆
    ══════════════════════════════════════════════ */
