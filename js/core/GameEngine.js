@@ -355,6 +355,7 @@ Gp._startNewRun = function(heroId, levelId) {
     this._vpW = 0;
     this._vpH = 0;
     this._currentLevelId = levelId;
+    this._totalWaves = levelCfg.maxWaves || 5;
     this._spawnInterval = levelCfg.spawnIntervalMin || 1.5;
     this._spawnIntervalDecay = levelCfg.spawnIntervalDecay || 0.02;
     this._enemyTypeWeights = levelCfg.enemyTypes || { Normal: 0.45, Tanker: 0.20, Stalker: 0.25, Shaman: 0.10 };
@@ -372,7 +373,7 @@ Gp._startNewRun = function(heroId, levelId) {
     this._elapsed = 0;
     this.kills = 0;
     this._spawnTimer = 0;
-    this._spawnInterval = 1.5;
+    this._spawnInterval = levelCfg.spawnIntervalMin || 1.5;
     this._difficultyTimer = 0;
     this._bossTimer = 0;
     this._lastMoveX = 0;
@@ -697,6 +698,7 @@ Gp._loop = function(timestamp) {
     if (!this.running || this.gameOver) return;
     try {
         var dt = Math.min((timestamp - this._lastTime) / 1000, 0.05);
+        var _skipToEnd = false;
         this._lastTime = timestamp;
         this._elapsed += dt;
 
@@ -962,8 +964,10 @@ Gp._loop = function(timestamp) {
             if (this.player.shouldRevive && this.player.shouldRevive(this)) {
                 this._spawnCausalityText('💀 复活！元气恢复 30%');
                 this.triggerShake(1.5, 500);
-                return;
+                /* Continue loop — rAF rescheduled at end of _loop */
+                _skipToEnd = true;
             }
+            if (_skipToEnd) { this._syncUI(); if (this.running && !this.gameOver) requestAnimationFrame(this._boundLoop); return; }
             this._gameOver();
             return;
         }
@@ -994,6 +998,7 @@ Gp._loop = function(timestamp) {
                 /* Epoch 32: 波次间事件 */
                 if (this._waveCount >= 1 && Math.random() < 0.6) {
                     this._triggerInterWaveEvent();
+                    this.running = false;
                     return;
                 }
                 this.running = false;
@@ -1314,12 +1319,12 @@ Gp._updateCoins = function(dt) {
         var dx = player.x - coin.x;
         var dy = player.y - coin.y;
         var dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < player.radius + 6) {
+        if (dist < player.radius + 6 || dist < (player.magnetRadius || 60)) {
             coin.el.remove();
             this._activeCoins.splice(i, 1);
             collected++;
         } else {
-            var speed = 400;
+            var speed = 400 + (player.magnetRadius || 0) * 2;
             var move = speed * dt;
             coin.x += (dx / dist) * move;
             coin.y += (dy / dist) * move;
@@ -1371,7 +1376,7 @@ Gp._updateExpGems = function(dt) {
         var dx = player.x - gem.x;
         var dy = player.y - gem.y;
         var dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < player.radius + gem.radius) {
+        if (dist < player.radius + gem.radius || dist < (player.magnetRadius || 60)) {
             collected.push(gem);
         } else {
             var speed = 400;
@@ -1579,7 +1584,7 @@ Gp._enterAbyss = function() {
     this._elapsed = 0;
     this.kills = 0;
     this._spawnTimer = 0;
-    this._spawnInterval = 1.5;
+    this._spawnInterval = this._spawnInterval; /* keep current level config */
     this._difficultyTimer = 0;
     this._bossTimer = 0;
     this._bossLord = null;
@@ -1761,7 +1766,7 @@ Gp._settleRun = async function(tokens) {
             crits: this._totalCritsThisRun || 0,
             waves: this._waveCount || 0,
             hitsTaken: this._playerHitCountThisRun || 0,
-            won: !this.gameOver
+            won: true
         };
         var vaultResult = window.saveManager.evaluateWeeklyVault(runStats);
         if (vaultResult.evaluated && vaultResult.completed) {
@@ -1771,6 +1776,14 @@ Gp._settleRun = async function(tokens) {
 
     await window.saveManager.saveMeta(meta);
     await window.saveManager.clearActiveRun();
+
+    /* Epoch 14: 运行统计记录 */
+    try {
+        var ur = Object.keys(this.player.relicLevels || {}).filter(function(k) { return (this.player.relicLevels[k] || 0) > 0; }).length;
+        if (typeof window.saveManager.recordRunStats === 'function') {
+            window.saveManager.recordRunStats(this.kills, this._elapsed, this._maxGoldThisRun || 0, this._overdriveCount || 0, this._totalDodgesThisRun || 0, this._totalCritsThisRun || 0, this._waveCount, this._bossKillsThisRun || 0, this.loopCount || 0, true, this._playerHitCountThisRun || 0, ur);
+        }
+    } catch(e) { console.warn('[GameEngine] error:', e); }
 
     /* ── 成就：局末型检测 ── */
     /* 击杀类 */
@@ -1899,13 +1912,6 @@ Gp._gameOver = async function() {
     meta.totalRuns = (meta.totalRuns || 0) + 1;
     meta.totalKills = (meta.totalKills || 0) + this.kills;
 
-    /* Epoch 14: 运行统计 */
-    try {
-        var ur = Object.keys(this.player.relicLevels || {}).filter(function(k) { return (this.player.relicLevels[k] || 0) > 0; }).length;
-        if (typeof window.saveManager.recordRunStats === 'function') {
-            window.saveManager.recordRunStats(this.kills, this._elapsed, this._maxGoldThisRun || 0, this._overdriveCount || 0, this._totalDodgesThisRun || 0, this._totalCritsThisRun || 0, this._waveCount, this._bossKillsThisRun || 0, this.loopCount || 0, false, this._playerHitCountThisRun || 0, ur);
-        }
-    } catch(e) { console.warn('[GameEngine] error:', e); }
     /* ── Epoch 14: 挑战完成检查 ── */
     var challengeResults = null;
     try {
@@ -2666,6 +2672,7 @@ Gp._continueAfterInterWave = function() {
     this._tempCritBonus = 0;
     this._tempShield = 0;
 
+    this._unfreezeClock();
     this.running = true;
     this._lastTime = performance.now();
     requestAnimationFrame(this._boundLoop);

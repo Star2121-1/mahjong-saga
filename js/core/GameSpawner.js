@@ -56,7 +56,7 @@ Ss.reset = function(engine) {
 /* ── 主循环更新 ── */
 
 Ss.update = function(dt, engine) {
-    if (!engine.running || engine.gameOver || engine._pendingReward || engine._bossLordWave) return;
+    if (!engine.running || engine.gameOver || engine._pendingReward) return;
 
     this._difficultyTimer += dt;
     if (this._difficultyTimer >= 10) {

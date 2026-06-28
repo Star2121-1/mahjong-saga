@@ -104,6 +104,12 @@ Sys.applyMutator = function(engine, mutatorId) {
         for (var i = 0; i < engine.enemies.length; i++) {
             var e = engine.enemies[i];
             if (!e.alive) continue;
+            if (!e._bloodmoonStored) {
+                e._bloodmoonStored = true;
+                e._bloodmoonOrigAtk = e.atk;
+                e._bloodmoonOrigMaxHp = e.maxHp;
+                e._bloodmoonOrigHp = e.hp;
+            }
             e.atk = Math.floor(e.atk * 1.4);
             e.maxHp = Math.floor(e.maxHp * 1.3);
             e.hp = Math.floor(e.hp * 1.3);
@@ -145,6 +151,15 @@ Sys.clearMutatorEffects = function(engine) {
     if (engine._activeMutator === 'bloodmoon') {
         for (var i = 0; i < engine.enemies.length; i++) {
             var e = engine.enemies[i];
+            if (e._bloodmoonStored) {
+                e.atk = e._bloodmoonOrigAtk;
+                e.maxHp = e._bloodmoonOrigMaxHp;
+                e.hp = e._bloodmoonOrigHp;
+                e._bloodmoonStored = false;
+                e._bloodmoonOrigAtk = undefined;
+                e._bloodmoonOrigMaxHp = undefined;
+                e._bloodmoonOrigHp = undefined;
+            }
             var el = engine._enemyElements.get(e.id);
             if (el) el.style.transform = '';
         }
