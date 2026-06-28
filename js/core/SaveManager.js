@@ -110,7 +110,7 @@ class SaveManager {
                 dailyRewardsClaimed: {},
                 runHistory: [],
                 /* Epoch 32: 图鉴系统 */
-                compendium: { relics: [], weapons: [], enemies: [], mutations: [] }
+                compendium: { relics: [], weapons: [], enemies: [], equips: [], mutations: [] }
             };
         } else {
             if (!data.unlockedHeroes) data.unlockedHeroes = ['Knight'];
@@ -180,7 +180,7 @@ class SaveManager {
             if (!data.lastLoginDate) data.lastLoginDate = '';
             if (!data.dailyRewardsClaimed) data.dailyRewardsClaimed = {};
             if (!data.runHistory) data.runHistory = [];
-            if (!data.compendium) data.compendium = { relics: [], weapons: [], enemies: [], mutations: [] };
+            if (!data.compendium) data.compendium = { relics: [], weapons: [], enemies: [], equips: [], mutations: [] };
             this._metaCache = data;
         }
         return this._metaCache;
@@ -800,13 +800,19 @@ class SaveManager {
         var relicIds = ['sharp_edge','golden_finger','auto_drone','thorn_armor','wind_walker','vamp_ring','explosive_core','frost_core','gravity_core','weapon_amplify'];
         var weaponIds = Object.keys(window.rewardManager && window.rewardManager.weaponInfos || {});
         var enemyIds = ['Normal','Tanker','Stalker','Shaman','Boss_Lord'];
+        var equipIds = Object.keys(window.equipmentRegistry && window.equipmentRegistry.equipPool || {});
         total += relicIds.length;
         total += weaponIds.length;
         total += enemyIds.length;
-        total += (c.mutations || []).length;
+        total += equipIds.length;
+        total += enemyIds.length;
+        /* mutations: count from game engine active mutators */
+        var mutatorIds = ['gravity','bloodmoon','frenzy','frailty','wither'];
+        total += mutatorIds.length;
         seen += (c.relics || []).length;
         seen += (c.weapons || []).length;
         seen += (c.enemies || []).length;
+        seen += (c.equips || []).length;
         seen += (c.mutations || []).length;
         return {
             relics: (c.relics || []).length,
@@ -815,8 +821,10 @@ class SaveManager {
             weaponsTotal: weaponIds.length,
             enemies: (c.enemies || []).length,
             enemiesTotal: enemyIds.length,
+            equips: (c.equips || []).length,
+            equipsTotal: equipIds.length,
             mutations: (c.mutations || []).length,
-            mutationsTotal: total - relicIds.length - weaponIds.length - enemyIds.length,
+            mutationsTotal: mutatorIds.length,
             total: total,
             seen: seen,
             pct: total > 0 ? Math.round(seen / total * 100) : 0

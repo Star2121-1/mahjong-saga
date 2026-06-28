@@ -1164,6 +1164,30 @@ if (this._activeMutator === 'bloodmoon' || _vaultBlood) count *= 2;
     }
 };
 
+/* ── Epoch 32: 精英怪生成 ── */
+
+Gp._spawnEliteEnemy = function() {
+    var level = Math.floor(this._elapsed / 15) + 1;
+    var angle = Math.random() * Math.PI * 2;
+    var dist = 200 + Math.random() * 50;
+    var x = this.player.x + Math.cos(angle) * dist;
+    var y = this.player.y + Math.sin(angle) * dist;
+
+    var id = ++this._enemyIdCounter;
+    var types = ['Tanker', 'Stalker', 'Shaman'];
+    var enemyType = types[Math.floor(Math.random() * types.length)];
+    var enemy = new Enemy(id, x, y, level, false, enemyType);
+
+    /* Elite boost */
+    enemy.maxHp = Math.floor(enemy.maxHp * 1.5);
+    enemy.hp = enemy.maxHp;
+    enemy.atk = Math.floor(enemy.atk * 1.3);
+    enemy.el && enemy.el.classList.add('elite-marker');
+
+    this.enemies.push(enemy);
+    this.currentWaveSpawnedCount++;
+};
+
 /* ── Boss 装备掉落 ── */
 Gp._tryDropEquipment = function(x, y, isBossLord) {
     if (!window.equipmentRegistry || !window.saveManager) return;
@@ -1175,6 +1199,8 @@ Gp._tryDropEquipment = function(x, y, isBossLord) {
     var protoId = protoIds[Math.floor(Math.random() * protoIds.length)];
     var item = window.equipmentRegistry.createItem(protoId, quality);
     if (!item) return;
+    /* Epoch 33: 图鉴记录装备 */
+    if (window.saveManager) window.saveManager.recordCompendiumEntry('equips', item.protoId);
     var meta = window.saveManager._metaCache;
     if (!meta) return;
     meta.equipments = meta.equipments || [];
@@ -2397,9 +2423,11 @@ Gp._triggerInterWaveEvent = function() {
 };
 
 Gp._continueAfterInterWave = function() {
+    this._pendingReward = false;
     if (this._extraEliteCount > 0) {
+        /* Epoch 32: 怪物潮 — 额外精英怪 */
         for (var i = 0; i < this._extraEliteCount; i++) {
-            this._spawnEnemy(false, true);
+            this._spawnEliteEnemy();
         }
         this._extraEliteCount = 0;
     }

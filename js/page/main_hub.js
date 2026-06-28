@@ -920,6 +920,7 @@
                 '<div class="stat-row"><span class="stat-label">圣物</span><span class="stat-value">' + prog.relics + '/' + prog.relicsTotal + '</span></div>' +
                 '<div class="stat-row"><span class="stat-label">武器</span><span class="stat-value">' + prog.weapons + '/' + prog.weaponsTotal + '</span></div>' +
                 '<div class="stat-row"><span class="stat-label">敌人</span><span class="stat-value">' + prog.enemies + '/' + prog.enemiesTotal + '</span></div>' +
+                '<div class="stat-row"><span class="stat-label">装备</span><span class="stat-value">' + prog.equips + '/' + prog.equipsTotal + '</span></div>' +
                 '<div class="stat-row"><span class="stat-label">突变</span><span class="stat-value">' + prog.mutations + '/' + prog.mutationsTotal + '</span></div>';
         }
         /* 挑战列表 */
