@@ -504,7 +504,7 @@ class Enemy {
                 srcX = source.x;
                 srcY = source.y;
             }
-            if (srcX != null && srcY != null) {
+            if (srcX != null && srcY != null && window.gameEngine && window.gameEngine.player) {
                 var toPlayerX = window.gameEngine.player.x - this.x;
                 var toPlayerY = window.gameEngine.player.y - this.y;
                 var toPlayerLen = Math.sqrt(toPlayerX * toPlayerX + toPlayerY * toPlayerY);

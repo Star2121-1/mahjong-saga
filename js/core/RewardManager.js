@@ -30,7 +30,7 @@ class RewardManager {
         };
 
         this.overlay = document.getElementById('reward-overlay');
-        this.cardsContainer = this.overlay.querySelector('.reward-cards');
+        this.cardsContainer = this.overlay ? this.overlay.querySelector('.reward-cards') : null;
         this._replaceWeaponId = null;
 
         /* ── 牺牲选项池 ── */

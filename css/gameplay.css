@@ -233,15 +233,6 @@
     0% { box-shadow: 0 0 15px rgba(156,39,176,0.3); }
     100% { box-shadow: 0 0 30px rgba(156,39,176,0.6); }
 }
-.reward-card {
-    width: 140px; padding: 16px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid #2a4a3a; border-radius: 14px;
-    display: flex; flex-direction: column; align-items: center;
-    gap: 6px; text-align: center;
-    transition: border-color 0.2s, transform 0.1s;
-}
-.reward-card:hover { border-color: #1e6f42; }
 .legendary-card {
     border-color: #ffd700;
     background: rgba(255,215,0,0.06);
@@ -658,9 +649,7 @@
    置换面板
    ══════════════════════════════════════════════ */
 
-.weapon-card { border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
-.weapon-card .relic-btn { background: rgba(76,175,80,0.15); color: #4caf50; border-color: #4caf50; }
-.weapon-card .relic-btn:hover { background: rgba(76,175,80,0.3); }
+   /* weapon-card: dead CSS — compendium uses .compendium-weapon-card */
 
 #replace-panel { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 10px 0; }
 .replace-title { font-size: 20px; font-weight: 800; color: #b62929; letter-spacing: 2px; text-shadow: 0 0 20px rgba(182,41,41,0.3); }
@@ -1020,25 +1009,10 @@
     pointer-events: none; will-change: transform, opacity;
 }
 
-.fct-normal {
-    font-size: 16px; color: #1e6f42;
-    text-shadow: 0 0 4px rgba(30,111,66,0.2);
-    animation: fctFloatUp 0.65s ease-out forwards;
-}
 .fct-crit {
     font-size: 30px; color: #b62929;
     text-shadow: 0 0 8px rgba(182,41,41,0.6), 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
     animation: fctCritPop 0.7s ease-out forwards;
-}
-.fct-freeze {
-    font-size: 20px; color: #4caf50;
-    text-shadow: 0 0 16px rgba(76,175,80,0.8), 0 0 32px rgba(76,175,80,0.4);
-    animation: fctFloatUp 0.75s ease-out forwards;
-}
-.fct-overdrive {
-    font-size: 26px; color: #ffd700;
-    text-shadow: 0 0 12px rgba(255,215,0,0.8), 0 0 24px rgba(255,215,0,0.4);
-    animation: fctOverdriveArc 0.8s ease-out forwards;
 }
 .fct-heal {
     font-size: 16px; color: #4caf50;

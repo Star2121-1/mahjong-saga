@@ -243,7 +243,7 @@
 .hero-node-cost { color: #ffd740; font-weight: 700; font-size: 11px; }
 .hero-node-tag { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; letter-spacing: 1px; }
 .hero-node-tag.deployed { background: rgba(255,215,0,0.2); color: #ffd700; border: 1px solid rgba(255,215,0,0.3); }
-.hero-node-tag.ready { background: rgba(76,175,80,0.15); color: #81c784; border: 1px solid rgba(76,175,80,0.2); }
+/* .hero-node-tag.ready: dead CSS — only .deployed is generated */
 .btn-hero-unlock {
     padding: 3px 12px; font-size: 11px;
     background: linear-gradient(135deg, #b8860b, #daa520);
@@ -779,4 +779,13 @@
     #level-cards { gap: 3px; }
     #tech-tree-panel { padding: 6px; }
     #forge-workshop { padding: 6px; }
+}
+
+/* ── Login streak milestone ── */
+
+.streak-milestone {
+    font-size: 10px;
+    color: #aaa;
+    margin-top: 1px;
+    line-height: 1.4;
 }
