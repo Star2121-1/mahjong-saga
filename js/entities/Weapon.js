@@ -179,6 +179,9 @@ window.ShotgunBurst = class extends window.Weapon {
     update(dt) {
         this.cooldownTimer -= dt;
     }
+    reset() {
+        /* No resources to clean */
+    }
 };
 
 /* ══════════════════════════════════════════════

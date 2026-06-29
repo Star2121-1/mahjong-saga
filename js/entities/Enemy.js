@@ -260,6 +260,13 @@ class Enemy {
         if (this._totemTimer <= 0) {
             this._totemTimer = 5;
             if (engine) {
+                /* Epoch 16: 图腾上限 10，防止无限增长 */
+                var existingTotems = engine._totems ? engine._totems.length : 0;
+                if (existingTotems >= 10) {
+                    /* 移除最早的图腾 */
+                    var oldest = engine._totems.shift();
+                    if (oldest && oldest.el && oldest.el.parentNode) oldest.el.remove();
+                }
                 var tel = document.createElement('div');
                 tel.className = 'totem-pillar';
                 tel.style.left = this.x + 'px';

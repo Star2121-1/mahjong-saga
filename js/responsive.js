@@ -17,6 +17,10 @@
         BASE_W = 1920; BASE_H = 1080; MIN_SCALE = 0.5;
     }
 
+    /* Epoch 16: 防抖 throttle 避免 iOS 地址栏动画期间重复 reflow */
+    var _fitTimer = 0;
+    var _lastFitScale = '';
+
     function fit() {
         var c = document.getElementById(containerId);
         if (!c) return;
@@ -27,15 +31,28 @@
         var sy = vh / BASE_H;
         var s = Math.min(sx, sy, 1);
         if (s < MIN_SCALE) s = MIN_SCALE;
+        var key = s + '|' + vw + '|' + vh;
+        if (key === _lastFitScale) return; /* 同参数跳过 */
+        _lastFitScale = key;
         c.style.transform = 'scale(' + s + ')';
         c.style.transformOrigin = 'center center';
     }
 
-    fit();
-    window.addEventListener('resize', fit);
-    if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', fit);
-        window.visualViewport.addEventListener('scroll', fit);
+    function scheduleFit() {
+        if (_fitTimer) return;
+        _fitTimer = setTimeout(function() {
+            _fitTimer = 0;
+            fit();
+        }, 80); /* 80ms throttle */
     }
-    setTimeout(fit, 100);
+
+    fit();
+    /* 只监听 visualViewport，window.resize 会重复触发 */
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', scheduleFit);
+        window.visualViewport.addEventListener('scroll', scheduleFit);
+    }
+    /* iOS 地址栏渐近动画补偿 */
+    setTimeout(scheduleFit, 300);
+    setTimeout(scheduleFit, 600);
 })();

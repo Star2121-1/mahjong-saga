@@ -143,6 +143,10 @@ class SaveManager {
                 data.currentHero = OLD_TO_NEW[data.currentHero];
             }
             if (!data.currentHero) data.currentHero = 'Knight';
+            /* Epoch 16: inflationGuard 迁移 */
+            if (!data.inflationGuard) {
+                data.inflationGuard = { totalMetaTokens: 0, lastReset: 0 };
+            }
             if (data.metaTokens == null) data.metaTokens = 0;
             if (data.totalRuns == null) data.totalRuns = 0;
             if (data.totalKills == null) data.totalKills = 0;
@@ -943,8 +947,12 @@ class SaveManager {
     }
 
     async _saveMetaToStorage() {
-        var data = JSON.stringify(this._metaCache);
-        localStorage.setItem('cr_meta.json', data);
+        try {
+            var data = JSON.stringify(this._metaCache);
+            localStorage.setItem('cr_meta.json', data);
+        } catch (e) {
+            console.warn('SaveManager _saveMetaToStorage error:', e);
+        }
     }
 
     /* ── Epoch 45: 元代币辅助 ── */

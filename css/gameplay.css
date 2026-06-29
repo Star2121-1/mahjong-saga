@@ -548,7 +548,19 @@
 .game-clock-frozen #boss-gamble-panel,
 .game-clock-frozen #boss-gamble-panel *,
 .game-clock-frozen #boss-gamble-panel *::before,
-.game-clock-frozen #boss-gamble-panel *::after {
+.game-clock-frozen #boss-gamble-panel *::after,
+.game-clock-frozen #mutator-overlay,
+.game-clock-frozen #mutator-overlay *,
+.game-clock-frozen #mutator-overlay *::before,
+.game-clock-frozen #mutator-overlay *::after,
+.game-clock-frozen #victory-overlay,
+.game-clock-frozen #victory-overlay *,
+.game-clock-frozen #victory-overlay *::before,
+.game-clock-frozen #victory-overlay *::after,
+.game-clock-frozen #game-over-overlay,
+.game-clock-frozen #game-over-overlay *,
+.game-clock-frozen #game-over-overlay *::before,
+.game-clock-frozen #game-over-overlay *::after {
     animation-play-state: running !important;
     transition-property: all !important;
 }

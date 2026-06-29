@@ -505,7 +505,6 @@ Gp._startNewRun = function(heroId, levelId) {
 
 Gp._announceWave = function(waveIdx) {
     this._unfreezeClock();
-    this._freezeClock();
     var wa = document.getElementById('wave-announce');
     wa.textContent = '\u7b2c ' + (waveIdx + 1) + ' \u6ce2';
     wa.classList.add('active');
@@ -513,7 +512,11 @@ Gp._announceWave = function(waveIdx) {
     var self = this;
     setTimeout(function() {
         wa.classList.remove('active');
-        self._beginLoop();
+        self._freezeClock();
+        setTimeout(function() {
+            self._unfreezeClock();
+            self._beginLoop();
+        }, 300);
     }, 1200);
 };
 
@@ -2052,7 +2055,7 @@ Gp._syncEntities = function() {
         el.style.top = enemy.y + 'px';
         var flash = enemy.flashTimer > 0;
         var isFinalBoss = enemy.isBoss && enemy.radius >= 75;
-        el.classList.toggle('frozen', enemy.frozen);
+        el.classList.toggle('frozen-crystal', enemy.frozen);
         el.style.backgroundColor = flash ? '#b62929' : (enemy.isBoss ? (isFinalBoss ? '#6a1a1a' : 'hsl(' + enemy.hue + ', 40%, 30%)') : 'hsl(' + enemy.hue + ', 25%, 28%)');
         el.style.boxShadow = flash ? '0 0 18px rgba(182,41,41,0.6)' : (enemy.isBoss ? (isFinalBoss ? '0 0 60px rgba(182,41,41,0.7)' : '0 0 40px rgba(156,39,176,0.5)') : '0 0 10px hsla(' + enemy.hue + ', 25%, 28%, 0.35)');
         var fill = enemy._hpFill || el.querySelector('.enemy-hp-fill');

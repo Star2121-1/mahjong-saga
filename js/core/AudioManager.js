@@ -16,6 +16,10 @@ Ap._ensureContext = function() {
         var AC = window.AudioContext || window.webkitAudioContext;
         if (!AC) { this._initialized = true; return; }
         this._ctx = new AC();
+        /* Epoch 16: iOS 12.2+ 需要 resume() 才能播放 */
+        if (this._ctx.state === 'suspended') {
+            this._ctx.resume();
+        }
         this._initialized = true;
     } catch (e) {
         console.warn('[AudioManager] _ensureContext failed:', e);

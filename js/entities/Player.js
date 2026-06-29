@@ -551,8 +551,6 @@ class Player {
         var talents = meta.talents || {};
         this.maxHp += (talents.health_boost || 0) * 20;
         this.hp = this.maxHp;
-        /* 保存基础maxHp用于临时增益恢复 */
-        this._baseMaxHp = this.maxHp;
         this.speed += (talents.speed_boost || 0) * 15;
         this.baseSpeed = this.speed;
         this.magnetRadius += (talents.magnet_boost || 0) * 30;
@@ -584,6 +582,10 @@ class Player {
                 }
             }
         }
+        this.baseSpeed = this.speed;
+
+        /* 保存基础maxHp用于临时增益恢复（装备聚合完成后） */
+        this._baseMaxHp = this.maxHp;
         this.baseSpeed = this.speed;
 
         /* ── 套装共鸣检测 ── */

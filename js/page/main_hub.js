@@ -896,6 +896,8 @@
                 currentVal = meta.fullSetActivated ? 1 : 0;
             } else if (c.id === 'speed_demon') {
                 currentVal = (meta.runStats && meta.runStats.fastestRun != null && meta.runStats.fastestRun < 9999) ? Math.round(meta.runStats.fastestRun) : 9999;
+            } else if (c.id === 'first_kill') {
+                currentVal = meta.totalKills || 0;
             }
             progress = Math.min(100, Math.round((currentVal / threshold) * 100));
             html +=
