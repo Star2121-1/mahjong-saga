@@ -42,18 +42,19 @@ Fp.spawnText = function(x, y, text, typeOrColor, size, duration) {
     node.style.top = y + 'px';
     node._fctActive = true;
     node.style.display = '';
-    node.style.animation = 'none';
+    /* 移除旧的 animationend listener 避免重复绑定 */
+    node.removeEventListener('animationend', node._fctOnEnd);
+    /* 触发 reflow 以确保动画从初始状态重新开始 */
     void node.offsetWidth;
     node.style.animation = '';
+    /* 绑定清理回调 — 保存到节点上以便后续 remove */
     var self = this;
     var onEnd = function() {
         node.removeEventListener('animationend', onEnd);
-        if (node._fctActive) {
-            node._fctActive = false;
-            self._returnNode(node);
-        }
+        node._fctActive = false;
+        self._returnNode(node);
     };
-    node.removeEventListener('animationend', onEnd);
+    node._fctOnEnd = onEnd;
     node.addEventListener('animationend', onEnd);
 };
 

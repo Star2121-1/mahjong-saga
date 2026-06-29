@@ -582,6 +582,7 @@ Gp._beginLoop = function() {
     this.running = true;
     this.gameOver = false;
     this._lastTime = performance.now();
+    this._elapsed = 0;
     requestAnimationFrame(this._boundLoop);
 };
 
@@ -1916,7 +1917,8 @@ Gp._gameOver = async function() {
     } catch(e) { console.warn('[GameEngine] error:', e); }
 
     /* ── Epoch 14: 运行统计记录 ── */
-    var uniqueRelics = Object.keys(this.player.relicLevels || {}).filter(function(k) { return (this.player.relicLevels[k] || 0) > 0; }).length;
+    var pRelics = this.player && this.player.relicLevels || {};
+    var uniqueRelics = Object.keys(pRelics).filter(function(k) { return (pRelics[k] || 0) > 0; }).length;
     if (typeof window.saveManager.recordRunStats === 'function') {
         window.saveManager.recordRunStats(
             this.kills, this._elapsed, this._maxGoldThisRun || 0,
