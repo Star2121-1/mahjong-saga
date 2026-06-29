@@ -1,12 +1,17 @@
 /* ══════════════════════════════════════════════
    麻将江湖 — 游戏系统 (Game Systems)
    Epoch 5 — GameEngine.js 解耦拆分
+   修复 — spawnCausalityText 委托给 CombatSystem
    ══════════════════════════════════════════════ */
 
 (function() {
 
 window.Systems = {};
 var Sys = window.Systems;
+
+/* 委托 CombatSystem 用于因果文本等战斗特效 */
+window.CombatSystem = window.CombatSystem || {};
+var Cs = window.CombatSystem;
 
 /* ── Overdrive ── */
 
@@ -30,7 +35,7 @@ Sys.triggerOverdrive = function(engine) {
 
     if (engine.container) engine.container.classList.add('overdrive-active');
     engine.triggerShake(0.5, 3000);
-    Sys.spawnCausalityText(engine, '☀☀☀ Overdrive 轰炸 ☀☀☀');
+    Cs.spawnCausalityText(engine, '☀☀☀ Overdrive 轰炸 ☀☀☀');
 
     /* 成就：Overdrive 计数 */
     engine._overdriveCount = (engine._overdriveCount || 0) + 1;

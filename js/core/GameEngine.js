@@ -1741,7 +1741,8 @@ Gp._settleRun = async function(tokens) {
 
     /* Epoch 14: 运行统计记录 */
     try {
-        var ur = Object.keys(this.player.relicLevels || {}).filter(function(k) { return (this.player.relicLevels[k] || 0) > 0; }).length;
+        var pR = this.player && this.player.relicLevels || {};
+        var ur = Object.keys(pR).filter(function(k) { return (pR[k] || 0) > 0; }).length;
         if (typeof window.saveManager.recordRunStats === 'function') {
             window.saveManager.recordRunStats(this.kills, this._elapsed, this._maxGoldThisRun || 0, this._overdriveCount || 0, this._totalDodgesThisRun || 0, this._totalCritsThisRun || 0, this._waveCount, this._bossKillsThisRun || 0, this.loopCount || 0, true, this._playerHitCountThisRun || 0, ur);
         }
@@ -1940,7 +1941,8 @@ Gp._gameOver = async function() {
 
     /* Epoch 19: 游戏死亡也记录历史 */
     try {
-        var ur = Object.keys(this.player.relicLevels || {}).filter(function(k) { return (this.player.relicLevels[k] || 0) > 0; }).length;
+        var pR2 = this.player && this.player.relicLevels || {};
+        var ur = Object.keys(pR2).filter(function(k) { return (pR2[k] || 0) > 0; }).length;
         if (typeof window.saveManager.recordRunHistory === 'function') {
             window.saveManager.recordRunHistory(
                 this.player.heroId, this._currentLevelId, this.kills, this._elapsed,
