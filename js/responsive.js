@@ -22,6 +22,7 @@
        竖屏手机 (390x844) → scale≈0.203 → 游戏宽度填满，上下黑边
        横屏设备 (1920x1080) → scale=1 → 原尺寸
        横屏设备 (1200x1920) → scale≈0.625 → 游戏高度填满，左右黑边 */
+    var _fitTimer = 0;
     var _lastFitScale = '';
 
     function fit() {
@@ -36,12 +37,20 @@
         var key = s.toFixed(4) + '|' + vw + '|' + vh;
         if (key === _lastFitScale) return; /* 同参数跳过 */
         _lastFitScale = key;
-        /* fixed + scale: 脱离文档流避免撑出视口 */
+        /* fixed: 脱离文档流 */
         c.style.position = 'fixed';
-        c.style.top = '0';
-        c.style.left = '0';
+        /* 居中: 缩放后尺寸 = BASE_W*s × BASE_H*s
+           视口中的偏移 = (视口 - 缩放后尺寸) / 2 */
+        var scaledW = BASE_W * s;
+        var scaledH = BASE_H * s;
+        c.style.top = ((vh - scaledH) / 2) + 'px';
+        c.style.left = ((vw - scaledW) / 2) + 'px';
+        c.style.width = BASE_W + 'px';
+        c.style.height = BASE_H + 'px';
         c.style.transform = 'scale(' + s + ')';
-        c.style.transformOrigin = 'center center';
+        /* transformOrigin 设为缩放起点为元素左上角，
+           配合 top/left 偏移实现居中 */
+        c.style.transformOrigin = 'top left';
     }
 
     function scheduleFit() {
