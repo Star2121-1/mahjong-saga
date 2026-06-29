@@ -881,6 +881,7 @@
             } else if (c.id === 'flawless' || c.id === 'flawless_5') {
                 currentVal = meta.flawlessRuns || 0;
             } else if (c.id === 'get_rich' || c.id === 'gold_10k') {
+                /* 单局值：meta.maxGoldThisRun 由 _settleRun 写入，跨局不清零 */
                 currentVal = meta.maxGoldThisRun || 0;
             } else if (c.id === 'boss_slayer') {
                 currentVal = meta.bossKills || 0;

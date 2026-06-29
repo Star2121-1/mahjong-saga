@@ -12,8 +12,8 @@ window.achievementConfig = [
 
     /* ═══ 通关类 ═══ */
     { id: 'first_victory',  name: '凯旋初征',  desc: '首次通关任意关卡',       icon: '🏆', category: 'victory', thresholds: [1] },
-    { id: 'victory_10',     name: '百战不殆',  desc: '累计通关 10 局',         icon: '🎖️', category: 'victory', thresholds: [10] },
-    { id: 'victory_50',     name: '传奇雀士',  desc: '累计通关 50 局',         icon: '👑', category: 'victory', thresholds: [50] },
+    { id: 'victory_10',     name: '百战不殆',  desc: '累计通关 10 局（含尝试）', icon: '🎖️', category: 'victory', thresholds: [10] },
+    { id: 'victory_50',     name: '传奇雀士',  desc: '累计通关 50 局（含尝试）', icon: '👑', category: 'victory', thresholds: [50] },
     { id: 'flawless',       name: '毫发无伤',  desc: '任一关卡全程未受击通关', icon: '✨', category: 'victory', thresholds: [1] },
     { id: 'flawless_5',     name: '完美无瑕',  desc: '累计无伤通关 5 次',      icon: '🌟', category: 'victory', thresholds: [5] },
 
@@ -28,8 +28,7 @@ window.achievementConfig = [
     { id: 'overdrive_50',   name: '永动机',    desc: '累计触发 Overdrive 50 次', icon: '💫', category: 'special', thresholds: [50] },
     { id: 'get_rich',       name: '腰缠万贯',  desc: '单局积累 1000 金币',     icon: '💰', category: 'special', thresholds: [1000] },
     { id: 'gold_10k',       name: '富可敌国',  desc: '单局积累 10000 金币',    icon: '🪙', category: 'special', thresholds: [10000] },
-    { id: 'speed_demon',    name: '极速通关',  desc: '单局 3 分钟内通关',      icon: '⏱️', category: 'special', thresholds: [180] },
-    { id: 'all_heroes',     name: '群雄汇聚',  desc: '解锁全部 3 名英雄',      icon: '🎭', category: 'special', thresholds: [3] },
+    { id: 'speed_demon',    name: '极速通关',  desc: '单局 3 分钟内通关',      icon: '⏱️', category: 'special', thresholds: [180] },{ id: 'all_heroes',     name: '群雄汇聚',  desc: '解锁全部 3 名英雄',      icon: '🎭', category: 'special', thresholds: [3] },
     { id: 'full_set',       name: '套装共鸣',  desc: '同时激活炎痕+永冻光环',  icon: '🔥❄️', category: 'special', thresholds: [1] },
 ];
 

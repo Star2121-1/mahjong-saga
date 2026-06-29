@@ -1318,6 +1318,12 @@ Gp._updateExpGems = function(dt) {
     var collected = [];
     for (var i = this._expGems.length - 1; i >= 0; i--) {
         var gem = this._expGems[i];
+        /* Epoch 11: 过期清理，防止经验石无限堆积 */
+        if (gem.isExpired) {
+            if (gem.el && gem.el.parentNode) gem.el.remove();
+            this._expGems.splice(i, 1);
+            continue;
+        }
         if (!gem.el) {
             var el = document.createElement('div');
             el.className = 'exp-gem';
@@ -1334,7 +1340,7 @@ Gp._updateExpGems = function(dt) {
         if (dist < player.radius + gem.radius || dist < (player.magnetRadius || 60)) {
             collected.push(gem);
         } else {
-            var speed = 400;
+            var speed = 400 + (player.magnetRadius || 0) * 2;
             var move = speed * dt;
             if (move >= dist) {
                 gem.x = player.x;

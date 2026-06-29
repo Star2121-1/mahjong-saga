@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════
-   麻将江湖 — 战斗系统 (Game Combat)
+   Game Combat — 战斗辅助系统
    Epoch 5 — GameEngine.js 解耦拆分
    ══════════════════════════════════════════════ */
 
@@ -61,26 +61,8 @@ Cs.rewardKill = function(engine, enemy) {
     engine._rewardKill(enemy);
 };
 
-/* ── 装备掉落 ── */
-
-Cs.tryDropEquipment = function(engine, x, y, isBossLord) {
-    if (!window.equipmentRegistry || !window.saveManager) return;
-    var chance = isBossLord ? 1.0 : 0.25;
-    if (Math.random() > chance) return;
-    var roll = Math.random();
-    var quality = roll < 0.1 ? 'legendary' : roll < 0.4 ? 'epic' : 'rare';
-    var protoIds = Object.keys(window.equipmentRegistry.equipPool);
-    var protoId = protoIds[Math.floor(Math.random() * protoIds.length)];
-    var item = window.equipmentRegistry.createItem(protoId, quality);
-    if (!item) return;
-    var meta = window.saveManager._metaCache;
-    if (!meta) return;
-    meta.equipments = meta.equipments || [];
-    meta.equipments.push(item);
-    window.saveManager._saveMetaToStorage();
-    var qualityLabel = { rare: '稀有', epic: '史诗', legendary: '传说' }[quality] || quality;
-    engine._spawnCausalityText('🎁 获得装备：' + item.name + ' (' + qualityLabel + ')');
-};
+/* ── 装备掉落 ── (已迁移至 GameEngine._tryDropEquipment) */
+/* Cs.tryDropEquipment 已废弃，保留此注释防止重复添加 */
 
 /* ── 飘字 ── */
 
