@@ -121,9 +121,28 @@ class SaveManager {
             if (!data.unlockedHeroes) data.unlockedHeroes = ['Knight'];
             if (!data.currentHero) data.currentHero = 'Knight';
             var OLD_TO_NEW = { hero_swordsman: 'Knight', hero_colossus: 'Mage', hero_phantom: 'Assassin' };
-            if (!data.currentSelectedHero || OLD_TO_NEW[data.currentSelectedHero]) {
+            /* 迁移旧的 hero_swordsman → Knight */
+            if (data.currentSelectedHero && OLD_TO_NEW[data.currentSelectedHero]) {
+                data.currentSelectedHero = OLD_TO_NEW[data.currentSelectedHero];
+            }
+            if (!data.currentSelectedHero) {
                 data.currentSelectedHero = data.currentHero || 'Knight';
             }
+            /* 迁移 unlockedHeroes */
+            if (data.unlockedHeroes) {
+                for (var _otn = 0; _otn < data.unlockedHeroes.length; _otn++) {
+                    if (OLD_TO_NEW[data.unlockedHeroes[_otn]]) {
+                        data.unlockedHeroes[_otn] = OLD_TO_NEW[data.unlockedHeroes[_otn]];
+                    }
+                }
+            } else {
+                data.unlockedHeroes = ['Knight'];
+            }
+            /* 迁移 currentHero */
+            if (data.currentHero && OLD_TO_NEW[data.currentHero]) {
+                data.currentHero = OLD_TO_NEW[data.currentHero];
+            }
+            if (!data.currentHero) data.currentHero = 'Knight';
             if (data.metaTokens == null) data.metaTokens = 0;
             if (data.totalRuns == null) data.totalRuns = 0;
             if (data.totalKills == null) data.totalKills = 0;

@@ -9,7 +9,7 @@ if (window.Systems) {}
 
 window.GameEngine = function() {
     this._currentLevelId = 'level_1';
-    this._heroIds = ['hero_swordsman', 'hero_colossus', 'hero_phantom'];
+    this._heroIds = ['Knight', 'Mage', 'Assassin'];
 
     this.running = false;
     this.gameOver = false;
@@ -2439,7 +2439,7 @@ Gp.restart = function() {
     this._spawnInterval = 1.5;
     this._difficultyTimer = 0;
 
-    var heroId = this.player ? this.player.heroId : 'hero_swordsman';
+    var heroId = this.player ? this.player.heroId : 'Knight';
     var levelId = this._currentLevelId || 'level_1';
     this._startNewRun(heroId, levelId);
 };

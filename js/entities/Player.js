@@ -1,6 +1,6 @@
 class Player {
     constructor(x, y, heroId) {
-        this.heroId = heroId || 'hero_swordsman';
+        this.heroId = heroId || 'Knight';
         this.x = x;
         this.y = y;
         this._initFromConfig();
@@ -375,7 +375,7 @@ class Player {
     }
 
     restore(data) {
-        this.heroId = data.heroId || 'hero_swordsman';
+        this.heroId = data.heroId || 'Knight';
         this._initFromConfig();
         this.x = data.x || 0; this.y = data.y || 0;
         this.gold = data.gold || 0;
@@ -545,20 +545,6 @@ class Player {
     reset(heroId) {
         this.heroId = heroId || 'Knight';
         this._initFromConfig();
-
-        var reg = window.heroRegistry;
-        var heroCfg = reg && reg.getHero(this.heroId);
-        if (heroCfg) {
-            this.maxHp = heroCfg.hp;
-            this.hp = heroCfg.hp;
-            this.atk = heroCfg.atk;
-            this.speed = heroCfg.speed;
-            this.baseSpeed = heroCfg.speed;
-            this.baseDodge = heroCfg.baseDodge || 0;
-            this.dodgeRate = this.baseDodge;
-            this.maxWeaponSlots = heroCfg.weaponSlots || 6;
-            this.cdFloor = heroCfg.cdFloor || 0.2;
-        }
 
         /* ── 永久天赋加成 ── */
         var meta = (window.saveManager && window.saveManager._metaCache) || {};

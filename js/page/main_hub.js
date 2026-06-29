@@ -1,5 +1,5 @@
 (function() {
-    var _heroIds = ['hero_swordsman', 'hero_colossus', 'hero_phantom'];
+    var _heroIds = ['Knight', 'Mage', 'Assassin'];
     var _currentHeroIndex = 0;
     var _currentLevelId = 'level_1';
     var _historyFilter = 'all';
@@ -307,14 +307,14 @@
     }
 
     function getCurrentHeroId() {
-        return _heroIds[_currentHeroIndex] || 'hero_swordsman';
+        return _heroIds[_currentHeroIndex] || 'Knight';
     }
 
     function refreshHeroCarousel() {
         var heroId = getCurrentHeroId();
-        var cfg = window.heroConfig[heroId] || window.heroConfig.hero_swordsman;
+        var cfg = window.heroConfig[heroId] || window.heroConfig.Knight;
         var meta = window.saveManager._metaCache || {};
-        var unlocked = meta.unlockedHeroes || ['hero_swordsman'];
+        var unlocked = meta.unlockedHeroes || ['Knight'];
         var isUnlocked = unlocked.indexOf(heroId) !== -1;
         var isSelected = meta.currentSelectedHero === heroId;
 
@@ -358,14 +358,14 @@
     async function onHeroMainAction() {
         var heroId = getCurrentHeroId();
         var meta = window.saveManager._metaCache || {};
-        var unlocked = meta.unlockedHeroes || ['hero_swordsman'];
+        var unlocked = meta.unlockedHeroes || ['Knight'];
 
         if (unlocked.indexOf(heroId) === -1) {
             var cfg = window.heroConfig[heroId];
             var cost = cfg.unlockCost;
             if ((meta.metaTokens || 0) >= cost) {
                 meta.metaTokens -= cost;
-                if (!meta.unlockedHeroes) meta.unlockedHeroes = ['hero_swordsman'];
+                if (!meta.unlockedHeroes) meta.unlockedHeroes = ['Knight'];
                 if (meta.unlockedHeroes.indexOf(heroId) === -1) meta.unlockedHeroes.push(heroId);
                 meta.currentSelectedHero = heroId;
                 await window.saveManager.saveMeta(meta);
@@ -380,7 +380,7 @@
 
     function onHeroDetails() {
         var heroId = getCurrentHeroId();
-        var cfg = window.heroConfig[heroId] || window.heroConfig.hero_swordsman;
+        var cfg = window.heroConfig[heroId] || window.heroConfig.Knight;
 
         if (DOM.heroDetailPortrait) {
             DOM.heroDetailPortrait.className = 'hero-portrait large ' + (cfg.shapeClass || 'shape-circle');
