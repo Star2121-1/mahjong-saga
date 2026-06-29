@@ -1151,70 +1151,6 @@ Gp._spawnEnemy = function(isBoss) {
     enemy.el = el;
 };
 
-/** Spawn a specific enemy type (for boss summons, interwave events) */
-Gp._spawnEnemyType = function(type) {
-    var level = Math.floor(this._elapsed / 15) + 1;
-    var angle = Math.random() * Math.PI * 2;
-    var dist = 200 + Math.random() * 50;
-    var x = this.player.x + Math.cos(angle) * dist;
-    var y = this.player.y + Math.sin(angle) * dist;
-    var margin = 20;
-    x = Math.max(margin, Math.min(this._mapW - margin, x));
-    y = Math.max(margin, Math.min(this._mapH - margin, y));
-    var id = this._enemyIdCounter++;
-    var enemy = new Enemy(id, x, y, level, false, type);
-    enemy.el = document.createElement('div');
-    enemy.el.className = 'enemy';
-    /* 2.5D 骨雕妖牌 */
-    enemy.el.style.background = '#2a4a3a';
-    enemy.el.style.borderRadius = '4px';
-    enemy.el.style.boxShadow = '0 3px 0 #1a3020, 0 5px 0.5px #3a5a4a, 0 6px 8px rgba(0,0,0,0.4)';
-    enemy.el.style.display = 'flex';
-    enemy.el.style.alignItems = 'center';
-    enemy.el.style.justifyContent = 'center';
-    enemy.el.style.fontSize = '12px';
-    enemy.el.style.fontWeight = '700';
-    enemy.el.style.color = '#5a8a6a';
-    /* Mahjong tile face */
-    var face = document.createElement('div');
-    face.style.position = 'relative';
-    face.style.width = '32px';
-    face.style.height = '42px';
-    face.style.background = '#f5f5dc';
-    face.style.border = '1px solid #bbb';
-    face.style.borderRadius = '3px';
-    face.style.boxShadow = 'inset 0 -2px 0 #ddd, 0 2px 4px rgba(0,0,0,0.2)';
-    face.style.display = 'flex';
-    face.style.alignItems = 'center';
-    face.style.justifyContent = 'center';
-    face.style.fontSize = '16px';
-    face.style.fontWeight = 'bold';
-    face.style.color = '#333';
-    face.textContent = enemy.type.charAt(0);
-    enemy.el.appendChild(face);
-    /* HP bar */
-    var hpBar = document.createElement('div');
-    hpBar.className = 'enemy-hpbar';
-    hpBar.style.width = '36px';
-    hpBar.style.height = '4px';
-    hpBar.style.background = '#333';
-    hpBar.style.borderRadius = '2px';
-    hpBar.style.position = 'absolute';
-    hpBar.style.bottom = '-6px';
-    hpBar.style.overflow = 'hidden';
-    var hpFill = document.createElement('div');
-    hpFill.className = 'enemy-hpbar-fill';
-    hpFill.style.width = '100%';
-    hpFill.style.height = '100%';
-    hpFill.style.background = '#4caf50';
-    hpFill.style.transition = 'width 0.15s';
-    hpBar.appendChild(hpFill);
-    enemy.el.appendChild(hpBar);
-    this._worldLayer.appendChild(enemy.el);
-    this._enemyElements.set(id, enemy.el);
-    enemy.el = enemy.el;
-    this.enemies.push(enemy);
-};
 
 Gp._spawnCoinsAt = function(x, y, isBoss, level) {
     /* Epoch 5: 委托掉落到 CombatSystem */
@@ -1266,6 +1202,10 @@ Gp._spawnEliteEnemy = function() {
 Gp._tryDropEquipment = function(x, y, isBossLord) {
     if (!window.equipmentRegistry || !window.saveManager) return;
     var chance = isBossLord ? 1.0 : 0.25;
+    /* Epoch 16: Abyss Gamble 3x 掉落 + 怪物潮双倍 */
+    var abyssMult = this._gambleAbyssBonus ? 3 : 1;
+    var surgeMult = this._monsterSurgeDoubleDrops ? 2 : 1;
+    var totalMult = abyssMult * surgeMult;
     if (Math.random() > chance) return;
     var roll = Math.random();
     var quality = roll < 0.1 ? 'legendary' : roll < 0.4 ? 'epic' : 'rare';
@@ -1282,6 +1222,18 @@ Gp._tryDropEquipment = function(x, y, isBossLord) {
     window.saveManager._saveMetaToStorage();
     var qualityLabel = { rare: '稀有', epic: '史诗', legendary: '传说' }[quality] || quality;
     this._spawnCausalityText('🎁 获得装备：' + item.name + ' (' + qualityLabel + ')');
+    /* Epoch 16: Abyss Gamble + 怪物潮双倍掉落 */
+    for (var _di = 0; _di < totalMult; _di++) {
+        var dropItem = (_di === 0) ? item : window.equipmentRegistry.createItem(protoId, quality);
+        if (dropItem) {
+            meta.equipments.push(dropItem);
+            window.saveManager._saveMetaToStorage();
+            var qLabel = { rare: '稀有', epic: '史诗', legendary: '传说' }[quality] || quality;
+            this._spawnCausalityText('🎁 获得装备：' + dropItem.name + ' (' + qLabel + ')' + (_di > 0 ? ' x' + (_di + 1) : ''));
+        }
+    }
+    /* Consume Abyss Gamble bonus */
+    if (this._gambleAbyssBonus) this._gambleAbyssBonus = false;
 };
 
 Gp._spawnExpGemsAt = function(x, y, isBoss, level) {
@@ -2671,6 +2623,8 @@ Gp._continueAfterInterWave = function() {
     this._tempGoldMult = 1;
     this._tempCritBonus = 0;
     this._tempShield = 0;
+    this._tempShieldEnd = 0;
+    this._tempBuffEnd = 0;
 
     this._unfreezeClock();
     this.running = true;
@@ -3154,6 +3108,15 @@ Gp._spawnEnemyType = function(type) {
     var level = Math.floor(this._elapsed / 15) + 1;
     var id = this._enemyIdCounter++;
     var enemy = new Enemy(id, cx, cy, level, false, type);
+    /* Apply level difficulty factor (consistent with SpawnSystem) */
+    var diff = 1;
+    try {
+        var cfg = window.levelConfig[this._currentLevelId];
+        if (cfg) diff = cfg.difficultyFactor || 1;
+    } catch(e) {}
+    enemy.maxHp = Math.floor(enemy.maxHp * diff);
+    enemy.hp = enemy.maxHp;
+    enemy.atk = Math.floor(enemy.atk * diff);
     this.enemies.push(enemy);
 
     var el = document.createElement('div');
