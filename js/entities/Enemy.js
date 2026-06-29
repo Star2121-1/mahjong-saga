@@ -1,4 +1,4 @@
-class Enemy {
+window.Enemy = class Enemy {
     constructor(id, x, y, level, isBoss, type) {
         this.id = id;
         this.x = x;
