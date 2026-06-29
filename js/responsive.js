@@ -10,15 +10,18 @@
     if (!containerId) return;
 
     /* 设计分辨率 */
-    var BASE_W, BASE_H, MIN_SCALE;
+    var BASE_W, BASE_H;
     if (containerId === 'save-select-screen') {
-        BASE_W = 480; BASE_H = 720; MIN_SCALE = 0.6;
+        BASE_W = 480; BASE_H = 720;
     } else {
-        BASE_W = 1920; BASE_H = 1080; MIN_SCALE = 0.5;
+        BASE_W = 1920; BASE_H = 1080;
     }
 
-    /* Epoch 16: 防抖 throttle 避免 iOS 地址栏动画期间重复 reflow */
-    var _fitTimer = 0;
+    /* Epoch 11: 短边填满策略。
+       scale = min(vw/BASE_W, vh/BASE_H, 1)
+       竖屏手机 (390x844) → scale≈0.203 → 游戏宽度填满，上下黑边
+       横屏设备 (1920x1080) → scale=1 → 原尺寸
+       横屏设备 (1200x1920) → scale≈0.625 → 游戏高度填满，左右黑边 */
     var _lastFitScale = '';
 
     function fit() {
@@ -30,10 +33,13 @@
         var sx = vw / BASE_W;
         var sy = vh / BASE_H;
         var s = Math.min(sx, sy, 1);
-        if (s < MIN_SCALE) s = MIN_SCALE;
-        var key = s + '|' + vw + '|' + vh;
+        var key = s.toFixed(4) + '|' + vw + '|' + vh;
         if (key === _lastFitScale) return; /* 同参数跳过 */
         _lastFitScale = key;
+        /* fixed + scale: 脱离文档流避免撑出视口 */
+        c.style.position = 'fixed';
+        c.style.top = '0';
+        c.style.left = '0';
         c.style.transform = 'scale(' + s + ')';
         c.style.transformOrigin = 'center center';
     }
@@ -47,11 +53,12 @@
     }
 
     fit();
-    /* 只监听 visualViewport，window.resize 会重复触发 */
+    /* 监听 visualViewport (移动端) + window.resize (桌面端) */
     if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', scheduleFit);
         window.visualViewport.addEventListener('scroll', scheduleFit);
     }
+    window.addEventListener('resize', scheduleFit);
     /* iOS 地址栏渐近动画补偿 */
     setTimeout(scheduleFit, 300);
     setTimeout(scheduleFit, 600);

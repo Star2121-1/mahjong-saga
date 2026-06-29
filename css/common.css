@@ -18,20 +18,20 @@ body { position: relative; }
 
 /* 大本营竖版容器（废弃但保留兼容） */
 #main-hub-screen {
-    width: 100vw; height: 100vh;
-    max-width: 100%;
+    width: 1920px; height: 1080px;
     display: flex; flex-direction: row;
     background: linear-gradient(180deg, #0d1a12 0%, #132a1a 100%);
     overflow: hidden; position: relative;
+    margin: 0 auto;
 }
 
-/* 游戏竖版容器（废弃但保留兼容） */
+/* 游戏主容器 — 固定 1920x1080，由 responsive.js 做 scale 适配视口 */
 #game-container {
-    width: 100vw; height: 100vh;
-    max-width: 100%;
+    width: 1920px; height: 1080px;
     display: flex; flex-direction: column;
     overflow: hidden; position: relative;
     background: #133b26;
+    margin: 0 auto;
 }
 
 /* ══════════════════════════════════════════════

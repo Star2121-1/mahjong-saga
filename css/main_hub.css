@@ -1,5 +1,5 @@
 #main-hub-screen {
-    width: 100vw; height: 100vh;
+    width: 1920px; height: 1080px;
     display: flex; flex-direction: row;
     background: linear-gradient(180deg, #0d1a12 0%, #132a1a 100%);
     overflow: hidden; position: relative;
@@ -20,7 +20,7 @@
 
 #hub-left-nav {
     width: 20%; min-width: 160px;
-    height: 100vh;
+    height: 100%;
     background: linear-gradient(180deg, #0a1a0f 0%, #0d2014 50%, #0a1a0f 100%);
     border-right: 2px solid #1a5336;
     display: flex; flex-direction: column;
@@ -78,7 +78,7 @@
 
 #hub-right-canvas {
     flex: 1;
-    height: 100vh;
+    height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
     padding: 56px 32px 32px;
