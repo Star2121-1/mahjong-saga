@@ -281,15 +281,19 @@ Sys.triggerShake = function(engine, intensity, duration) {
     if (!engine.container) return;
     intensity = intensity || 1;
     duration = duration || 200;
+    /* 最大位移钳制：intensity 1→8px, 2→16px, 3→24px — 防止破坏视口 */
+    var maxDisp = Math.min(intensity * 8, 24);
     if (engine._shakeTimer > 0 && engine._shakeIntensity >= intensity) return;
+
+    var wl = engine._worldLayer || document.getElementById('world-layer');
+    if (wl) {
+        wl.style.setProperty('--sx', (maxDisp * (Math.random() > 0.5 ? 1 : -1)) + 'px');
+        wl.style.setProperty('--sy', (maxDisp * (Math.random() > 0.5 ? 1 : -1)) + 'px');
+        wl.style.animationDuration = Math.min(duration, 3000) + 'ms';
+        wl.classList.add('shake-active');
+    }
     engine._shakeTimer = duration / 1000;
     engine._shakeIntensity = intensity;
-    engine.container.classList.add('screen-shake-active');
-    if (intensity >= 2) {
-        engine.container.style.animationDuration = '0.06s';
-    } else {
-        engine.container.style.animationDuration = '0.1s';
-    }
 };
 
 Sys.updateShake = function(engine, dt) {
@@ -297,9 +301,12 @@ Sys.updateShake = function(engine, dt) {
         engine._shakeTimer -= dt;
         if (engine._shakeTimer <= 0) {
             engine._shakeTimer = 0;
-            if (engine.container) {
-                engine.container.classList.remove('screen-shake-active');
-                engine.container.style.animationDuration = '';
+            /* 清除 shake 样式，回归零位移 */
+            var wl = engine._worldLayer || document.getElementById('world-layer');
+            if (wl) {
+                wl.classList.remove('shake-active');
+                wl.style.animationDuration = '';
+                wl.style.transform = '';
             }
         }
     }

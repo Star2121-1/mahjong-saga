@@ -97,39 +97,212 @@
    敌人 — 暗淡灰绿妖牌
    ══════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════
+   麻将主题敌人矩阵 — 2.5D 程序化麻将牌渲染
+   ══════════════════════════════════════════════ */
+
+/* 基础麻将牌 — 骨白正面 + 翡翠绿背面 */
 .enemy {
     position: absolute;
     width: 36px; height: 48px;
-    background: #2a4a3a;
-    border-radius: 4px;
     z-index: 5; cursor: pointer;
-    box-shadow:
-        0 3px 0 #1a3020,
-        0 5px 0.5px #3a5a4a,
-        0 6px 8px rgba(0,0,0,0.4);
     transform: translate(-50%, -50%);
     display: flex; align-items: center; justify-content: center;
-    font-size: calc(12 * 1.5px); color: #5a8a6a; font-weight: 700;
+    font-weight: 700;
+    /* 2.5D 牌体：多层 box-shadow 堆叠厚度 */
+    border-radius: 4px;
+    background: #f8f4e8;
+    border: 1px solid #c8c0a8;
+    box-shadow:
+        0 2px 0 #d8d0b8,
+        0 4px 0 #c8c0a8,
+        0 5px 0 #b8b098,
+        0 6px 0 #a8a088,
+        0 7px 0 #989078,
+        0 8px 12px rgba(0,0,0,0.45);
+    /* 牌面内容 */
+    flex-direction: column;
 }
+
+/* 牌面文字（花色字符）— 非 Boss 敌人 */
+.enemy:not(.boss)::before {
+    content: attr(data-suit);
+    font-size: calc(18 * 1.5px);
+    font-weight: 900;
+    line-height: 1;
+    color: inherit;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+    z-index: 1;
+}
+
+/* 牌面顶部小标记（类型名） */
+.enemy:not(.boss)::after {
+    content: attr(data-type);
+    font-size: calc(7 * 1.5px);
+    opacity: 0.6;
+    position: absolute;
+    top: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    letter-spacing: 0.5px;
+}
+
+/* 普通敌人 — 万子（红字） */
+.enemy:not(.boss):not(.boss-lord) {
+    color: #c41e3a;
+}
+
+/* Tanker — 厚底牌，蓝色 */
+.enemy[data-enemy-type="Tanker"] {
+    width: 44px; height: 56px;
+    color: #1565c0;
+    box-shadow:
+        0 2px 0 #90a4ae,
+        0 4px 0 #78909c,
+        0 5px 0 #607d8b,
+        0 6px 0 #546e7a,
+        0 7px 0 #455a64,
+        0 8px 0 #37474f,
+        0 9px 0 #263238,
+        0 10px 14px rgba(0,0,0,0.5);
+}
+
+/* Stalker — 半透明幽灵牌，紫色 */
+.enemy[data-enemy-type="Stalker"] {
+    color: #7b1fa2;
+    opacity: 0.85;
+}
+
+/* Shaman — 图腾牌，青绿色 */
+.enemy[data-enemy-type="Shaman"] {
+    color: #00897b;
+}
+
+/* Boss 精英 — 金边牌 */
 .enemy.boss {
     width: 64px; height: 80px;
-    background: #4a2a2a;
+    background: linear-gradient(135deg, #fff8e1, #ffe0b2);
+    border: 2px solid #ffb300;
+    color: #e65100;
     box-shadow:
-        0 4px 0 #2a1a1a,
-        0 6px 0.5px #5a3a3a,
-        0 8px 10px rgba(0,0,0,0.5);
+        0 3px 0 #ffb300,
+        0 5px 0 #ffa000,
+        0 6px 0 #ff8f00,
+        0 7px 0 #ff7f00,
+        0 8px 0 #ff6f00,
+        0 10px 20px rgba(255,111,0,0.35);
 }
+.enemy.boss::before { font-size: calc(28 * 1.5px); }
+
+/* 最终 Boss — 红中（传奇牌） */
 .enemy.boss.final-boss {
     width: 80px; height: 100px;
-    background: #6a1a1a;
+    background: linear-gradient(135deg, #fff8e1 0%, #ffcdd2 50%, #fff8e1 100%);
+    border: 3px solid #d32f2f;
+    color: #b71c1c;
+    box-shadow:
+        0 3px 0 #d32f2f,
+        0 5px 0 #c62828,
+        0 6px 0 #b71c1c,
+        0 7px 0 #a11f27,
+        0 8px 0 #8e1a26,
+        0 10px 0 #7b1624,
+        0 12px 0 #6a1321,
+        0 14px 24px rgba(183,28,28,0.4);
+    animation: bossTilePulse 2s ease-in-out infinite;
 }
+.enemy.boss.final-boss::before { font-size: calc(36 * 1.5px); }
+
+@keyframes bossTilePulse {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(211,47,47,0.4)); }
+    50% { filter: drop-shadow(0 0 18px rgba(211,47,47,0.8)); }
+}
+
+/* Boss Lord — 巨大红中传奇牌 */
+.enemy.boss.boss-lord {
+    width: 96px; height: 128px;
+    background: radial-gradient(circle at 50% 40%, #fff8e1, #ffcdd2 60%, #ef9a9a);
+    border: 3px solid #d32f2f;
+    color: #b71c1c;
+    box-shadow:
+        0 4px 0 #c62828,
+        0 6px 0 #b71c1c,
+        0 8px 0 #a11f27,
+        0 10px 0 #8e1a26,
+        0 12px 0 #7b1624,
+        0 14px 0 #6a1321,
+        0 16px 0 #5a1019,
+        0 18px 0 #4a0d14,
+        0 20px 30px rgba(183,28,28,0.5);
+}
+.enemy.boss.boss-lord::before { font-size: calc(42 * 1.5px); }
+
+/* Boss 基础 aura — 金色光晕 */
+.enemy.boss::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 6px;
+    background: radial-gradient(circle, rgba(255,179,0,0.15) 0%, transparent 65%);
+    animation: bossAuraSpin 3s linear infinite;
+    pointer-events: none;
+    z-index: -1;
+}
+/* Final Boss 红色脉冲 aura */
+.enemy.boss.final-boss::before {
+    inset: -10px;
+    background: radial-gradient(circle, rgba(211,47,47,0.25) 0%, transparent 60%);
+    animation-duration: 2s;
+}
+/* Boss Lord 超大径向光晕 */
+.enemy.boss.boss-lord::before {
+    inset: -10px;
+    border-radius: 10px;
+    background: radial-gradient(circle, rgba(211,47,47,0.3) 0%, transparent 65%);
+    animation-duration: 2.5s;
+}
+
+@keyframes bossAuraSpin {
+    0% { transform: rotate(0deg) scale(1); opacity: 0.6; }
+    50% { transform: rotate(180deg) scale(1.1); opacity: 1; }
+    100% { transform: rotate(360deg) scale(1); opacity: 0.6; }
+}
+
+/* 冰冻效果 — 翡翠冰霜覆盖 */
 .enemy.frozen {
-    filter: hue-rotate(180deg) brightness(0.4) saturate(0.3);
-    box-shadow: 0 0 20px rgba(0,150,255,0.5), inset 0 0 15px rgba(100,200,255,0.3);
+    background: linear-gradient(135deg, #e0f7fa, #b2ebf2) !important;
+    border-color: #4dd0e1 !important;
+    color: #00695c !important;
+    box-shadow:
+        0 2px 0 #4dd0e1,
+        0 4px 0 #26c6da,
+        0 5px 0 #00bcd4,
+        0 6px 0 #00acc1,
+        0 7px 0 #0097a7,
+        0 8px 0 #00838f,
+        0 9px 0 #006064,
+        0 10px 14px rgba(0,150,200,0.45) !important;
+    animation: iceShimmer 0.8s infinite alternate;
 }
-.enemy.elite-marker {
-    box-shadow: 0 0 12px rgba(255,100,0,0.6), inset 0 0 8px rgba(255,200,0,0.3);
-    border-color: #ff6600 !important;
+
+/* 受击闪烁 */
+.enemy.flash-hit {
+    animation: flashHit 0.1s;
+}
+
+@keyframes flashHit {
+    0% { filter: brightness(2.5) saturate(0); }
+    100% { filter: brightness(1); }
+}
+
+/* Boss 暴怒 */
+.enemy.boss-enraged {
+    animation: enragedPulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes enragedPulse {
+    0% { filter: brightness(1) drop-shadow(0 0 4px rgba(255,0,0,0.3)); }
+    100% { filter: brightness(1.3) drop-shadow(0 0 12px rgba(255,0,0,0.7)); }
 }
 .enemy-hp-bar {
     position: absolute; top: -10px; left: 50%;
@@ -619,40 +792,140 @@
    武器系统视觉元素
    ══════════════════════════════════════════════ */
 
-.projectile { position: absolute; border-radius: 50%; pointer-events: none; z-index: 9; }
+/* ══════════════════════════════════════════════
+   动能弹道专精 — Mahjong 主题投影 + 粒子拖尾
+   ══════════════════════════════════════════════ */
+
+.projectile {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9;
+    will-change: transform;
+}
+
+/* 追踪飞刃 — 飞旋麻将牌碎片（菱形切片） */
 .tracking-blade {
-    width: 8px; height: 8px;
-    background: radial-gradient(circle at 35% 35%, #ffd740, #ff8f00);
-    box-shadow: 0 0 10px rgba(255,143,0,0.6);
+    width: 14px; height: 14px;
+    background: linear-gradient(135deg, #ffd740 0%, #ff6f00 100%);
+    border-radius: 2px;
+    transform: rotate(45deg);
+    box-shadow:
+        0 0 12px rgba(255,143,0,0.8),
+        0 0 24px rgba(255,111,0,0.4),
+        inset 0 0 4px rgba(255,255,255,0.5);
+    animation: bladeSpin 0.3s linear infinite;
 }
+.tracking-blade::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    background: linear-gradient(90deg, transparent, rgba(255,215,64,0.3), transparent);
+    border-radius: 4px;
+    animation: bladeTrail 0.4s linear infinite;
+}
+@keyframes bladeSpin {
+    0% { transform: rotate(45deg); }
+    100% { transform: rotate(405deg); }
+}
+@keyframes bladeTrail {
+    0% { transform: translateX(-6px) scaleX(0.5); opacity: 0.6; }
+    100% { transform: translateX(6px) scaleX(1.5); opacity: 0; }
+}
+
+/* 扇形散射弹丸 — 麻将筒子（圆形带点） */
 .shotgun-pellet {
-    width: 6px; height: 6px;
-    background: radial-gradient(circle at 35% 35%, #ffab40, #ff6d00);
-    box-shadow: 0 0 6px rgba(255,109,0,0.5);
+    width: 10px; height: 10px;
+    background: radial-gradient(circle, #ffffff 30%, #4fc3f7 60%, #0288d1 100%);
+    border-radius: 50%;
+    box-shadow:
+        0 0 8px rgba(79,195,247,0.7),
+        0 0 16px rgba(2,136,209,0.3);
 }
+.shotgun-pellet::before {
+    content: '●';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    color: #0d47a1;
+}
+
+/* 环形护体 — 翡翠玉璧 */
 .orbit-shield-orb {
-    position: absolute; width: 16px; height: 16px; border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, #82b1ff, #2962ff);
-    box-shadow: 0 0 16px rgba(41,98,255,0.7), inset 0 0 6px rgba(255,255,255,0.3);
-    pointer-events: none; z-index: 9;
+    position: absolute;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #a5d6a7, #388e3c);
+    box-shadow:
+        0 0 12px rgba(56,142,60,0.8),
+        0 0 24px rgba(76,175,80,0.4),
+        inset 0 0 6px rgba(255,255,255,0.4),
+        inset 0 0 2px rgba(255,255,255,0.6);
+    pointer-events: none;
+    z-index: 9;
+    border: 1px solid rgba(255,255,255,0.3);
 }
+.orbit-shield-orb::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 1px solid rgba(165,214,167,0.4);
+    animation: shieldPulse 1.5s ease-in-out infinite;
+}
+@keyframes shieldPulse {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.3); opacity: 0; }
+}
+
+/* 区域震荡 — 麻将牌翻飞涟漪 */
 .shockwave {
-    position: absolute; border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,200,50,0.35), rgba(255,100,0,0));
-    pointer-events: none; z-index: 8;
+    position: absolute;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle, rgba(255,215,0,0.15) 0%, transparent 60%),
+        repeating-conic-gradient(from 0deg, rgba(255,152,0,0.1) 0deg 10deg, transparent 10deg 20deg);
+    pointer-events: none;
+    z-index: 8;
     transform: translate(-50%, -50%);
+    border: 2px solid rgba(255,215,0,0.3);
+    box-shadow: 0 0 20px rgba(255,215,0,0.3);
 }
+
+/* 全屏脉冲 — 红中爆裂 */
 .nova-pulse {
-    position: absolute; border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,50,50,0.4), rgba(200,0,0,0));
-    pointer-events: none; z-index: 8;
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(211,47,47,0.2) 0%, rgba(255,215,0,0.1) 40%, transparent 70%);
+    pointer-events: none;
+    z-index: 8;
     transform: translate(-50%, -50%);
+    border: 3px solid rgba(211,47,47,0.5);
+    box-shadow: 0 0 30px rgba(211,47,47,0.4), inset 0 0 20px rgba(255,215,0,0.2);
 }
+
+/* 持续线杀 — 光刃斩击 */
 .laser-beam {
-    position: absolute; height: 4px;
-    background: linear-gradient(90deg, rgba(255,0,0,0.8), rgba(255,100,0,0.4));
-    border-radius: 2px; pointer-events: none; z-index: 7;
-    box-shadow: 0 0 12px rgba(255,0,0,0.5);
+    position: absolute;
+    height: 5px;
+    background: linear-gradient(90deg, rgba(255,215,0,0.9), rgba(255,152,0,0.6), rgba(255,87,34,0.3));
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 7;
+    box-shadow:
+        0 0 16px rgba(255,215,0,0.7),
+        0 0 32px rgba(255,152,0,0.3),
+        inset 0 0 4px rgba(255,255,255,0.5);
+}
+.laser-beam::before {
+    content: '';
+    position: absolute;
+    inset: -3px 0;
+    background: linear-gradient(90deg, rgba(255,255,255,0.4), transparent);
+    border-radius: 4px;
 }
 
 /* ══════════════════════════════════════════════
@@ -837,10 +1110,20 @@
 }
 
 .enemy-projectile {
-    position: absolute; border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, #ff8a80, #b62929);
-    box-shadow: 0 0 12px rgba(182,41,41,0.7), 0 0 24px rgba(182,41,41,0.3);
-    pointer-events: none; z-index: 9;
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ff5252 20%, #b71c1c 60%, #7f0000 100%);
+    box-shadow:
+        0 0 14px rgba(183,28,28,0.8),
+        0 0 28px rgba(182,41,41,0.4),
+        inset 0 0 4px rgba(255,82,82,0.5);
+    pointer-events: none;
+    z-index: 9;
+    animation: bloodPulse 0.5s ease-in-out infinite alternate;
+}
+@keyframes bloodPulse {
+    0% { box-shadow: 0 0 10px rgba(183,28,28,0.6), 0 0 20px rgba(182,41,41,0.3), inset 0 0 3px rgba(255,82,82,0.4); }
+    100% { box-shadow: 0 0 18px rgba(183,28,28,1), 0 0 36px rgba(182,41,41,0.6), inset 0 0 6px rgba(255,82,82,0.7); }
 }
 
 /* ══════════════════════════════════════════════
@@ -1017,52 +1300,75 @@
     font-family: 'Impact', 'Arial Black', sans-serif;
     font-weight: 900; white-space: nowrap;
     pointer-events: none; will-change: transform, opacity;
+    /* 最小字体钳制：不低于 18px 确保可读性 */
+    min-font-size: clamp(18px, 2vw, 45px);
 }
 
+.fct-normal {
+    font-size: clamp(22px, 2.5vw, 45px);
+    color: #ffffff;
+    text-shadow: 0 0 6px rgba(0,0,0,0.8), 1px 1px 0 #000, -1px -1px 0 #000;
+    animation: fctFloatUp 0.5s ease-out forwards;
+}
 .fct-crit {
-    font-size: calc(30 * 1.5px); color: #b62929;
-    text-shadow: 0 0 8px rgba(182,41,41,0.6), 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
-    animation: fctCritPop 0.7s ease-out forwards;
+    font-size: clamp(28px, 3.2vw, 52px);
+    color: #ff4444;
+    text-shadow: 0 0 10px rgba(255,68,68,0.8), 0 0 20px rgba(255,0,0,0.4), 2px 2px 0 #000, -1px -1px 0 #000;
+    animation: fctCritPop 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 .fct-heal {
-    font-size: calc(16 * 1.5px); color: #4caf50;
-    text-shadow: 0 0 12px rgba(76,175,80,0.7), 0 0 24px rgba(76,175,80,0.3);
-    animation: fctFloatUp 0.65s ease-out forwards;
+    font-size: clamp(18px, 2vw, 36px);
+    color: #66ff88;
+    text-shadow: 0 0 12px rgba(102,255,136,0.8), 0 0 24px rgba(76,175,80,0.4);
+    animation: fctFloatUp 0.45s ease-out forwards;
 }
 .fct-exp {
-    font-size: calc(14 * 1.5px); color: #4caf50;
-    text-shadow: 0 0 12px rgba(76,175,80,0.7), 0 0 24px rgba(76,175,80,0.3);
-    animation: fctFloatUp 0.65s ease-out forwards;
+    font-size: clamp(16px, 1.8vw, 32px);
+    color: #88ccff;
+    text-shadow: 0 0 10px rgba(136,204,255,0.7), 0 0 20px rgba(100,150,255,0.3);
+    animation: fctFloatUp 0.4s ease-out forwards;
 }
 @keyframes fctFloatUp {
-    0% { opacity: 1; transform: translateY(0) scale(1); }
-    60% { opacity: 1; }
-    100% { opacity: 0; transform: translateY(-50px) scale(0.85); }
+    0%   { opacity: 1; transform: translateY(0) scale(0.8); }
+    15%  { opacity: 1; transform: translateY(-8px) scale(1); }
+    40%  { opacity: 0.7; transform: translateY(-25px) scale(0.95); }
+    70%  { opacity: 0.35; transform: translateY(-40px) scale(0.85); }
+    100% { opacity: 0; transform: translateY(-55px) scale(0.75); }
 }
 @keyframes fctCritPop {
-    0% { opacity: 1; transform: scale(1.4); }
-    15% { transform: scale(1.1); }
-    60% { opacity: 1; }
-    100% { opacity: 0; transform: translateY(-50px) scale(1); }
+    0%   { opacity: 1; transform: scale(1.5); }
+    20%  { opacity: 1; transform: scale(1.1); }
+    45%  { opacity: 0.7; transform: translateY(-15px) scale(1); }
+    75%  { opacity: 0.3; transform: translateY(-38px) scale(0.85); }
+    100% { opacity: 0; transform: translateY(-55px) scale(0.75); }
 }
 @keyframes fctOverdriveArc {
-    0% { opacity: 1; transform: translateY(0) scale(1.2); }
-    20% { transform: translateX(12px) translateY(-20px) scale(1.4); }
-    50% { opacity: 1; transform: translateX(-8px) translateY(-40px) scale(1.1); }
+    0%   { opacity: 1; transform: translateY(0) scale(1.2); }
+    20%  { transform: translateX(12px) translateY(-20px) scale(1.4); }
+    50%  { opacity: 1; transform: translateX(-8px) translateY(-40px) scale(1.1); }
     100% { opacity: 0; transform: translateX(0) translateY(-60px) scale(0.8); }
 }
 
 /* ══════════════════════════════════════════════
-   动态屏幕震颤
+   动态屏幕震颤 — 隔离于 world-layer，不影响外层缩放矩阵
+   shake 通过独立 transform 层处理，与 responsive.js 的 scale() 完全正交
    ══════════════════════════════════════════════ */
 
-.screen-shake-active { animation: shakeEffect 0.08s infinite; }
+#world-layer.shake-active {
+    animation: shakeEffect linear;
+    animation-fill-mode: forwards;
+}
 @keyframes shakeEffect {
-    0% { transform: translate(0, 0); }
-    20% { transform: translate(-4px, 4px); }
-    40% { transform: translate(-4px, -4px); }
-    60% { transform: translate(4px, 4px); }
-    80% { transform: translate(4px, -4px); }
+    0%   { transform: translate(0, 0); }
+    10%  { transform: translate(var(--sx, -6px), var(--sy, 6px)); }
+    20%  { transform: translate(calc(var(--sx, -6px) * -0.7), calc(var(--sy, 6px) * -0.7)); }
+    30%  { transform: translate(calc(var(--sx, -6px) * 0.5), calc(var(--sy, 6px) * 0.5)); }
+    40%  { transform: translate(calc(var(--sx, -6px) * -0.3), calc(var(--sy, 6px) * -0.3)); }
+    50%  { transform: translate(calc(var(--sx, -6px) * 0.15), calc(var(--sy, 6px) * 0.15)); }
+    60%  { transform: translate(calc(var(--sx, -6px) * -0.07), calc(var(--sy, 6px) * -0.07)); }
+    70%  { transform: translate(calc(var(--sx, -6px) * 0.03), calc(var(--sy, 6px) * 0.03)); }
+    80%  { transform: translate(calc(var(--sx, -6px) * -0.01), calc(var(--sy, 6px) * -0.01)); }
+    90%  { transform: translate(0, 0); }
     100% { transform: translate(0, 0); }
 }
 

@@ -925,14 +925,18 @@ Gp._loop = function(timestamp) {
             if (this._overdriveTimer <= 0) this._endOverdrive();
         }
 
-        /* ── 屏幕震颤计时 ── */
-        if (this._shakeTimer > 0) {
+        /* ── 屏幕震颤计时 — 委托给 Systems ── */
+        if (this._systems && this._systems.updateShake) {
+            this._systems.updateShake(this, dt);
+        } else if (this._shakeTimer > 0) {
             this._shakeTimer -= dt;
             if (this._shakeTimer <= 0) {
                 this._shakeTimer = 0;
-                if (this.container) {
-                    this.container.classList.remove('screen-shake-active');
-                    this.container.style.animationDuration = '';
+                var wl = this._worldLayer || document.getElementById('world-layer');
+                if (wl) {
+                    wl.classList.remove('shake-active');
+                    wl.style.transform = '';
+                    wl.style.animationDuration = '';
                 }
             }
         }
@@ -1133,17 +1137,33 @@ Gp._spawnEnemy = function(isBoss) {
         if (this._waveCount >= maxWaves) el.classList.add('final-boss');
     }
     el.dataset.id = id;
-    /* 2.5D 骨雕妖牌 */
-    el.style.background = '#2a4a3a';
-    el.style.borderRadius = '4px';
-    el.style.boxShadow = '0 3px 0 #1a3020, 0 5px 0.5px #3a5a4a, 0 6px 8px rgba(0,0,0,0.4)';
-    el.style.display = 'flex';
-    el.style.alignItems = 'center';
-    el.style.justifyContent = 'center';
-    el.style.fontSize = '12px';
-    el.style.fontWeight = '700';
-    el.style.color = '#5a8a6a';
-    if (enemyType === 'Stalker') el.style.opacity = '1';
+    el.dataset.enemyType = enemyType;
+    /* Boss 用 DOM 内嵌字符（::before 留给 aura），普通敌人用 ::before */
+    if (enemy.isBoss) {
+        var bossChar = (this._waveCount >= maxWaves) ? '中' : '★';
+        el.innerHTML = '<span style="font-size:calc(28*1.5px);font-weight:900;color:#e65100;text-shadow:0 0 8px rgba(255,179,0,0.5);z-index:1;position:relative;">' + bossChar + '</span>';
+    } else {
+        /* Mahjong 牌面字符映射 — 仅普通敌人 */
+        var suitMap = {
+            'Normal': '萬',
+            'Tanker': '條',
+            'Stalker': '筒',
+            'Shaman': '風'
+        };
+        el.setAttribute('data-suit', suitMap[enemyType] || '萬');
+        el.setAttribute('data-type', enemyType === 'Normal' ? '' : enemyType.substring(0, 3));
+    }
+    /* 2.5D 麻将牌渲染 — CSS 负责样式，JS 仅设位置 */
+    el.style.background = '';
+    el.style.borderRadius = '';
+    el.style.boxShadow = '';
+    el.style.display = '';
+    el.style.alignItems = '';
+    el.style.justifyContent = '';
+    el.style.fontSize = '';
+    el.style.fontWeight = '';
+    el.style.color = '';
+    if (enemyType === 'Stalker') el.style.opacity = '0.85';
     var hpBar = document.createElement('div');
     hpBar.className = 'enemy-hp-bar';
     var hpFill = document.createElement('div');
@@ -1721,7 +1741,7 @@ Gp._settleRun = async function(tokens) {
             overdriveCount: this._overdriveCount || 0,
             elapsed: this._elapsed,
             maxGold: this._maxGoldThisRun || 0,
-            uniqueRelics: Object.keys(this.player.relicLevels || {}).filter(function(k) { return (this.player.relicLevels[k] || 0) > 0; }).length,
+            uniqueRelics: (function(){ var p=this.player&&this.player.relicLevels||{}; return Object.keys(p).filter(function(k){return(p[k]||0)>0;}).length; }).call(this),
             bossKills: this._bossKillsThisRun || 0,
             abyssDepth: this.loopCount || 0,
             dodges: this._totalDodgesThisRun || 0,
@@ -2064,10 +2084,19 @@ Gp._syncEntities = function() {
         el.style.left = enemy.x + 'px';
         el.style.top = enemy.y + 'px';
         var flash = enemy.flashTimer > 0;
-        var isFinalBoss = enemy.isBoss && enemy.radius >= 75;
+        /* 受击闪烁效果 */
+        if (flash) {
+            el.classList.add('flash-hit');
+            setTimeout(function(e){ setTimeout(function(){ e.classList.remove('flash-hit'); }, 100); }, 0, el);
+        } else {
+            el.classList.remove('flash-hit');
+        }
+        /* 冰冻 */
         el.classList.toggle('frozen-crystal', enemy.frozen);
-        el.style.backgroundColor = flash ? '#b62929' : (enemy.isBoss ? (isFinalBoss ? '#6a1a1a' : 'hsl(' + enemy.hue + ', 40%, 30%)') : 'hsl(' + enemy.hue + ', 25%, 28%)');
-        el.style.boxShadow = flash ? '0 0 18px rgba(182,41,41,0.6)' : (enemy.isBoss ? (isFinalBoss ? '0 0 60px rgba(182,41,41,0.7)' : '0 0 40px rgba(156,39,176,0.5)') : '0 0 10px hsla(' + enemy.hue + ', 25%, 28%, 0.35)');
+        /* Boss 暴怒 */
+        if (enemy._bossEnraged) el.classList.add('boss-enraged');
+        else el.classList.remove('boss-enraged');
+        /* HP 条更新 */
         var fill = enemy._hpFill || el.querySelector('.enemy-hp-fill');
         if (fill) {
             if (!enemy._hpFill) enemy._hpFill = fill;
@@ -2357,18 +2386,18 @@ Gp.triggerShake = function(intensity, duration) {
     if (this._systems && this._systems.triggerShake) {
         return this._systems.triggerShake(this, intensity, duration);
     }
-    if (!this.container) return;
+    /* Fallback: 直接操作 world-layer */
+    var wl = this._worldLayer || document.getElementById('world-layer');
+    if (!wl) return;
     intensity = intensity || 1;
     duration = duration || 200;
-    if (this._shakeTimer > 0 && this._shakeIntensity >= intensity) return;
+    var maxDisp = Math.min(intensity * 8, 24);
+    wl.style.setProperty('--sx', (maxDisp * (Math.random() > 0.5 ? 1 : -1)) + 'px');
+    wl.style.setProperty('--sy', (maxDisp * (Math.random() > 0.5 ? 1 : -1)) + 'px');
+    wl.style.animationDuration = Math.min(duration, 3000) + 'ms';
+    wl.classList.add('shake-active');
     this._shakeTimer = duration / 1000;
     this._shakeIntensity = intensity;
-    this.container.classList.add('screen-shake-active');
-    if (intensity >= 2) {
-        this.container.style.animationDuration = '0.06s';
-    } else {
-        this.container.style.animationDuration = '0.1s';
-    }
 };
 
 Gp.restart = function() {
@@ -3012,6 +3041,9 @@ Gp._spawnBossLordFromGamble = function() {
     var el = document.createElement('div');
     el.className = 'enemy boss boss-lord';
     el.dataset.id = id;
+    el.dataset.enemyType = 'Boss_Lord';
+    /* Boss 字符直接放入 DOM（::before 留给 aura） */
+    el.innerHTML = '<span style="font-size:calc(42*1.5px);font-weight:900;color:#b71c1c;text-shadow:0 0 12px rgba(211,47,47,0.6);z-index:1;position:relative;">中</span>';
     var hpBar = document.createElement('div');
     hpBar.className = 'enemy-hp-bar';
     var hpFill = document.createElement('div');
@@ -3084,6 +3116,9 @@ Gp._spawnBossLord = function() {
     var el = document.createElement('div');
     el.className = 'enemy boss boss-lord';
     el.dataset.id = id;
+    el.dataset.enemyType = 'Boss_Lord';
+    /* Boss 字符直接放入 DOM（::before 留给 aura） */
+    el.innerHTML = '<span style="font-size:calc(42*1.5px);font-weight:900;color:#b71c1c;text-shadow:0 0 12px rgba(211,47,47,0.6);z-index:1;position:relative;">中</span>';
     var hpBar = document.createElement('div');
     hpBar.className = 'enemy-hp-bar';
     var hpFill = document.createElement('div');

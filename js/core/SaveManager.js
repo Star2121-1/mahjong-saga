@@ -1109,13 +1109,13 @@ class SaveManager {
     checkSeasonTrigger() {
         var meta = this._metaCache || {};
         var season = meta.season || {};
-        if (season.currentSeason > 0) return { triggered: false };
+        if (season.currentSeason > 0) return Promise.resolve({ triggered: false });
         var totalRuns = meta.totalRuns || 0;
         var bestAbyss = meta.highestEndlessLoop || 0;
         var totalWins = meta.runStats && meta.runStats.wins || 0;
         if (totalWins >= 5) return this.activateSeason();
         if (bestAbyss >= 10) return this.activateSeason();
-        return { triggered: false, reason: '未满足赛季激活条件（需 5 胜或深渊 10 层）' };
+        return Promise.resolve({ triggered: false, reason: '未满足赛季激活条件（需 5 胜或深渊 10 层）' });
     }
 
     /** 激活赛季 */
