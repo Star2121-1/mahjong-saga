@@ -1,0 +1,655 @@
+(function() {
+    'use strict';
+    var Gp = window.GameEngine.prototype;
+
+/* ══════════════════════════════════════════════
+   Epoch 32: 波次间事件系统
+   ══════════════════════════════════════════════ */
+
+Gp._interWaveEvents = [
+    { id: 'coin_rush', name: '金币雨', icon: '🪙', desc: '场上立即掉落 20 金币！', weight: 40, apply: function() { this.player.addGold(20); this._spawnCoinBurst(20); } },
+    { id: 'meditation', name: '冥想泉源', icon: '🧘', desc: '恢复 30% HP，下波怪物 -20% 攻击力', weight: 25, apply: function() { this.player.hp = Math.min(this.player.maxHp, this.player.hp + Math.floor(this.player.maxHp * 0.3)); this._tempEnemyAtkDebuff = 0.8; } },
+    { id: 'monster_surge', name: '怪物潮', icon: '👹', desc: '额外生成 5 个精英怪！但掉落翻倍', weight: 20, apply: function() { this._extraEliteCount = 5; this._monsterSurgeDoubleDrops = true; } },
+    { id: 'time_dilation', name: '时光缓流', icon: '⏳', desc: '下波怪物移速 -30%', weight: 20, apply: function() { this._tempEnemySpeedDebuff = 0.7; } },
+    { id: 'berserk', name: '狂战士祝福', icon: '⚔', desc: '下波击杀额外 +10 怒气', weight: 15, apply: function() { this._tempBerserkBonus = true; } },
+    { id: 'golden_touch', name: '点金术', icon: '✨', desc: '下波金币收益 ×3', weight: 15, apply: function() { this._tempGoldMult = 3; } },
+    { id: 'iron_fist', name: '铁拳', icon: '👊', desc: '下波暴击率 +25%', weight: 20, apply: function() { this._tempCritBonus = 0.25; } },
+    { id: 'shield_of_faith', name: '信仰护盾', icon: '🛡', desc: '获得可吸收 50 伤害的护盾（持续 15 秒）', weight: 15, apply: function() { this._tempShield = 50; this._tempShieldEnd = Date.now() / 1000 + 15; } }
+];
+
+Gp._pickInterWaveEvent = function() {
+    var totalWeight = 0;
+    for (var i = 0; i < this._interWaveEvents.length; i++) totalWeight += this._interWaveEvents[i].weight;
+    var roll = Math.random() * totalWeight;
+    var cumulative = 0;
+    for (var i = 0; i < this._interWaveEvents.length; i++) {
+        cumulative += this._interWaveEvents[i].weight;
+        if (roll < cumulative) return this._interWaveEvents[i];
+    }
+    return this._interWaveEvents[0];
+};
+
+Gp._triggerInterWaveEvent = function() {
+    var evt = this._pickInterWaveEvent();
+    this._interWaveEvent = evt;
+    this._freezeClock();
+
+    var overlay = document.getElementById('reward-overlay');
+    var titleEl = overlay.querySelector('.reward-title');
+    var origTitle = titleEl ? titleEl.textContent : '';
+    if (titleEl) titleEl.textContent = evt.icon + ' ' + evt.name;
+
+    var cardsDiv = overlay.querySelector('.reward-cards');
+    cardsDiv.innerHTML =
+        '<div style="text-align:center;padding:20px;">' +
+        '<div style="font-size:48px;margin:10px;">' + evt.icon + '</div>' +
+        '<div style="font-size:18px;font-weight:800;color:#ffd700;margin-bottom:8px;">' + evt.name + '</div>' +
+        '<div style="font-size:14px;color:#ccc;margin-bottom:16px;">' + evt.desc + '</div>' +
+        '<button class="relic-btn" id="interevent-accept" style="background:#cc8800;">接受恩赐</button>' +
+        '</div>';
+
+    overlay.classList.add('active');
+    var self = this;
+    document.getElementById('interevent-accept').addEventListener('click', function() {
+        overlay.classList.remove('active');
+        overlay.classList.remove('levelup-mode');
+        self._pendingReward = false;
+        self._interWaveEvent = null;
+        self._interWaveTimer = 0;
+        evt.apply.call(self);
+        self._syncUI();
+        self._continueAfterInterWave();
+    }, { once: true });
+};
+
+Gp._continueAfterInterWave = function() {
+    this._pendingReward = false;
+    if (this._extraEliteCount > 0) {
+        /* Epoch 32: 怪物潮 — 额外精英怪 */
+        for (var i = 0; i < this._extraEliteCount; i++) {
+            this._spawnEliteEnemy();
+        }
+        this._extraEliteCount = 0;
+    }
+    this._monsterSurgeDoubleDrops = false;
+    this._tempEnemyAtkDebuff = 0;
+    this._tempEnemySpeedDebuff = 0;
+    this._tempBerserkBonus = false;
+    this._tempGoldMult = 1;
+    this._tempCritBonus = 0;
+    this._tempShield = 0;
+    this._tempShieldEnd = 0;
+    this._tempBuffEnd = 0;
+
+    this._unfreezeClock();
+    this.running = true;
+    this._lastTime = performance.now();
+    requestAnimationFrame(this._boundLoop);
+};
+
+Gp._spawnCoinBurst = function(count) {
+    if (!this.battlefield) return;
+    var px = this.player.x;
+    var py = this.player.y;
+    for (var i = 0; i < count; i++) {
+        var angle = (Math.PI * 2 / count) * i + Math.random() * 0.5;
+        var dist = 30 + Math.random() * 40;
+        var cx = px + Math.cos(angle) * dist;
+        var cy = py + Math.sin(angle) * dist;
+        this.player.addGold(1);
+    }
+    if (window.fxManager) window.fxManager.spawnText(px, py, '+' + count + ' 🪙', '#ffd700', 24, 1500);
+};
+
+/* ══════════════════════════════════════════════
+   波次突变系统
+   ══════════════════════════════════════════════ */
+
+Gp._showMutatorPanel = function() {
+    /* Epoch 5: 委托突变面板到 Systems */
+    if (this._systems && this._systems.showMutatorPanel) {
+        return this._systems.showMutatorPanel(this);
+    }
+    if (!this.mutatorOverlay || !this.mutatorChoices) return;
+    this.running = false;
+    this._freezeClock();
+    this.mutatorChoices.innerHTML = '';
+    var self = this;
+
+    var choices = [
+        { id: 'gravity', title: '引力逆转', desc: '经验吸附范围归零，必须肉身拾取', icon: '🧲' },
+        { id: 'bloodmoon', title: '狂暴血月', desc: '怪物体型+30%，攻击+40%，掉落翻倍', icon: '🌍' },
+        { id: 'frenzy', title: '狂乱', desc: '怪物移速+50%，金币掉落+50%', icon: '⚡' },
+        { id: 'frailty', title: '脆弱', desc: '攻击倍率双向提升——你打得更痛，你也更容易倒下', icon: '🟡' },
+        { id: 'wither', title: '枯萎', desc: '全体怪物每5秒损失5%最大HP', icon: '☠️' }
+    ];
+
+    for (var i = 0; i < choices.length; i++) {
+        var c = choices[i];
+        var card = document.createElement('div');
+        card.className = 'mutator-card';
+        card.innerHTML =
+            '<div class="mutator-card-icon">' + c.icon + '</div>' +
+            '<div class="mutator-card-title">' + c.title + '</div>' +
+            '<div class="mutator-card-desc">' + c.desc + '</div>' +
+            '<button class="mutator-btn">选择</button>';
+        (function(cid, mgr) {
+            card.querySelector('.mutator-btn').addEventListener('click', function() { mgr._applyMutator(cid); });
+        })(c.id, self);
+        this.mutatorChoices.appendChild(card);
+    }
+    this.mutatorOverlay.classList.add('active');
+};
+
+Gp._applyMutator = function(mutatorId) {
+    /* Epoch 5: 委托突变应用到 Systems */
+    if (this._systems && this._systems.applyMutator) {
+        return this._systems.applyMutator(this, mutatorId);
+    }
+    this._activeMutator = mutatorId;
+    /* Epoch 38: Mutator 视觉反馈 */
+    this._updateMutatorBadge();
+    /* Epoch 32: 图鉴记录突变 */
+    if (window.saveManager) window.saveManager.recordCompendiumEntry('mutations', mutatorId);
+    this.mutatorOverlay.classList.remove('active');
+    if (mutatorId === 'gravity') {
+        this._origMagnetRadius = this.player.magnetRadius;
+        this.player.magnetRadius = 0;
+    } else if (mutatorId === 'bloodmoon') {
+        for (var i = 0; i < this.enemies.length; i++) {
+            var e = this.enemies[i];
+            if (!e.alive) continue;
+            e.atk = Math.floor(e.atk * 1.4);
+            e.maxHp = Math.floor(e.maxHp * 1.3);
+            e.hp = Math.floor(e.hp * 1.3);
+            var el = this._enemyElements.get(e.id);
+            if (el) el.style.transform = 'scale(1.3)';
+        }
+    } else if (mutatorId === 'frenzy') {
+        for (var i = 0; i < this.enemies.length; i++) {
+            var e = this.enemies[i];
+            if (!e.alive) continue;
+            if (!e._frenzyStored) {
+                e._frenzyStored = true;
+                e._frenzyOrigSpeed = e.speed;
+                e.speed = Math.floor(e.speed * 1.5);
+            }
+        }
+    } else if (mutatorId === 'frailty') {
+        this._frailtyOrigPlayerAtk = this.player.atk;
+        this.player.atk = Math.floor(this.player.atk * 1.5);
+        for (var i = 0; i < this.enemies.length; i++) {
+            var e = this.enemies[i];
+            if (!e.alive) continue;
+            if (!e._frailtyStored) {
+                e._frailtyStored = true;
+                e._frailtyOrigAtk = e.atk;
+                e.atk = Math.floor(e.atk * 1.5);
+            }
+        }
+    } else if (mutatorId === 'wither') {
+        this._witherTimer = 0;
+    }
+    this._beginLoop();
+};
+
+Gp._clearMutatorEffects = function() {
+    if (this._activeMutator === 'gravity' && this._origMagnetRadius != null) {
+        this.player.magnetRadius = this._origMagnetRadius;
+    }
+    if (this._activeMutator === 'bloodmoon') {
+        for (var i = 0; i < this.enemies.length; i++) {
+            var e = this.enemies[i];
+            var el = this._enemyElements.get(e.id);
+            if (el) el.style.transform = '';
+        }
+    }
+    if (this._activeMutator === 'frenzy') {
+        for (var i = 0; i < this.enemies.length; i++) {
+            var e = this.enemies[i];
+            if (e._frenzyStored) {
+                e.speed = e._frenzyOrigSpeed || e.baseSpeed;
+                e._frenzyStored = false;
+                e._frenzyOrigSpeed = undefined;
+            }
+        }
+    }
+    if (this._activeMutator === 'frailty') {
+        if (this._frailtyOrigPlayerAtk != null) this.player.atk = this._frailtyOrigPlayerAtk;
+        for (var i = 0; i < this.enemies.length; i++) {
+            var e = this.enemies[i];
+            if (e._frailtyStored) {
+                e.atk = e._frailtyOrigAtk || e.baseAtk;
+                e._frailtyStored = false;
+                e._frailtyOrigAtk = undefined;
+            }
+        }
+    }
+    this._activeMutator = null;
+    this._origMagnetRadius = null;
+    /* Epoch 38: 清除 Mutator 视觉反馈 */
+    this._updateMutatorBadge();
+};
+
+/* ── Epoch 38: Mutator 徽章 + 共振指示 ── */
+
+Gp._updateMutatorBadge = function() {
+    if (!this.mutatorBadge) return;
+    if (this._activeMutator) {
+        var labels = { gravity:'引力逆转', bloodmoon:'狂暴血月', frenzy:'狂乱', frailty:'脆弱', wither:'枯萎' };
+        this.mutatorBadge.textContent = labels[this._activeMutator] || this._activeMutator;
+        this.mutatorBadge.className = 'mutator-badge ' + this._activeMutator;
+        this.mutatorBadge.style.display = '';
+        /* Screen tinting */
+        var gc = this.container;
+        if (gc) {
+            gc.className = gc.className.replace(/mutator-\S+/g, '').trim();
+            gc.classList.add('mutator-' + this._activeMutator);
+        }
+    } else {
+        this.mutatorBadge.style.display = 'none';
+        var gc = this.container;
+        if (gc) gc.className = gc.className.replace(/mutator-\S+/g, '').trim();
+    }
+};
+
+Gp._updateResonancePills = function() {
+    if (!this.resonancePills) return;
+    var p = this.player;
+    var html = '';
+    if (p.setResonanceSpeed) html += '<span class="resonance-pill resonance-speed">🔥 炎痕</span>';
+    if (p.setResonanceIce) html += '<span class="resonance-pill resonance-ice">❄️ 永冻</span>';
+    this.resonancePills.innerHTML = html;
+};
+
+Gp._clearTotems = function() {
+    for (var i = 0; i < this._totems.length; i++) {
+        if (this._totems[i].el && this._totems[i].el.parentNode) this._totems[i].el.remove();
+    }
+    this._totems = [];
+};
+
+/* ══════════════════════════════════════════════
+   V3.0 Overdrive 狂暴系统
+   ══════════════════════════════════════════════ */
+
+Gp._triggerOverdrive = function() {
+    window.audioManager && window.audioManager.play('overdrive');
+    /* Epoch 5: 委托 Overdrive 到 Systems */
+    if (this._systems && this._systems.triggerOverdrive) {
+        return this._systems.triggerOverdrive(this);
+    }
+    if (this._overdriveActive) return;
+    this._overdriveActive = true;
+    this._overdriveTimer = 3.0;
+    this.player.rage = 0;
+    if (this._syncUI) this._syncUI();
+    this._origCdFloor = this.player.cdFloor;
+    this.player.cdFloor = 0;
+
+    for (var _oi = 0; _oi < this.enemies.length; _oi++) {
+        var _oe = this.enemies[_oi];
+        if (_oe.alive && !_oe._overdriveStored) {
+            _oe._overdriveStored = true;
+            _oe._overdriveOrigSpeed = _oe.speed;
+            _oe.speed = 0;
+        }
+    }
+
+    if (this.container) this.container.classList.add('overdrive-active');
+    this.triggerShake(0.5, 3000);
+    this._spawnCausalityText('☀️☀️☀️ Overdrive 爆轰 ☀️☀️☀️');
+
+    /* 成就：Overdrive 计数 */
+    this._overdriveCount = (this._overdriveCount || 0) + 1;
+    if (this._overdriveCount >= 1) this._checkAchievement('overdrive_1');
+    if (this._overdriveCount >= 10) this._checkAchievement('overdrive_10');
+    if (this._overdriveCount >= 50) this._checkAchievement('overdrive_50');
+};
+
+Gp._endOverdrive = function() {
+    if (!this._overdriveActive) return;
+    this._overdriveActive = false;
+    this._overdriveTimer = 0;
+
+    if (this.player) this.player.cdFloor = this._origCdFloor || 0.2;
+
+    for (var _oi = 0; _oi < this.enemies.length; _oi++) {
+        var _oe = this.enemies[_oi];
+        if (_oe._overdriveStored) {
+            _oe.speed = _oe._overdriveOrigSpeed || _oe.baseSpeed;
+            _oe._overdriveStored = false;
+            _oe._overdriveOrigSpeed = undefined;
+        }
+    }
+
+    if (this.container) this.container.classList.remove('overdrive-active');
+};
+
+/* ══════════════════════════════════════════════
+   终局领主 Boss Lord 系统
+   ══════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════
+   Boss Gamble — 决战前风险/回报选择
+   ══════════════════════════════════════════════ */
+
+Gp._showBossGamble = function() {
+    if (!this.battlefield) return;
+    this._freezeClock();
+    this.running = false;
+    this._pendingBossGamble = true;
+
+    var meta = window.saveManager._metaCache || {};
+    var tokens = meta.metaTokens || 0;
+    var gold50 = Math.floor(this.player.gold * 0.5);
+    var canGamble = gold50 > 0;
+    var canAbyss = tokens >= 1;
+
+    var panel = document.createElement('div');
+    panel.id = 'boss-gamble-panel';
+    panel.className = 'boss-gamble-panel';
+    panel.innerHTML =
+        '<div class="gamble-title">🎲 决战豪赌</div>' +
+        '<div class="gamble-subtitle">深渊领主即将降临，是否押注？</div>' +
+        '<div class="gamble-choices">' +
+            '<div class="gamble-card gamble-safe">' +
+                '<div class="gamble-card-icon">🛡️</div>' +
+                '<div class="gamble-card-title">稳妥前进</div>' +
+                '<div class="gamble-card-desc">正常迎战领主，不押注任何资源</div>' +
+                '<button class="gamble-btn" data-choice="safe">安全出征</button>' +
+            '</div>' +
+            '<div class="gamble-card gamble-gold' + (!canGamble ? ' disabled' : '') + '">' +
+                '<div class="gamble-card-icon">💰</div>' +
+                '<div class="gamble-card-title">金币豪赌</div>' +
+                '<div class="gamble-card-desc">押 ' + gold50 + ' 金币 · 胜: 3x 返还 · 负: 全输</div>' +
+                '<button class="gamble-btn' + (!canGamble ? ' disabled' : '') + '" data-choice="gold"' + (!canGamble ? ' disabled' : '') + '>金币豪赌</button>' +
+            '</div>' +
+            '<div class="gamble-card gamble-abyss' + (!canAbyss ? ' disabled' : '') + '">' +
+                '<div class="gamble-card-icon">🌀</div>' +
+                '<div class="gamble-card-title">深渊试炼</div>' +
+                '<div class="gamble-card-desc">押 1 元代币 · 领主 +50% HP · 装备掉落 3x</div>' +
+                '<button class="gamble-btn' + (!canAbyss ? ' disabled' : '') + '" data-choice="abyss"' + (!canAbyss ? ' disabled' : '') + '>深渊试炼</button>' +
+            '</div>' +
+        '</div>';
+    this.battlefield.appendChild(panel);
+
+    var self = this;
+    var btns = panel.querySelectorAll('.gamble-btn');
+    for (var i = 0; i < btns.length; i++) {
+        btns[i].addEventListener('click', (function(choice) {
+            return function() {
+                if (panel.parentNode) panel.remove();
+                self._resolveGambleChoice(choice);
+            };
+        })(btns[i].getAttribute('data-choice')), { once: true });
+    }
+};
+
+Gp._resolveGambleChoice = function(choice) {
+    this._pendingBossGamble = false;
+    if (choice === 'safe') {
+        this._gambleActive = false;
+        this._gambleType = null;
+        this._gambleStaked = 0;
+    } else if (choice === 'gold') {
+        this._gambleActive = true;
+        this._gambleType = 'gold';
+        this._gambleStaked = Math.floor(this.player.gold * 0.5);
+        this.player.gold -= this._gambleStaked;
+        this._syncUI();
+    } else if (choice === 'abyss') {
+        var meta = window.saveManager._metaCache || {};
+        if ((meta.metaTokens || 0) >= 1) {
+            this._gambleActive = true;
+            this._gambleType = 'abyss';
+            this._gambleStaked = 1;
+            meta.metaTokens -= 1;
+            window.saveManager._metaCache = meta;
+            window.saveManager._saveMetaToStorage();
+        } else {
+            this._gambleActive = false;
+        }
+    }
+    /* 生成领主（无论是否赌注） */
+    this._spawnBossLordFromGamble();
+    this._beginLoop();
+};
+
+Gp._spawnBossLordFromGamble = function() {
+    /* 玩家做出选择后，实际生成领主 */
+    if (this._bossLordSpawned) return;
+    var level = Math.floor(this._elapsed / 15) + 1;
+    var x = this._mapW / 2;
+    var y = Math.floor(this._mapH * 0.35);
+    var margin = 100;
+    x = Math.max(margin, Math.min(this._mapW - margin, x));
+    y = Math.max(margin, Math.min(this._mapH - margin, y));
+
+    var id = this._enemyIdCounter++;
+    var lord = new Enemy(id, x, y, level, true, 'Boss_Lord');
+    var diff = 1;
+    try { diff = window.levelConfig[this._currentLevelId].difficultyFactor || 1; } catch(e) {}
+    lord.maxHp = Math.floor(lord.maxHp * diff);
+    lord.hp = lord.maxHp;
+    lord.atk = Math.floor(lord.atk * diff);
+    this.enemies.push(lord);
+    this._bossLord = lord;
+    this._bossLordSpawned = true;
+
+    /* Gamble: 深渊试炼增加领主HP */
+    if (this._gambleType === 'abyss' && this._gambleActive) {
+        lord.maxHp = Math.floor(lord.maxHp * 1.5);
+        lord.hp = lord.maxHp;
+        this._spawnCausalityText('⚠️ 深渊试炼激活：领主 +50% HP');
+    }
+
+    /* ── 变异保险库：血月对Boss Lord生效 ── */
+    if (this._vaultMutations && this._vaultMutations.indexOf('bloodmoon') !== -1) {
+        lord.atk = Math.floor(lord.atk * 1.4);
+        lord.maxHp = Math.floor(lord.maxHp * 1.3);
+        lord.hp = Math.floor(lord.hp * 1.3);
+    }
+
+    var el = document.createElement('div');
+    el.className = 'enemy boss boss-lord';
+    el.dataset.id = id;
+    el.dataset.enemyType = 'Boss_Lord';
+    /* Boss 字符直接放入 DOM（::before 留给 aura） */
+    el.innerHTML = '<span style="font-size:calc(42*1.5px);font-weight:900;color:#b71c1c;text-shadow:0 0 12px rgba(211,47,47,0.6);z-index:1;position:relative;">中</span>';
+    var hpBar = document.createElement('div');
+    hpBar.className = 'enemy-hp-bar';
+    var hpFill = document.createElement('div');
+    hpFill.className = 'enemy-hp-fill';
+    hpBar.appendChild(hpFill);
+    el.appendChild(hpBar);
+    this._worldLayer.appendChild(el);
+    this._enemyElements.set(id, el);
+    lord.el = el;
+
+    if (this._bloodRageActive) {
+        lord.speed = Math.floor(lord.speed * 1.2);
+        lord.baseSpeed = lord.speed;
+        if (lord.el) lord.el.classList.add('boss-blood-rage');
+    }
+
+    if (this.bossHpBar) this.bossHpBar.classList.add('active');
+    this._screenShake();
+};
+
+Gp._resolveGamble = function(won) {
+    if (!this._gambleActive) return;
+    if (this._gambleType === 'gold') {
+        if (won) {
+            var bonus = this._gambleStaked * 3;
+            this.player.addGold(bonus);
+            this._spawnCausalityText('💰 金币豪赌胜利！+' + bonus + ' 金币');
+        } else {
+            this._spawnCausalityText('💰 金币豪赌失败... 金币已输掉');
+        }
+    } else if (this._gambleType === 'abyss') {
+        if (won) {
+            this._gambleAbyssBonus = true;
+            this._spawnCausalityText('🌀 深渊试炼胜利！下次装备掉落 3x');
+        } else {
+            this._spawnCausalityText('🌀 深渊试炼失败... 元代币已损失');
+        }
+    }
+    this._gambleActive = false;
+    this._gambleType = null;
+    this._gambleStaked = 0;
+};
+
+Gp._spawnBossLord = function() {
+    window.audioManager && window.audioManager.play('boss');
+    var level = Math.floor(this._elapsed / 15) + 1;
+    var x = this._mapW / 2;
+    var y = Math.floor(this._mapH * 0.35);
+    var margin = 100;
+    x = Math.max(margin, Math.min(this._mapW - margin, x));
+    y = Math.max(margin, Math.min(this._mapH - margin, y));
+
+    var id = this._enemyIdCounter++;
+    var lord = new Enemy(id, x, y, level, true, 'Boss_Lord');
+    var diff = 1;
+    try { diff = window.levelConfig[this._currentLevelId].difficultyFactor || 1; } catch(e) { console.warn('diff config read error', e); }
+    lord.maxHp = Math.floor(lord.maxHp * diff);
+    lord.hp = lord.maxHp;
+    lord.atk = Math.floor(lord.atk * diff);
+    this.enemies.push(lord);
+    this._bossLord = lord;
+
+    /* ── 变异保险库：血月对Boss Lord生效 ── */
+    if (this._vaultMutations && this._vaultMutations.indexOf('bloodmoon') !== -1) {
+        lord.atk = Math.floor(lord.atk * 1.4);
+        lord.maxHp = Math.floor(lord.maxHp * 1.3);
+        lord.hp = Math.floor(lord.hp * 1.3);
+    }
+
+    var el = document.createElement('div');
+    el.className = 'enemy boss boss-lord';
+    el.dataset.id = id;
+    el.dataset.enemyType = 'Boss_Lord';
+    /* Boss 字符直接放入 DOM（::before 留给 aura） */
+    el.innerHTML = '<span style="font-size:calc(42*1.5px);font-weight:900;color:#b71c1c;text-shadow:0 0 12px rgba(211,47,47,0.6);z-index:1;position:relative;">中</span>';
+    var hpBar = document.createElement('div');
+    hpBar.className = 'enemy-hp-bar';
+    var hpFill = document.createElement('div');
+    hpFill.className = 'enemy-hp-fill';
+    hpBar.appendChild(hpFill);
+    el.appendChild(hpBar);
+    this._worldLayer.appendChild(el);
+    this._enemyElements.set(id, el);
+    lord.el = el;
+
+    if (this._bloodRageActive) {
+        lord.speed = Math.floor(lord.speed * 1.2);
+        lord.baseSpeed = lord.speed;
+        if (lord.el) lord.el.classList.add('boss-blood-rage');
+        this._spawnCausalityText('血海狂暴：领主速度 +20%');
+    }
+
+    if (this.bossHpBar) this.bossHpBar.classList.add('active');
+    this._screenShake();
+    return lord;
+};
+
+Gp._spawnEnemyType = function(type) {
+    var angle = Math.random() * Math.PI * 2;
+    var margin = 30;
+    var vpW = this.battlefield.clientWidth;
+    var vpH = this.battlefield.clientHeight;
+    var viewR = Math.sqrt(vpW * vpW + vpH * vpH) * 0.5;
+    var spawnRadius = viewR + 50;
+    var cx = this.player.x + Math.cos(angle) * spawnRadius;
+    var cy = this.player.y + Math.sin(angle) * spawnRadius;
+    cx = Math.max(margin, Math.min(this._mapW - margin, cx));
+    cy = Math.max(margin, Math.min(this._mapH - margin, cy));
+
+    var level = Math.floor(this._elapsed / 15) + 1;
+    var id = this._enemyIdCounter++;
+    var enemy = new Enemy(id, cx, cy, level, false, type);
+    /* Apply level difficulty factor (consistent with SpawnSystem) */
+    var diff = 1;
+    try {
+        var cfg = window.levelConfig[this._currentLevelId];
+        if (cfg) diff = cfg.difficultyFactor || 1;
+    } catch(e) {}
+    enemy.maxHp = Math.floor(enemy.maxHp * diff);
+    enemy.hp = enemy.maxHp;
+    enemy.atk = Math.floor(enemy.atk * diff);
+    this.enemies.push(enemy);
+
+    var el = document.createElement('div');
+    el.className = 'enemy';
+    el.dataset.id = id;
+    var hpBar = document.createElement('div');
+    hpBar.className = 'enemy-hp-bar';
+    var hpFill = document.createElement('div');
+    hpFill.className = 'enemy-hp-fill';
+    hpBar.appendChild(hpFill);
+    el.appendChild(hpBar);
+    this._worldLayer.appendChild(el);
+    this._enemyElements.set(id, el);
+    enemy.el = el;
+    return enemy;
+};
+
+Gp._updateEnemyProjectiles = function(dt) {
+    for (var i = this._enemyProjectiles.length - 1; i >= 0; i--) {
+        var p = this._enemyProjectiles[i];
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.lifeTime -= dt;
+        if (p.lifeTime <= 0) p.alive = false;
+
+        if (!p.el) {
+            var pel = document.createElement('div');
+            pel.className = 'enemy-projectile';
+            var d = p.radius * 2;
+            pel.style.width = d + 'px';
+            pel.style.height = d + 'px';
+            this._worldLayer.appendChild(pel);
+            p.el = pel;
+        }
+        p.el.style.left = (p.x - p.radius) + 'px';
+        p.el.style.top = (p.y - p.radius) + 'px';
+
+        if (p.x < -100 || p.x > this._mapW + 100 || p.y < -100 || p.y > this._mapH + 100) {
+            p.alive = false;
+        }
+
+        if (p.alive && this.player) {
+            var dx = this.player.x - p.x;
+            var dy = this.player.y - p.y;
+            if (dx * dx + dy * dy < (this.player.radius + p.radius) * (this.player.radius + p.radius)) {
+                if (!p._hitPlayer) {
+                    p._hitPlayer = true;
+                    var dmg = p.damage;
+                    /* Epoch 14: 关卡亲和减伤 */
+                    if (this._mapAffinityReduction) {
+                        dmg = Math.max(1, Math.floor(dmg * (1 - this._mapAffinityReduction)));
+                    }
+                    this.player.takeDamage(dmg, this._bossLord || this);
+                }
+                p.alive = false;
+            }
+        }
+
+        if (!p.alive) {
+            if (p.el && p.el.parentNode) p.el.remove();
+            this._enemyProjectiles.splice(i, 1);
+        }
+    }
+};
+
+Gp._cleanEnemyProjectiles = function() {
+    for (var i = 0; i < this._enemyProjectiles.length; i++) {
+        if (this._enemyProjectiles[i].el && this._enemyProjectiles[i].el.parentNode) {
+            this._enemyProjectiles[i].el.remove();
+        }
+    }
+    this._enemyProjectiles = [];
+};
+
+})();
