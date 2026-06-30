@@ -195,9 +195,20 @@ Gp.init = async function() {
             if (e.target.closest && e.target.closest('#joystick-container')) return;
             if (!self.running || self.gameOver || self._pendingReward) return;
 
+            /* ── ScreenToGameCoordinate 工具：处理 responsive.js 的 transform:scale() ── */
             var bfRect = self.battlefield.getBoundingClientRect();
-            var clickVX = e.clientX - bfRect.left;
-            var clickVY = e.clientY - bfRect.top;
+            var containerEl = self.container || document.getElementById('game-container');
+            var containerRect = containerEl ? containerEl.getBoundingClientRect() : null;
+            /* scale = 设计尺寸 / 实际渲染尺寸 */
+            var designW = 1920;
+            var designH = 1080;
+            var scaleX = 1, scaleY = 1;
+            if (containerRect && containerRect.width > 0) {
+                scaleX = designW / containerRect.width;
+                scaleY = designH / containerRect.height;
+            }
+            var clickVX = (e.clientX - bfRect.left) * scaleX;
+            var clickVY = (e.clientY - bfRect.top) * scaleY;
             var clickWX = clickVX + self.cameraX;
             var clickWY = clickVY + self.cameraY;
 

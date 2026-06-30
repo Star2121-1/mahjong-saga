@@ -41,11 +41,6 @@
                 </div>
             </div>
 
-            <div id="reward-overlay">
-                <div class="reward-title">选择圣物</div>
-                <div class="reward-cards"></div>
-            </div>
-
             <div id="boss-hp-bar">
                 <span id="boss-hp-label">深渊领主</span>
                 <div class="hp-bar-track"><div id="boss-hp-fill" style="width:100%"></div></div>
@@ -53,65 +48,71 @@
 
             <div id="wave-announce"></div>
 
-            <div id="mutator-overlay">
-                <div class="mutator-title">⚠ 波次突变</div>
-                <div class="mutator-subtitle">当前波次出现异常战况，请选择一种适应策略</div>
-                <div class="mutator-choices" id="mutator-choices"></div>
-            </div>
-
-            <div id="victory-overlay">
-                <h1>胡牌！大捷！</h1>
-                <div class="result">存活时间：<span id="victory-time">00:00</span></div>
-                <div class="result">击杀数：<span id="victory-kills">0</span></div>
-                <div class="result">圣物：<span id="victory-relics">-</span></div>
-                <div class="result">获得核心：<span id="victory-tokens">0</span></div>
-                <div id="victory-tips" class="victory-tips"></div>
-                <button id="victory-restart-btn">🔄 再来一局</button>
-                <button id="victory-continue-btn" style="display:none">🌀 继续挑战</button>
-                <button id="victory-hub-btn">返回大本营</button>
-            </div>
-
             <div id="joystick-container">
                 <div id="joystick-base">
                     <div id="joystick-knob"></div>
                 </div>
             </div>
+        </div>
 
-            <div id="game-over-overlay">
-                <h1>GAME OVER</h1>
-                <div class="result">存活时间：<span id="result-time">00:00</span></div>
-                <div class="result">击杀数：<span id="result-kills">0</span></div>
-                <div class="result">波次：<span id="result-wave">-</span></div>
-                <div id="death-tips" class="victory-tips" style="color:#ff8888;"></div>
-                <div id="death-compensation" class="result" style="color:#ffd700;"></div>
-                <button id="restart-btn">🔄 重新开始</button>
-                <button id="hub-btn" style="padding:8px 0;font-size:13px;font-weight:600;width:200px;margin-top:4px;background:rgba(255,255,255,0.04);color:#888;border:1px solid #333;border-radius:6px;cursor:pointer;">返回大本营</button>
+        <!-- ═══ Overlay layers — 放在 battlefield 外面，避免 overflow:hidden 裁切 ═══ -->
+        <div id="reward-overlay">
+            <div class="reward-title">选择圣物</div>
+            <div class="reward-cards"></div>
+        </div>
+
+        <div id="mutator-overlay">
+            <div class="mutator-title">⚠ 波次突变</div>
+            <div class="mutator-subtitle">当前波次出现异常战况，请选择一种适应策略</div>
+            <div class="mutator-choices" id="mutator-choices"></div>
+        </div>
+
+        <div id="victory-overlay">
+            <h1>胡牌！大捷！</h1>
+            <div class="result">存活时间：<span id="victory-time">00:00</span></div>
+            <div class="result">击杀数：<span id="victory-kills">0</span></div>
+            <div class="result">圣物：<span id="victory-relics">-</span></div>
+            <div class="result">获得核心：<span id="victory-tokens">0</span></div>
+            <div id="victory-tips" class="victory-tips"></div>
+            <button id="victory-restart-btn">🔄 再来一局</button>
+            <button id="victory-continue-btn" style="display:none">🌀 继续挑战</button>
+            <button id="victory-hub-btn">返回大本营</button>
+        </div>
+
+        <div id="game-over-overlay">
+            <h1>GAME OVER</h1>
+            <div class="result">存活时间：<span id="result-time">00:00</span></div>
+            <div class="result">击杀数：<span id="result-kills">0</span></div>
+            <div class="result">波次：<span id="result-wave">-</span></div>
+            <div id="death-tips" class="victory-tips" style="color:#ff8888;"></div>
+            <div id="death-compensation" class="result" style="color:#ffd700;"></div>
+            <button id="restart-btn">🔄 重新开始</button>
+            <button id="hub-btn" style="padding:8px 0;font-size:13px;font-weight:600;width:200px;margin-top:4px;background:rgba(255,255,255,0.04);color:#888;border:1px solid #333;border-radius:6px;cursor:pointer;">返回大本营</button>
+        </div>
+
+        <div id="pause-overlay">
+            <div class="pause-panel">
+                <div class="pause-title">⏸ 游戏暂停</div>
+                <button id="pause-continue-btn">▶ 继续游戏</button>
+                <button id="pause-hub-btn">返回大本营</button>
             </div>
+        </div>
 
-            <div id="pause-overlay">
-                <div class="pause-panel">
-                    <div class="pause-title">⏸ 游戏暂停</div>
-                    <button id="pause-continue-btn">▶ 继续游戏</button>
-                    <button id="pause-hub-btn">返回大本营</button>
+        <div id="guide-overlay">
+            <div class="guide-panel">
+                <div class="guide-title">⚔ 新手指引</div>
+                <div class="guide-body">
+                    <div class="guide-item"><span class="guide-key">WASD</span> / 方向键 移动</div>
+                    <div class="guide-item"><span class="guide-key">点击地面</span> 走位 / 点击敌人攻击</div>
+                    <div class="guide-item"><span class="guide-key">空格</span> 怒气满时触发 Overdrive</div>
+                    <div class="guide-item"><span class="guide-key">Esc</span> / ⏸ 暂停游戏</div>
+                    <div class="guide-item"><span class="guide-key">拾取</span> 击杀掉落铜筹码与经验石，自动吸附</div>
+                    <div class="guide-item"><span class="guide-key">升级</span> 弹出三选一麻将牌，强化天命手牌</div>
                 </div>
-            </div>
-
-            <div id="guide-overlay">
-                <div class="guide-panel">
-                    <div class="guide-title">⚔ 新手指引</div>
-                    <div class="guide-body">
-                        <div class="guide-item"><span class="guide-key">WASD</span> / 方向键 移动</div>
-                        <div class="guide-item"><span class="guide-key">点击地面</span> 走位 / 点击敌人攻击</div>
-                        <div class="guide-item"><span class="guide-key">空格</span> 怒气满时触发 Overdrive</div>
-                        <div class="guide-item"><span class="guide-key">Esc</span> / ⏸ 暂停游戏</div>
-                        <div class="guide-item"><span class="guide-key">拾取</span> 击杀掉落铜筹码与经验石，自动吸附</div>
-                        <div class="guide-item"><span class="guide-key">升级</span> 弹出三选一麻将牌，强化天命手牌</div>
-                    </div>
-                    <button id="guide-confirm-btn">明白了，出征！</button>
-                    <div class="guide-nav">
-                        <button id="guide-prev-btn" disabled>← 上一步</button>
-                        <button id="guide-next-btn">下一步 →</button>
-                    </div>
+                <button id="guide-confirm-btn">明白了，出征！</button>
+                <div class="guide-nav">
+                    <button id="guide-prev-btn" disabled>← 上一步</button>
+                    <button id="guide-next-btn">下一步 →</button>
                 </div>
             </div>
         </div>

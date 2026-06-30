@@ -343,8 +343,8 @@
    ══════════════════════════════════════════════ */
 
 #reward-overlay {
-    position: absolute; inset: 0;
-    background: rgba(0,0,0,0.92); z-index: 100;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.92); z-index: 1000;
     display: none; flex-direction: column;
     justify-content: center; align-items: center; padding: 20px;
 }
@@ -489,10 +489,10 @@
    ══════════════════════════════════════════════ */
 
 #victory-overlay {
-    position: absolute; inset: 0;
+    position: fixed; inset: 0;
     background: rgba(0,0,0,0.85);
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    z-index: 60; display: none;
+    z-index: 1000; display: none;
     flex-direction: column; justify-content: center; align-items: center; gap: 12px;
 }
 #victory-overlay.active { display: flex; }
@@ -505,10 +505,10 @@
 .result span { color: #1e6f42; font-weight: 700; }
 
 #game-over-overlay {
-    position: absolute; inset: 0;
+    position: fixed; inset: 0;
     background: rgba(0,0,0,0.85);
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    z-index: 60; display: none;
+    z-index: 1000; display: none;
     flex-direction: column; justify-content: center; align-items: center; gap: 12px;
 }
 #game-over-overlay.active { display: flex; }
@@ -632,8 +632,8 @@
    ══════════════════════════════════════════════ */
 
 #pause-overlay {
-    position: absolute; inset: 0;
-    background: rgba(0,0,0,0.75); z-index: 200;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75); z-index: 1000;
     display: none; flex-direction: column; justify-content: center; align-items: center;
 }
 #pause-overlay.active { display: flex; }
@@ -666,8 +666,8 @@
    ══════════════════════════════════════════════ */
 
 #guide-overlay {
-    position: absolute; inset: 0;
-    background: rgba(0,0,0,0.82); z-index: 300;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.82); z-index: 1000;
     display: none; flex-direction: column;
     justify-content: center; align-items: center; padding: 16px;
 }
@@ -956,10 +956,10 @@
    ══════════════════════════════════════════════ */
 
 #mutator-overlay {
-    position: absolute; inset: 0;
+    position: fixed; inset: 0;
     background: rgba(80,0,0,0.92);
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-    z-index: 110; display: none;
+    z-index: 1000; display: none;
     flex-direction: column; justify-content: center; align-items: center; padding: 20px;
 }
 #mutator-overlay.active { display: flex; }
