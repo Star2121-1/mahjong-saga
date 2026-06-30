@@ -39,7 +39,7 @@ window.GameEngine = function() {
     this.cameraY = 0;
 
     this._lastTime = 0;
-    this._boundLoop = this._loop.bind(this);
+    this._boundLoop = null; // bound in init() after all modules loaded
 
     this._pressedKeys = {};
     this._joystickDX = 0;
@@ -207,3 +207,7 @@ var Gp = window.GameEngine.prototype;
 // [MOVED] → GameEngine.NewRun.js// Gp._saveHandState = function() { ... }
 // [MOVED] → GameEngine.NewRun.js// Gp._restoreHandState = function() { ... }
 // [MOVED] → GameEngine.NewRun.js// Gp._defineGuideSteps = function() { ... }
+
+window.gameEngine = new GameEngine();
+
+})();

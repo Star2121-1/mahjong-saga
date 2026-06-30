@@ -80,6 +80,7 @@ class RewardManager {
 
     hidePanel() {
         this._panelLocked = false;
+        if (!this.overlay) return;
         this.overlay.classList.remove('active');
         this.overlay.classList.remove('levelup-mode');
         var replaceEl = document.getElementById('replace-panel');

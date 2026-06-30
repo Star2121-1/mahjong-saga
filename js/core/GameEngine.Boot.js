@@ -477,6 +477,10 @@ Gp._beginLoop = function() {
     this.gameOver = false;
     this._lastTime = performance.now();
     this._elapsed = 0;
+    /* 惰性绑定 — 确保 _loop 已存在 */
+    if (!this._boundLoop || typeof this._boundLoop !== 'function') {
+        this._boundLoop = this._loop.bind(this);
+    }
     requestAnimationFrame(this._boundLoop);
 };
 
