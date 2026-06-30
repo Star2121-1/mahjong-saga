@@ -1473,6 +1473,9 @@ Gp._resumeAfterReward = function() {
     if (this._bossLord) this._bossLord = null;
 
     this._announceWave(this._waveCount);
+
+    /* 启动下一波 */
+    this._beginLoop();
 };
 
 Gp._resumeAfterLevelUp = function() {
@@ -2090,12 +2093,16 @@ Gp._syncEntities = function() {
     this.playerEl.style.left = this.player.x + 'px';
     this.playerEl.style.top = this.player.y + 'px';
     this.playerEl.style.transform = 'translate(-50%,-50%)' + tilt;
-    this.playerEl.classList.toggle('invuln', this.player.invulnTimer > 0);
 
-    /* 雀牌受击发光 */
+    /* ── Step A: 受击平滑闪烁 — 指数衰减曲线替代硬 toggle ── */
     if (this.player.invulnTimer > 0) {
-        this.playerEl.style.filter = 'drop-shadow(0 0 8px rgba(182,41,41,0.8))';
+        /* 总持续时间上限 300ms，alpha 从 0.4 指数衰减到 0 */
+        var t = 1 - Math.min(this.player.invulnTimer / 0.3, 1); /* 0→1 进度 */
+        var alpha = 0.4 * Math.exp(-t * 4); /* 指数衰减 */
+        this.playerEl.style.opacity = (1 - alpha).toFixed(3);
+        this.playerEl.style.filter = 'drop-shadow(0 0 ' + (8 * (1 - alpha)).toFixed(1) + 'px rgba(182,41,41,0.8))';
     } else {
+        this.playerEl.style.opacity = '1';
         this.playerEl.style.filter = 'drop-shadow(0 0 6px rgba(26,83,54,0.4))';
     }
 
