@@ -1,0 +1,69 @@
+/* ══════════════════════════════════════════════
+   玩家 — 2.5D 骨雕麻将牌 "雀"
+   ══════════════════════════════════════════════ */
+
+#player {
+    position: absolute;
+    width: 48px; height: 64px;
+    background: #fbfbf7;
+    border-radius: 6px;
+    z-index: 10;
+    transform: translate(-50%, -50%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: calc(24 * var(--_fs) * 1px); font-weight: 900;
+    color: #b62929;
+    /* 2.5D 骨雕夹心 */
+    box-shadow:
+        0 4px 0 #1a5336,
+        0 6px 0.5px #dfc590,
+        0 8px 10px rgba(0,0,0,0.5);
+    text-shadow: 0 0 8px rgba(182,41,41,0.6);
+}
+#player::before {
+    content: '雀';
+    font-size: calc(24 * var(--_fs) * 1px);
+    font-weight: 900;
+    color: #b62929;
+    text-shadow: 0 0 8px rgba(182,41,41,0.6);
+}
+#player.invuln { /* 受击闪烁由 JS 控制 opacity 平滑插值，CSS 不设固定值 */ }
+#player filter: drop-shadow(0 0 12px #1a5336) drop-shadow(0 0 4px #1a5336);
+
+/* 玩家血条 */
+#player-hp-wrap {
+    position: absolute; top: -22px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    width: 70px;
+}
+#player-hp-bar { width: 100%; height: 6px; background: #333; border-radius: 3px; overflow: hidden; }
+#player-hp-fill { height: 100%; background: linear-gradient(90deg, #1a5336, #00e676); border-radius: 3px; transition: width 0.15s ease; }
+#player-hp-text { font-size: calc(10 * var(--_fs) * 1px); color: #fffef5; font-weight: 700; white-space: nowrap; }
+
+/* 受击冻结特效 */
+.frozen-crystal {
+    background: linear-gradient(135deg, #4caf50, #1a5336) !important;
+    filter: drop-shadow(0 0 10px #4caf50) !important;
+    animation: iceShimmer 1s infinite alternate;
+}
+@keyframes iceShimmer {
+    0% { filter: drop-shadow(0 0 6px #4caf50); }
+    100% { filter: drop-shadow(0 0 16px #a5d6a7); }
+}
+
+/* 响应式: 小视口玩家尺寸 */
+@media (max-height: 768px) {
+    #player { width: 40px; height: 54px; font-size: 20px; }
+    #player-hp-wrap { width: 60px; }
+    #player-hp-bar { height: 5px; }
+    #player-hp-text { font-size: 9px; }
+}
+@media (max-height: 600px) {
+    #player { width: 32px; height: 44px; font-size: 16px; }
+    #player-hp-wrap { width: 50px; }
+    #player-hp-bar { height: 4px; }
+    #player-hp-text { font-size: 8px; }
+}
+@media (max-height: 480px) {
+    #player { width: 28px; height: 38px; font-size: 14px; }
+}

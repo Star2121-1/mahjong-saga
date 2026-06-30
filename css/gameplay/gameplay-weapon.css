@@ -1,0 +1,148 @@
+/* ══════════════════════════════════════════════
+   神兵装备栏
+   ══════════════════════════════════════════════ */
+
+#weapon-slot-bar {
+    height: 28px; background: rgba(0,0,0,0.35);
+    display: flex; align-items: center; padding: 0 6px;
+    flex-shrink: 0; border-top: 1px solid rgba(26,83,54,0.15);
+    overflow: hidden;
+}
+.weapon-slots { display: flex; gap: 4px; width: 100%; }
+.weapon-slot {
+    flex: 1; min-width: 0; display: flex; align-items: center;
+    gap: 4px; padding: 2px 4px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 4px;
+    transition: box-shadow 0.3s;
+}
+.ws-icon { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 6px currentColor; }
+.ws-name { font-size: calc(9 * var(--_fs) * 1px); color: #e0e0d8; font-weight: 600; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48px; }
+.ws-cd-track { flex: 1; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; min-width: 12px; }
+.ws-cd-fill { height: 100%; background: #1e6f42; border-radius: 2px; transition: width 0.08s linear; }
+.ws-level { font-size: calc(8 * var(--_fs) * 1px); color: #c8c8c0; font-weight: 700; flex-shrink: 0; min-width: 16px; text-align: right; }
+.ws-cd-text { font-size: calc(7 * var(--_fs) * 1px); color: #d0d0c8; font-weight: 600; flex-shrink: 0; min-height: 10px; text-align: center; }
+.weapon-slot.on-cd .ws-name { opacity: 0.4; }
+.weapon-slot.on-cd .ws-icon { opacity: 0.4; }
+.weapon-slot-bar .ws-limit { font-size: calc(10 * var(--_fs) * 1px); color: #d0d0c8; font-weight: 600; }
+
+/* ══════════════════════════════════════════════
+   天命手牌槽 — 14 列 CSS Grid (底部固定)
+   ══════════════════════════════════════════════ */
+
+#hand-tile-bar {
+    position: absolute; bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    z-index: 40;
+    display: none; /* 默认隐藏，游戏开始时启用 */
+}
+#hand-tile-bar.active { display: block; }
+
+#hand-tile-grid {
+    display: grid;
+    grid-template-columns: repeat(14, 1fr);
+    gap: 4px;
+    padding: 8px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(26,83,54,0.3);
+    border-radius: 12px;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.hand-tile-slot {
+    aspect-ratio: 3/4;
+    background: rgba(251,251,247,0.03);
+    border: 1px dashed rgba(26,83,54,0.2);
+    border-radius: 6px;
+    position: relative;
+    transition: border-color 0.2s, background 0.2s;
+}
+.hand-tile-slot.occupied {
+    border-style: solid;
+    border-color: rgba(42,115,72,0.5);
+    background: rgba(251,251,247,0.06);
+}
+/* 2.5D 骨雕麻将牌 */
+.hand-tile-slot .tile-body {
+    position: absolute; inset: 0;
+    background: #fbfbf7;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: calc(14 * var(--_fs) * 1px); font-weight: 900;
+    color: #b62929;
+    box-shadow:
+        0 3px 0 #1a5336,
+        0 4px 0.5px #dfc590,
+        0 6px 8px rgba(0,0,0,0.4);
+    transform: perspective(400px) rotateX(8deg);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.hand-tile-slot.occupied .tile-body:hover {
+    transform: perspective(400px) rotateX(4deg) translateY(-4px);
+    box-shadow:
+        0 5px 0 #1a5336,
+        0 7px 0.5px #dfc590,
+        0 10px 12px rgba(0,0,0,0.5);
+}
+/* 筒子牌蓝色 */
+.hand-tile-slot .tile-body.tong { color: #1b4f72; }
+/* 条子牌绿色 */
+.hand-tile-slot .tile-body.tiao { color: #1e6f42; }
+/* 万字牌红色 */
+.hand-tile-slot .tile-body.wan { color: #b62929; }
+/* 风牌 */
+.hand-tile-slot .tile-body.wind { color: #1a5336; }
+/* 箭牌 */
+.hand-tile-slot .tile-body.arrow { color: #b62929; }
+
+/* 新武器横幅 */
+.new-weapon-banner {
+    position: absolute; left: 0; right: 0; bottom: 40px;
+    height: 24px; display: flex; align-items: center; justify-content: center;
+}
+.new-weapon-banner::before, .new-weapon-banner::after {
+    content: ''; position: absolute; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, #ffd700, transparent);
+    animation: laserSlice 0.5s ease-in-out infinite alternate;
+}
+.new-weapon-banner::before { top: 0; }
+.new-weapon-banner::after { bottom: 0; animation-delay: 0.1s; }
+@keyframes laserSlice {
+    0% { opacity: 0.3; transform: scaleX(0.6); }
+    100% { opacity: 1; transform: scaleX(1); }
+}
+.sacrifice-banner span {
+    font-size: calc(9 * var(--_fs) * 1px); font-weight: 900; color: #ff4444;
+    text-shadow: 0 0 12px rgba(255,68,68,0.8);
+    letter-spacing: 2px; transform: skewX(-15deg);
+    animation: bannerBlink 0.8s ease-in-out infinite alternate;
+}
+.new-weapon-banner span {
+    font-size: calc(9 * var(--_fs) * 1px); font-weight: 900; color: #ffd700;
+    text-shadow: 0 0 12px rgba(255,215,0,0.8);
+    letter-spacing: 2px; transform: skewX(-15deg);
+    animation: bannerBlink 0.8s ease-in-out infinite alternate;
+}
+@keyframes bannerBlink {
+    0% { color: #ffd700; }
+    100% { color: #fff; }
+}
+
+/* 吸入动画 + 槽位波纹 */
+.slot-ripple { animation: slotRipple 0.5s ease-out; }
+@keyframes slotRipple {
+    0% { box-shadow: inset 0 0 0 rgba(255,215,0,0), inset 0 0 0 rgba(255,215,0,0); }
+    30% { box-shadow: inset 0 0 30px rgba(255,215,0,0.6), inset 0 0 60px rgba(255,215,0,0.3); }
+    100% { box-shadow: inset 0 0 0 rgba(255,215,0,0), inset 0 0 0 rgba(255,215,0,0); }
+}
+
+/* 响应式: 武器栏 */
+@media (max-height: 600px) {
+    #weapon-slot-bar { height: 22px; }
+    .ws-icon { width: 8px; height: 8px; }
+    .ws-name { font-size: 8px; max-width: 36px; }
+    .ws-level { font-size: 7px; }
+}

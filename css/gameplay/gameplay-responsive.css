@@ -1,0 +1,36 @@
+/* ══════════════════════════════════════════════
+   响应式: 小视口战场优化
+   ══════════════════════════════════════════════ */
+
+/* ≤768px 高度: 缩小角色和敌人尺寸 */
+@media (max-height: 768px) {
+    .enemy { width: 30px; height: 40px; font-size: 10px; }
+}
+
+/* ≤600px 高度: 大幅缩小 */
+@media (max-height: 600px) {
+    .enemy { width: 24px; height: 32px; font-size: 9px; }
+    .pause-panel { padding: 20px 24px; }
+    .pause-title { font-size: 22px; }
+    .guide-panel { padding: 16px 18px; }
+    .guide-title { font-size: 16px; }
+    .guide-item { font-size: 12px; }
+    .guide-key { min-width: 48px; font-size: 11px; }
+    .mutator-card { width: 150px; padding: 12px 10px; }
+    .mutator-card-icon { font-size: 28px; }
+    .mutator-card-title { font-size: 14px; }
+    .mutator-card-desc { font-size: 11px; }
+}
+
+/* ≤480px 极小视口 */
+@media (max-height: 480px) {
+    .enemy { width: 20px; height: 28px; font-size: 8px; }
+}
+
+/* 超宽屏: 战场居中 */
+@media (min-aspect-ratio: 2/1) {
+    #battlefield {
+        margin: 0 auto;
+        max-width: 1600px;
+    }
+}

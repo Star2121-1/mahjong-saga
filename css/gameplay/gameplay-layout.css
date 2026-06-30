@@ -1,0 +1,166 @@
+/* ══════════════════════════════════════════════
+   麻将江湖 — 战场布局
+   ══════════════════════════════════════════════ */
+
+/* ── 响应式字体基线 ── */
+#game-container {
+    background: #1a5c38;
+    --_fs: 1.5;
+}
+
+/* 16:9 战场主体 */
+#battlefield {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(ellipse at center, #2a7348 0%, #1a5c38 50%, #134a2e 100%);
+    touch-action: none;
+}
+/* 视差背景层 — 随玩家移动微移 */
+#battlefield::before {
+    content: '';
+    position: absolute;
+    inset: -60px;
+    background:
+        radial-gradient(ellipse 120px 80px at 20% 30%, rgba(255,255,255,0.03) 0%, transparent 100%),
+        radial-gradient(ellipse 80px 120px at 70% 60%, rgba(255,255,255,0.02) 0%, transparent 100%),
+        radial-gradient(ellipse 100px 60px at 50% 80%, rgba(0,0,0,0.1) 0%, transparent 100%);
+    z-index: 0;
+    pointer-events: none;
+    transition: transform 0.3s ease-out;
+    will-change: transform;
+}
+#world-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; will-change: transform; z-index: 1; }
+
+/* 顶部状态栏 */
+#top-bar {
+    height: 36px; padding-top: 4px;
+    background: rgba(0,0,0,0.25);
+    display: flex; justify-content: flex-start; align-items: center;
+    gap: 16px; z-index: 50; flex-shrink: 0;
+    border-bottom: 1px solid rgba(42,115,72,0.5);
+    padding-left: 12px;
+}
+.stat { font-size: calc(13 * var(--_fs) * 1px); font-weight: 600; color: #fffef5; letter-spacing: 1px; }
+
+/* 底部状态栏 */
+#bottom-bar {
+    height: 36px; background: rgba(0,0,0,0.5);
+    display: flex; justify-content: center; align-items: center;
+    flex-shrink: 0; border-top: 1px solid rgba(26,83,54,0.2);
+    padding: 0 10px;
+}
+.hint { font-size: calc(14 * var(--_fs) * 1px); color: #e8e8e0; font-weight: 700; letter-spacing: 1px; flex: 1; text-align: center; }
+#pause-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(26,83,54,0.3);
+    border-radius: 4px; color: #ecece4; font-size: calc(16 * var(--_fs) * 1px);
+    cursor: pointer; padding: 4px 10px; line-height: 1;
+    transition: background 0.2s, border-color 0.2s; flex-shrink: 0;
+}
+#pause-btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(26,83,54,0.5); }
+
+/* 经验条容器 */
+#exp-bar-container {
+    width: 100%; height: 16px;
+    background: rgba(0,0,0,0.5);
+    position: relative; flex-shrink: 0;
+    display: flex; align-items: center;
+}
+#exp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #1a5336, #4caf50);
+    border-radius: 0 3px 3px 0;
+    box-shadow: 0 0 8px rgba(76,175,80,0.5);
+    transition: width 0.15s ease;
+    position: absolute; top: 0; left: 0;
+}
+#exp-bar-text {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    font-size: calc(10 * var(--_fs) * 1px); color: #fff; font-weight: 700;
+    letter-spacing: 0.5px; white-space: nowrap;
+    text-shadow: 0 0 6px rgba(0,0,0,0.8);
+    pointer-events: none; z-index: 1;
+}
+
+/* 怒气条容器 */
+#rage-bar-container { width: 100%; height: 16px; background: rgba(0,0,0,0.5); position: relative; flex-shrink: 0; display: flex; align-items: center; }
+#rage-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #b62929, #ff1744);
+    border-radius: 0 3px 3px 0;
+    box-shadow: 0 0 8px rgba(182,41,41,0.5);
+    transition: width 0.12s ease;
+    position: absolute; top: 0; left: 0;
+}
+#rage-bar-text {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    font-size: calc(10 * var(--_fs) * 1px); color: #fff; font-weight: 700;
+    white-space: nowrap;
+    text-shadow: 0 0 6px rgba(0,0,0,0.8);
+    pointer-events: none; z-index: 1;
+}
+
+/* 波次公告 */
+#wave-announce {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: calc(36 * var(--_fs) * 1px); font-weight: 800; color: #ffd700;
+    z-index: 80; pointer-events: none; opacity: 0;
+    text-shadow: 0 0 40px rgba(255,215,0,0.5);
+    letter-spacing: 4px;
+}
+#wave-announce.active { animation: waveAnnounce 1.2s ease-out forwards; }
+
+/* Mutator badge + Resonance pills */
+.mutator-badge {
+    padding: 2px 8px; background: rgba(182,41,41,0.25);
+    border: 1px solid #b62929; border-radius: 4px;
+    font-size: calc(11 * var(--_fs) * 1px); color: #ffab91; font-weight: 700;
+    white-space: nowrap;
+}
+.mutator-badge.bloodmoon { background: rgba(182,41,41,0.4); border-color: #b62929; color: #ff7979; }
+.mutator-badge.frenzy { background: rgba(255,152,0,0.25); border-color: #ff9800; color: #ffcc80; }
+.mutator-badge.gravity { background: rgba(156,39,176,0.25); border-color: #9c27b0; color: #f0a0ff; }
+.mutator-badge.frailty { background: rgba(255,235,59,0.2); border-color: #ffeb3b; color: #ffff8a; }
+.mutator-badge.wither { background: rgba(76,175,80,0.25); border-color: #4caf50; color: #c8e6c0; }
+.resonance-pills { display: flex; gap: 4px; }
+.resonance-pill {
+    padding: 1px 6px; border-radius: 3px; font-size: calc(10 * var(--_fs) * 1px); font-weight: 700;
+}
+.resonance-speed { background: rgba(255,109,0,0.2); color: #ff8a65; border: 1px solid #ff6d00; }
+.resonance-ice { background: rgba(76,175,80,0.2); color: #c8e6c0; border: 1px solid #4caf50; }
+
+/* 虚拟摇杆 */
+#joystick-container {
+    position: absolute; bottom: 24px; right: 24px;
+    z-index: 40; touch-action: none;
+}
+#joystick-base {
+    width: 100px; height: 100px; border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(26,83,54,0.3);
+    position: relative; cursor: pointer;
+}
+#joystick-knob {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(30,111,66,0.5);
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none; transition: none;
+}
+
+/* 响应式: 小高度视口缩减顶部栏 */
+@media (max-height: 600px) {
+    #top-bar { height: 28px; gap: 10px; padding-left: 8px; }
+    .stat { font-size: 11px; }
+    #rage-bar-container { height: 12px; }
+    #rage-bar-text { font-size: 9px; }
+    #weapon-slot-bar { height: 22px; }
+    .ws-icon { width: 8px; height: 8px; }
+    .ws-name { font-size: 8px; max-width: 36px; }
+    .ws-level { font-size: 7px; }
+    #boss-hp-bar { height: 16px; padding: 0 6px; gap: 4px; }
+    #boss-hp-bar .hp-bar-track { height: 6px; }
+    #boss-hp-label { font-size: 9px; }
+}

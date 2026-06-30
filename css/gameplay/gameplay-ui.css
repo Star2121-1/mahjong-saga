@@ -1,0 +1,215 @@
+/* ══════════════════════════════════════════════
+   武器系统视觉元素 — 动能弹道 Mahjong 主题
+   ══════════════════════════════════════════════ */
+
+.projectile {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9;
+    will-change: transform;
+}
+
+/* 追踪飞刃 — 飞旋麻将牌碎片（菱形切片） */
+.tracking-blade {
+    width: 14px; height: 14px;
+    background: linear-gradient(135deg, #ffd740 0%, #ff6f00 100%);
+    border-radius: 2px;
+    transform: rotate(45deg);
+    box-shadow:
+        0 0 12px rgba(255,143,0,0.8),
+        0 0 24px rgba(255,111,0,0.4),
+        inset 0 0 4px rgba(255,255,255,0.5);
+    animation: bladeSpin 0.3s linear infinite;
+}
+.tracking-blade::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    background: linear-gradient(90deg, transparent, rgba(255,215,64,0.3), transparent);
+    border-radius: 4px;
+    animation: bladeTrail 0.4s linear infinite;
+}
+@keyframes bladeSpin {
+    0% { transform: rotate(45deg); }
+    100% { transform: rotate(405deg); }
+}
+@keyframes bladeTrail {
+    0% { transform: translateX(-6px) scaleX(0.5); opacity: 0.6; }
+    100% { transform: translateX(6px) scaleX(1.5); opacity: 0; }
+}
+
+/* 扇形散射弹丸 — 麻将筒子（圆形带点） */
+.shotgun-pellet {
+    width: 10px; height: 10px;
+    background: radial-gradient(circle, #ffffff 30%, #4fc3f7 60%, #0288d1 100%);
+    border-radius: 50%;
+    box-shadow:
+        0 0 8px rgba(79,195,247,0.7),
+        0 0 16px rgba(2,136,209,0.3);
+}
+.shotgun-pellet::before {
+    content: '●';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    color: #0d47a1;
+}
+
+/* 环形护体 — 翡翠玉璧 */
+.orbit-shield-orb {
+    position: absolute;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #a5d6a7, #388e3c);
+    box-shadow:
+        0 0 12px rgba(56,142,60,0.8),
+        0 0 24px rgba(76,175,80,0.4),
+        inset 0 0 6px rgba(255,255,255,0.4),
+        inset 0 0 2px rgba(255,255,255,0.6);
+    pointer-events: none;
+    z-index: 9;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+.orbit-shield-orb::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 1px solid rgba(165,214,167,0.4);
+    animation: shieldPulse 1.5s ease-in-out infinite;
+}
+@keyframes shieldPulse {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.3); opacity: 0; }
+}
+
+/* 区域震荡 — 麻将牌翻飞涟漪 */
+.shockwave {
+    position: absolute;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle, rgba(255,215,0,0.15) 0%, transparent 60%),
+        repeating-conic-gradient(from 0deg, rgba(255,152,0,0.1) 0deg 10deg, transparent 10deg 20deg);
+    pointer-events: none;
+    z-index: 8;
+    transform: translate(-50%, -50%);
+    border: 2px solid rgba(255,215,0,0.3);
+    box-shadow: 0 0 20px rgba(255,215,0,0.3);
+}
+
+/* 全屏脉冲 — 红中爆裂 */
+.nova-pulse {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(211,47,47,0.2) 0%, rgba(255,215,0,0.1) 40%, transparent 70%);
+    pointer-events: none;
+    z-index: 8;
+    transform: translate(-50%, -50%);
+    border: 3px solid rgba(211,47,47,0.5);
+    box-shadow: 0 0 30px rgba(211,47,47,0.4), inset 0 0 20px rgba(255,215,0,0.2);
+}
+
+/* 持续线杀 — 光刃斩击 */
+.laser-beam {
+    position: absolute;
+    height: 5px;
+    background: linear-gradient(90deg, rgba(255,215,0,0.9), rgba(255,152,0,0.6), rgba(255,87,34,0.3));
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 7;
+    box-shadow:
+        0 0 16px rgba(255,215,0,0.7),
+        0 0 32px rgba(255,152,0,0.3),
+        inset 0 0 4px rgba(255,255,255,0.5);
+}
+.laser-beam::before {
+    content: '';
+    position: absolute;
+    inset: -3px 0;
+    background: linear-gradient(90deg, rgba(255,255,255,0.4), transparent);
+    border-radius: 4px;
+}
+
+/* 置换面板 weapon-card: dead CSS — compendium uses .compendium-weapon-card */
+
+/* ══════════════════════════════════════════════
+   Overdrive 视觉
+   ══════════════════════════════════════════════ */
+
+#game-container.overdrive-active #battlefield {
+    filter: saturate(1.6) hue-rotate(-10deg) brightness(1.15);
+    transition: filter 0.15s;
+}
+/* Epoch 38: Mutator screen tinting */
+#game-container.mutator-bloodmoon #battlefield { filter: sepia(0.3) saturate(1.5) hue-rotate(-20deg); }
+#game-container.mutator-frenzy #battlefield { filter: saturate(1.4) brightness(1.05); }
+#game-container.mutator-gravity #battlefield { filter: contrast(1.15) brightness(0.95); }
+#game-container.mutator-frailty #battlefield { filter: saturate(0.7) brightness(1.1); }
+#game-container.mutator-wither #battlefield { filter: saturate(0.5) brightness(0.9) hue-rotate(40deg); }
+#game-container.overdrive-active #player {
+    filter: drop-shadow(0 0 20px #b62929) drop-shadow(0 0 40px #b62929);
+    box-shadow: 0 0 60px rgba(182,41,41,0.6), inset 0 0 20px rgba(255,255,255,0.15);
+}
+#game-container.overdrive-active .enemy {
+    filter: grayscale(0.7) brightness(0.5);
+    transition: filter 0.3s;
+}
+#game-container.overdrive-active #top-bar,
+#game-container.overdrive-active #rage-bar-container {
+    border-color: rgba(182,41,41,0.3);
+}
+
+/* ══════════════════════════════════════════════
+   时钟冻结 — 全局动画挂起
+   ══════════════════════════════════════════════ */
+
+.game-clock-frozen *, .game-clock-frozen *::before, .game-clock-frozen *::after {
+    animation-play-state: paused !important;
+    transition-property: none !important;
+}
+.game-clock-frozen #reward-overlay,
+.game-clock-frozen #reward-overlay *,
+.game-clock-frozen #reward-overlay *::before,
+.game-clock-frozen #reward-overlay *::after,
+.game-clock-frozen #pause-overlay,
+.game-clock-frozen #pause-overlay *,
+.game-clock-frozen #guide-overlay,
+.game-clock-frozen #guide-overlay *,
+.game-clock-frozen #boss-gamble-panel,
+.game-clock-frozen #boss-gamble-panel *,
+.game-clock-frozen #boss-gamble-panel *::before,
+.game-clock-frozen #boss-gamble-panel *::after,
+.game-clock-frozen #mutator-overlay,
+.game-clock-frozen #mutator-overlay *,
+.game-clock-frozen #mutator-overlay *::before,
+.game-clock-frozen #mutator-overlay *::after,
+.game-clock-frozen #victory-overlay,
+.game-clock-frozen #victory-overlay *,
+.game-clock-frozen #victory-overlay *::before,
+.game-clock-frozen #victory-overlay *::after,
+.game-clock-frozen #game-over-overlay,
+.game-clock-frozen #game-over-overlay *,
+.game-clock-frozen #game-over-overlay *::before,
+.game-clock-frozen #game-over-overlay *::after {
+    animation-play-state: running !important;
+    transition-property: all !important;
+}
+
+/* ══════════════════════════════════════════════
+   引导面板步骤导航 (Epoch 1)
+   ══════════════════════════════════════════════ */
+
+.guide-nav {
+    display: flex; gap: 8px; justify-content: center; margin-top: 8px;
+}
+.guide-nav button {
+    padding: 8px 20px; font-size: calc(13 * var(--_fs) * 1px); font-weight: 700;
+    border-radius: 6px; cursor: pointer;
+    transition: transform 0.1s, background 0.2s;
+}
+.guide-nav button:hover { transform: scale(1.04); }
+.guide-nav button:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }

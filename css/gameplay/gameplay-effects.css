@@ -1,0 +1,206 @@
+/* ══════════════════════════════════════════════
+   伤害飘字 — 麻将江湖配色
+   ══════════════════════════════════════════════ */
+
+.damage-float {
+    position: absolute; font-size: calc(18 * var(--_fs) * 1px); font-weight: 800;
+    color: #1e6f42; pointer-events: none; z-index: 20;
+    animation: floatUp 0.6s ease-out forwards;
+    text-shadow: 0 0 6px rgba(30,111,66,0.5);
+}
+.damage-float.crit {
+    font-size: calc(26 * var(--_fs) * 1px); color: #b62929;
+    text-shadow: 0 0 12px rgba(182,41,41,0.7), 0 0 24px rgba(182,41,41,0.3);
+}
+
+/* ══════════════════════════════════════════════
+   爆炸/特效
+   ══════════════════════════════════════════════ */
+
+.explosion-effect {
+    position: absolute; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,200,50,0.6), rgba(255,100,0,0));
+    pointer-events: none; z-index: 15;
+    animation: explosionExpand 0.35s ease-out forwards;
+}
+
+/* ══════════════════════════════════════════════
+   高性能飘字对象池 (FCT)
+   ══════════════════════════════════════════════ */
+
+#fct-layer { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 25; }
+
+.fct-node {
+    position: absolute;
+    font-family: 'Impact', 'Arial Black', sans-serif;
+    font-weight: 900; white-space: nowrap;
+    pointer-events: none; will-change: transform, opacity;
+    /* 最小字体钳制：不低于 18px 确保可读性 */
+    min-font-size: clamp(18px, 2vw, 45px);
+}
+
+.fct-normal {
+    font-size: clamp(22px, 2.5vw, 45px);
+    color: #ffffff;
+    text-shadow: 0 0 6px rgba(0,0,0,0.8), 1px 1px 0 #000, -1px -1px 0 #000;
+    animation: fctFloatUp 0.5s ease-out forwards;
+}
+.fct-crit {
+    font-size: clamp(28px, 3.2vw, 52px);
+    color: #ff4444;
+    text-shadow: 0 0 10px rgba(255,68,68,0.8), 0 0 20px rgba(255,0,0,0.4), 2px 2px 0 #000, -1px -1px 0 #000;
+    animation: fctCritPop 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.fct-heal {
+    font-size: clamp(18px, 2vw, 36px);
+    color: #66ff88;
+    text-shadow: 0 0 12px rgba(102,255,136,0.8), 0 0 24px rgba(76,175,80,0.4);
+    animation: fctFloatUp 0.45s ease-out forwards;
+}
+.fct-exp {
+    font-size: clamp(16px, 1.8vw, 32px);
+    color: #88ccff;
+    text-shadow: 0 0 10px rgba(136,204,255,0.7), 0 0 20px rgba(100,150,255,0.3);
+    animation: fctFloatUp 0.4s ease-out forwards;
+}
+@keyframes fctFloatUp {
+    0%   { opacity: 1; transform: translateY(0) scale(0.8); }
+    15%  { opacity: 1; transform: translateY(-8px) scale(1); }
+    40%  { opacity: 0.7; transform: translateY(-25px) scale(0.95); }
+    70%  { opacity: 0.35; transform: translateY(-40px) scale(0.85); }
+    100% { opacity: 0; transform: translateY(-55px) scale(0.75); }
+}
+@keyframes fctCritPop {
+    0%   { opacity: 1; transform: scale(1.5); }
+    20%  { opacity: 1; transform: scale(1.1); }
+    45%  { opacity: 0.7; transform: translateY(-15px) scale(1); }
+    75%  { opacity: 0.3; transform: translateY(-38px) scale(0.85); }
+    100% { opacity: 0; transform: translateY(-55px) scale(0.75); }
+}
+@keyframes fctOverdriveArc {
+    0%   { opacity: 1; transform: translateY(0) scale(1.2); }
+    20%  { transform: translateX(12px) translateY(-20px) scale(1.4); }
+    50%  { opacity: 1; transform: translateX(-8px) translateY(-40px) scale(1.1); }
+    100% { opacity: 0; transform: translateX(0) translateY(-60px) scale(0.8); }
+}
+
+/* ══════════════════════════════════════════════
+   套装共鸣特效
+   ══════════════════════════════════════════════ */
+
+.resonance-flame {
+    position: absolute; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,100,0,0.35) 0%, rgba(255,50,0,0) 70%);
+    pointer-events: none; z-index: 14;
+    transform: translate(-50%, -50%);
+    animation: resonanceFlame 0.4s ease-out forwards;
+}
+@keyframes resonanceFlame {
+    0% { opacity: 0.8; transform: translate(-50%, -50%) scale(0.6); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+}
+.resonance-ice {
+    position: absolute; border-radius: 50%;
+    background: radial-gradient(circle, rgba(30,111,66,0.3) 0%, rgba(0,100,50,0) 70%);
+    pointer-events: none; z-index: 14;
+    transform: translate(-50%, -50%);
+    animation: resonanceIce 0.5s ease-out forwards;
+}
+@keyframes resonanceIce {
+    0% { opacity: 0.7; transform: translate(-50%, -50%) scale(0.5); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+/* ══════════════════════════════════════════════
+   动态屏幕震颤 — 隔离于 world-layer
+   ══════════════════════════════════════════════ */
+
+#world-layer.shake-active {
+    animation: shakeEffect linear;
+    animation-fill-mode: forwards;
+}
+@keyframes shakeEffect {
+    0%   { transform: translate(0, 0); }
+    10%  { transform: translate(var(--sx, -6px), var(--sy, 6px)); }
+    20%  { transform: translate(calc(var(--sx, -6px) * -0.7), calc(var(--sy, 6px) * -0.7)); }
+    30%  { transform: translate(calc(var(--sx, -6px) * 0.5), calc(var(--sy, 6px) * 0.5)); }
+    40%  { transform: translate(calc(var(--sx, -6px) * -0.3), calc(var(--sy, 6px) * -0.3)); }
+    50%  { transform: translate(calc(var(--sx, -6px) * 0.15), calc(var(--sy, 6px) * 0.15)); }
+    60%  { transform: translate(calc(var(--sx, -6px) * -0.07), calc(var(--sy, 6px) * -0.07)); }
+    70%  { transform: translate(calc(var(--sx, -6px) * 0.03), calc(var(--sy, 6px) * 0.03)); }
+    80%  { transform: translate(calc(var(--sx, -6px) * -0.01), calc(var(--sy, 6px) * -0.01)); }
+    90%  { transform: translate(0, 0); }
+    100% { transform: translate(0, 0); }
+}
+
+/* ══════════════════════════════════════════════
+   动态上下文高亮 (Epoch 1)
+   ══════════════════════════════════════════════ */
+
+.context-highlight {
+    animation: contextPulse 1s ease-in-out 3;
+}
+@keyframes contextPulse {
+    0% { box-shadow: 0 0 0 0 rgba(76,175,80,0); }
+    50% { box-shadow: 0 0 0 8px rgba(76,175,80,0.5), 0 0 30px rgba(76,175,80,0.3); }
+    100% { box-shadow: 0 0 0 0 rgba(76,175,80,0); }
+}
+
+/* ══════════════════════════════════════════════
+   手牌交付飞入动画 (Epoch 1)
+   ══════════════════════════════════════════════ */
+
+.tile-delivering .tile-body {
+    animation: tileDeliverIn 0.4s ease-out forwards;
+}
+@keyframes tileDeliverIn {
+    0% { opacity: 0; transform: perspective(400px) rotateX(8deg) translateY(-30px) scale(0.5); }
+    100% { opacity: 1; transform: perspective(400px) rotateX(8deg) translateY(0) scale(1); }
+}
+
+/* 经验宝石 */
+.exp-gem {
+    position: absolute; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #4caf50, #1a5336);
+    box-shadow: 0 0 12px rgba(76,175,80,0.6), inset 0 0 4px rgba(255,255,255,0.3);
+    pointer-events: none; z-index: 8;
+}
+
+/* 图腾 */
+.totem-pillar {
+    position: absolute; width: 16px; height: 40px;
+    background: linear-gradient(180deg, #8a7a6a, #5a4a3a);
+    border-radius: 4px 4px 2px 2px;
+    pointer-events: none; z-index: 4;
+    box-shadow: 0 0 20px rgba(90,74,58,0.4), 0 0 60px rgba(90,74,58,0.1);
+    transform: translate(-50%, -100%);
+}
+
+/* Boss 血怒滤镜 */
+.boss-blood-rage { filter: hue-rotate(-30deg) saturate(1.5); }
+
+/* 成就/飘字动画 */
+@keyframes floatUp {
+    0% { opacity: 1; transform: translate(-50%, -50%) translateY(0); }
+    100% { opacity: 0; transform: translate(-50%, -50%) translateY(-60px); }
+}
+@keyframes achievePop {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+    25% { transform: translate(-50%, -50%) scale(1); }
+    60% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -50%) translateY(-30px); }
+}
+
+/* 响应式: 飘字 */
+@media (max-height: 768px) {
+    .damage-float { font-size: 14px; }
+    .heal-float { font-size: 14px; }
+    .crit-float { font-size: 20px; }
+}
+@media (max-height: 600px) {
+    .damage-float { font-size: 12px; }
+}
+@media (max-height: 480px) {
+    .damage-float { font-size: 10px; }
+}
