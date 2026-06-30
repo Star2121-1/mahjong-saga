@@ -2080,7 +2080,8 @@ Gp._renderPlayerTile = function() {
     this.playerEl.style.fontWeight = '900';
     this.playerEl.style.color = '#b62929';
     this.playerEl.style.textShadow = '0 0 8px rgba(182,41,41,0.6)';
-    this.playerEl.textContent = '雀';
+    /* 不要用 textContent 覆盖子元素 — 用 ::before 伪元素显示"雀"字 */
+    this.playerEl.style.setProperty('--tile-char', '"雀"');
 };
 
 Gp._syncEntities = function() {

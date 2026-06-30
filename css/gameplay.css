@@ -97,6 +97,13 @@
         0 8px 10px rgba(0,0,0,0.5);
     text-shadow: 0 0 8px rgba(182,41,41,0.6);
 }
+#player::before {
+    content: '雀';
+    font-size: calc(24 * var(--_fs) * 1px);
+    font-weight: 900;
+    color: #b62929;
+    text-shadow: 0 0 8px rgba(182,41,41,0.6);
+}
 #player.invuln { /* 受击闪烁由 JS 控制 opacity 平滑插值，CSS 不设固定值 */ }
 #player-hp-wrap {
     position: absolute; top: -22px; left: 50%;
