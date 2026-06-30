@@ -1822,7 +1822,8 @@ Gp._settleRun = async function(tokens) {
     }
 
     /* ── Epoch 15/23: 战局历史记录 ── */
-    var uniqueRelics = Object.keys(this.player.relicLevels || {}).filter(function(k) { return (this.player.relicLevels[k] || 0) > 0; }).length;
+    var pR3 = this.player && this.player.relicLevels || {};
+    var uniqueRelics = Object.keys(pR3).filter(function(k) { return (pR3[k] || 0) > 0; }).length;
     var _wc = [];
     try {
         if (typeof window.saveManager.recordRunHistory === 'function') {

@@ -831,7 +831,7 @@ class SaveManager {
         var shuffled = allChallenges.slice().sort(function() { return Math.random() - 0.5; });
         var picked = shuffled.slice(0, 4);
         picked.forEach(function(c) { c.progress = 0; c.completed = false; });
-        meta.currentWeek = weekKey || this._weekKey();
+        meta.currentWeek = weekKey || ('W' + Math.floor((Date.now() - Date.UTC(2025, 0, 1)) / (7 * 24 * 60 * 60 * 1000)));
         meta.weeklyChallenges = { week: meta.currentWeek, challenges: picked };
         this.saveMeta(meta);
         return picked;
