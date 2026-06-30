@@ -253,6 +253,7 @@ Gp._cacheStage3DOM = function() {
     this.battlefield = document.getElementById('battlefield');
     this.container = document.getElementById('game-container');
     this._worldLayer = document.getElementById('world-layer');
+    this._battlefieldBg = document.getElementById('battlefield');
     this.playerEl = document.getElementById('player');
     this.playerHpFill = document.getElementById('player-hp-fill');
     this.playerHpText = document.getElementById('player-hp-text');
@@ -731,6 +732,13 @@ Gp._loop = function(timestamp) {
         var input = this._getInputVector();
         this._lastMoveX = input.x;
         this.player.update(dt, input.x, input.y, this._mapW, this._mapH);
+
+        /* ── Step 5: 视差背景随玩家位置微移 ── */
+        if (this._battlefieldBg) {
+            var px = -(this.player.x / this._mapW - 0.5) * 40;
+            var py = -(this.player.y / this._mapH - 0.5) * 30;
+            this._battlefieldBg.style.transform = 'translate(' + px + 'px,' + py + 'px)';
+        }
 
         if (!this._pendingReward) {
             /* Epoch 5: 委托刷怪逻辑到 SpawnSystem */
