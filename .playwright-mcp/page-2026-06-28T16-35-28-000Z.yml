@@ -1,0 +1,852 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - link "Skip to main content" [ref=e3] [cursor=pointer]:
+      - /url: "#content"
+    - generic [ref=e4]:
+      - link "Stack Overflow Home" [ref=e5] [cursor=pointer]:
+        - /url: https://stackoverflow.com
+        - img [ref=e6]
+      - link "About" [ref=e8] [cursor=pointer]:
+        - /url: https://stackoverflow.co/
+        - generic [ref=e9]: About
+      - button "Products" [ref=e10] [cursor=pointer]:
+        - generic [ref=e11]: Products
+      - link "Stack Internal" [ref=e12] [cursor=pointer]:
+        - /url: https://stackoverflow.co/internal/
+        - generic [ref=e13]: Stack Internal
+      - search [ref=e14]:
+        - generic [ref=e15]:
+          - combobox "Search" [ref=e16]
+          - img
+      - navigation "Topbar" [ref=e17]:
+        - list [ref=e18]:
+          - listitem [ref=e19]:
+            - link "Help Center and other resources" [ref=e20] [cursor=pointer]:
+              - /url: /help
+              - img [ref=e21]
+          - listitem [ref=e23]:
+            - link "Site switcher" [ref=e24] [cursor=pointer]:
+              - /url: https://stackexchange.com
+              - img [ref=e25]
+          - listitem
+          - listitem
+          - listitem [ref=e27]:
+            - link "Log in" [ref=e28] [cursor=pointer]:
+              - /url: https://stackoverflow.com/users/login?ssrc=head&returnurl=https%3a%2f%2fstackoverflow.com%2fquestions%2f58896644%2fs3-athena-query-result-location-and-invalid-s3-folder-location%2f58906839
+          - listitem [ref=e29]:
+            - link "Sign up" [ref=e30] [cursor=pointer]:
+              - /url: https://stackoverflow.com/users/signup?ssrc=head&returnurl=https%3a%2f%2fstackoverflow.com%2fquestions%2f58896644%2fs3-athena-query-result-location-and-invalid-s3-folder-location%2f58906839
+  - generic [ref=e32]:
+    - generic [ref=e33]:
+      - text: The 2026 Annual Developer Survey is live—
+      - link "take the Survey today!" [ref=e34] [cursor=pointer]:
+        - /url: https://take.survey.stackoverflow.co/jfe/form/SV_4GHunpL3IfJ3rRc?utm_medium=referral&utm_source=stackoverflow-community&utm_campaign=dev-survey-2026&utm_content=announcement-banner
+    - link "dismiss" [ref=e35] [cursor=pointer]:
+      - /url: "#"
+      - img [ref=e36]
+  - generic [ref=e38]:
+    - navigation "Primary" [ref=e41]:
+      - list [ref=e42]:
+        - listitem [ref=e43]:
+          - list [ref=e44]:
+            - listitem [ref=e45]:
+              - link "Home" [ref=e46] [cursor=pointer]:
+                - /url: /
+                - generic [ref=e47]:
+                  - img [ref=e48]
+                  - generic [ref=e50]: Home
+            - listitem [ref=e51]:
+              - link "Questions" [ref=e52] [cursor=pointer]:
+                - /url: /questions
+                - generic [ref=e53]:
+                  - img [ref=e54]
+                  - generic [ref=e56]: Questions
+            - listitem [ref=e57]:
+              - link "AI Assist" [ref=e58] [cursor=pointer]:
+                - /url: https://stackoverflow.com/ai-assist
+                - generic [ref=e59]:
+                  - img [ref=e61]
+                  - generic [ref=e63]: AI Assist
+            - listitem [ref=e64]:
+              - link "Tags" [ref=e65] [cursor=pointer]:
+                - /url: /tags
+                - generic [ref=e66]:
+                  - img [ref=e67]
+                  - generic [ref=e70]: Tags
+            - listitem [ref=e71]
+            - listitem [ref=e72]:
+              - link "Stack Overflow for Agents" [ref=e73] [cursor=pointer]:
+                - /url: http://agents.stackoverflow.com
+                - generic [ref=e74]:
+                  - img [ref=e76]
+                  - generic [ref=e78]: Stack Overflow for Agents
+            - listitem [ref=e79]
+            - listitem [ref=e80]:
+              - link "Challenges" [ref=e81] [cursor=pointer]:
+                - /url: /beta/challenges
+                - generic [ref=e82]:
+                  - img [ref=e83]
+                  - generic [ref=e85]: Challenges
+            - listitem [ref=e86]:
+              - link "Chat" [expanded] [ref=e87] [cursor=pointer]:
+                - /url: https://chat.stackoverflow.com/?tab=explore
+                - img [ref=e90]
+                - generic [ref=e95]: Chat
+            - listitem [ref=e96]:
+              - link "Articles" [ref=e97] [cursor=pointer]:
+                - /url: https://stackoverflow.blog/contributed?utm_medium=referral&utm_source=stackoverflow-community&utm_campaign=so-blog&utm_content=experiment-articles
+                - generic [ref=e98]:
+                  - img [ref=e99]
+                  - generic [ref=e102]: Articles
+            - listitem [ref=e103]:
+              - link "Users" [ref=e104] [cursor=pointer]:
+                - /url: /users
+                - generic [ref=e105]:
+                  - img [ref=e106]
+                  - generic [ref=e108]: Users
+            - listitem [ref=e109]
+            - listitem [ref=e110]:
+              - link "Companies" [ref=e111] [cursor=pointer]:
+                - /url: https://stackoverflow.com/jobs/companies?so_medium=stackoverflow&so_source=SiteNav
+                - generic [ref=e112]:
+                  - img [ref=e113]
+                  - generic [ref=e115]: Companies
+            - listitem [ref=e116]:
+              - button "Collectives" [ref=e118] [cursor=pointer]:
+                - generic [ref=e119]: Collectives
+                - img [ref=e121]
+            - listitem [ref=e123]:
+              - paragraph [ref=e124]:
+                - text: Communities for your favorite technologies.
+                - link "Explore all Collectives" [ref=e125] [cursor=pointer]:
+                  - /url: /collectives-all
+        - listitem [ref=e126]:
+          - generic [ref=e127]: Stack Internal
+          - generic [ref=e128]:
+            - img [ref=e129]
+            - paragraph [ref=e143]:
+              - text: Stack Overflow for Teams is now called
+              - strong [ref=e144]: Stack Internal
+              - text: . Bring the best of human thought and AI automation together at your work.
+            - link "Try for free" [ref=e145] [cursor=pointer]:
+              - /url: https://stackoverflowteams.com/teams/create/free/?utm_medium=referral&utm_source=stackoverflow-community&utm_campaign=side-bar&utm_content=explore-teams
+            - link "Learn more" [ref=e146] [cursor=pointer]:
+              - /url: https://stackoverflow.co/internal/?utm_medium=referral&utm_source=stackoverflow-community&utm_campaign=side-bar&utm_content=explore-teams
+    - generic [ref=e149]:
+      - generic [ref=e150]:
+        - heading "S3/Athena query result location and “Invalid S3 folder location”" [level=1] [ref=e151]:
+          - link "S3/Athena query result location and “Invalid S3 folder location”" [ref=e152] [cursor=pointer]:
+            - /url: /questions/58896644/s3-athena-query-result-location-and-invalid-s3-folder-location
+        - link "Ask Question" [ref=e155] [cursor=pointer]:
+          - /url: /questions/ask
+      - generic [ref=e156]:
+        - generic "2019-11-17 01:08:46Z" [ref=e157]:
+          - text: Asked
+          - time [ref=e158]: 6 years, 7 months ago
+        - generic [ref=e159]:
+          - text: Modified
+          - link "6 years, 5 months ago" [ref=e160] [cursor=pointer]:
+            - /url: "?lastactivity"
+        - generic "Viewed 7,935 times" [ref=e161]: Viewed 8k times
+        - generic [ref=e162]:
+          - img [ref=e163]
+          - text: Part of
+          - link "AWS" [ref=e165] [cursor=pointer]:
+            - /url: /collectives/aws
+          - text: Collective
+      - main "question and answers" [ref=e166]:
+        - generic [ref=e168]:
+          - generic [ref=e170]:
+            - button "Up vote" [ref=e171] [cursor=pointer]:
+              - img [ref=e172]
+            - generic [ref=e174]: "9"
+            - button "Down vote" [ref=e175] [cursor=pointer]:
+              - img [ref=e176]
+            - button "Save" [ref=e178] [cursor=pointer]:
+              - img [ref=e179]
+            - link "Timeline" [ref=e181] [cursor=pointer]:
+              - /url: /posts/58896644/timeline
+              - img [ref=e182]
+          - generic [ref=e184]:
+            - generic [ref=e185]:
+              - paragraph [ref=e186]: "Are there particular requirements to the bucket for specifying the query result location? When I try to create a new table, I get a popup:"
+              - code [ref=e188]: Before you run your first query, you need to set up a query result location in Amazon S3. Learn more
+              - paragraph [ref=e189]: So I click the link and specify my query result location in the format specified s3://query-results-bucket/folder. But it always says
+              - code [ref=e191]: Invalid S3 folder location
+              - paragraph [ref=e192]: I posted this in Superuser first but it was closed (not sure why...).
+            - generic [ref=e195]:
+              - link [ref=e196] [cursor=pointer]:
+                - /url: /collectives/aws
+              - list [ref=e197]:
+                - listitem [ref=e198]:
+                  - link "show questions tagged 'amazon-web-services'" [ref=e199] [cursor=pointer]:
+                    - /url: /questions/tagged/amazon-web-services
+                    - text: amazon-web-services
+                - listitem [ref=e200]:
+                  - link "show questions tagged 'amazon-s3'" [ref=e201] [cursor=pointer]:
+                    - /url: /questions/tagged/amazon-s3
+                    - text: amazon-s3
+                - listitem [ref=e202]:
+                  - link "show questions tagged 'amazon-athena'" [ref=e203] [cursor=pointer]:
+                    - /url: /questions/tagged/amazon-athena
+                    - text: amazon-athena
+            - generic [ref=e205]:
+              - generic [ref=e208]:
+                - link "Share" [ref=e210] [cursor=pointer]:
+                  - /url: /q/58896644
+                - link "Improve this question" [ref=e212] [cursor=pointer]:
+                  - /url: /posts/58896644/edit
+                - button "Follow" [ref=e214] [cursor=pointer]
+              - generic [ref=e216]:
+                - link "edited Nov 17, 2019 at 1:50" [ref=e219] [cursor=pointer]:
+                  - /url: /posts/58896644/revisions
+                - link "chris's user avatar" [ref=e221] [cursor=pointer]:
+                  - /url: /users/4782/chris
+                  - img "chris's user avatar" [ref=e223]
+                - generic [ref=e224]:
+                  - link "chris" [ref=e225] [cursor=pointer]:
+                    - /url: /users/4782/chris
+                  - generic [ref=e226]:
+                    - text: 37.7k
+                    - generic [ref=e227]: "55"
+                    - generic [ref=e229]: 55 gold badges
+                    - generic [ref=e230]: "162"
+                    - generic [ref=e232]: 162 silver badges
+                    - generic [ref=e233]: "245"
+                    - generic [ref=e235]: 245 bronze badges
+              - generic [ref=e237]:
+                - generic [ref=e239]: asked Nov 17, 2019 at 1:08
+                - link "tom's user avatar" [ref=e241] [cursor=pointer]:
+                  - /url: /users/1042151/tom
+                  - img "tom's user avatar" [ref=e243]
+                - generic [ref=e244]:
+                  - link "tom" [ref=e245] [cursor=pointer]:
+                    - /url: /users/1042151/tom
+                  - generic [ref=e246]:
+                    - text: 1,503
+                    - generic [ref=e247]: "1"
+                    - generic [ref=e249]: 1 gold badge
+                    - generic [ref=e250]: "18"
+                    - generic [ref=e252]: 18 silver badges
+                    - generic [ref=e253]: "31"
+                    - generic [ref=e255]: 31 bronze badges
+          - generic [ref=e256]:
+            - list [ref=e258]:
+              - listitem [ref=e259]:
+                - generic [ref=e261]: "4"
+                - generic [ref=e263]:
+                  - generic [ref=e264]:
+                    - text: Try putting a trailing slash (
+                    - code [ref=e265]: /
+                    - text: ") at the end of the path, eg:"
+                    - code [ref=e266]: s3://query-results-bucket/folder/
+                  - generic [ref=e267]:
+                    - text: –
+                    - link "John Rotenstein" [ref=e268] [cursor=pointer]:
+                      - /url: /users/174777/john-rotenstein
+                  - link "Commented Nov 17, 2019 at 5:39" [ref=e270] [cursor=pointer]:
+                    - /url: "#comment104059986_58896644"
+                    - generic [ref=e271]: Commented
+                    - text: Nov 17, 2019 at 5:39
+              - listitem [ref=e272]
+              - listitem [ref=e274]:
+                - generic [ref=e277]:
+                  - text: I had to add the trailing slash! Thanks
+                  - generic [ref=e278]:
+                    - text: –
+                    - link "tom" [ref=e279] [cursor=pointer]:
+                      - /url: /users/1042151/tom
+                  - link "Commented Nov 18, 2019 at 1:00" [ref=e281] [cursor=pointer]:
+                    - /url: "#comment104076131_58896644"
+                    - generic [ref=e282]: Commented
+                    - text: Nov 18, 2019 at 1:00
+              - listitem [ref=e283]:
+                - generic [ref=e285]: "1"
+                - generic [ref=e287]:
+                  - text: trailing slash didn't work for me. I had to go Workgroups > View details > Edit workgroup and use the Select dialog to browse and select the folder, then Save
+                  - generic [ref=e288]:
+                    - text: –
+                    - link "DaveO" [ref=e289] [cursor=pointer]:
+                      - /url: /users/422611/daveo
+                  - link "Commented Dec 23, 2019 at 2:27" [ref=e291] [cursor=pointer]:
+                    - /url: "#comment105081759_58896644"
+                    - generic [ref=e292]: Commented
+                    - text: Dec 23, 2019 at 2:27
+              - listitem [ref=e293]:
+                - generic [ref=e296]:
+                  - text: Thank you @JohnRotenstein for the trailing slash comment. Would have been so simple for Amazon to handle that for us, or at least tells us more!
+                  - generic [ref=e297]:
+                    - text: –
+                    - link "sfuqua" [ref=e298] [cursor=pointer]:
+                      - /url: /users/30384/sfuqua
+                  - link "Commented Jun 4, 2020 at 20:43" [ref=e300] [cursor=pointer]:
+                    - /url: "#comment110013507_58896644"
+                    - generic [ref=e301]: Commented
+                    - text: Jun 4, 2020 at 20:43
+            - button "Add a comment" [ref=e303] [cursor=pointer]
+        - generic [ref=e304]:
+          - generic [ref=e306]:
+            - heading "2 Answers" [level=2] [ref=e308]
+            - generic [ref=e310]:
+              - generic [ref=e312]: "Sorted by:"
+              - combobox "Sorted by:" [ref=e314]:
+                - option "Highest score (default)" [selected]
+                - option "Trending (recent votes count more)"
+                - option "Date modified (newest first)"
+                - option "Date created (oldest first)"
+          - generic [ref=e316]:
+            - generic [ref=e318]:
+              - button "Up vote" [ref=e319] [cursor=pointer]:
+                - img [ref=e320]
+              - generic [ref=e322]: "40"
+              - button "Down vote" [ref=e323] [cursor=pointer]:
+                - img [ref=e324]
+              - button "Save" [ref=e326] [cursor=pointer]:
+                - img [ref=e327]
+              - note "Accepted" [ref=e329]:
+                - img [ref=e331]
+              - link "Timeline" [ref=e333] [cursor=pointer]:
+                - /url: /posts/58906839/timeline
+                - img [ref=e334]
+            - generic [ref=e336]:
+              - generic [ref=e337]:
+                - paragraph [ref=e338]: "The folder name needs to have a trailing slash:"
+                - code [ref=e340]: s3://query-results-bucket/folder/
+              - generic [ref=e342]:
+                - time
+                - generic [ref=e345]:
+                  - link "Share" [ref=e347] [cursor=pointer]:
+                    - /url: /a/58906839
+                  - link "Improve this answer" [ref=e349] [cursor=pointer]:
+                    - /url: /posts/58906839/edit
+                  - button "Follow" [ref=e351] [cursor=pointer]
+                - generic [ref=e353]:
+                  - generic [ref=e355]: answered Nov 18, 2019 at 1:19
+                  - link "John Rotenstein's user avatar" [ref=e357] [cursor=pointer]:
+                    - /url: /users/174777/john-rotenstein
+                    - img "John Rotenstein's user avatar" [ref=e359]
+                  - generic [ref=e360]:
+                    - link "John Rotenstein" [ref=e361] [cursor=pointer]:
+                      - /url: /users/174777/john-rotenstein
+                    - link [ref=e362] [cursor=pointer]:
+                      - /url: /collectives/aws
+                      - img [ref=e363]
+                    - generic [ref=e365]:
+                      - text: 273k
+                      - generic [ref=e366]: "28"
+                      - generic [ref=e368]: 28 gold badges
+                      - generic [ref=e369]: "458"
+                      - generic [ref=e371]: 458 silver badges
+                      - generic [ref=e372]: "544"
+                      - generic [ref=e374]: 544 bronze badges
+            - generic [ref=e375]:
+              - generic [ref=e376]:
+                - img [ref=e377]
+                - generic [ref=e379]: Sign up to request clarification or add additional context in comments.
+                - button [ref=e380] [cursor=pointer]:
+                  - img [ref=e381]
+              - generic [ref=e384]:
+                - heading "1 Comment" [level=2] [ref=e385]:
+                  - button "1 Comment" [expanded] [ref=e386] [cursor=pointer]:
+                    - text: 1 Comment
+                    - img [ref=e387]
+                - button "Add a comment" [ref=e390] [cursor=pointer]:
+                  - paragraph [ref=e392]: Add a comment
+                - list [ref=e393]:
+                  - listitem [ref=e394]:
+                    - generic [ref=e395]:
+                      - generic [ref=e396]:
+                        - link "User profile" [ref=e398] [cursor=pointer]:
+                          - /url: /users/1117219/stonelam
+                        - generic [ref=e403]:
+                          - link "StoneLam" [ref=e404] [cursor=pointer]:
+                            - /url: /users/1117219/stonelam
+                          - link "Over a year ago" [ref=e405] [cursor=pointer]:
+                            - /url: "#comment106655657_58906839"
+                            - time [ref=e406]: Over a year ago
+                      - generic [ref=e410]:
+                        - generic [ref=e411]: Amazon should add this hint at document or the popup alert. Or should append the trailing slash for user automatically.
+                        - generic [ref=e415]:
+                          - button "13" [ref=e416] [cursor=pointer]:
+                            - generic [ref=e417]:
+                              - img [ref=e419]
+                              - generic [ref=e421]: "13"
+                          - button "Reply" [ref=e422] [cursor=pointer]:
+                            - generic [ref=e423]:
+                              - img [ref=e425]
+                              - generic [ref=e427]: Reply
+                          - button "Open menu" [ref=e428] [cursor=pointer]:
+                            - img [ref=e429]
+          - generic [ref=e432]:
+            - generic [ref=e434]:
+              - button "Up vote" [ref=e435] [cursor=pointer]:
+                - img [ref=e436]
+              - generic [ref=e438]: "0"
+              - button "Down vote" [ref=e439] [cursor=pointer]:
+                - img [ref=e440]
+              - button "Save" [ref=e442] [cursor=pointer]:
+                - img [ref=e443]
+              - link "Timeline" [ref=e445] [cursor=pointer]:
+                - /url: /posts/58896856/timeline
+                - img [ref=e446]
+            - generic [ref=e448]:
+              - generic [ref=e449]:
+                - paragraph [ref=e450]: Ran into this earlier in the week.
+                - paragraph [ref=e451]: First, make sure the bucket exists. There doesn't appear to be an option to create the bucket when setting the value in the athena console.
+                - paragraph [ref=e452]: Next, make sure you have the bucket specified properly. In my case, I initially had s3:/// - there is no validation, so an extra character will cause this error. If you go to the athena settings, you can see what the bucket settings look like.
+                - paragraph [ref=e453]: Finally check the workgroup - there is a default workgroup per account, make sure it's not disabled. You can create additional workgroups, each of which will need its own settings.
+              - generic [ref=e455]:
+                - time
+                - generic [ref=e458]:
+                  - link "Share" [ref=e460] [cursor=pointer]:
+                    - /url: /a/58896856
+                  - link "Improve this answer" [ref=e462] [cursor=pointer]:
+                    - /url: /posts/58896856/edit
+                  - button "Follow" [ref=e464] [cursor=pointer]
+                - generic [ref=e466]:
+                  - generic [ref=e468]: answered Nov 17, 2019 at 1:53
+                  - link "chris's user avatar" [ref=e470] [cursor=pointer]:
+                    - /url: /users/4782/chris
+                    - img "chris's user avatar" [ref=e472]
+                  - generic [ref=e473]:
+                    - link "chris" [ref=e474] [cursor=pointer]:
+                      - /url: /users/4782/chris
+                    - generic [ref=e475]:
+                      - text: 37.7k
+                      - generic [ref=e476]: "55"
+                      - generic [ref=e478]: 55 gold badges
+                      - generic [ref=e479]: "162"
+                      - generic [ref=e481]: 162 silver badges
+                      - generic [ref=e482]: "245"
+                      - generic [ref=e484]: 245 bronze badges
+            - generic [ref=e487]:
+              - heading "Comments" [level=2] [ref=e489]
+              - button "Add a comment" [ref=e491] [cursor=pointer]:
+                - paragraph [ref=e493]: Add a comment
+              - list
+          - generic [ref=e494]:
+            - heading "Your Answer" [level=2] [ref=e495]
+            - generic [ref=e498]:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - button [disabled]
+                        - button [disabled]
+                        - button [disabled]
+                        - button [disabled]
+                      - generic:
+                        - button [disabled]
+                        - button [disabled]
+                        - button [disabled]
+                        - button [disabled]
+                        - button [disabled]
+                      - generic:
+                        - button [disabled]
+                        - button [disabled]
+                        - button [disabled]
+                      - generic:
+                        - link:
+                          - /url: "#"
+            - generic [ref=e501]:
+              - generic [ref=e502]:
+                - heading "Sign up or log in" [level=3] [ref=e503]:
+                  - text: Sign up or
+                  - link "log in" [ref=e504] [cursor=pointer]:
+                    - /url: /users/login?ssrc=question_page&returnurl=https%3a%2f%2fstackoverflow.com%2fquestions%2f58896644%2fs3-athena-query-result-location-and-invalid-s3-folder-location%23new-answer
+                - generic [ref=e505] [cursor=pointer]:
+                  - img [ref=e506]
+                  - text: Sign up using Google
+                - generic [ref=e511] [cursor=pointer]:
+                  - img [ref=e512]
+                  - text: Sign up using Email and Password
+              - generic [ref=e515]:
+                - heading "Post as a guest" [level=3] [ref=e516]
+                - generic [ref=e518]:
+                  - generic [ref=e519] [cursor=pointer]: Name
+                  - textbox "Name" [ref=e521]:
+                    - /placeholder: ""
+                - generic [ref=e523]:
+                  - generic [ref=e525]:
+                    - generic [ref=e526] [cursor=pointer]: Email
+                    - paragraph [ref=e527]: Required, but never shown
+                  - textbox "Email" [ref=e529]:
+                    - /placeholder: ""
+            - generic [ref=e530]:
+              - button "Post Your Answer" [ref=e531] [cursor=pointer]
+              - paragraph [ref=e532]:
+                - text: By clicking “Post Your Answer”, you agree to our
+                - link "terms of service" [ref=e533] [cursor=pointer]:
+                  - /url: https://stackoverflow.com/legal/terms-of-service/public
+                - text: and acknowledge you have read our
+                - link "privacy policy" [ref=e534] [cursor=pointer]:
+                  - /url: https://stackoverflow.com/legal/privacy-policy
+                - text: .
+          - generic [ref=e535]:
+            - generic [ref=e537]:
+              - paragraph [ref=e538]: Start asking to get answers
+              - paragraph [ref=e539]: Find the answer to your question by asking.
+              - link "Ask question" [ref=e540] [cursor=pointer]:
+                - /url: /questions/ask
+            - generic [ref=e542]:
+              - paragraph [ref=e543]: Explore related questions
+              - list [ref=e545]:
+                - listitem [ref=e546]:
+                  - link "show questions tagged 'amazon-web-services'" [ref=e547] [cursor=pointer]:
+                    - /url: /questions/tagged/amazon-web-services
+                    - text: amazon-web-services
+                - listitem [ref=e548]:
+                  - link "show questions tagged 'amazon-s3'" [ref=e549] [cursor=pointer]:
+                    - /url: /questions/tagged/amazon-s3
+                    - text: amazon-s3
+                - listitem [ref=e550]:
+                  - link "show questions tagged 'amazon-athena'" [ref=e551] [cursor=pointer]:
+                    - /url: /questions/tagged/amazon-athena
+                    - text: amazon-athena
+              - paragraph [ref=e552]: See similar questions with these tags.
+      - complementary "sidebar" [ref=e553]:
+        - generic [ref=e554]:
+          - link "AWS Collective See more" [ref=e556] [cursor=pointer]:
+            - /url: /collectives/aws
+            - generic [ref=e557]:
+              - generic [ref=e560]:
+                - generic [ref=e561]: AWS
+                - generic [ref=e562]: Collective
+              - generic [ref=e563]: See more
+          - generic [ref=e565]:
+            - link "This question is in a collective:" [ref=e566] [cursor=pointer]:
+              - /url: /collectives
+              - img [ref=e567]
+              - text: "This question is in a collective:"
+            - text: a subcommunity defined by tags with relevant content and experts.
+        - list [ref=e570]:
+          - listitem [ref=e571]: The Overflow Blog
+          - listitem [ref=e572]:
+            - img [ref=e574]
+            - link "Code isn’t the only thing causing your production..." [ref=e578] [cursor=pointer]:
+              - /url: https://stackoverflow.blog/2026/06/25/code-isnt-causing-your-production-failures/?cb=1
+          - listitem [ref=e579]:
+            - img [ref=e581]
+            - link "Paging Charity! How can engineering leaders avoid becoming Bond..." [ref=e585] [cursor=pointer]:
+              - /url: https://stackoverflow.blog/2026/06/26/paging-charity-how-can-engineering-leaders-avoid-becoming-bond-villains/?cb=1
+          - listitem [ref=e586]: Featured on Meta
+          - listitem [ref=e587]:
+            - generic "Meta Stack Exchange" [ref=e589]
+            - link "Partnering with Communities to Modernize Policies & Norms" [ref=e591] [cursor=pointer]:
+              - /url: https://meta.stackexchange.com/questions/418826/partnering-with-communities-to-modernize-policies-norms?cb=1
+          - listitem [ref=e592]:
+            - generic "Meta Stack Overflow" [ref=e594]
+            - 'link "Policy: Generative AI (e.g., ChatGPT) is banned" [ref=e596] [cursor=pointer]':
+              - /url: https://meta.stackoverflow.com/questions/421831/policy-generative-ai-e-g-chatgpt-is-banned?cb=1
+          - listitem [ref=e597]:
+            - generic "Meta Stack Overflow" [ref=e599]
+            - link "The 2026 Developer Survey is Live" [ref=e601] [cursor=pointer]:
+              - /url: https://meta.stackoverflow.com/questions/439978/the-2026-developer-survey-is-live?cb=1
+        - link "10 people chatting" [ref=e604] [cursor=pointer]:
+          - /url: https://chat.stackoverflow.com/
+        - generic [ref=e610]:
+          - generic [ref=e611]:
+            - generic [ref=e612]: Community activity
+            - generic [ref=e613]: Last 1 hr
+          - generic [ref=e615]:
+            - img [ref=e617]
+            - generic [ref=e620]:
+              - paragraph [ref=e621]: Could not load activity
+              - paragraph [ref=e622]: We're unable to load activity right now. Please check back shortly.
+        - generic [ref=e623]:
+          - heading "Related" [level=3] [ref=e624]
+          - generic [ref=e625]:
+            - generic [ref=e626]:
+              - link "5" [ref=e627] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/43548689/amazon-athena-s3-location-error?rq=3
+                - generic [ref=e628]: "5"
+              - link "Amazon Athena - S3 location error" [ref=e629] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/43548689/amazon-athena-s3-location-error?rq=3
+            - generic [ref=e630]:
+              - link "8" [ref=e631] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/45313763/athena-query-fails-with-boto3-s3-location-invalid?rq=3
+                - generic [ref=e632]: "8"
+              - link "Athena query fails with boto3 (S3 location invalid)" [ref=e633] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/45313763/athena-query-fails-with-boto3-s3-location-invalid?rq=3
+            - generic [ref=e634]:
+              - link "1" [ref=e635] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/46017061/location-of-s3-data-for-amazon-athena?rq=3
+                - generic [ref=e636]: "1"
+              - link "Location of S3 data for Amazon Athena" [ref=e637] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/46017061/location-of-s3-data-for-amazon-athena?rq=3
+            - generic [ref=e638]:
+              - link "12" [ref=e639] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/47449163/athena-query-results-at-specific-path-on-s3?rq=3
+                - generic [ref=e640]: "12"
+              - link "Athena query results at specific path on S3" [ref=e641] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/47449163/athena-query-results-at-specific-path-on-s3?rq=3
+            - generic [ref=e642]:
+              - link "5" [ref=e643] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/48779143/outputlocation-is-not-a-valid-s3-path-athena-exception?rq=3
+                - generic [ref=e644]: "5"
+              - link "outputLocation is not a valid S3 path. Athena Exception" [ref=e645] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/48779143/outputlocation-is-not-a-valid-s3-path-athena-exception?rq=3
+            - generic [ref=e646]:
+              - link "2" [ref=e647] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/55529052/allow-athena-query-to-s3-bucket?rq=3
+                - generic [ref=e648]: "2"
+              - link "Allow Athena query to S3 bucket" [ref=e649] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/55529052/allow-athena-query-to-s3-bucket?rq=3
+            - generic [ref=e650]:
+              - link "4" [ref=e651] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/59973070/athena-returns-different-result-sets-when-exactly-the-same-query-is-run?rq=3
+                - generic [ref=e652]: "4"
+              - link "Athena returns different result sets when exactly the same query is run" [ref=e653] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/59973070/athena-returns-different-result-sets-when-exactly-the-same-query-is-run?rq=3
+            - generic [ref=e654]:
+              - link "4" [ref=e655] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/62494792/aws-athena-query-returns-results-in-incorrect-format-when-query-is-run-again?rq=3
+                - generic [ref=e656]: "4"
+              - link "AWS Athena query returns results in incorrect format when query is run again" [ref=e657] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/62494792/aws-athena-query-returns-results-in-incorrect-format-when-query-is-run-again?rq=3
+            - generic [ref=e658]:
+              - link "4" [ref=e659] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/62575827/querying-s3-using-athena?rq=3
+                - generic [ref=e660]: "4"
+              - link "Querying S3 using Athena" [ref=e661] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/62575827/querying-s3-using-athena?rq=3
+            - generic [ref=e662]:
+              - link "0" [ref=e663] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/66458251/athena-query-on-paramterized-s3-folders?rq=3
+                - generic [ref=e664]: "0"
+              - link "Athena query on paramterized s3 folders" [ref=e665] [cursor=pointer]:
+                - /url: https://stackoverflow.com/questions/66458251/athena-query-on-paramterized-s3-folders?rq=3
+        - generic [ref=e666]:
+          - heading "Hot Network Questions" [level=4] [ref=e667]:
+            - link "Hot Network Questions" [ref=e668] [cursor=pointer]:
+              - /url: https://stackexchange.com/questions?tab=hot
+          - list [ref=e669]:
+            - listitem [ref=e670]:
+              - generic "Travel Stack Exchange" [ref=e671]
+              - link "Does Business class qualified for Bangkok fast track" [ref=e672] [cursor=pointer]:
+                - /url: https://travel.stackexchange.com/questions/203967/does-business-class-qualified-for-bangkok-fast-track
+            - listitem [ref=e673]:
+              - generic "Philosophy Stack Exchange" [ref=e674]
+              - link "What definition of Mathematics differentiates it from any other field?" [ref=e675] [cursor=pointer]:
+                - /url: https://philosophy.stackexchange.com/questions/139314/what-definition-of-mathematics-differentiates-it-from-any-other-field
+            - listitem [ref=e676]:
+              - generic "Bicycles Stack Exchange" [ref=e677]
+              - link "Is tubeless the solution for constant valve stem cutting?" [ref=e678] [cursor=pointer]:
+                - /url: https://bicycles.stackexchange.com/questions/100442/is-tubeless-the-solution-for-constant-valve-stem-cutting
+            - listitem [ref=e679]:
+              - generic "Electrical Engineering Stack Exchange" [ref=e680]
+              - link "Why 2N7002 on I2C bus?" [ref=e681] [cursor=pointer]:
+                - /url: https://electronics.stackexchange.com/questions/770211/why-2n7002-on-i2c-bus
+            - listitem [ref=e682]:
+              - generic "Home Improvement Stack Exchange" [ref=e683]
+              - link "How to get the upper wheel off a vintage craftsman bandsaw?" [ref=e684] [cursor=pointer]:
+                - /url: https://diy.stackexchange.com/questions/331112/how-to-get-the-upper-wheel-off-a-vintage-craftsman-bandsaw
+            - listitem [ref=e685]:
+              - generic "Arqade" [ref=e686]
+              - link "Can you play splitscreen multiplayer in Star Fox?" [ref=e687] [cursor=pointer]:
+                - /url: https://gaming.stackexchange.com/questions/419101/can-you-play-splitscreen-multiplayer-in-star-fox
+            - listitem [ref=e688]:
+              - generic "Geographic Information Systems Stack Exchange" [ref=e689]
+              - link "Use GDAL to download from remote 7zip" [ref=e690] [cursor=pointer]:
+                - /url: https://gis.stackexchange.com/questions/501055/use-gdal-to-download-from-remote-7zip
+            - listitem [ref=e691]:
+              - generic "Unix & Linux Stack Exchange" [ref=e692]
+              - link "Can hard link targets be on a separate drive?" [ref=e693] [cursor=pointer]:
+                - /url: https://unix.stackexchange.com/questions/806523/can-hard-link-targets-be-on-a-separate-drive
+            - listitem [ref=e694]:
+              - generic "MathOverflow" [ref=e695]
+              - link "What is the limsup of the guaranteed winning fraction for Alice and Bob in a coin game against a dealer with a known sequence?" [ref=e696] [cursor=pointer]:
+                - /url: https://mathoverflow.net/questions/512684/what-is-the-limsup-of-the-guaranteed-winning-fraction-for-alice-and-bob-in-a-coi
+            - listitem [ref=e697]:
+              - generic "Blender Stack Exchange" [ref=e698]
+              - link "Hide obstructed hair?" [ref=e699] [cursor=pointer]:
+                - /url: https://blender.stackexchange.com/questions/347374/hide-obstructed-hair
+            - listitem [ref=e700]:
+              - generic "Aviation Stack Exchange" [ref=e701]
+              - link "Does the ACJ-221 really have a 12 hour endurance?" [ref=e702] [cursor=pointer]:
+                - /url: https://aviation.stackexchange.com/questions/115379/does-the-acj-221-really-have-a-12-hour-endurance
+            - listitem [ref=e703]:
+              - generic "Mathematics Stack Exchange" [ref=e704]
+              - link "Consecutive numbers with prime factorization with powers at least two" [ref=e705] [cursor=pointer]:
+                - /url: https://math.stackexchange.com/questions/5141988/consecutive-numbers-with-prime-factorization-with-powers-at-least-two
+            - listitem [ref=e706]:
+              - generic "Puzzling Stack Exchange" [ref=e707]
+              - link "Crossword cross product" [ref=e708] [cursor=pointer]:
+                - /url: https://puzzling.stackexchange.com/questions/138655/crossword-cross-product
+            - listitem [ref=e709]:
+              - generic "Super User" [ref=e710]
+              - link "How to show text data in TCP packets in Wireshark?" [ref=e711] [cursor=pointer]:
+                - /url: https://superuser.com/questions/1938662/how-to-show-text-data-in-tcp-packets-in-wireshark
+            - listitem [ref=e712]:
+              - generic "Philosophy Stack Exchange" [ref=e713]
+              - link "Is philosophy self-correcting like science?" [ref=e714] [cursor=pointer]:
+                - /url: https://philosophy.stackexchange.com/questions/139328/is-philosophy-self-correcting-like-science
+            - listitem [ref=e715]:
+              - generic "Law Stack Exchange" [ref=e716]
+              - link "Did Obama violate the emoluments clause by accepting a prize from a foreign king?" [ref=e717] [cursor=pointer]:
+                - /url: https://law.stackexchange.com/questions/115020/did-obama-violate-the-emoluments-clause-by-accepting-a-prize-from-a-foreign-king
+            - listitem [ref=e718]:
+              - generic "Science Fiction & Fantasy Stack Exchange" [ref=e719]
+              - link "Fire elemental is intimidated by magnesium burning under water" [ref=e720] [cursor=pointer]:
+                - /url: https://scifi.stackexchange.com/questions/305028/fire-elemental-is-intimidated-by-magnesium-burning-under-water
+            - listitem [ref=e721]:
+              - generic "Mathematica Stack Exchange" [ref=e722]
+              - link "\"Exact\" Voronoi cells on sphere" [ref=e723] [cursor=pointer]:
+                - /url: https://mathematica.stackexchange.com/questions/319649/exact-voronoi-cells-on-sphere
+            - listitem [ref=e724]:
+              - generic "Bicycles Stack Exchange" [ref=e725]
+              - link "Cycling in the heat around Phoenix (~40°C days), what am I still missing?" [ref=e726] [cursor=pointer]:
+                - /url: https://bicycles.stackexchange.com/questions/100440/cycling-in-the-heat-around-phoenix-40c-days-what-am-i-still-missing
+            - listitem [ref=e727]:
+              - generic "Software Engineering Stack Exchange" [ref=e728]
+              - link "Avoiding validation logic duplication across app layers" [ref=e729] [cursor=pointer]:
+                - /url: https://softwareengineering.stackexchange.com/questions/461291/avoiding-validation-logic-duplication-across-app-layers
+            - listitem [ref=e730]:
+              - generic "Gardening & Landscaping Stack Exchange" [ref=e731]
+              - link "At what age is it optimal to repot plants?" [ref=e732] [cursor=pointer]:
+                - /url: https://gardening.stackexchange.com/questions/70857/at-what-age-is-it-optimal-to-repot-plants
+            - listitem [ref=e733]:
+              - generic "Electrical Engineering Stack Exchange" [ref=e734]
+              - 'link "DP83825I: Why would TI specify an ESR value for the crystal?" [ref=e735] [cursor=pointer]':
+                - /url: https://electronics.stackexchange.com/questions/770243/dp83825i-why-would-ti-specify-an-esr-value-for-the-crystal
+            - listitem [ref=e736]:
+              - generic "Seasoned Advice" [ref=e737]
+              - link "I have a recipe that is calling for 12 basil leaves but I have ground basil instead" [ref=e738] [cursor=pointer]:
+                - /url: https://cooking.stackexchange.com/questions/137042/i-have-a-recipe-that-is-calling-for-12-basil-leaves-but-i-have-ground-basil-inst
+            - listitem [ref=e739]:
+              - generic "Photography Stack Exchange" [ref=e740]
+              - link "Canon 100D change focusing screen" [ref=e741] [cursor=pointer]:
+                - /url: https://photo.stackexchange.com/questions/138558/canon-100d-change-focusing-screen
+        - link "Question feed" [ref=e743] [cursor=pointer]:
+          - /url: /feeds/question/58896644
+          - img [ref=e744]
+          - text: Question feed
+  - contentinfo [ref=e746]:
+    - generic [ref=e747]:
+      - link "Stack Overflow" [ref=e749] [cursor=pointer]:
+        - /url: https://stackoverflow.com
+        - img [ref=e750]
+      - navigation "Footer" [ref=e752]:
+        - generic [ref=e753]:
+          - heading "Stack Overflow" [level=5] [ref=e754]:
+            - link "Stack Overflow" [ref=e755] [cursor=pointer]:
+              - /url: https://stackoverflow.com
+          - list [ref=e756]:
+            - listitem [ref=e757]:
+              - link "Questions" [ref=e758] [cursor=pointer]:
+                - /url: /questions
+            - listitem [ref=e759]:
+              - link "Help" [ref=e760] [cursor=pointer]:
+                - /url: /help
+            - listitem [ref=e761]:
+              - link "Chat" [ref=e762] [cursor=pointer]:
+                - /url: https://chat.stackoverflow.com/?tab=explore
+        - generic [ref=e763]:
+          - heading "Business" [level=5] [ref=e764]:
+            - link "Business" [ref=e765] [cursor=pointer]:
+              - /url: https://stackoverflow.co/
+          - list [ref=e766]:
+            - listitem [ref=e767]:
+              - link "Stack Internal" [ref=e768] [cursor=pointer]:
+                - /url: https://stackoverflow.co/internal/?utm_medium=referral&utm_source=stackoverflow-community&utm_campaign=footer&utm_content=teams
+            - listitem [ref=e769]:
+              - link "Stack Data Licensing" [ref=e770] [cursor=pointer]:
+                - /url: https://stackoverflow.co/data-licensing/?utm_medium=referral&utm_source=stackoverflow-community&utm_campaign=footer&utm_content=data-licensing
+            - listitem [ref=e771]:
+              - link "Stack Ads" [ref=e772] [cursor=pointer]:
+                - /url: https://stackoverflow.co/advertising/?utm_medium=referral&utm_source=stackoverflow-community&utm_campaign=footer&utm_content=advertising
+        - generic [ref=e773]:
+          - heading "Company" [level=5] [ref=e774]:
+            - link "Company" [ref=e775] [cursor=pointer]:
+              - /url: https://stackoverflow.co/
+          - list [ref=e776]:
+            - listitem [ref=e777]:
+              - link "About" [ref=e778] [cursor=pointer]:
+                - /url: https://stackoverflow.co/
+            - listitem [ref=e779]:
+              - link "Press" [ref=e780] [cursor=pointer]:
+                - /url: https://stackoverflow.co/company/press/
+            - listitem [ref=e781]:
+              - link "Work Here" [ref=e782] [cursor=pointer]:
+                - /url: https://stackoverflow.co/company/work-here/
+            - listitem [ref=e783]:
+              - link "Legal" [ref=e784] [cursor=pointer]:
+                - /url: https://stackoverflow.com/legal
+            - listitem [ref=e785]:
+              - link "Privacy Policy" [ref=e786] [cursor=pointer]:
+                - /url: https://stackoverflow.com/legal/privacy-policy
+            - listitem [ref=e787]:
+              - link "Terms of Service" [ref=e788] [cursor=pointer]:
+                - /url: https://stackoverflow.com/legal/terms-of-service/public
+            - listitem [ref=e789]:
+              - link "Contact Us" [ref=e790] [cursor=pointer]:
+                - /url: /contact
+            - listitem [ref=e791]:
+              - button "Cookie Settings" [ref=e792] [cursor=pointer]
+            - listitem [ref=e793]:
+              - link "Cookie Policy" [ref=e794] [cursor=pointer]:
+                - /url: https://policies.stackoverflow.co/stack-overflow/cookie-policy
+        - generic [ref=e796]:
+          - heading "Stack Exchange Network" [level=5] [ref=e797]:
+            - link "Stack Exchange Network" [ref=e798] [cursor=pointer]:
+              - /url: https://stackexchange.com
+          - list [ref=e799]:
+            - listitem [ref=e800]:
+              - link "Technology" [ref=e801] [cursor=pointer]:
+                - /url: https://stackexchange.com/sites#technology
+            - listitem [ref=e802]:
+              - link "Culture & recreation" [ref=e803] [cursor=pointer]:
+                - /url: https://stackexchange.com/sites#culturerecreation
+            - listitem [ref=e804]:
+              - link "Life & arts" [ref=e805] [cursor=pointer]:
+                - /url: https://stackexchange.com/sites#lifearts
+            - listitem [ref=e806]:
+              - link "Science" [ref=e807] [cursor=pointer]:
+                - /url: https://stackexchange.com/sites#science
+            - listitem [ref=e808]:
+              - link "Professional" [ref=e809] [cursor=pointer]:
+                - /url: https://stackexchange.com/sites#professional
+            - listitem [ref=e810]:
+              - link "Business" [ref=e811] [cursor=pointer]:
+                - /url: https://stackexchange.com/sites#business
+            - listitem [ref=e812]:
+              - link "API" [ref=e813] [cursor=pointer]:
+                - /url: https://api.stackexchange.com/
+            - listitem [ref=e814]:
+              - link "Data" [ref=e815] [cursor=pointer]:
+                - /url: https://data.stackexchange.com/
+      - generic [ref=e816]:
+        - list [ref=e817]:
+          - listitem [ref=e818]:
+            - link "Blog" [ref=e819] [cursor=pointer]:
+              - /url: https://stackoverflow.blog?blb=1
+          - listitem [ref=e820]:
+            - link "Facebook" [ref=e821] [cursor=pointer]:
+              - /url: https://www.facebook.com/officialstackoverflow/
+          - listitem [ref=e822]:
+            - link "Twitter" [ref=e823] [cursor=pointer]:
+              - /url: https://twitter.com/stackoverflow
+          - listitem [ref=e824]:
+            - link "LinkedIn" [ref=e825] [cursor=pointer]:
+              - /url: https://linkedin.com/company/stack-overflow
+          - listitem [ref=e826]:
+            - link "Instagram" [ref=e827] [cursor=pointer]:
+              - /url: https://www.instagram.com/thestackoverflow
+        - paragraph [ref=e828]:
+          - text: Site design / logo © 2026 Stack Exchange Inc; user contributions licensed under
+          - link "CC BY-SA" [ref=e829] [cursor=pointer]:
+            - /url: https://stackoverflow.com/help/licensing
+          - text: . rev 2026.6.25.43791
+  - dialog "Privacy" [ref=e831]:
+    - generic [ref=e832]:
+      - generic [ref=e834]:
+        - text: By continuing to use this website, you agree Stack Exchange can store cookies on your device and disclose information in accordance with our
+        - link "Cookie Policy" [ref=e835] [cursor=pointer]:
+          - /url: https://policies.stackoverflow.co/stack-overflow/cookie-policy/
+        - text: . By exiting this window, default cookies will be accepted. To reject cookies, select an option from below.
+      - generic [ref=e837]:
+        - button "Necessary cookies only" [ref=e839] [cursor=pointer]
+        - button "Customize settings, Opens the preference center dialog" [ref=e840] [cursor=pointer]: Customize settings
+      - button "Close" [ref=e842] [cursor=pointer]

@@ -1,4 +1,4 @@
-class Enemy {
+window.Enemy = class Enemy {
     constructor(id, x, y, level, isBoss, type) {
         this.id = id;
         this.x = x;
@@ -137,7 +137,12 @@ class Enemy {
                 this.attackTimer = this.attackCooldown;
                 if (dist <= attackRange + 5) {
                     this.flashTimer = 0.12;
-                    player.takeDamage(this.atk, this);
+                    var dmg = this.atk;
+                    /* Epoch 14: 关卡亲和减伤 */
+                    if (engine && engine._mapAffinityReduction) {
+                        dmg = Math.max(1, Math.floor(dmg * (1 - engine._mapAffinityReduction)));
+                    }
+                    player.takeDamage(dmg, this);
                 }
             }
             if (dist > attackRange + 5) this.reachedPlayer = false;
@@ -187,7 +192,7 @@ class Enemy {
                 if (this.el) this.el.style.opacity = '1';
                 if (dist <= attackRange + 5) {
                     this.flashTimer = 0.12;
-                    player.takeDamage(Math.floor(this.atk * 1.5), this);
+                    player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * 1.5), engine), this);
                 }
             }
             return;
@@ -205,7 +210,7 @@ class Enemy {
                     this.attackTimer = this.attackCooldown;
                     if (dist <= attackRange + 5) {
                         this.flashTimer = 0.12;
-                        player.takeDamage(this.atk, this);
+                        player.takeDamage(this._applyMapAffinityDmg(this.atk, engine), this);
                     }
                 }
                 if (dist > attackRange + 5) this.reachedPlayer = false;
@@ -226,7 +231,7 @@ class Enemy {
                 this.attackTimer = this.attackCooldown;
                 if (dist <= attackRange + 5) {
                     this.flashTimer = 0.12;
-                    player.takeDamage(this.atk, this);
+                    player.takeDamage(this._applyMapAffinityDmg(this.atk, engine), this);
                 }
             }
             if (dist > attackRange + 5) this.reachedPlayer = false;
@@ -255,6 +260,13 @@ class Enemy {
         if (this._totemTimer <= 0) {
             this._totemTimer = 5;
             if (engine) {
+                /* Epoch 16: 图腾上限 10，防止无限增长 */
+                var existingTotems = engine._totems ? engine._totems.length : 0;
+                if (existingTotems >= 10) {
+                    /* 移除最早的图腾 */
+                    var oldest = engine._totems.shift();
+                    if (oldest && oldest.el && oldest.el.parentNode) oldest.el.remove();
+                }
                 var tel = document.createElement('div');
                 tel.className = 'totem-pillar';
                 tel.style.left = this.x + 'px';
@@ -293,7 +305,7 @@ class Enemy {
                 this.attackTimer = this.attackCooldown;
                 if (dist <= attackRange + 5) {
                     this.flashTimer = 0.12;
-                    player.takeDamage(this.atk, this);
+                    player.takeDamage(this._applyMapAffinityDmg(this.atk, engine), this);
                 }
             }
             if (dist > attackRange + 5) this.reachedPlayer = false;
@@ -313,6 +325,16 @@ class Enemy {
         else this._bossPhase = 3;
 
         if (prevPhase !== this._bossPhase) {
+            /* Epoch 38: Boss 阶段过渡庆祝 */
+            var phaseLabels = { 1: 'Phase 1', 2: 'Phase 2 — 能力觉醒', 3: 'Phase 3 — 暴怒！' };
+            var phaseColors = { 1: '#888', 2: '#ff9800', 3: '#b62929' };
+            if (engine && engine._spawnCausalityText) {
+                engine._spawnCausalityText('BOSS ' + phaseLabels[this._bossPhase], phaseColors[this._bossPhase]);
+            }
+            if (engine && engine.triggerShake) engine.triggerShake(1, 600);
+            if (this._bossPhase === 3) {
+                if (window.audioManager) window.audioManager.play('boss');
+            }
             if (this._bossPhase === 3 && !this._bossEnraged) {
                 this._bossEnraged = true;
                 this.speed = this.baseSpeed * 1.8;
@@ -378,7 +400,7 @@ class Enemy {
                     var pdx = player.x - this.x;
                     var pdy = player.y - this.y;
                     if (pdx * pdx + pdy * pdy <= 120 * 120) {
-                        player.takeDamage(Math.floor(this.atk * 2.5), this);
+                        player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * 2.5), engine), this);
                     }
                     if (this._bossWarningEl && this._bossWarningEl.parentNode) this._bossWarningEl.remove();
                     this._bossWarningEl = null;
@@ -443,7 +465,7 @@ class Enemy {
             if (this._bossContactTimer <= 0) {
                 this._bossContactTimer = 0.5;
                 var contactDmg = this._bossEnraged ? Math.floor(this.atk * 2) : this.atk;
-                player.takeDamage(contactDmg, this);
+                player.takeDamage(this._applyMapAffinityDmg(contactDmg, engine), this);
             }
         }
     }
@@ -452,6 +474,14 @@ class Enemy {
         var margin = this.radius;
         this.x = Math.max(margin, Math.min(engine._mapW - margin, this.x));
         this.y = Math.max(margin, Math.min(engine._mapH - margin, this.y));
+    }
+
+    /* ── Epoch 14: 关卡亲和减伤辅助 ── */
+    _applyMapAffinityDmg(dmg, engine) {
+        if (engine && engine._mapAffinityReduction) {
+            return Math.max(1, Math.floor(dmg * (1 - engine._mapAffinityReduction)));
+        }
+        return dmg;
     }
 
     takeDamage(dmg, source, sourceX, sourceY, _fctTypeOverride) {
@@ -481,7 +511,7 @@ class Enemy {
                 srcX = source.x;
                 srcY = source.y;
             }
-            if (srcX != null && srcY != null) {
+            if (srcX != null && srcY != null && window.gameEngine && window.gameEngine.player) {
                 var toPlayerX = window.gameEngine.player.x - this.x;
                 var toPlayerY = window.gameEngine.player.y - this.y;
                 var toPlayerLen = Math.sqrt(toPlayerX * toPlayerX + toPlayerY * toPlayerY);

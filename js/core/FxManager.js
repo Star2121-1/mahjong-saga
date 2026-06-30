@@ -26,30 +26,42 @@ Fp.init = function() {
     }
 };
 
-Fp.spawnText = function(x, y, text, type) {
+Fp.spawnText = function(x, y, text, typeOrColor, size, duration) {
     if (!this._layer) this.init();
     var node = this._borrowNode();
     if (!node) return;
+    var type = (typeof typeOrColor === 'string' && typeOrColor.startsWith('#')) ? 'normal' : typeOrColor;
+    var color = typeOrColor;
+    if (typeof typeOrColor === 'string' && typeOrColor.startsWith('#')) color = typeOrColor;
     type = type || 'normal';
     node.textContent = text;
     node.className = 'fct-node fct-' + type;
+    if (color) node.style.color = color;
+    if (size) node.style.fontSize = size + 'px';
     node.style.left = x + 'px';
     node.style.top = y + 'px';
     node._fctActive = true;
     node.style.display = '';
-    node.style.animation = 'none';
+    /* 移除旧的 animationend listener 避免重复绑定 */
+    node.removeEventListener('animationend', node._fctOnEnd);
+    /* 触发 reflow 以确保动画从初始状态重新开始 */
     void node.offsetWidth;
-    node.style.animation = '';
+    /* 注意：不清空 node.style.animation，否则会覆盖 CSS 类的 animation 属性 */
+    /* 绑定清理回调 — 保存到节点上以便后续 remove */
     var self = this;
     var onEnd = function() {
         node.removeEventListener('animationend', onEnd);
-        if (node._fctActive) {
-            node._fctActive = false;
-            self._returnNode(node);
-        }
+        node._fctActive = false;
+        self._returnNode(node);
     };
-    node.removeEventListener('animationend', onEnd);
+    node._fctOnEnd = onEnd;
     node.addEventListener('animationend', onEnd);
+    /* fallback: 如果 animationend 未触发，5s 后强制回收 */
+    node._fctTimeout = setTimeout(function() {
+        node.removeEventListener('animationend', onEnd);
+        node._fctActive = false;
+        self._returnNode(node);
+    }, 5000);
 };
 
 Fp._borrowNode = function() {
@@ -74,6 +86,7 @@ Fp._returnNode = function(node) {
     node.textContent = '';
     node.className = 'fct-node';
     node._fctActive = false;
+    if (node._fctTimeout) { clearTimeout(node._fctTimeout); node._fctTimeout = null; }
 };
 
 window.fxManager = new window.FxManager();

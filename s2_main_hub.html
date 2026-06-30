@@ -6,7 +6,7 @@
     <title>麻将江湖 - 大本营</title>
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/main_hub.css">
-    <script src="js/core/SaveManager.js"></script>
+    <script src="js/core/SaveManager.js?v=20260630b"></script>
 </head>
 <body>
     <div id="main-hub-screen">
@@ -17,6 +17,12 @@
             <span>总击杀: <span id="hub-total-kills">0</span></span>
             <span class="hub-stat-sep">|</span>
             <span>核心: <span id="hub-meta-tokens">0</span></span>
+            <span class="hub-stat-sep">|</span>
+            <span class="hub-stat-sep">|</span>
+            <span id="login-streak-indicator" style="color:#ffd700;font-size:11px;">登录: 0 天</span>
+            <button id="makeup-token-btn" style="display:none;background:#4a2;color:#fff;border:1px solid #2a1;border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer;">💾 补签 x0</button>
+            <span id="season-indicator" style="color:#666;font-size:11px;">赛季未激活</span>
+            <span id="elite-mode-indicator" style="color:#666;font-size:11px;">精英模式 OFF</span>
         </div>
 
         <!-- ════════════════════════════ 左侧竹节导航 (15%) ════════════════════════════ -->
@@ -26,7 +32,10 @@
             <div class="nav-item" data-panel="forge">⚒ 百宝牌箩</div>
             <div class="nav-item" data-panel="expedition">⚔ 血战到底</div>
             <div class="nav-item" data-panel="mutation">🧬 变异保险库</div>
+            <div class="nav-item" data-panel="compendium">📕 武器图鉴</div>
             <div class="nav-item" data-panel="achievements">🏆 雀理乾坤</div>
+            <div class="nav-item" data-panel="stats">📊 战绩统计</div>
+            <div class="nav-item" data-panel="history">📜 历史记录</div>
         </aside>
 
         <!-- ════════════════════════════ 右侧内容画布 (85%) ════════════════════════════ -->
@@ -142,7 +151,26 @@
                 <div id="mutation-list"></div>
             </div>
 
-            <!-- ════════════════════════════ tab 6: 雀理乾坤 ════════════════════════════ -->
+            <!-- ════════════════════════════ tab 8: 战绩统计 ════════════════════════════ -->
+            <div id="panel-stats" class="hub-panel" style="display:none">
+                <div class="stats-title">📊 雀士战绩统计</div>
+                <div id="stats-grid"></div>
+            </div>
+
+            <!-- ════════════════════════════ tab 9: 历史记录 ════════════════════════════ -->
+            <div id="panel-history" class="hub-panel" style="display:none">
+                <div class="stats-title">📜 战局历史记录</div>
+                <div id="history-grid"></div>
+            </div>
+
+            <!-- ════════════════════════════ tab 6: 武器图鉴 ════════════════════════════ -->
+            <div id="panel-compendium" class="hub-panel" style="display:none">
+                <div class="compendium-title">📕 武器图鉴</div>
+                <div class="compendium-desc">六神兵全览 · 查看武器参数与协同圣物</div>
+                <div id="weapon-compendium-grid"></div>
+            </div>
+
+            <!-- ════════════════════════════ tab 7: 雀理乾坤 ════════════════════════════ -->
             <div id="panel-achievements" class="hub-panel" style="display:none">
                 <div class="achievement-title">🏆 雀士功勋</div>
                 <div class="achievement-grid" id="achievement-grid"></div>
@@ -150,12 +178,12 @@
         </main>
     </div>
 
-    <script src="js/entities/EquipmentRegistry.js"></script>
-    <script src="js/entities/HeroRegistry.js"></script>
-    <script src="js/config/HeroConfig.js"></script>
-    <script src="js/config/LevelConfig.js"></script>
-    <script src="js/config/AchievementConfig.js"></script>
-    <script src="js/page/main_hub.js"></script>
-    <script src="js/responsive.js"></script>
+    <script src="js/entities/EquipmentRegistry.js?v=20260629t9"></script>
+    <script src="js/entities/HeroRegistry.js?v=20260629t9"></script>
+    <script src="js/config/HeroConfig.js?v=20260629t9"></script>
+    <script src="js/config/LevelConfig.js?v=20260629t9"></script>
+    <script src="js/config/AchievementConfig.js?v=20260629t9"></script>
+    <script src="js/page/main_hub.js?v=20260630b"></script>
+    <script src="js/responsive.js?v=20260629t9"></script>
 </body>
 </html>

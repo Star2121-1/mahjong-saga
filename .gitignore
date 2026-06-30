@@ -1,0 +1,39 @@
+# Build / temp
+*.log
+.env
+.env.local
+node_modules/
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Session
+.memory/
+.claude/
+
+# Playwright MCP snapshots
+.playwright-mcp/
+
+# Screenshots / test artifacts
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+
+# Test scripts
+cycle*_*.js
+
+# Logs
+logs/

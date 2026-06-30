@@ -176,6 +176,12 @@ window.ShotgunBurst = class extends window.Weapon {
             engine._projectiles.push(proj);
         }
     }
+    update(dt) {
+        this.cooldownTimer -= dt;
+    }
+    reset() {
+        /* No resources to clean */
+    }
 };
 
 /* ══════════════════════════════════════════════
