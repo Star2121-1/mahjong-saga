@@ -347,6 +347,7 @@
     background: rgba(0,0,0,0.92); z-index: 1000;
     display: none; flex-direction: column;
     justify-content: center; align-items: center; padding: 20px;
+    pointer-events: auto;
 }
 #reward-overlay.active { display: flex; }
 .reward-title {

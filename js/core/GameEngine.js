@@ -193,6 +193,8 @@ Gp.init = async function() {
         this.battlefield.addEventListener('pointerdown', function(e) {
             if (e.button !== 0) return;
             if (e.target.closest && e.target.closest('#joystick-container')) return;
+            /* 排除 overlay 区域 — 防止拦截 modal 点击 */
+            if (e.target.closest && (e.target.closest('#reward-overlay, #victory-overlay, #game-over-overlay, #pause-overlay, #guide-overlay, #mutator-overlay, #boss-gamble-panel'))) return;
             if (!self.running || self.gameOver || self._pendingReward) return;
 
             /* ── ScreenToGameCoordinate 工具：处理 responsive.js 的 transform:scale() ── */
