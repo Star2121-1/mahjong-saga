@@ -39,6 +39,8 @@
         _lastFitScale = key;
         /* fixed: 脱离文档流 */
         c.style.position = 'fixed';
+        /* 响应式字体基线：缩放比例驱动 --_fs */
+        c.style.setProperty('--_fs', (1.5 * s).toFixed(3));
         /* 居中: 缩放后尺寸 = BASE_W*s × BASE_H*s
            视口中的偏移 = (视口 - 缩放后尺寸) / 2 */
         var scaledW = BASE_W * s;
