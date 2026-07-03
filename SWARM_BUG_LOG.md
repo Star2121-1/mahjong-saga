@@ -301,18 +301,20 @@
 
 ---
 
-## Round 26 Fixes Applied (Phase 3)
+## Round 26 Fixes Applied (Phase 3) — STATUS UPDATE (Round 28 Verification)
 
-| # | ID | 描述 | 文件 | 状态 |
-|---|----|------|------|------|
-| 1 | C-002 | ExpGem.isExpired 属性→方法调用 | GameEngine.Spawn.js | 待修复 |
-| 2 | C-001 | HeroRegistry/HeroConfig 加载顺序 | pages/s2_main_hub.html, pages/s3_gameplay.html | 待修复 |
-| 3 | H-008 | saveMeta 返回 boolean→Promise | SaveManager.Core.js | 待修复 |
-| 4 | H-038 | weeklyVault.checkFn 不可序列化 | SaveManager.Weekly.js | 待修复 |
-| 5 | H-018 | refreshStatsPanel 缩进 bug | main_hub.js | 待修复 |
-| 6 | H-023 | CSS floatUp keyframes 冲突 | common.css + gameplay-effects.css | 待修复 |
-| 7 | H-024 | #player box-shadow 颜色冲突 | gameplay-player.css | 待修复 |
-| 8 | H-032 | CSS 版本号缺失 | pages/*.html | 待修复 |
+> 以下为 Round 26 标记"待修复"项的 Round 28 验证结果。
+
+| # | ID | 描述 | 文件 | 原状态 | Round 28 验证 |
+|---|----|------|------|--------|--------------|
+| 1 | C-002 | ExpGem.isExpired 属性→方法调用 | GameEngine.Spawn.js | 待修复 | ✅ 已修复 (R27): `gem.isExpired()` |
+| 2 | C-001 | HeroRegistry/HeroConfig 加载顺序 | pages/*.html | 待修复 | ✅ 已修复 (R27): HeroConfig 在前 |
+| 3 | H-008 | saveMeta 返回 boolean→Promise | SaveManager.Core.js | 待修复 | ✅ 已修复 (R27): Promise wrapper |
+| 4 | H-038 | weeklyVault.checkFn 不可序列化 | SaveManager.Weekly.js | 待修复 | ✅ 已修复 (R27): id 查找 |
+| 5 | H-018 | refreshStatsPanel 缩进 bug | main_hub.js | 待修复 | ✅ 已修复 (R27): 格式正常 |
+| 6 | H-023 | CSS floatUp keyframes 冲突 | common.css + gameplay-effects.css | 待修复 | ⚠️ 两处定义但作用于不同元素，非 bug |
+| 7 | H-024 | #player box-shadow 颜色冲突 | gameplay-player.css | 待修复 | ✅ 已修复 (R27): 默认红色系 |
+| 8 | H-032 | CSS 版本号缺失 | pages/*.html | 待修复 | ✅ 已修复 (R27): 全部带 v= |
 
 ---
 
