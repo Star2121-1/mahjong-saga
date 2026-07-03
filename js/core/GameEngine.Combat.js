@@ -40,6 +40,11 @@ Gp._resumeAfterReward = function() {
 
 Gp._resumeAfterLevelUp = function() {
     if (window.rewardManager) window.rewardManager.hidePanel();
+    /* M-001: 升级期间如果波次已清除(_pendingReward=true)，恢复以显示奖励面板 */
+    if (this.enemies.length === 0 && this._activeCoins.length === 0 && this._expGems.length === 0
+        && this.currentWaveSpawnedCount >= this._getWaveEnemyMax() && this._waveCount < this._getMaxWaves() - 1) {
+        this._pendingReward = true;
+    }
     /* Epoch 2: 雀魂护盾 — 每10波触发 */
     this._checkQqueenShield();
     this._beginLoop();
@@ -60,7 +65,7 @@ Gp._checkQqueenShield = function() {
         this.container.style.boxShadow = '0 0 60px rgba(30,111,66,0.6)';
     }
     var self = this;
-    setTimeout(function() {
+    this._qqueenShieldTimer = setTimeout(function() {
         self._shieldActive = false;
         if (self.container) self.container.style.boxShadow = '';
     }, this._shieldTimer * 1000);
@@ -112,6 +117,7 @@ Gp._showVictory = function() {
 };
 
 Gp._showAbyssPanel = function() {
+    if (this._abyssPanelVisible) return; /* L-018: 防止快速点击重复添加 panel */
     this._freezeClock();
     var self = this;
     var panel = document.createElement('div');
@@ -190,6 +196,8 @@ Gp._enterAbyss = function() {
     this._clearTotems();
     this._cleanEnemyProjectiles();
     this.gameOver = false;
+    this.running = false; /* 显式确保 running=false，由 _announceWave → _beginLoop 恢复 */
+    this._abyssPanelVisible = true;
     var vpW = this.battlefield.clientWidth;
     var vpH = this.battlefield.clientHeight;
     this.cameraX = Math.max(0, Math.min(this._mapW - vpW, this.player.x - vpW / 2));
@@ -268,7 +276,11 @@ Gp._spawnCausalityText = function(text) {
 };
 
 Gp._settleRun = async function(tokens) {
+    /* 防止 restart() 在 await 期间调用导致新游戏被覆盖 */
+    if (!this.running || this.gameOver) return;
     var meta = await window.saveManager.getMeta();
+    /* 再次检查 — await 后可能已 restart */
+    if (!this.running || this.gameOver) return;
     meta.metaTokens = (meta.metaTokens || 0) + tokens;
     meta.totalRuns = (meta.totalRuns || 0) + 1;
     meta.totalKills = (meta.totalKills || 0) + this.kills;
@@ -336,12 +348,12 @@ Gp._settleRun = async function(tokens) {
         };
         var vaultResult = window.saveManager.evaluateWeeklyVault(runStats);
         if (vaultResult.evaluated && vaultResult.completed) {
-            console.log('[Vault] 金库挑战完成:', vaultResult.reward);
+            /* [Vault] 金库挑战完成 */
         }
     }
 
-    await window.saveManager.saveMeta(meta);
-    await window.saveManager.clearActiveRun();
+    await window.saveManager.saveMeta(meta).catch(function(e){ console.warn('[SettleRun] saveMeta failed:', e); });
+    await window.saveManager.clearActiveRun().catch(function(e){ console.warn('[SettleRun] clearActiveRun failed:', e); });
 
     /* Epoch 14: 运行统计记录 */
     try {
@@ -395,7 +407,7 @@ Gp._settleRun = async function(tokens) {
             var _newMut = _avail[Math.floor(Math.random() * _avail.length)];
             _unlocked.push(_newMut);
             meta.unlockedMutations = _unlocked;
-            await window.saveManager.saveMeta(meta);
+            if (this.running && !this.gameOver) await window.saveManager.saveMeta(meta);
             var _label = _newMut === 'gravity' ? '\u5f15\u529b\u9006\u8f6c' : '\u72c2\u66b4\u8840\u6708';
             var _notif = document.createElement('div');
             _notif.className = 'mutation-unlock-notif';
@@ -421,7 +433,8 @@ Gp._settleRun = async function(tokens) {
 
 Gp._gameOver = async function() {
     if (this.gameOver) return;
-    window.audioManager && window.audioManager.play('gameover');
+    /* C-01: 增加 running 守卫，防止 restart() 在 await 期间覆盖 meta */
+    if (!this.running) return;
     this.gameOver = true;
     this.running = false;
     this._freezeClock();
@@ -475,7 +488,10 @@ Gp._gameOver = async function() {
 
     var tokens = window.saveManager.calcMetaTokens(this.kills, this._elapsed);
 
-    var meta = await window.saveManager.getMeta();
+    var meta = await window.saveManager.getMeta().catch(function(e){ console.warn('[GameOver] getMeta failed:', e); return {}; });
+    /* C-01: await 后二次守卫 — restart() 可能在 await 期间调用 */
+    if (!this.running || this.gameOver) return;
+    if (!meta || typeof meta.metaTokens === 'undefined') meta = { metaTokens: 0 };
     meta.metaTokens = (meta.metaTokens || 0) + tokens;
     meta.totalRuns = (meta.totalRuns || 0) + 1;
     meta.totalKills = (meta.totalKills || 0) + this.kills;
@@ -536,7 +552,7 @@ Gp._gameOver = async function() {
     }
 
     meta.lastSaveTimestamp = Date.now();
-    await window.saveManager.saveMeta(meta);
+    await window.saveManager.saveMeta(meta).catch(function(e){ console.warn('[GameOver] saveMeta failed:', e); });
 
     /* 显示补偿信息 */
     var compEl = document.getElementById('death-compensation');
@@ -581,7 +597,7 @@ Gp._gameOver = async function() {
         }
     } catch(e) { console.warn('[GameEngine] error:', e); }
 
-    await window.saveManager.clearActiveRun();
+    await window.saveManager.clearActiveRun().catch(function(e){ console.warn('[GameOver] clearActiveRun failed:', e); });
 };
 
 Gp._removeEnemyDOM = function(enemy) {
@@ -621,13 +637,21 @@ Gp._syncPlayerHP = function() {
     var pct = (this.player.hp / this.player.maxHp) * 100;
     this.playerHpFill.style.width = Math.max(0, pct) + '%';
     this.playerHpText.textContent = Math.max(0, Math.floor(this.player.hp)) + '/' + this.player.maxHp;
+    /* M-025: 受击/无敌闪烁已委托给 _syncEntities，此处不再覆盖 opacity/filter */
 };
 
 /* ── 2.5D 骨雕雀牌渲染 ── */
 
 Gp._renderPlayerTile = function() {
     if (!this.playerEl) return;
-    /* 雀牌 — 骨雕麻将质感 */
+    var heroId = this.player ? this.player.heroId : null;
+    /* 脏检查：仅在 heroId 变化时重新渲染牌面样式 */
+    if (heroId === this._lastRenderedHeroId) return;
+    this._lastRenderedHeroId = heroId;
+    /* 设置 data-hero 属性，供 CSS 差异化样式匹配 */
+    this.playerEl.setAttribute('data-hero', heroId || 'Hero');
+    var heroCfg = heroId ? (window.heroConfig[heroId] || null) : null;
+    /* 雀牌 — 骨雕麻将质感，根据英雄调整样式 */
     this.playerEl.style.width = '48px';
     this.playerEl.style.height = '64px';
     this.playerEl.style.background = '#fbfbf7';
@@ -638,10 +662,33 @@ Gp._renderPlayerTile = function() {
     this.playerEl.style.justifyContent = 'center';
     this.playerEl.style.fontSize = '24px';
     this.playerEl.style.fontWeight = '900';
-    this.playerEl.style.color = '#b62929';
-    this.playerEl.style.textShadow = '0 0 8px rgba(182,41,41,0.6)';
-    /* 不要用 textContent 覆盖子元素 — 用 ::before 伪元素显示"雀"字 */
-    this.playerEl.style.setProperty('--tile-char', '"雀"');
+    /* ── 查找或创建文字 span，避免 textContent 覆盖子元素（如 #player-hp-wrap） ── */
+    var textSpan = this.playerEl.querySelector('.player-tile-text');
+    if (!textSpan) {
+        textSpan = document.createElement('span');
+        textSpan.className = 'player-tile-text';
+        this.playerEl.appendChild(textSpan);
+    }
+    /* 根据英雄设定颜色 */
+    if (heroId === 'Hero') {
+        textSpan.style.color = '#b8860b';
+        textSpan.style.textShadow = '0 0 8px rgba(212,175,55,0.6)';
+        this.playerEl.style.borderColor = '#d4af37';
+        this.playerEl.style.boxShadow = '0 4px 0 #b8860b, 0 6px 0.5px #dfc590, 0 8px 10px rgba(0,0,0,0.5)';
+        textSpan.textContent = '雀';
+    } else if (heroId === 'Knight') {
+        textSpan.style.color = '#1565c0';
+        textSpan.style.textShadow = '0 0 8px rgba(21,101,192,0.6)';
+        textSpan.textContent = '一万';
+    } else if (heroId === 'Mage') {
+        textSpan.style.color = '#2e7d32';
+        textSpan.style.textShadow = '0 0 8px rgba(46,125,50,0.6)';
+        textSpan.textContent = '九筒';
+    } else if (heroId === 'Assassin') {
+        textSpan.style.color = '#7b1fa2';
+        textSpan.style.textShadow = '0 0 8px rgba(123,31,162,0.6)';
+        textSpan.textContent = '一条';
+    }
 };
 
 Gp._syncEntities = function() {
@@ -655,13 +702,16 @@ Gp._syncEntities = function() {
     this.playerEl.style.top = this.player.y + 'px';
     this.playerEl.style.transform = 'translate(-50%,-50%)' + tilt;
 
-    /* ── Step A: 受击平滑闪烁 — 指数衰减曲线替代硬 toggle ── */
-    if (this.player.invulnTimer > 0) {
-        /* 总持续时间上限 300ms，alpha 从 0.4 指数衰减到 0 */
-        var t = 1 - Math.min(this.player.invulnTimer / 0.3, 1); /* 0→1 进度 */
-        var alpha = 0.4 * Math.exp(-t * 4); /* 指数衰减 */
+    /* ── Step A: 受击平滑闪烁 — 使用独立 hitFlashTimer，不依赖 invulnTimer ── */
+    if (this.player.hitFlashTimer > 0) {
+        var t = 1 - Math.min(this.player.hitFlashTimer / 0.3, 1);
+        var alpha = 0.4 * Math.exp(-t * 4);
         this.playerEl.style.opacity = (1 - alpha).toFixed(3);
         this.playerEl.style.filter = 'drop-shadow(0 0 ' + (8 * (1 - alpha)).toFixed(1) + 'px rgba(182,41,41,0.8))';
+    } else if (this.player.invulnTimer > 0) {
+        /* 无敌帧：轻微半透明 */
+        this.playerEl.style.opacity = '0.85';
+        this.playerEl.style.filter = '';
     } else {
         this.playerEl.style.opacity = '1';
         this.playerEl.style.filter = 'drop-shadow(0 0 6px rgba(26,83,54,0.4))';
@@ -674,15 +724,32 @@ Gp._syncEntities = function() {
         el.style.left = enemy.x + 'px';
         el.style.top = enemy.y + 'px';
         var flash = enemy.flashTimer > 0;
-        /* 受击闪烁效果 */
+        /* 受击闪烁效果 — H-014/M-008: 改用 CSS animation + animationend，元素移除时自动清理 */
         if (flash) {
-            el.classList.add('flash-hit');
-            setTimeout(function(e){ setTimeout(function(){ e.classList.remove('flash-hit'); }, 100); }, 0, el);
+            if (!el.classList.contains('flash-hit')) {
+                el.classList.add('flash-hit');
+                if (!el._flashHandler) {
+                    el._flashHandler = function() {
+                        el.classList.remove('flash-hit');
+                        el.removeEventListener('animationend', el._flashHandler);
+                        el._flashHandler = null;
+                    };
+                    el.addEventListener('animationend', el._flashHandler);
+                }
+            }
         } else {
             el.classList.remove('flash-hit');
+            if (el._flashHandler) {
+                el.removeEventListener('animationend', el._flashHandler);
+                el._flashHandler = null;
+            }
         }
         /* 冰冻 */
         el.classList.toggle('frozen-crystal', enemy.frozen);
+        /* M-024: Stalker 冰冻时恢复完全不透明 */
+        if (enemy.type === 'Stalker') {
+            el.style.opacity = enemy.frozen ? '1' : '0.85';
+        }
         /* Boss 暴怒 */
         if (enemy._bossEnraged) el.classList.add('boss-enraged');
         else el.classList.remove('boss-enraged');
@@ -799,6 +866,7 @@ Gp._moveTo = function(wx, wy) {
 };
 
 Gp._triggerKnightDodgeSlam = function() {
+    /* 移除震动 */
     var px = this.player.x;
     var py = this.player.y;
     var slamRadius = 100;
@@ -813,7 +881,6 @@ Gp._triggerKnightDodgeSlam = function() {
     slamEl.style.border = '2px solid rgba(255,255,255,0.6)';
     slamEl.style.pointerEvents = 'none';
     this._worldLayer.appendChild(slamEl);
-    this.triggerShake(1, 200);
     setTimeout(function() { if (slamEl.parentNode) slamEl.remove(); }, 300);
     for (var i = 0; i < this.enemies.length; i++) {
         var e = this.enemies[i];

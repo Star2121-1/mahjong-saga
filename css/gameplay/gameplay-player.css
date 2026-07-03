@@ -1,7 +1,60 @@
 /* ══════════════════════════════════════════════
-   玩家 — 2.5D 骨雕麻将牌 "雀"
+   玩家 — 2.5D 骨雕麻将 "雀"
    ══════════════════════════════════════════════ */
 
+/* 雀（默认英雄）— 金色边框 */
+#player[data-hero="Hero"] {
+    border: 2px solid #d4af37;
+    box-shadow:
+        0 4px 0 #b8860b,
+        0 6px 0.5px #dfc590,
+        0 8px 10px rgba(0,0,0,0.5),
+        0 0 12px rgba(212,175,55,0.4);
+    color: #b8860b;
+    text-shadow: 0 0 8px rgba(212,175,55,0.6);
+    filter: drop-shadow(0 0 12px #d4af37) drop-shadow(0 0 4px #d4af37);
+}
+
+/* 一万（骑士）— 蓝色边框 */
+#player[data-hero="Knight"] {
+    border: 2px solid #1565c0;
+    box-shadow:
+        0 4px 0 #0d47a1,
+        0 6px 0.5px #dfc590,
+        0 8px 10px rgba(0,0,0,0.5),
+        0 0 12px rgba(21,101,192,0.4);
+    color: #1565c0;
+    text-shadow: 0 0 8px rgba(21,101,192,0.6);
+    filter: drop-shadow(0 0 12px #1565c0) drop-shadow(0 0 4px #1565c0);
+}
+
+/* 九筒（法师）— 绿色边框 */
+#player[data-hero="Mage"] {
+    border: 2px solid #2e7d32;
+    box-shadow:
+        0 4px 0 #1b5e20,
+        0 6px 0.5px #dfc590,
+        0 8px 10px rgba(0,0,0,0.5),
+        0 0 12px rgba(46,125,50,0.4);
+    color: #2e7d32;
+    text-shadow: 0 0 8px rgba(46,125,50,0.6);
+    filter: drop-shadow(0 0 12px #2e7d32) drop-shadow(0 0 4px #2e7d32);
+}
+
+/* 一条（刺客）— 紫色边框 */
+#player[data-hero="Assassin"] {
+    border: 2px solid #7b1fa2;
+    box-shadow:
+        0 4px 0 #4a148c,
+        0 6px 0.5px #dfc590,
+        0 8px 10px rgba(0,0,0,0.5),
+        0 0 12px rgba(123,31,162,0.4);
+    color: #7b1fa2;
+    text-shadow: 0 0 8px rgba(123,31,162,0.6);
+    filter: drop-shadow(0 0 12px #7b1fa2) drop-shadow(0 0 4px #7b1fa2);
+}
+
+/* 默认（无 data-hero 属性）— 红色雀 */
 #player {
     position: absolute;
     width: 48px; height: 64px;
@@ -12,22 +65,20 @@
     display: flex; align-items: center; justify-content: center;
     font-size: calc(24 * var(--_fs) * 1px); font-weight: 900;
     color: #b62929;
+    border: 2px solid #b62929;
     /* 2.5D 骨雕夹心 */
     box-shadow:
-        0 4px 0 #1a5336,
+        0 4px 0 #902020,
         0 6px 0.5px #dfc590,
-        0 8px 10px rgba(0,0,0,0.5);
+        0 8px 10px rgba(0,0,0,0.5),
+        0 0 12px rgba(182,41,41,0.4);
     text-shadow: 0 0 8px rgba(182,41,41,0.6);
+    filter: drop-shadow(0 0 12px #b62929) drop-shadow(0 0 4px #b62929);
 }
+/* 牌面文字由 JS 动态设置 */
 #player::before {
-    content: '雀';
-    font-size: calc(24 * var(--_fs) * 1px);
-    font-weight: 900;
-    color: #b62929;
-    text-shadow: 0 0 8px rgba(182,41,41,0.6);
+    content: ''; display: none;
 }
-#player.invuln { /* 受击闪烁由 JS 控制 opacity 平滑插值，CSS 不设固定值 */ }
-#player filter: drop-shadow(0 0 12px #1a5336) drop-shadow(0 0 4px #1a5336);
 
 /* 玩家血条 */
 #player-hp-wrap {
@@ -40,15 +91,15 @@
 #player-hp-fill { height: 100%; background: linear-gradient(90deg, #1a5336, #00e676); border-radius: 3px; transition: width 0.15s ease; }
 #player-hp-text { font-size: calc(10 * var(--_fs) * 1px); color: #fffef5; font-weight: 700; white-space: nowrap; }
 
-/* 受击冻结特效 */
+/* 受击冻结特效 — 冰蓝色统一 */
 .frozen-crystal {
-    background: linear-gradient(135deg, #4caf50, #1a5336) !important;
-    filter: drop-shadow(0 0 10px #4caf50) !important;
+    background: linear-gradient(135deg, #70d6ff, #0077b6) !important;
+    filter: drop-shadow(0 0 10px #70d6ff) !important;
     animation: iceShimmer 1s infinite alternate;
 }
 @keyframes iceShimmer {
-    0% { filter: drop-shadow(0 0 6px #4caf50); }
-    100% { filter: drop-shadow(0 0 16px #a5d6a7); }
+    0% { filter: drop-shadow(0 0 6px #70d6ff); }
+    100% { filter: drop-shadow(0 0 16px #b3e5fc); }
 }
 
 /* 响应式: 小视口玩家尺寸 */
@@ -66,4 +117,5 @@
 }
 @media (max-height: 480px) {
     #player { width: 28px; height: 38px; font-size: 14px; }
+    #player-hp-text { font-size: 7px; }
 }

@@ -257,12 +257,7 @@
     100% { box-shadow: 0 0 120px rgba(182,41,41,1), 0 0 40px rgba(200,0,0,0.5); }
 }
 
-/* Boss Lord 覆盖 */
-.enemy.boss.boss-lord {
-    width: 80px; height: 100px; border-radius: 6px;
-    box-shadow: 0 0 80px rgba(182,41,41,0.7), 0 0 20px rgba(200,0,0,0.3);
-    border: 2px solid rgba(182,41,41,0.3);
-}
+/* Boss Lord 覆盖 — 删除冗余，统一使用上方 96x128 定义 */
 
 /* Boss 投射物 */
 .enemy-projectile {

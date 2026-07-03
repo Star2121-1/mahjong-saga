@@ -194,7 +194,7 @@ Gp.restart = function() {
     this._spawnInterval = 1.5;
     this._difficultyTimer = 0;
 
-    var heroId = this.player ? this.player.heroId : 'Knight';
+    var heroId = this.player ? this.player.heroId : 'Hero';
     var levelId = this._currentLevelId || 'level_1';
     this._startNewRun(heroId, levelId);
 };

@@ -1,6 +1,6 @@
 (function() {
-    var _heroIds = ['Knight', 'Mage', 'Assassin'];
-    var _currentHeroIndex = 0;
+    var _heroIds = ['Hero', 'Knight', 'Mage', 'Assassin'];
+    var _currentHeroIndex = 0; /* 默认雀圣 */
     var _currentLevelId = 'level_1';
     var _historyFilter = 'all';
     var _historySort = 'date-desc';
@@ -8,12 +8,17 @@
     var DOM = {};
     var _tabLoopId = null; /* Tab 帧循环引用，用于清理 */
     var _tabIntervals = []; /* Tab 定时器数组，用于清理 */
+    var _hubListenersBound = false; /* 防止重复绑定事件监听器 */
 
     function $(id) { return document.getElementById(id); }
 
     window.HubTabController = {
         _currentPanel: 'tavern',
         _previousPanel: null,
+
+        reset: function() {
+            _hubListenersBound = false;
+        },
 
         init: function() {
             var self = this;
@@ -22,11 +27,15 @@
             for (var i = 0; i < navItems.length; i++) {
                 navItems[i].addEventListener('click', function(e) {
                     e.preventDefault();
+                    if (this.id === 'btn-hub-home') {
+                        window.location.href = '../index.html';
+                        return;
+                    }
                     var panelId = this.getAttribute('data-panel');
                     if (panelId) self.switchTo(panelId);
                 });
             }
-            this.switchTo('tavern');
+            this.switchTo('expedition');
         },
 
         switchTo: function(panelId) {
@@ -120,7 +129,7 @@
                 });
             }
 
-            console.log('[HubTab] Panel "' + prev + '" cleaned up — rAF + all intervals destroyed.');
+            /* HubTab panel cleaned up */
         }
     };
 
@@ -140,6 +149,8 @@
     }
 
     function init() {
+        if (_hubListenersBound) return; /* 防止重复绑定事件监听器 */
+        _hubListenersBound = true;
         DOM.hubMetaTokens = $('hub-meta-tokens');
         DOM.hubTotalRuns = $('hub-total-runs');
         DOM.hubTotalKills = $('hub-total-kills');
@@ -186,7 +197,7 @@
                         makeupBtn.textContent = res.reason;
                         setTimeout(function() { refreshMainHub(); }, 1200);
                     }
-                }).catch(function() {});
+                }).catch(function(err) { console.warn('[main_hub] makeupToken claim failed:', err); });
             });
         }
 
@@ -269,7 +280,7 @@
                     }
                     badge.textContent = nextLabel;
                 }
-            }).catch(function() {});
+            }).catch(function(err) { console.warn('[main_hub] loginStreak check failed:', err); });
         }
 
         var seasonEl = document.getElementById('season-indicator');
@@ -295,7 +306,7 @@
                     }
                     refreshMainHub();
                 }
-            }).catch(function() {});
+            }).catch(function(err) { console.warn('[main_hub] loginStreak check failed:', err); });
         }
 
         refreshHeroCarousel();
@@ -314,7 +325,7 @@
         var heroId = getCurrentHeroId();
         var cfg = window.heroConfig[heroId] || window.heroConfig.Knight;
         var meta = window.saveManager._metaCache || {};
-        var unlocked = meta.unlockedHeroes || ['Knight'];
+        var unlocked = meta.unlockedHeroes || ['Hero'];
         var isUnlocked = unlocked.indexOf(heroId) !== -1;
         var isSelected = meta.currentSelectedHero === heroId;
 
@@ -323,6 +334,7 @@
 
         if (DOM.heroPortrait) {
             DOM.heroPortrait.className = 'hero-portrait ' + (cfg.shapeClass || 'shape-circle');
+            DOM.heroPortrait.dataset.heroId = heroId;
             if (!isUnlocked) DOM.heroPortrait.classList.add('locked');
         }
 
@@ -330,7 +342,7 @@
             if (!isUnlocked) {
                 var cost = cfg.unlockCost;
                 DOM.btnHeroMainAction.textContent = '解锁: ' + cost + ' 核心';
-                DOM.btnHeroMainAction.disabled = (meta.metaTokens || 0) < cost;
+                DOM.btnHeroMainAction.disabled = (meta.bossCores || 0) < cost;
             } else if (isSelected) {
                 DOM.btnHeroMainAction.textContent = '已使用';
                 DOM.btnHeroMainAction.disabled = true;
@@ -358,14 +370,14 @@
     async function onHeroMainAction() {
         var heroId = getCurrentHeroId();
         var meta = window.saveManager._metaCache || {};
-        var unlocked = meta.unlockedHeroes || ['Knight'];
+        var unlocked = meta.unlockedHeroes || ['Hero'];
 
         if (unlocked.indexOf(heroId) === -1) {
             var cfg = window.heroConfig[heroId];
             var cost = cfg.unlockCost;
-            if ((meta.metaTokens || 0) >= cost) {
-                meta.metaTokens -= cost;
-                if (!meta.unlockedHeroes) meta.unlockedHeroes = ['Knight'];
+            if ((meta.bossCores || 0) >= cost) {
+                meta.bossCores -= cost;
+                if (!meta.unlockedHeroes) meta.unlockedHeroes = ['Hero'];
                 if (meta.unlockedHeroes.indexOf(heroId) === -1) meta.unlockedHeroes.push(heroId);
                 meta.currentSelectedHero = heroId;
                 await window.saveManager.saveMeta(meta);
@@ -390,7 +402,11 @@
         if (DOM.heroDetailAbility) DOM.heroDetailAbility.textContent = cfg.ability || '';
 
         if (DOM.heroDetailStats) {
-            DOM.heroDetailStats.innerHTML = '<div>HP <span>' + cfg.hp + '</span></div><div>ATK <span>' + cfg.atk + '</span></div><div>SPD <span>' + cfg.speed + '</span></div><div>闪避 <span>' + Math.round((cfg.baseDodge || 0) * 100) + '%</span></div>';
+            DOM.heroDetailStats.innerHTML =
+                '<div>HP <span>' + cfg.hp + '</span></div>' +
+                '<div>ATK <span>' + cfg.atk + '</span></div>' +
+                '<div>SPD <span>' + cfg.speed + '</span></div>' +
+                '<div>闪避 <span>' + Math.round((cfg.baseDodge || 0) * 100) + '%</span></div>';
         }
 
         if (DOM.heroDetailsModal) DOM.heroDetailsModal.classList.remove('hidden');
@@ -584,18 +600,18 @@
 
     async function onHubStart() {
         var meta = window.saveManager._metaCache || {};
-        var heroId = meta.currentSelectedHero || meta.currentHero || 'Knight';
+        var heroId = meta.currentSelectedHero || meta.currentHero || 'Hero';
         var levelId = _currentLevelId || 'level_1';
         await window.saveManager.startNewRun(heroId, levelId);
         window.location.href = 's3_gameplay.html';
     }
 
     window.TavernManager = {
-        refreshTavernMaze: async function() {
+        refreshTavernMaze: function() {
             var nodesEl = document.getElementById('hero-nodes');
             if (!nodesEl) return;
             var meta = window.saveManager._metaCache || {};
-            var unlocked = meta.unlockedHeroes || ['Knight'];
+            var unlocked = meta.unlockedHeroes || ['Hero'];
             var currentHero = meta.currentHero || 'Knight';
             var cores = meta.bossCores || 0;
             var heroes = window.heroRegistry.getAllHeroes();
@@ -661,7 +677,11 @@
         _flashReason: function(reason) {
             var el = document.createElement('div');
             el.textContent = reason;
-            el.style.cssText = 'position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);background:rgba(180,40,40,0.92);color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:700;z-index:999;pointer-events:none;';
+            el.style.cssText =
+                'position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);' +
+                'background:rgba(180,40,40,0.92);color:#fff;' +
+                'padding:10px 24px;border-radius:8px;' +
+                'font-size:14px;font-weight:700;z-index:999;pointer-events:none;';
             document.body.appendChild(el);
             setTimeout(function() { if (el.parentNode) el.remove(); }, 1200);
         }
@@ -707,19 +727,41 @@
                 slotsEl.appendChild(div);
             });
 
-            /* ── 左栏：仓库网格 ── */
+            /* ── 左栏：仓库卡片列表（去重） ── */
             invEl.innerHTML = '';
             var eqMap = {};
             for (var ei = 0; ei < equipments.length; ei++) eqMap[equipments[ei].instanceId] = equipments[ei];
             var isEquipped = {};
             for (var s in equipped) { if (equipped[s]) isEquipped[equipped[s]] = true; }
+            var qualityColors = { rare: '#4fc3f7', epic: '#ce93d8', legendary: '#ffd740' };
+            var slotIcons = { weapon: '⚔', armor: '🛡', talisman: '💍' };
+            var _seen = {};
             for (var ej = 0; ej < equipments.length; ej++) {
                 var eqItem = equipments[ej];
+                if (!eqItem || !eqItem.instanceId) continue;
                 if (isEquipped[eqItem.instanceId]) continue;
+                if (_seen[eqItem.instanceId]) continue;
+                _seen[eqItem.instanceId] = true;
                 (function(item) {
                     var card = document.createElement('div');
                     card.className = 'equip-card quality-' + item.quality;
-                    card.innerHTML = '<div class="equip-card-name">' + item.name + '</div><div class="equip-card-slot">' + slotLabels[item.slot] + '</div>';
+                    var bg = qualityColors[item.quality] || '#888';
+                    var affixHtml = '';
+                    if (item.affixes && item.affixes.length) {
+                        affixHtml = '<div class="equip-card-affixes">';
+                        for (var af = 0; af < item.affixes.length; af++) {
+                            var affix = item.affixes[af];
+                            affixHtml += '<span class="equip-card-affix">' + affix.name + '</span>';
+                        }
+                        affixHtml += '</div>';
+                    }
+                    card.innerHTML =
+                        '<div class="equip-card-icon" style="background:' + bg + '20;border:1px solid ' + bg + '40;color:' + bg + '">' + (slotIcons[item.slot] || '?') + '</div>' +
+                        '<div class="equip-card-info">' +
+                        '<div class="equip-card-name">' + item.name + ' <span class="quality-tag ' + item.quality + '">' + item.quality + '</span></div>' +
+                        '<div class="equip-card-slot">' + slotLabels[item.slot] + '</div>' +
+                        affixHtml +
+                        '</div>';
                     card.addEventListener('click', function() {
                         window.saveManager.equipItem(item.instanceId);
                         self.renderForge();
@@ -750,7 +792,11 @@
                 var affix = item.affixes[ai];
                 var row = document.createElement('div');
                 row.className = 'forge-affix-row';
-                var valStr = affix.fmt.replace('{val}', (affix.val * (affix.id === 'xp_gain' || affix.id === 'speed_pct' ? 100 : 1)).toFixed(affix.id === 'ice_bonus' ? 1 : 0) + (affix.id === 'xp_gain' || affix.id === 'speed_pct' ? '%' : ''));
+                var pctMult = (affix.id === 'xp_gain' || affix.id === 'speed_pct') ? 100 : 1;
+                var toFixed = (affix.id === 'ice_bonus') ? 1 : 0;
+                var unit = (affix.id === 'xp_gain' || affix.id === 'speed_pct') ? '%' : '';
+                var valStr = affix.fmt.replace('{val}',
+                    (affix.val * pctMult).toFixed(toFixed) + unit);
                 row.innerHTML = '<span class="forge-affix-text">' + affix.name + ': ' + valStr + '</span>';
                 var btn = document.createElement('button');
                 btn.className = 'forge-affix-btn';
@@ -956,8 +1002,9 @@
                 '<div class="stat-row"><span class="stat-label">圣物多样性</span><span class="stat-value">' + stats.relicVariety + ' 种</span></div>';
         } else {
             statsHtml = '<div class="stats-empty">暂无数据，开始一局游戏吧！</div>';
+        }
 
-            /* Epoch 19: 成就进度 */
+        /* Epoch 19: 成就进度 */
         var achHtml = '';
         if (typeof window.achievementConfig !== 'undefined') {
             var achMeta = meta.achievements || {};
@@ -967,9 +1014,18 @@
         }
         statsHtml += achHtml;
 
+        /* Epoch 16: 声望信息 */
+        var prestigeHtml = '';
+        if (typeof window.saveManager.getPrestigeInfo === 'function') {
+            var pi = window.saveManager.getPrestigeInfo();
+            prestigeHtml =
+                '<div class="stat-row"><span class="stat-label">声望等级</span><span class="stat-value">' + (pi.level || 0) + '</span></div>' +
+                '<div class="stat-row"><span class="stat-label">声望点</span><span class="stat-value">' + (pi.points || 0) + ' / ' + pi.potential + '</span></div>' +
+                '<div class="stat-row"><span class="stat-label">转生加成</span><span class="stat-value">ATK+' + Math.floor((pi.points||0)*0.5) + ' HP+' + Math.floor((pi.points||0)*2) + '</span></div>' +
+                (pi.canPrestige
+                    ? '<button class="btn-perk-buy" id="prestige-btn" style="margin-top:8px;width:100%;">转生 (' + (pi.potential - (pi.points||0)) + ' 点可获得)</button>'
+                    : '<div class="stat-row"><span class="stat-label">转生</span><span class="stat-value">已满级</span></div>');
         }
-
-/* Epoch 16: 声望信息 */        var prestigeHtml = '';        if (typeof window.saveManager.getPrestigeInfo === 'function') {            var pi = window.saveManager.getPrestigeInfo();            prestigeHtml =                '<div class="stat-row"><span class="stat-label">声望等级</span><span class="stat-value">' + (pi.level || 0) + '</span></div>' +                '<div class="stat-row"><span class="stat-label">声望点</span><span class="stat-value">' + (pi.points || 0) + ' / ' + pi.potential + '</span></div>' +                '<div class="stat-row"><span class="stat-label">转生加成</span><span class="stat-value">ATK+' + Math.floor((pi.points||0)*0.5) + ' HP+' + Math.floor((pi.points||0)*2) + '</span></div>' +                (pi.canPrestige ? '<button class="btn-perk-buy" id="prestige-btn" style="margin-top:8px;width:100%;">转生 (' + (pi.potential - (pi.points||0)) + ' 点可获得)</button>' : '<div class="stat-row"><span class="stat-label">转生</span><span class="stat-value">已满级</span></div>');        }
 
         /* Epoch 32: 图鉴进度 */
         var compendiumHtml = '';
@@ -1044,7 +1100,11 @@
                     var def = poolMap[q.id];
                     if (!def) continue;
                     var claimBtn = (q.completed && !dq.claimed && !dq.claimed[q.id])
-                        ? '<button class="btn-perk-buy" data-quest="' + q.id + '" style="margin-top:4px;width:100%;font-size:11px;">领取 (' + (def.reward.metaTokens||0) + '代币' + (def.reward.bossCores ? '|' + def.reward.bossCores + '核心' : '') + ')</button>'
+                        ? '<button class="btn-perk-buy" data-quest="' + q.id +
+                          '" style="margin-top:4px;width:100%;font-size:11px;">领取 (' +
+                          (def.reward.metaTokens || 0) + '代币' +
+                          (def.reward.bossCores ? '|' + def.reward.bossCores + '核心' : '') +
+                          ')</button>'
                         : '';
                     questHtml += '<div class="stat-row" style="flex-direction:column;align-items:flex-start;gap:4px;">' +
                         '<span class="stat-label">' + (q.completed ? '✅ ' : '⬜ ') + def.name + '</span>' +
@@ -1174,12 +1234,22 @@
             '<div class="perk-row">' +
             '<span class="perk-name">开局圣物</span>' +
             '<span class="perk-count">' + (perks.token_relic_start ? '已拥有' : '未购买') + '</span>' +
-            '<button class="btn-perk-buy' + (perks.token_relic_start ? ' disabled' : '') + '" data-perk="token_relic_start" data-cost="30"' + (perks.token_relic_start ? ' disabled' : '') + '>购买 (30 代币)</button>' +
+            '<button class="btn-perk-buy' +
+            (perks.token_relic_start ? ' disabled' : '') +
+            '" data-perk="token_relic_start" data-cost="30"' +
+            (perks.token_relic_start ? ' disabled' : '') +
+            '>购买 (30 代币)</button>' +
             '</div>' +
             '<div class="perk-row">' +
             '<span class="perk-name">关卡亲和 Lv.' + (perks.token_map_affinity || 0) + '</span>' +
             '<span class="perk-desc">' + _mapAffinityDesc(perks.token_map_affinity || 0) + '</span>' +
-            '<button class="btn-perk-buy' + ((perks.token_map_affinity || 0) >= 3 ? ' disabled' : '') + '" data-perk="map_affinity"' + ((perks.token_map_affinity || 0) >= 3 ? ' disabled' : '') + '>升级 (' + _mapAffinityCost(perks.token_map_affinity || 0) + ' 代币)</button>' +
+            '<button class="btn-perk-buy' +
+            ((perks.token_map_affinity || 0) >= 3 ? ' disabled' : '') +
+            '" data-perk="map_affinity"' +
+            ((perks.token_map_affinity || 0) >= 3 ? ' disabled' : '') +
+            '>升级 (' +
+            _mapAffinityCost(perks.token_map_affinity || 0) +
+            ' 代币)</button>' +
             '</div>' +
             /* Epoch 15: 精英模式 */
             '<div class="elite-toggle' + (window.saveManager && window.saveManager.isEliteMode && window.saveManager.isEliteMode() ? ' active' : '') + '">' +
@@ -1197,9 +1267,18 @@
             '<div class="stats-section">' +
             '<div class="stats-section-title">🎯 活跃挑战</div>' +
             '<div class="challenges-grid">' + challengesHtml + '</div>' +
-'<div class="stats-section">' +            '<div class="stats-section-title">⏱ 每日挑战</div>' +            '<div class="stats-grid">' + dailyHtml + '</div>' +            '</div>' +
-'<div class="stats-section">' +            '<div class="stats-section-title">📋 每日任务</div>' +            '<div class="stats-grid">' + dailyQuestHtml + '</div>' +            '</div>' +
-'<div class="stats-section">' +            '<div class="stats-section-title">🏆 每周超级挑战</div>' +            '<div class="challenges-grid" id="weekly-challenges-section"><div class="stats-empty">加载中...</div></div>' +            '</div>' +
+            '<div class="stats-section">' +
+            '<div class="stats-section-title">⏱ 每日挑战</div>' +
+            '<div class="stats-grid">' + dailyHtml + '</div>' +
+            '</div>' +
+            '<div class="stats-section">' +
+            '<div class="stats-section-title">📋 每日任务</div>' +
+            '<div class="stats-grid">' + dailyQuestHtml + '</div>' +
+            '</div>' +
+            '<div class="stats-section">' +
+            '<div class="stats-section-title">🏆 每周超级挑战</div>' +
+            '<div class="challenges-grid" id="weekly-challenges-section"><div class="stats-empty">加载中...</div></div>' +
+            '</div>' +
             '<div class="stats-section">' +
             '<div class="stats-section-title">🔐 每周金库</div>' +
             '<div class="vaults-grid">' + vaultHtml + '</div>' +
@@ -1209,10 +1288,22 @@
             '<div class="stats-section-title">🛒 元代币商城</div>' +
             '<div class="perks-list">' + perksHtml + '</div>' +
             '</div>' +
-'<div class="stats-section">' +            '<div class="stats-section-title">⭐ 声望转生</div>' +            '<div class="stats-grid">' + prestigeHtml + '</div>' +            '</div>' +
-'<div class="stats-section">' +            '<div class="stats-section-title">📖 图鉴收集</div>' +            '<div class="stats-grid">' + compendiumHtml + '</div>' +            '</div>' +
-'<div class="stats-section">' +            '<div class="stats-section-title">🔮 秘密发现</div>' +            '<div class="stats-grid">' + secretsHtml + '</div>' +            '</div>' +
-'<div class="stats-section">' +            '<div class="stats-section-title">🌟 赛季奖励</div>' +            '<div class="stats-grid">' + seasonRewardHtml + '</div>' +            '</div>';
+            '<div class="stats-section">' +
+            '<div class="stats-section-title">⭐ 声望转生</div>' +
+            '<div class="stats-grid">' + prestigeHtml + '</div>' +
+            '</div>' +
+            '<div class="stats-section">' +
+            '<div class="stats-section-title">📖 图鉴收集</div>' +
+            '<div class="stats-grid">' + compendiumHtml + '</div>' +
+            '</div>' +
+            '<div class="stats-section">' +
+            '<div class="stats-section-title">🔮 秘密发现</div>' +
+            '<div class="stats-grid">' + secretsHtml + '</div>' +
+            '</div>' +
+            '<div class="stats-section">' +
+            '<div class="stats-section-title">🌟 赛季奖励</div>' +
+            '<div class="stats-grid">' + seasonRewardHtml + '</div>' +
+            '</div>';
 
         /* 绑定购买按钮 */
         grid.querySelectorAll('.btn-perk-buy').forEach(function(btn) {
@@ -1240,7 +1331,7 @@
                 var questId = this.dataset.quest;
                 window.saveManager.claimDailyQuestReward(questId).then(function(res) {
                     if (res.ok) refreshStatsPanel();
-                }).catch(function() {});
+                }).catch(function(err) { console.warn('[main_hub] loginStreak check failed:', err); });
             });
         });
 
@@ -1268,7 +1359,7 @@
                         refreshStatsPanel();
                         refreshMainHub();
                     }
-                }).catch(function() {});
+                }).catch(function(err) { console.warn('[main_hub] loginStreak check failed:', err); });
             });
         }
 
@@ -1278,7 +1369,7 @@
             claimBtn.addEventListener('click', function() {
                 window.saveManager.claimWeeklyVaultReward().then(function(res) {
                     if (res.ok) refreshStatsPanel();
-                }).catch(function() {});
+                }).catch(function(err) { console.warn('[main_hub] loginStreak check failed:', err); });
             });
         }
         var abandonBtn = document.getElementById('vault-abandon-btn');
@@ -1286,7 +1377,7 @@
             abandonBtn.addEventListener('click', function() {
                 window.saveManager.abandonWeeklyVault().then(function(res) {
                     if (res.ok) refreshStatsPanel();
-                }).catch(function() {});
+                }).catch(function(err) { console.warn('[main_hub] loginStreak check failed:', err); });
             });
         }
         document.querySelectorAll('.vault-tier-btn').forEach(function(btn) {
@@ -1295,7 +1386,7 @@
                 window.saveManager.openWeeklyVault(bet).then(function(res) {
                     if (res.ok) refreshStatsPanel();
                     else alert(res.reason);
-                }).catch(function() {});
+                }).catch(function(err) { console.warn('[main_hub] loginStreak check failed:', err); });
             });
         });
     }
@@ -1357,7 +1448,7 @@
         }
     }
 
-    /* ── Epoch 15: 精英模式切换 ── */    /* ── Epoch 15: 精英模式切换 ── */
+    /* ── Epoch 15: 精英模式切换 ── */
     async function onEliteToggle(btn) {
         var isOn = window.saveManager.isEliteMode();
         var result = isOn
@@ -1527,7 +1618,21 @@
             var ds = ts.getFullYear()+'/'+(ts.getMonth()+1)+'/'+ts.getDate()+' '+ts.getHours()+':'+String(ts.getMinutes()).padStart(2,'0');
             var rc = e.won ? 'history-won' : 'history-lost';
             var ri = e.won ? '通关' : '失败';
-            html += '<div class="history-entry '+rc+'"><div class="history-time">'+ds+'</div><div class="history-result">'+ri+'</div><div class="history-details">英雄: '+(e.heroId||'-')+' | 关卡: '+(e.levelId||'-')+' | 击杀: '+e.kills+' | 用时: '+Math.round(e.elapsed/60)+'分'+(e.loopCount?' | 深渊: '+e.loopCount+'层':'')+'</div><div class="history-reward">奖励: +'+(e.metaTokensEarned||0)+' 代币</div>'+(e.weeklyCompleted && e.weeklyCompleted.length > 0 ? '<div class="history-weekly">🏆 周常: '+e.weeklyCompleted.join(', ')+'</div>' : '')+'</div>';
+            html += '<div class="history-entry ' + rc + '">' +
+                '<div class="history-time">' + ds + '</div>' +
+                '<div class="history-result">' + ri + '</div>' +
+                '<div class="history-details">' +
+                '英雄: ' + (e.heroId || '-') +
+                ' | 关卡: ' + (e.levelId || '-') +
+                ' | 击杀: ' + e.kills +
+                ' | 用时: ' + Math.round(e.elapsed / 60) + '分' +
+                (e.loopCount ? ' | 深渊: ' + e.loopCount + '层' : '') +
+                '</div>' +
+                '<div class="history-reward">奖励: +' + (e.metaTokensEarned || 0) + ' 代币</div>' +
+                (e.weeklyCompleted && e.weeklyCompleted.length > 0
+                    ? '<div class="history-weekly">🏆 周常: ' + e.weeklyCompleted.join(', ') + '</div>'
+                    : '') +
+                '</div>';
         }
         grid.innerHTML = html;
     }

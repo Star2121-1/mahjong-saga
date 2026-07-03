@@ -86,7 +86,8 @@
         el.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:' + color + ';color:#fff;padding:12px 24px;border-radius:8px;z-index:9999;font-size:14px;font-weight:600;box-shadow:0 0 30px rgba(0,0,0,0.4);max-width:420px;text-align:center;pointer-events:none;';
         el.textContent = msg;
         document.body.appendChild(el);
-        setTimeout(function() { el.remove(); }, 3500);
+        var self = el;
+        setTimeout(function() { if (document.contains(self)) self.remove(); }, 3500); /* L-016: 跨页面残留防护 */
     }
 
     async function onNewGame() {

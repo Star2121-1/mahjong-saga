@@ -34,7 +34,6 @@ Sys.triggerOverdrive = function(engine) {
     }
 
     if (engine.container) engine.container.classList.add('overdrive-active');
-    engine.triggerShake(0.5, 3000);
     Cs.spawnCausalityText(engine, '☀☀☀ Overdrive 轰炸 ☀☀☀');
 
     /* 成就：Overdrive 计数 */
@@ -132,15 +131,18 @@ Sys.applyMutator = function(engine, mutatorId) {
             }
         }
     } else if (mutatorId === 'frailty') {
+        /* L-008: 脆弱突变不再双向增益 — 玩家 +80% ATK 但受击伤害 +30% */
         engine._frailtyOrigPlayerAtk = engine.player.atk;
-        engine.player.atk = Math.floor(engine.player.atk * 1.5);
+        engine._frailtyOrigPlayerDmgTaken = engine._frailtyOrigPlayerDmgTaken || 0;
+        engine.player.atk = Math.floor(engine.player.atk * 1.8);
+        engine.player._frailtyDebuff = true;
         for (var i = 0; i < engine.enemies.length; i++) {
             var e = engine.enemies[i];
             if (!e.alive) continue;
             if (!e._frailtyStored) {
                 e._frailtyStored = true;
                 e._frailtyOrigAtk = e.atk;
-                e.atk = Math.floor(e.atk * 1.5);
+                /* 敌人不再获得 ATK 加成 */
             }
         }
     } else if (mutatorId === 'wither') {
@@ -181,6 +183,7 @@ Sys.clearMutatorEffects = function(engine) {
     }
     if (engine._activeMutator === 'frailty') {
         if (engine._frailtyOrigPlayerAtk != null) engine.player.atk = engine._frailtyOrigPlayerAtk;
+        engine.player._frailtyDebuff = false;
         for (var i = 0; i < engine.enemies.length; i++) {
             var e = engine.enemies[i];
             if (e._frailtyStored) {
@@ -198,6 +201,19 @@ Sys.clearMutatorEffects = function(engine) {
 
 Sys.updateResonanceAuras = function(engine, dt) {
     if (!engine.player) return;
+    /* M-004: 预创建共鸣节点池，切换 visibility 而非频繁 create/remove */
+    if (!engine._flameAuraEl) {
+        engine._flameAuraEl = document.createElement('div');
+        engine._flameAuraEl.className = 'resonance-flame';
+        engine._flameAuraEl.style.visibility = 'hidden';
+        engine._worldLayer.appendChild(engine._flameAuraEl);
+    }
+    if (!engine._iceAuraEl) {
+        engine._iceAuraEl = document.createElement('div');
+        engine._iceAuraEl.className = 'resonance-ice';
+        engine._iceAuraEl.style.visibility = 'hidden';
+        engine._worldLayer.appendChild(engine._iceAuraEl);
+    }
     /* 焰痕 */
     if (engine.player.setResonanceSpeed && !engine._pendingReward) {
         engine._flameAuraTimer = (engine._flameAuraTimer || 0) + dt;
@@ -206,7 +222,7 @@ Sys.updateResonanceAuras = function(engine, dt) {
             var px = engine.player.x;
             var py = engine.player.y;
             var auraR = 80;
-            var dmg = Math.floor(engine.player.atk * 0.3);
+            var dmg = Math.floor(engine.player.atk * 0.10); /* H-027: 从 0.15 降至 0.10 防 DPS 过高 */
             for (var ae = 0; ae < engine.enemies.length; ae++) {
                 var e = engine.enemies[ae];
                 if (!e.alive) continue;
@@ -216,14 +232,14 @@ Sys.updateResonanceAuras = function(engine, dt) {
                     e.takeDamage(dmg);
                 }
             }
-            var auraEl = document.createElement('div');
-            auraEl.className = 'resonance-flame';
-            auraEl.style.left = (px - auraR) + 'px';
-            auraEl.style.top = (py - auraR) + 'px';
-            auraEl.style.width = (auraR * 2) + 'px';
-            auraEl.style.height = (auraR * 2) + 'px';
-            engine._worldLayer.appendChild(auraEl);
-            setTimeout(function() { if (auraEl.parentNode) auraEl.remove(); }, 400);
+            var flameEl = engine._flameAuraEl;
+            flameEl.style.left = (px - auraR) + 'px';
+            flameEl.style.top = (py - auraR) + 'px';
+            flameEl.style.width = (auraR * 2) + 'px';
+            flameEl.style.height = (auraR * 2) + 'px';
+            flameEl.style.visibility = 'visible';
+            var _flameHideTimer = setTimeout(function() { if (flameEl) flameEl.style.visibility = 'hidden'; }, 400);
+            engine._flameHideTimer = _flameHideTimer;
         }
     }
     /* 永冻 */
@@ -246,14 +262,14 @@ Sys.updateResonanceAuras = function(engine, dt) {
                     if (e2.el) e2.el.classList.add('frozen-crystal');
                 }
             }
-            var iceEl = document.createElement('div');
-            iceEl.className = 'resonance-ice';
+            var iceEl = engine._iceAuraEl;
             iceEl.style.left = (px2 - iceR) + 'px';
             iceEl.style.top = (py2 - iceR) + 'px';
             iceEl.style.width = (iceR * 2) + 'px';
             iceEl.style.height = (iceR * 2) + 'px';
-            engine._worldLayer.appendChild(iceEl);
-            setTimeout(function() { if (iceEl.parentNode) iceEl.remove(); }, 500);
+            iceEl.style.visibility = 'visible';
+            var _iceHideTimer = setTimeout(function() { if (iceEl) iceEl.style.visibility = 'hidden'; }, 500);
+            engine._iceHideTimer = _iceHideTimer;
         }
     }
 };

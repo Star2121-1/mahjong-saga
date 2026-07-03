@@ -8,27 +8,27 @@ window.Enemy = class Enemy {
         this.type = type || 'Normal';
         this.el = null;
 
-        const hpMult = Math.pow(1.1, level - 1);
-        const atkMult = Math.pow(1.1, level - 1);
+        const hpMult = Math.pow(Balance.ENEMY_LEVEL_HP_ATK_MULT, level - 1);
+        const atkMult = Math.pow(Balance.ENEMY_LEVEL_HP_ATK_MULT, level - 1);
 
-        this.maxHp = Math.floor(20 * hpMult);
+        this.maxHp = Math.floor(Balance.ENEMY_BASE_HP * hpMult);
         this.hp = this.maxHp;
-        this.atk = Math.floor(5 * atkMult);
-        this.speed = 40 + (level - 1) * 3;
+        this.atk = Math.floor(Balance.ENEMY_BASE_ATK * atkMult);
+        this.speed = 40 + (level - 1) * Balance.ENEMY_LEVEL_SPEED_SCALE;
 
         /* ── 无尽深渊指数暴涨 ── */
         var eng = window.gameEngine;
         var loopCount = (eng && eng.loopCount) || 0;
         if (loopCount > 0) {
-            this.maxHp = Math.floor(this.maxHp * Math.pow(1.15, loopCount));
+            this.maxHp = Math.floor(this.maxHp * Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, loopCount));
             this.hp = this.maxHp;
-            this.atk = Math.floor(this.atk * Math.pow(1.15, loopCount));
-            this.speed = Math.floor(this.speed * Math.pow(1.05, loopCount));
+            this.atk = Math.floor(this.atk * Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, loopCount));
+            this.speed = Math.floor(this.speed * Math.pow(Balance.ABYSS_LOOP_SPEED_MULT, loopCount));
         }
 
         this.baseSpeed = this.speed;
-        this.radius = 18;
-        this.attackCooldown = 1.5;
+        this.radius = Balance.ENEMY_RADIUS;
+        this.attackCooldown = Balance.ENEMY_ATTACK_COOLDOWN;
         this.attackTimer = 0;
         this.reachedPlayer = false;
         this.hue = ((level - 1) * 47 + 17) % 360;
@@ -129,14 +129,14 @@ window.Enemy = class Enemy {
         var dx = player.x - this.x;
         var dy = player.y - this.y;
         var dist = Math.sqrt(dx * dx + dy * dy);
-        var attackRange = 30 + this.radius;
+        var attackRange = Balance.ENEMY_ATTACK_RANGE_OFFSET + this.radius;
 
         if (this.reachedPlayer) {
             this.attackTimer -= dt;
             if (this.attackTimer <= 0) {
                 this.attackTimer = this.attackCooldown;
-                if (dist <= attackRange + 5) {
-                    this.flashTimer = 0.12;
+                if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
+                    this.flashTimer = Balance.FLASH_DURATION;
                     var dmg = this.atk;
                     /* Epoch 14: 关卡亲和减伤 */
                     if (engine && engine._mapAffinityReduction) {
@@ -145,7 +145,7 @@ window.Enemy = class Enemy {
                     player.takeDamage(dmg, this);
                 }
             }
-            if (dist > attackRange + 5) this.reachedPlayer = false;
+            if (dist > attackRange + Balance.ENEMY_ATTACK_PADDING) this.reachedPlayer = false;
         }
 
         if (!this.reachedPlayer) {
@@ -155,6 +155,9 @@ window.Enemy = class Enemy {
             } else if (dist > 0.01) {
                 var spd = this._totemBuffed ? this.speed * 1.3 : this.speed;
                 var move = spd * dt;
+                /* M-028: 限制单帧位移不超过到攻击边界的距离，防止越过攻击范围 */
+                var toAttackEdge = dist - attackRange;
+                if (move > toAttackEdge) move = toAttackEdge;
                 this.x += (dx / dist) * move;
                 this.y += (dy / dist) * move;
                 this._clampPosition(engine);
@@ -166,7 +169,7 @@ window.Enemy = class Enemy {
         var dx = player.x - this.x;
         var dy = player.y - this.y;
         var dist = Math.sqrt(dx * dx + dy * dy);
-        var attackRange = 30 + this.radius;
+        var attackRange = Balance.ENEMY_ATTACK_RANGE_OFFSET + this.radius;
 
         if (this._stalkerCooldown > 0) this._stalkerCooldown -= dt;
 
@@ -190,8 +193,8 @@ window.Enemy = class Enemy {
                 this._stalkerState = 'fatigue';
                 this._stalkerTimer = 3.0;
                 if (this.el) this.el.style.opacity = '1';
-                if (dist <= attackRange + 5) {
-                    this.flashTimer = 0.12;
+                if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
+                    this.flashTimer = Balance.FLASH_DURATION;
                     player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * 1.5), engine), this);
                 }
             }
@@ -208,12 +211,12 @@ window.Enemy = class Enemy {
                 this.attackTimer -= dt;
                 if (this.attackTimer <= 0) {
                     this.attackTimer = this.attackCooldown;
-                    if (dist <= attackRange + 5) {
-                        this.flashTimer = 0.12;
+                    if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
+                        this.flashTimer = Balance.FLASH_DURATION;
                         player.takeDamage(this._applyMapAffinityDmg(this.atk, engine), this);
                     }
                 }
-                if (dist > attackRange + 5) this.reachedPlayer = false;
+                if (dist > attackRange + Balance.ENEMY_ATTACK_PADDING) this.reachedPlayer = false;
             }
             if (!this.reachedPlayer && dist > 0.01) {
                 var spd = this.baseSpeed * 0.5;
@@ -229,12 +232,12 @@ window.Enemy = class Enemy {
             this.attackTimer -= dt;
             if (this.attackTimer <= 0) {
                 this.attackTimer = this.attackCooldown;
-                if (dist <= attackRange + 5) {
-                    this.flashTimer = 0.12;
+                if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
+                    this.flashTimer = Balance.FLASH_DURATION;
                     player.takeDamage(this._applyMapAffinityDmg(this.atk, engine), this);
                 }
             }
-            if (dist > attackRange + 5) this.reachedPlayer = false;
+            if (dist > attackRange + Balance.ENEMY_ATTACK_PADDING) this.reachedPlayer = false;
         }
 
         if (!this.reachedPlayer) {
@@ -254,7 +257,7 @@ window.Enemy = class Enemy {
         var dx = player.x - this.x;
         var dy = player.y - this.y;
         var dist = Math.sqrt(dx * dx + dy * dy);
-        var attackRange = 30 + this.radius;
+        var attackRange = Balance.ENEMY_ATTACK_RANGE_OFFSET + this.radius;
 
         this._totemTimer -= dt;
         if (this._totemTimer <= 0) {
@@ -303,12 +306,12 @@ window.Enemy = class Enemy {
             this.attackTimer -= dt;
             if (this.attackTimer <= 0) {
                 this.attackTimer = this.attackCooldown;
-                if (dist <= attackRange + 5) {
-                    this.flashTimer = 0.12;
+                if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
+                    this.flashTimer = Balance.FLASH_DURATION;
                     player.takeDamage(this._applyMapAffinityDmg(this.atk, engine), this);
                 }
             }
-            if (dist > attackRange + 5) this.reachedPlayer = false;
+            if (dist > attackRange + Balance.ENEMY_ATTACK_PADDING) this.reachedPlayer = false;
         }
 
         if (!this.reachedPlayer && dist < attackRange) {
@@ -458,8 +461,9 @@ window.Enemy = class Enemy {
         var totalR = player.radius + this.radius;
         if (pDist < totalR) {
             if (pDist > 0.01) {
-                this.x -= (pdx / pDist) * 3;
-                this.y -= (pdy / pDist) * 3;
+                /* M-029: 推挤与 dt 成比例，不再 FPS 依赖 */
+                this.x -= (pdx / pDist) * this.speed * dt;
+                this.y -= (pdy / pDist) * this.speed * dt;
                 this._clampPosition(engine);
             }
             if (this._bossContactTimer <= 0) {
@@ -518,6 +522,9 @@ window.Enemy = class Enemy {
                 if (toPlayerLen > 0.01) {
                     toPlayerX /= toPlayerLen;
                     toPlayerY /= toPlayerLen;
+                } else {
+                    /* M-010: 玩家正好在 Tanker 中心时，默认视为正面 */
+                    toPlayerX = 1; toPlayerY = 0;
                 }
                 var fromSrcX = srcX - this.x;
                 var fromSrcY = srcY - this.y;
@@ -530,8 +537,13 @@ window.Enemy = class Enemy {
                 if (dot > 1e-10) actualDmg = Math.floor(actualDmg * 0.5);
             }
         }
+        /* K-029: 万子连击 -- 15% 几率造成额外 50% 伤害 */
+        if (source === 'player' && window.gameEngine && window.gameEngine.player
+            && window.gameEngine.player.heroId === 'Knight' && Math.random() < 0.15) {
+            actualDmg = Math.floor(actualDmg * 1.5);
+        }
         this.hp -= actualDmg;
-        this.flashTimer = 0.12;
+        this.flashTimer = Balance.FLASH_DURATION;
 
         /* ── FCT 喷射 ── */
         if (window.fxManager && actualDmg > 0) {

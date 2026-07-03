@@ -1,26 +1,42 @@
 window.heroConfig = {
+    Hero: {
+        id: 'Hero',
+        name: '雀（雀圣本尊）',
+        desc: '雀·天命之牌。万中无一，均衡全能。',
+        backstory: '骨雕雀牌通灵所化的雀圣，牌面上一个"雀"字即是一切。她诞生于千年雀坛的第一把胡牌，是万子、筒子、索子的共同先祖。平衡、机敏、无畏——她是麻将之魂。',
+        ability: '【雀灵流转】攻击速度 +15%，武器冷却 -10%。（已实现：速度+15%，cdFloor 0.18）',
+        baseDodge: 0.05,
+        hp: 120, atk: 12, speed: 200,
+        hue: 30,
+        unlockCost: 0,
+        shapeClass: 'shape-circle',
+        passiveName: '雀灵祝福',
+        passiveDesc: '攻击速度 +15%，武器冷却缩减 10%',
+        weaponSlots: 6,
+        cdFloor: 0.18
+    },
     Knight: {
         id: 'Knight',
-        name: '光刃行者',
-        desc: '均衡型战士，擅长正面肉搏。',
-        backstory: '曾是光之帝国的精英卫兵，在黑暗降临后失去了所有同伴。如今他挥舞着残存的光刃，誓要杀出一条血路。',
-        ability: '【光刃连击】每次攻击有 15% 几率触发连击，造成额外 50% 伤害。',
+        name: '一万（光刃行者）',
+        desc: '一万·坚盾之章。万子首席，攻守兼备。',
+        backstory: '一万乃万子之首，牌面镌刻光辉战纹。曾在雀坛血战中独挡八方妖牌，以身为盾护住牌河。传说他现身的牌局，从无败绩。',
+        ability: '【万子连击】每次攻击有 15% 几率触发连击，造成额外 50% 伤害。',
         baseDodge: 0,
         hp: 100, atk: 10, speed: 180,
         hue: 200,
-        unlockCost: 0,
+        unlockCost: 30,
         shapeClass: 'shape-circle',
-        /* Epoch 16: 兼容 HeroRegistry 被动字段 */
         passiveName: '闪避震荡',
         passiveDesc: '成功闪避时，释放半径 100px 冲击波击退周围敌人',
-        cost: 0
+        weaponSlots: 6,
+        cdFloor: 0.2
     },
     Mage: {
         id: 'Mage',
-        name: '不灭巨像',
-        desc: '高血量坦克，容错率极高。',
-        backstory: '远古泰坦的最后的子嗣，身躯由活体岩石构成。他坚不可摧，但行动迟缓。',
-        ability: '【花岗岩皮肤】每升一级荆棘反伤甲额外提供 5% 反伤率。',
+        name: '九筒（不灭巨像）',
+        desc: '九筒·筒王之躯。九子连环，金刚不坏。',
+        backstory: '九筒乃筒子之尊，九枚筒纹叠印成甲。远古雀神以万年岩晶所铸，牌桌上无人能撼其分毫。虽行动迟缓，但每一下都震天动地。',
+        ability: '【筒纹护体】每升一级荆棘反伤甲额外提供 5% 反伤率。',
         baseDodge: 0,
         hp: 160, atk: 6, speed: 140,
         hue: 120,
@@ -28,15 +44,14 @@ window.heroConfig = {
         shapeClass: 'shape-square',
         passiveName: null,
         passiveDesc: null,
-        cost: 50,
         weaponSlots: 6,
-        cdFloor: 0.2
+        cdFloor: 0.15
     },
     Assassin: {
         id: 'Assassin',
-        name: '幽灵刺客',
-        desc: '脆皮高爆发，极致的移速与杀戮。',
-        backstory: '来自影界的无名杀手，没人见过她的真面目。她为杀戮而生，也随时准备为杀戮而死。',
+        name: '一条（幽灵刺客）',
+        desc: '一条·索命之雀。幺鸡独行，一击必杀。',
+        backstory: '一条又名"幺鸡"，乃索子中最神秘的存在。她从不正面现身，只在牌河暗影中穿梭。传说被她盯上的对手，胡牌前必见血。',
         ability: '【暗影步】自带 15% 基础闪避率，移动速度提升 10%。',
         baseDodge: 0.15,
         hp: 75, atk: 16, speed: 220,
@@ -45,8 +60,7 @@ window.heroConfig = {
         shapeClass: 'shape-triangle',
         passiveName: null,
         passiveDesc: null,
-        cost: 100,
         weaponSlots: 6,
-        cdFloor: 0.2
+        cdFloor: 0.15
     }
 };

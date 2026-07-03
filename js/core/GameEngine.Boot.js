@@ -362,6 +362,12 @@ Gp._startNewRun = function(heroId, levelId) {
         this._spawnCausalityText('⚠️ 精英模式——所有敌人 +50% 属性，核心收益×1.5');
     }
 
+    /* ── world-layer 尺寸匹配地图，防止非全屏时 overflow:hidden 剪裁 ── */
+    if (this._worldLayer) {
+        this._worldLayer.style.width = this._mapW + 'px';
+        this._worldLayer.style.height = this._mapH + 'px';
+    }
+
     this.player.x = this._mapW / 2;
     this.player.y = this._mapH / 2;
     this.player.invulnTimer = 1.5;
@@ -384,6 +390,7 @@ Gp._startNewRun = function(heroId, levelId) {
 
     /* ── 渲染 2.5D 骨雕雀牌 ── */
     this._renderPlayerTile();
+    this._lastRenderedHeroId = this.player ? this.player.heroId : null;
 
     /* ── 初始化 14 格天命手牌槽 ── */
     this._initHandTiles();
@@ -398,6 +405,7 @@ Gp._startNewRun = function(heroId, levelId) {
 };
 
 Gp._announceWave = function(waveIdx) {
+    this._announcingWave = true; /* M-030: 阻止 _beginLoop 在公告期间被重入 */
     this._unfreezeClock();
     var wa = document.getElementById('wave-announce');
     wa.textContent = '第 ' + (waveIdx + 1) + ' 波';
@@ -408,6 +416,7 @@ Gp._announceWave = function(waveIdx) {
         wa.classList.remove('active');
         self._freezeClock();
         setTimeout(function() {
+            self._announcingWave = false; /* M-030: 公告链结束，解除守卫 */
             self._unfreezeClock();
             self._beginLoop();
         }, 300);
@@ -426,6 +435,12 @@ Gp._unfreezeClock = function() {
 Gp._isPauseAllowed = function() {
     if (!this.player || this.gameOver) return false;
     if (this._abyssPanelVisible) return false;
+    if (this._levelUpPending) return false;
+    if (this._pendingReward) return false;
+    if (this._announcingWave) return false;
+    if (this._pendingBossGamble) return false;
+    var bgp = document.getElementById('boss-gamble-panel');
+    if (bgp && bgp.classList.contains('active')) return false;
     if (this.victoryOverlay && this.victoryOverlay.classList.contains('active')) return false;
     if (this.gameOverOverlay && this.gameOverOverlay.classList.contains('active')) return false;
     var ro = document.getElementById('reward-overlay');
@@ -473,15 +488,28 @@ Gp._showGuide = function() {
 Gp._beginLoop = function() {
     this._unfreezeClock();
     if (this.running) return;
+    if (this._announcingWave) return; /* M-030: 公告链正在进行中，不重入 */
     this.running = true;
     this.gameOver = false;
     this._lastTime = performance.now();
     this._elapsed = 0;
+    /* H-028: run ID counter 防止过时调用重入循环 */
+    this._loopRunId = (this._loopRunId || 0) + 1;
+    var myRunId = this._loopRunId;
+    this._currentLoopRunId = myRunId;
+    var self = this;
     /* 惰性绑定 — 确保 _loop 已存在 */
     if (!this._boundLoop || typeof this._boundLoop !== 'function') {
         this._boundLoop = this._loop.bind(this);
     }
-    requestAnimationFrame(this._boundLoop);
+    /* 包装 rAF 调用，检查 run ID 是否匹配 */
+    var guardedLoop = function(ts) {
+        if (self._loopRunId !== myRunId) return; /* 过时调用丢弃 */
+        self._boundLoop(ts);
+    };
+    /* 暴露 guardedLoop 供复活路径使用 */
+    this._guardedLoop = guardedLoop;
+    requestAnimationFrame(guardedLoop);
 };
 
 Gp._autoSave = function(trigger) {
@@ -563,7 +591,13 @@ Gp._initJoystick = function() {
     }, { passive: false });
     document.addEventListener('touchmove', function(e) {
         if (!self._joystickActive) return;
-        updateKnob(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+        for (var i = 0; i < e.changedTouches.length; i++) {
+            if (e.changedTouches[i].identifier === _touchId) {
+                var t = e.changedTouches[i];
+                updateKnob(t.clientX, t.clientY);
+                return;
+            }
+        }
     }, { passive: false });
     document.addEventListener('touchend', function(e) {
         if (_touchId !== null) {

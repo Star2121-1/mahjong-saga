@@ -194,7 +194,15 @@
 .game-clock-frozen #game-over-overlay,
 .game-clock-frozen #game-over-overlay *,
 .game-clock-frozen #game-over-overlay *::before,
-.game-clock-frozen #game-over-overlay *::after {
+.game-clock-frozen #game-over-overlay *::after,
+.game-clock-frozen #abyss-panel,
+.game-clock-frozen #abyss-panel *,
+.game-clock-frozen #abyss-panel *::before,
+.game-clock-frozen #abyss-panel *::after,
+.game-clock-frozen #fct-layer,
+.game-clock-frozen #fct-layer *,
+.game-clock-frozen #fct-layer *::before,
+.game-clock-frozen #fct-layer *::after {
     animation-play-state: running !important;
     transition-property: all !important;
 }

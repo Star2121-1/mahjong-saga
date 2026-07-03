@@ -9,7 +9,7 @@ window.heroRegistry = {
         if (this.definitions) return;
         this.definitions = {};
         var cfg = window.heroConfig || {};
-        var ids = ['Knight', 'Mage', 'Assassin'];
+        var ids = ['Hero', 'Knight', 'Mage', 'Assassin'];
         for (var i = 0; i < ids.length; i++) {
             var h = cfg[ids[i]];
             if (!h) continue;
@@ -24,18 +24,19 @@ window.heroRegistry = {
                 hue: h.hue,
                 passiveName: h.passiveName || null,
                 passiveDesc: h.passiveDesc || null,
-                cost: h.unlockCost || h.cost || 0,
+                cost: h.unlockCost || 0,
                 weaponSlots: h.weaponSlots || 6,
-                cdFloor: h.cdFloor || 0.2,
+                cdFloor: h.cdFloor != null ? h.cdFloor : 0.2,
                 shapeClass: h.shapeClass || 'shape-circle'
             };
         }
     },
 
     _titleForId: function(id) {
-        if (id === 'Knight') return '防御型';
-        if (id === 'Mage') return '坦克型';
-        if (id === 'Assassin') return '敏捷型';
+        if (id === 'Hero') return '雀圣·天命';
+        if (id === 'Knight') return '万子·坚盾';
+        if (id === 'Mage') return '筒子·金刚';
+        if (id === 'Assassin') return '索子·暗影';
         return '';
     },
 

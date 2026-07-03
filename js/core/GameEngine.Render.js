@@ -71,16 +71,39 @@ Gp._updateWeapons = function(dt) {
         }
         /* Epoch 34: Overdrive 期间武器伤害翻倍 */
         if (this._overdriveActive) {
-            if (!w._origAtkFactor) w._origAtkFactor = w.atkFactor;
-            w.atkFactor = (w._origAtkFactor || 1) * 2;
+            /* H-032: 每次 Overdrive 重新记录基准值，防止跨升级使用过时 _origAtkFactor */
+            w._origAtkFactor = w.atkFactor;
+            w.atkFactor = w._origAtkFactor * 2;
         }
         w.update(dt, this.player, this.enemies, this);
-        if (this._overdriveActive) w.atkFactor = w._origAtkFactor || w.atkFactor;
-        if (this._overdriveActive) w.cooldownTimer = 0;
+        if (this._overdriveActive) { w.atkFactor = w._origAtkFactor; }
     }
 };
 
 Gp._updateProjectiles = function(dt) {
+    /* M-009: Grid 空间分割 — 每 80px 一格，减少 O(n*m) 碰撞检测 */
+    var GRID_SIZE = 80;
+    var grid = {};
+    for (var _gi = 0; _gi < this.enemies.length; _gi++) {
+        var ge = this.enemies[_gi];
+        if (!ge.alive) continue;
+        var gx = Math.floor(ge.x / GRID_SIZE);
+        var gy = Math.floor(ge.y / GRID_SIZE);
+        var key = gx + ',' + gy;
+        if (!grid[key]) grid[key] = [];
+        grid[key].push(ge);
+        /* M-031: 加入所有 8 个相邻格，防止跨格漏检（原代码只加了右下格） */
+        for (var dgx = -1; dgx <= 1; dgx++) {
+            for (var dgy = -1; dgy <= 1; dgy++) {
+                if (dgx === 0 && dgy === 0) continue;
+                var ngx = gx + dgx; var ngy = gy + dgy;
+                var nkey = ngx + ',' + ngy;
+                if (!grid[nkey]) grid[nkey] = [];
+                if (grid[nkey].indexOf(ge) === -1) grid[nkey].push(ge);
+            }
+        }
+    }
+
     for (var _i = this._projectiles.length - 1; _i >= 0; _i--) {
         var p = this._projectiles[_i];
         if (!p.alive) {
@@ -94,10 +117,25 @@ Gp._updateProjectiles = function(dt) {
             this._projectiles.splice(_i, 1);
             continue;
         }
-        for (var _j = 0; _j < this.enemies.length; _j++) {
-            var e = this.enemies[_j];
-            if (!e.alive) continue;
-            if (p.hitEnemies.has(e.id)) continue;
+        /* 只检测 projectile 所在格及相邻格的敌人 */
+        var pgx = Math.floor(p.x / GRID_SIZE);
+        var pgy = Math.floor(p.y / GRID_SIZE);
+        var candidates = [];
+        for (var dgx = -1; dgx <= 1; dgx++) {
+            for (var dgy = -1; dgy <= 1; dgy++) {
+                var ck = (pgx + dgx) + ',' + (pgy + dgy);
+                if (grid[ck]) {
+                    for (var ci = 0; ci < grid[ck].length; ci++) {
+                        var ce = grid[ck][ci];
+                        if (ce.alive && !p.hitEnemies.has(ce.id) && candidates.indexOf(ce) === -1) {
+                            candidates.push(ce);
+                        }
+                    }
+                }
+            }
+        }
+        for (var _cj = 0; _cj < candidates.length; _cj++) {
+            var e = candidates[_cj];
             var _dx = e.x - p.x;
             var _dy = e.y - p.y;
             var _radiusSum = e.radius + p.radius;

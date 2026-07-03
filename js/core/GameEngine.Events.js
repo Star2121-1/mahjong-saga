@@ -81,10 +81,9 @@ Gp._continueAfterInterWave = function() {
     this._tempShieldEnd = 0;
     this._tempBuffEnd = 0;
 
+    /* H-05: 统一通过 _beginLoop 启动，确保 runId guard + _announcingWave 守卫 */
     this._unfreezeClock();
-    this.running = true;
-    this._lastTime = performance.now();
-    requestAnimationFrame(this._boundLoop);
+    this._beginLoop();
 };
 
 Gp._spawnCoinBurst = function(count) {
@@ -98,6 +97,10 @@ Gp._spawnCoinBurst = function(count) {
         var cy = py + Math.sin(angle) * dist;
         this.player.addGold(1);
     }
+    /* L-022: 添加视觉反馈 — 委托给 CombatSystem */
+    if (this._combat && this._combat.spawnCoinsAt) {
+        this._combat.spawnCoinsAt(this, px, py, false, 1);
+    }
     if (window.fxManager) window.fxManager.spawnText(px, py, '+' + count + ' 🪙', '#ffd700', 24, 1500);
 };
 
@@ -105,93 +108,7 @@ Gp._spawnCoinBurst = function(count) {
    波次突变系统
    ══════════════════════════════════════════════ */
 
-Gp._showMutatorPanel = function() {
-    /* Epoch 5: 委托突变面板到 Systems */
-    if (this._systems && this._systems.showMutatorPanel) {
-        return this._systems.showMutatorPanel(this);
-    }
-    if (!this.mutatorOverlay || !this.mutatorChoices) return;
-    this.running = false;
-    this._freezeClock();
-    this.mutatorChoices.innerHTML = '';
-    var self = this;
-
-    var choices = [
-        { id: 'gravity', title: '引力逆转', desc: '经验吸附范围归零，必须肉身拾取', icon: '🧲' },
-        { id: 'bloodmoon', title: '狂暴血月', desc: '怪物体型+30%，攻击+40%，掉落翻倍', icon: '🌍' },
-        { id: 'frenzy', title: '狂乱', desc: '怪物移速+50%，金币掉落+50%', icon: '⚡' },
-        { id: 'frailty', title: '脆弱', desc: '攻击倍率双向提升——你打得更痛，你也更容易倒下', icon: '🟡' },
-        { id: 'wither', title: '枯萎', desc: '全体怪物每5秒损失5%最大HP', icon: '☠️' }
-    ];
-
-    for (var i = 0; i < choices.length; i++) {
-        var c = choices[i];
-        var card = document.createElement('div');
-        card.className = 'mutator-card';
-        card.innerHTML =
-            '<div class="mutator-card-icon">' + c.icon + '</div>' +
-            '<div class="mutator-card-title">' + c.title + '</div>' +
-            '<div class="mutator-card-desc">' + c.desc + '</div>' +
-            '<button class="mutator-btn">选择</button>';
-        (function(cid, mgr) {
-            card.querySelector('.mutator-btn').addEventListener('click', function() { mgr._applyMutator(cid); });
-        })(c.id, self);
-        this.mutatorChoices.appendChild(card);
-    }
-    this.mutatorOverlay.classList.add('active');
-};
-
-Gp._applyMutator = function(mutatorId) {
-    /* Epoch 5: 委托突变应用到 Systems */
-    if (this._systems && this._systems.applyMutator) {
-        return this._systems.applyMutator(this, mutatorId);
-    }
-    this._activeMutator = mutatorId;
-    /* Epoch 38: Mutator 视觉反馈 */
-    this._updateMutatorBadge();
-    /* Epoch 32: 图鉴记录突变 */
-    if (window.saveManager) window.saveManager.recordCompendiumEntry('mutations', mutatorId);
-    this.mutatorOverlay.classList.remove('active');
-    if (mutatorId === 'gravity') {
-        this._origMagnetRadius = this.player.magnetRadius;
-        this.player.magnetRadius = 0;
-    } else if (mutatorId === 'bloodmoon') {
-        for (var i = 0; i < this.enemies.length; i++) {
-            var e = this.enemies[i];
-            if (!e.alive) continue;
-            e.atk = Math.floor(e.atk * 1.4);
-            e.maxHp = Math.floor(e.maxHp * 1.3);
-            e.hp = Math.floor(e.hp * 1.3);
-            var el = this._enemyElements.get(e.id);
-            if (el) el.style.transform = 'scale(1.3)';
-        }
-    } else if (mutatorId === 'frenzy') {
-        for (var i = 0; i < this.enemies.length; i++) {
-            var e = this.enemies[i];
-            if (!e.alive) continue;
-            if (!e._frenzyStored) {
-                e._frenzyStored = true;
-                e._frenzyOrigSpeed = e.speed;
-                e.speed = Math.floor(e.speed * 1.5);
-            }
-        }
-    } else if (mutatorId === 'frailty') {
-        this._frailtyOrigPlayerAtk = this.player.atk;
-        this.player.atk = Math.floor(this.player.atk * 1.5);
-        for (var i = 0; i < this.enemies.length; i++) {
-            var e = this.enemies[i];
-            if (!e.alive) continue;
-            if (!e._frailtyStored) {
-                e._frailtyStored = true;
-                e._frailtyOrigAtk = e.atk;
-                e.atk = Math.floor(e.atk * 1.5);
-            }
-        }
-    } else if (mutatorId === 'wither') {
-        this._witherTimer = 0;
-    }
-    this._beginLoop();
-};
+/* Gp._showMutatorPanel / _applyMutator fallback 已废弃 — 委托给 Systems */
 
 Gp._clearMutatorEffects = function() {
     if (this._activeMutator === 'gravity' && this._origMagnetRadius != null) {
@@ -279,32 +196,11 @@ Gp._triggerOverdrive = function() {
     if (this._systems && this._systems.triggerOverdrive) {
         return this._systems.triggerOverdrive(this);
     }
+    /* Fallback: Systems 不可用时直接初始化标志 — 成就计数在 Systems 中处理 */
     if (this._overdriveActive) return;
     this._overdriveActive = true;
     this._overdriveTimer = 3.0;
     this.player.rage = 0;
-    if (this._syncUI) this._syncUI();
-    this._origCdFloor = this.player.cdFloor;
-    this.player.cdFloor = 0;
-
-    for (var _oi = 0; _oi < this.enemies.length; _oi++) {
-        var _oe = this.enemies[_oi];
-        if (_oe.alive && !_oe._overdriveStored) {
-            _oe._overdriveStored = true;
-            _oe._overdriveOrigSpeed = _oe.speed;
-            _oe.speed = 0;
-        }
-    }
-
-    if (this.container) this.container.classList.add('overdrive-active');
-    this.triggerShake(0.5, 3000);
-    this._spawnCausalityText('☀️☀️☀️ Overdrive 爆轰 ☀️☀️☀️');
-
-    /* 成就：Overdrive 计数 */
-    this._overdriveCount = (this._overdriveCount || 0) + 1;
-    if (this._overdriveCount >= 1) this._checkAchievement('overdrive_1');
-    if (this._overdriveCount >= 10) this._checkAchievement('overdrive_10');
-    if (this._overdriveCount >= 50) this._checkAchievement('overdrive_50');
 };
 
 Gp._endOverdrive = function() {
@@ -339,6 +235,20 @@ Gp._showBossGamble = function() {
     this._freezeClock();
     this.running = false;
     this._pendingBossGamble = true;
+
+    /* H-001: 超时机制 — 10 秒无操作自动选择 safe */
+    var self = this;
+    this._gambleTimeout = setTimeout(function() {
+        if (self._pendingBossGamble && panel && panel.parentNode) {
+            self._pendingBossGamble = false;
+            self._gambleActive = false;
+            self._gambleType = null;
+            self._gambleStaked = 0;
+            panel.remove();
+            self._unfreezeClock();
+            self._beginLoop();
+        }
+    }, 10000);
 
     var meta = window.saveManager._metaCache || {};
     var tokens = meta.metaTokens || 0;
@@ -387,6 +297,7 @@ Gp._showBossGamble = function() {
 };
 
 Gp._resolveGambleChoice = function(choice) {
+    clearTimeout(this._gambleTimeout);
     this._pendingBossGamble = false;
     if (choice === 'safe') {
         this._gambleActive = false;
@@ -433,6 +344,13 @@ Gp._spawnBossLordFromGamble = function() {
     lord.maxHp = Math.floor(lord.maxHp * diff);
     lord.hp = lord.maxHp;
     lord.atk = Math.floor(lord.atk * diff);
+
+    /* H-002: 精英模式 — 领主获得 50% 属性加成 */
+    if (this._eliteModeActive && this._eliteMultiplier) {
+        lord.maxHp = Math.floor(lord.maxHp * this._eliteMultiplier);
+        lord.hp = lord.maxHp;
+        lord.atk = Math.floor(lord.atk * this._eliteMultiplier);
+    }
     this.enemies.push(lord);
     this._bossLord = lord;
     this._bossLordSpawned = true;
@@ -500,59 +418,7 @@ Gp._resolveGamble = function(won) {
     this._gambleStaked = 0;
 };
 
-Gp._spawnBossLord = function() {
-    window.audioManager && window.audioManager.play('boss');
-    var level = Math.floor(this._elapsed / 15) + 1;
-    var x = this._mapW / 2;
-    var y = Math.floor(this._mapH * 0.35);
-    var margin = 100;
-    x = Math.max(margin, Math.min(this._mapW - margin, x));
-    y = Math.max(margin, Math.min(this._mapH - margin, y));
-
-    var id = this._enemyIdCounter++;
-    var lord = new Enemy(id, x, y, level, true, 'Boss_Lord');
-    var diff = 1;
-    try { diff = window.levelConfig[this._currentLevelId].difficultyFactor || 1; } catch(e) { console.warn('diff config read error', e); }
-    lord.maxHp = Math.floor(lord.maxHp * diff);
-    lord.hp = lord.maxHp;
-    lord.atk = Math.floor(lord.atk * diff);
-    this.enemies.push(lord);
-    this._bossLord = lord;
-
-    /* ── 变异保险库：血月对Boss Lord生效 ── */
-    if (this._vaultMutations && this._vaultMutations.indexOf('bloodmoon') !== -1) {
-        lord.atk = Math.floor(lord.atk * 1.4);
-        lord.maxHp = Math.floor(lord.maxHp * 1.3);
-        lord.hp = Math.floor(lord.hp * 1.3);
-    }
-
-    var el = document.createElement('div');
-    el.className = 'enemy boss boss-lord';
-    el.dataset.id = id;
-    el.dataset.enemyType = 'Boss_Lord';
-    /* Boss 字符直接放入 DOM（::before 留给 aura） */
-    el.innerHTML = '<span style="font-size:calc(42*1.5px);font-weight:900;color:#b71c1c;text-shadow:0 0 12px rgba(211,47,47,0.6);z-index:1;position:relative;">中</span>';
-    var hpBar = document.createElement('div');
-    hpBar.className = 'enemy-hp-bar';
-    var hpFill = document.createElement('div');
-    hpFill.className = 'enemy-hp-fill';
-    hpBar.appendChild(hpFill);
-    el.appendChild(hpBar);
-    this._worldLayer.appendChild(el);
-    this._enemyElements.set(id, el);
-    lord.el = el;
-
-    if (this._bloodRageActive) {
-        lord.speed = Math.floor(lord.speed * 1.2);
-        lord.baseSpeed = lord.speed;
-        if (lord.el) lord.el.classList.add('boss-blood-rage');
-        this._spawnCausalityText('血海狂暴：领主速度 +20%');
-    }
-
-    if (this.bossHpBar) this.bossHpBar.classList.add('active');
-    this._screenShake();
-    return lord;
-};
+/* Gp._spawnBossLord 已废弃 — 使用 _spawnBossLordFromGamble */
 
 Gp._spawnEnemyType = function(type) {
     var angle = Math.random() * Math.PI * 2;

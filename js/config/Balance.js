@@ -1,0 +1,175 @@
+/* ══════════════════════════════════════════════
+   Balance Constants — 跨文件数值常量集中管理
+   ══════════════════════════════════════════════ */
+
+window.Balance = {
+    /* ── Enemy (敌人基础属性 / 缩放) ── */
+    ENEMY_LEVEL_HP_ATK_MULT: 1.15,   // 每级 HP/ATK 倍率 (Enemy.js)
+    ABYSS_LOOP_HP_ATK_MULT: 1.08,   // 深渊轮回 HP/ATK 倍率 (Enemy.js)
+    ABYSS_LOOP_SPEED_MULT: 1.05,    // 深渊轮回 Speed 倍率 (Enemy.js)
+    ENEMY_BASE_HP: 20,               // 普通敌人基础 HP (Enemy.js)
+    ENEMY_BASE_ATK: 5,               // 普通敌人基础 ATK (Enemy.js)
+    ENEMY_LEVEL_SPEED_SCALE: 3,      // 每级速度增量 (Enemy.js)
+    ENEMY_RADIUS: 18,                // 普通敌人碰撞半径 (Enemy.js)
+    ENEMY_ATTACK_COOLDOWN: 1.5,      // 敌人攻击冷却 (Enemy.js)
+    ENEMY_ATTACK_RANGE_OFFSET: 30,   // 攻击范围偏移 (Enemy.js)
+    ENEMY_ATTACK_PADDING: 5,         // 攻击判定内缩 (Enemy.js)
+    FLASH_DURATION: 0.12,            // 受击闪烁持续时间 (Enemy.js)
+
+    /* ── Weapon (武器升级 / 弹道) ── */
+    WEAPON_UPGRADE_ATK_INC: 0.15,    // 武器升级 ATK 因子增量 (Weapon.js)
+    WEAPON_UPGRADE_CD_MULT: 0.9,     // 武器升级 CD 倍率 (Weapon.js)
+    DEFAULT_CD_FLOOR: 0.2,           // 默认 CD 下限 (Weapon.js)
+    PROJECTILE_DEFAULT_LIFETIME: 3.0,// 弹道默认存活时间 (Weapon.js)
+
+    /* ── Player (玩家机制) ── */
+    PLAYER_INVULN_ON_HIT: 0.35,      // 受击无敌帧时长 (Player.js)
+    MAX_LIFESTEAL_RATE: 0.8,         // 吸血上限 (Player.js)
+    LIFESTEAL_PER_VAMP_LEVEL: 0.08,  // 吸血戒指每级增幅 (Player.js)
+    MAX_EXPLOSION_CHANCE: 0.75,      // 爆炸概率上限 (Player.js)
+    EXPLOSION_PER_LEVEL: 0.15,       // 爆破核心每级增幅 (Player.js)
+    MAX_FREEZE_CHANCE: 0.5,          // 冰冻概率上限 (Player.js)
+    FREEZE_PER_LEVEL: 0.10,          // 冰霜核心每级增幅 (Player.js)
+
+    /* ── Combat (战斗特效) ── */
+    FLOAT_TEXT_TIMEOUT_MS: 650,      // 飘字消失延迟 (GameCombat.js)
+    EXPLOSION_EFFECT_TIMEOUT: 400,   // 爆炸特效消失延迟 (GameCombat.js)
+    CAUSALITY_TIMEOUT_MS: 2000,      // 因果文本消失延迟 (GameCombat.js)
+
+    /* ── 突变系统 ── */
+    MUTATOR_BLOODMOON_ATK_MULT: 1.4,
+    MUTATOR_BLOODMOON_HP_MULT: 1.3,
+    MUTATOR_BLOODMOON_SCALE: 1.3,
+    MUTATOR_FRENZY_SPEED_MULT: 1.5,
+    MUTATOR_FRENZY_GOLD_MULT: 1.5,
+    MUTATOR_FRAILTY_PLAYER_ATK_MULT: 1.8,
+    MUTATOR_FRAILTY_DAMAGE_TAKEN_MULT: 1.3,
+
+    /* ── 刷怪系统 ── */
+    DEFAULT_SPAWN_INTERVAL: 1.5,
+    DEFAULT_SPAWN_INTERVAL_DECAY: 0.02,
+    SPAWN_INTERVAL_MIN: 0.5,
+    BOSS_SPAWN_INTERVAL: 30,
+    ENEMY_SPAWN_RADIUS: 200,
+    ENEMY_SPAWN_RADIUS_JITTER: 50,
+    ENEMY_SPAWN_MARGIN: 20,
+    DEFAULT_ENEMY_WEIGHTS: { Normal: 0.45, Tanker: 0.20, Stalker: 0.25, Shaman: 0.10 },
+
+    /* ── 玩家系统 ── */
+    PLAYER_MAX_RAGE: 100,
+    PLAYER_DEFAULT_MAGNET_RADIUS: 60,
+    PLAYER_RADIUS: 28,
+    REVIVE_HP_PERCENT: 0.3,
+    REVIVE_INVULN_DURATION: 3.0,
+    TEMP_HP_REGEN_PER_SEC: 2,
+    PLAYER_HITFLASH_DURATION: 0.35,
+
+    /* ── FxManager ── */
+    FCT_POOL_SIZE_INIT: 50,
+    FCT_POOL_MAX_GROWTH: 200,
+    FCT_FALLBACK_TIMEOUT_MS: 5000,
+    FCT_HEALTHCHECK_MODULO: 50,
+    FCT_STALE_NODE_TIMEOUT_MS: 5000,
+
+    /* ── 成就/文本 ── */
+    ACHIEVEMENT_TEXT_TIMEOUT_MS: 2600,
+    ACHIEVEMENT_FONT_SIZE: 28,
+    ACHIEVEMENT_Z_INDEX: 210,
+    ACHIEVEMENT_ANIM_DURATION: 2.5,
+    CAUSALITY_TEXT_TIMEOUT_MS: 2000,
+    CAUSALITY_FONT_SIZE: 24,
+    CAUSALITY_Z_INDEX: 200,
+    CAUSALITY_ANIM_DURATION: 0.6,
+
+    /* ── 雀魂护盾 ── */
+    QQUEEN_SHIELD_INTERVAL: 10,
+    QQUEEN_SHIELD_BASE_DURATION: 5,
+    QQUEEN_SHIELD_DURATION_PER_LEVEL: 2,
+
+    /* ── 波次 ── */
+    WAVE_MILESTONE_THRESHOLD: 0.75,
+
+    /* ── 图腾 ── */
+    TOTEM_SPAWN_INTERVAL: 5,
+    MAX_TOTEMS: 10,
+    TOTEM_RADIUS: 100,
+
+    /* ── Stalker ── */
+    STALKER_TRIGGER_DIST: 150,
+    STALKER_CHARGE_SPEED_MULT: 2.5,
+    STALKER_FATIGUE_DURATION: 3.0,
+    STALKER_COOLDOWN: 2.0,
+
+    /* ── Shaman ── */
+    SHAMAN_RETREAT_DIST: 200,
+    SHAMAN_ADVANCE_DIST: 250,
+
+    /* ── Boss ── */
+    BOSS_LORD_BASE_HP: 80,
+    BOSS_LORD_BASE_ATK: 30,
+    BOSS_LORD_BASE_SPEED: 20,
+    BOSS_LORD_BASE_RADIUS: 70,
+    BOSS_HP_MULT: 6,
+    BOSS_ATK_MULT: 2,
+    BOSS_SPEED_MULT: 0.7,
+    BOSS_PHASE3_SPEED_MULT: 1.8,
+    BOSS_PHASE1_BULLET_COUNT: 12,
+    BOSS_WARNING_DURATION: 0.8,
+    BOSS_PHASE3_SUMMON_INTERVAL: 4,
+    BOSS_PHASE3_SUMMON_STALKER: 4,
+    BOSS_PHASE3_SUMMON_TANKER: 2,
+    BOSS_PROJECTILE_SPEED_NORMAL: 100,
+    BOSS_PROJECTILE_SPEED_BLOOD: 120,
+
+    /* ── 敌人 ── */
+    TANKER_HP_MULT: 2,
+    TANKER_SPEED_MULT: 0.5,
+    TANKER_SIDESHOT_REDUCTION: 0.5,
+    ASSASSIN_CRIT_MULT: 1.5,
+    BOSS_CONTACT_COOLDOWN: 0.5,
+    FROZEN_DAMAGE_MULT: 1.25,
+    FROZEN_HIT_DECAY: 0.25,
+
+    /* ── 武器 ── */
+    ORBIT_SHIELD_RADIUS: 50,
+    ORBIT_ORB_RADIUS: 8,
+    ORBIT_ROTATION_SPEED: 2.0,
+    SHOTGUN_SPREAD_COUNT: 5,
+    SHOTGUN_SPREAD_ANGLE: 0.3,
+    GROUND_SLAMMER_WAVE_DURATION: 0.2,
+    GROUND_SLAMMER_MIN_RADIUS: 10,
+    GROUND_SLAMMER_RADIUS_GROWTH: 70,
+    GROUND_SLAMMER_KNOCKBACK_FORCE: 200,
+    LASER_BEAM_LENGTH: 300,
+    LASER_HIT_RADIUS: 4,
+    TRACKING_BLADE_PROJ_LIFE: 2.0,
+    SHOTGUN_PROJ_LIFE: 0.8,
+    TRACKING_BLADE_RADIUS: 4,
+    SHOTGUN_RADIUS: 3,
+    KNIGHT_DODGE_SLAM_RADIUS: 100,
+    KNIGHT_DODGE_SLAM_FORCE: 200,
+    KNIGHT_DODGE_SLAM_TIMEOUT_MS: 300,
+
+    /* ── 经验石/金币 ── */
+    BOSS_MIN_GEM_COUNT: 5,
+    BOSS_EXTRA_GEM_COUNT: 4,
+    BOSS_TOTAL_EXP_GEMS: 25,
+    NORMAL_GEM_VALUE_BASE: 1,
+    COIN_COUNT_BOSS_BASE: 5,
+    COIN_COUNT_BOSS_PER_LVL: 0.5,
+    COIN_COUNT_NORMAL_BASE: 3,
+    COIN_COUNT_NORMAL_PER_LVL: 0.3,
+    COIN_SCATTER: 20,
+    COIN_VISUAL_OFFSET: 6,
+    GEM_LEVEL_SCALE: 0.5,
+
+    /* ── 震动 ── */
+    SHAKE_INTENSITY_STEP: 8,
+    SHAKE_MAX_DISPLACEMENT: 24,
+    SHAKE_MAX_DURATION_MS: 3000,
+
+    /* ── 工具 ── */
+    MS_PER_SECOND: 1000,
+    PI_OVER_3: Math.PI * 2 / 3,
+    PI_OVER_4: Math.PI * 4 / 3,
+};

@@ -37,7 +37,7 @@ Gp._loop = function(timestamp) {
             }
 
             if (this.player.hasDrone) {
-                var interval = this.player.evolvedDrone ? 0.2 : this.player.droneInterval;
+                var interval = this.player.evolvedDrone ? 0.35 : this.player.droneInterval;
                 this.player.droneTimer += dt;
                 while (this.player.droneTimer >= interval) {
                     this.player.droneTimer -= interval;
@@ -50,9 +50,9 @@ Gp._loop = function(timestamp) {
                             var _dy = _e.y - this.player.y;
                             withDist.push({ e: _e, d: _dx * _dx + _dy * _dy });
                         }
-                        withDist.sort(function(a,b) { return a.d - b.d; });
+                        withDist.sort(function(a,b) { if (a.d !== b.d) return a.d - b.d; return a.e.id - b.e.id; });
                         var targets = withDist.slice(0, 3);
-                        for (var _ti = 0; _ti < targets.length; _ti++) targets[_ti].e.takeDamage(24);
+                        for (var _ti = 0; _ti < targets.length; _ti++) targets[_ti].e.takeDamage(16);
                     } else {
                         var nearest = null;
                         var nearestDist = Infinity;
@@ -89,11 +89,12 @@ Gp._loop = function(timestamp) {
             }
 
             /* ── 波次突变触发器（Boss Lord 波次跳过） ── */
-            if (!this._bossLordWave && !this._mutatorTriggered && this._activeMutator === null && this.currentWaveSpawnedCount > 0) {
+            if (!this._bossLordWave && !this._mutatorTriggered && this._activeMutator === null && this.currentWaveSpawnedCount > 0 && !this._pendingReward && !this._levelUpPending) {
                 var cap = this._getWaveEnemyMax();
                 if (cap > 0 && this.currentWaveSpawnedCount >= Math.ceil(cap * 0.5)) {
                     this._mutatorTriggered = true;
-                    this._showMutatorPanel();
+                    /* 委托给 Systems.showMutatorPanel — 突变触发 */
+                    if (window.Systems) window.Systems.showMutatorPanel(this);
                 }
             }
 
@@ -125,67 +126,42 @@ Gp._loop = function(timestamp) {
                 this.player._healAmount = 0;
             }
 
-            var bossDied = [];
+            // 统一处理所有死亡的敌人（包括boss）
             for (var _ri = this.enemies.length - 1; _ri >= 0; _ri--) {
                 var _re = this.enemies[_ri];
                 if (!_re.alive) {
-                    if (_re.isBoss) {
-                        bossDied.push(_re);
-                    } else {
-                        this._rewardKill(_re);
-                        this._removeEnemyDOM(_re);
-                        this.enemies.splice(_ri, 1);
-                    }
-                }
-            }
-
-            if (bossDied.length) {
-                var lordDead = false;
-                for (var _bdi = 0; _bdi < bossDied.length; _bdi++) {
-                    var _be = bossDied[_bdi];
-                    if (_be.type === 'Boss_Lord') lordDead = true;
-                    this._spawnCoinsAt(_be.x, _be.y, true, _be.level);
-                    this._tryDropEquipment(_be.x, _be.y, _be.type === 'Boss_Lord');
-                    this.kills++;
-                    this._removeEnemyDOM(_be);
-                    var _idx = this.enemies.indexOf(_be);
-                    if (_idx !== -1) this.enemies.splice(_idx, 1);
-                }
-                if (lordDead) {
-                    this.triggerShake(3, 500);
-                    this._cleanEnemyProjectiles();
-                    for (var _ldi = this.enemies.length - 1; _ldi >= 0; _ldi--) {
-                        var _le = this.enemies[_ldi];
-                        if (_le.alive) { this._removeEnemyDOM(_le); this.enemies.splice(_ldi, 1); }
-                    }
-                    for (var _lci = 0; _lci < this._activeCoins.length; _lci++) this._activeCoins[_lci].el.remove();
-                    this._activeCoins = [];
-                    if (this.bossHpBar) this.bossHpBar.classList.remove('active');
-                    if (this._expGems.length > 0) {
-                        this._pendingBossLordSettle = true;
-                    } else {
-                        this.running = false;
-                        this.gameOver = true;
-                        if (this._currentLevelId === 'level_3' || this.loopCount > 0) {
-                            this._showAbyssPanel();
-                        } else {
-                            this._showVictory();
+                    var isLord = _re.type === 'Boss_Lord';
+                    this._rewardKill(_re); // 掉落金币+经验石+怒气
+                    this._tryDropEquipment(_re.x, _re.y, _re.isBoss);
+                    this._removeEnemyDOM(_re);
+                    this.enemies.splice(_ri, 1);
+                    if (isLord) {
+                        this.triggerShake(3, 500);
+                        this._cleanEnemyProjectiles();
+                        for (var _ldi = this.enemies.length - 1; _ldi >= 0; _ldi--) {
+                            var _le = this.enemies[_ldi];
+                            if (_le.alive) { this._removeEnemyDOM(_le); this.enemies.splice(_ldi, 1); }
                         }
+                        for (var _lci = 0; _lci < this._activeCoins.length; _lci++) this._activeCoins[_lci].el.remove();
+                        this._activeCoins = [];
+                        if (this.bossHpBar) this.bossHpBar.classList.remove('active');
+                        if (this._expGems.length > 0) {
+                            this._pendingBossLordSettle = true;
+                        } else {
+                            this.running = false;
+                            this.gameOver = true;
+                            if (this._currentLevelId === 'level_3' || this.loopCount > 0) {
+                                this._showAbyssPanel();
+                            } else {
+                                this._showVictory();
+                            }
+                        }
+                        return;
                     }
-                    return;
                 }
-                for (var _mi = this.enemies.length - 1; _mi >= 0; _mi--) {
-                    var _me = this.enemies[_mi];
-                    if (_me.alive) {
-                        this._spawnCoinsAt(_me.x, _me.y, false, _me.level);
-                        this._spawnExpGemsAt(_me.x, _me.y, false, _me.level);
-                        this.kills++;
-                        this._removeEnemyDOM(_me);
-                        this.enemies.splice(_mi, 1);
-                    }
-                }
-                this._pendingReward = true;
             }
+            // 所有非Boss敌人死亡 → 波次结束奖励
+            // is handled by _pendingReward block below
 
             if (this.player.hp < prevHp) {
                 /* Epoch 32: 临时护盾吸收 */
@@ -195,7 +171,6 @@ Gp._loop = function(timestamp) {
                     this.player.hp = Math.min(this.player.maxHp, this.player.hp + absorbed);
                     if (this._tempShield <= 0) this._tempShield = 0;
                 }
-                this._screenShake();
                 this._playerHitCountThisRun++;
             }
         }
@@ -286,12 +261,13 @@ Gp._loop = function(timestamp) {
                 /* Continue loop — rAF rescheduled at end of _loop */
                 _skipToEnd = true;
             }
-            if (_skipToEnd) { this._syncUI(); if (this.running && !this.gameOver) requestAnimationFrame(this._boundLoop); return; }
+            if (_skipToEnd) { this._syncUI(); if (this._guardedLoop) { requestAnimationFrame(this._guardedLoop); } return; }
             this._gameOver();
             return;
         }
 
-        if (this._levelUpPending && !this._pendingReward) {
+        /* ── 升级面板优先于波次奖励面板 ── */
+        if (this._levelUpPending) {
             this._levelUpPending = false;
             this.running = false;
             this._freezeClock();
@@ -301,14 +277,6 @@ Gp._loop = function(timestamp) {
         }
 
         if (this._pendingReward && this._activeCoins.length === 0 && this._expGems.length === 0) {
-            if (this._levelUpPending) {
-                this._levelUpPending = false;
-                this.running = false;
-                this._freezeClock();
-                this._syncUI();
-                if (window.rewardManager) window.rewardManager.showLevelUpPanel();
-                return;
-            }
             if (this._waveCount >= this._getMaxWaves() - 1) {
                 this.running = false;
                 this.gameOver = true;
@@ -351,7 +319,7 @@ Gp._loop = function(timestamp) {
         this._syncUI();
     } catch (err) { console.error('Game loop error:', err); }
 
-    if (this.running && !this.gameOver) requestAnimationFrame(this._boundLoop);
+    if (this.running && !this.gameOver) requestAnimationFrame(this._guardedLoop || this._boundLoop);
 };
 
 Gp._getMaxWaves = function() {

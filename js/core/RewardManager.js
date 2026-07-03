@@ -3,10 +3,10 @@ class RewardManager {
         this.baseRelics = [
             { id: 'sharp_edge', name: '锐利锋芒', desc: '攻击力 +3', cost: 15 },
             { id: 'golden_finger', name: '黄金右手指', desc: '暴击率 +15%', cost: 25 },
-            { id: 'auto_drone', name: '自动化随从', desc: '无人机攻击最近敌人', cost: 40 },
+            { id: 'auto_drone', name: '自动化随从', desc: '无人机攻击最近敌人', cost: 60 },
             { id: 'thorn_armor', name: '荆棘反伤甲', desc: '最大HP+20，反伤+10%', cost: 30 },
             { id: 'wind_walker', name: '疾风步', desc: '移动速度 +12%', cost: 20 },
-            { id: 'vamp_ring', name: '吮血指环', desc: '点击伤害 8% 吸血', cost: 35 },
+            { id: 'vamp_ring', name: '吮血指环', desc: '点击伤害 8% 吸血', cost: 50 },
             { id: 'explosive_core', name: '爆破核心', desc: '15% 几率 50% 范围溅射', cost: 30 },
             { id: 'frost_core', name: '冰霜核心', desc: '10% 几率冰冻 1.5s', cost: 25 },
             { id: 'gravity_core', name: '引力核心', desc: '经验吸附范围 +40px', cost: 20 },
@@ -32,6 +32,7 @@ class RewardManager {
         this.overlay = document.getElementById('reward-overlay');
         this.cardsContainer = this.overlay ? this.overlay.querySelector('.reward-cards') : null;
         this._replaceWeaponId = null;
+        this._pendingWeapon = null;
 
         /* ── 牺牲选项池 ── */
         /* ── 秘密图鉴 ── */
@@ -64,7 +65,18 @@ class RewardManager {
     /* ── 升级三选一 ── */
 
     showLevelUpPanel() {
-        if (this._panelLocked) return;
+        /* 如果面板已锁定（上一次调用未完成），先解锁再重试 */
+        if (this._panelLocked) {
+            this._panelLocked = false;
+            this.hidePanel();
+        }
+        this._panelLocked = true;
+        /* 延迟初始化覆盖层引用（file:// 协议下构造时 DOM 可能未就绪） */
+        if (!this.overlay) {
+            this.overlay = document.getElementById('reward-overlay');
+            this.cardsContainer = this.overlay ? this.overlay.querySelector('.reward-cards') : null;
+        }
+        if (!this.overlay) { console.warn('[REWARD] overlay not found, retrying...'); this._panelLocked = false; return; }
         this._panelLocked = true;
         this.overlay.classList.add('levelup-mode');
         var titleEl = this.overlay.querySelector('.reward-title');
@@ -80,6 +92,8 @@ class RewardManager {
 
     hidePanel() {
         this._panelLocked = false;
+        /* Clean up suckin animation if in progress */
+        if (this._suckinCleanup) { this._suckinCleanup(); this._suckinCleanup = null; }
         if (!this.overlay) return;
         this.overlay.classList.remove('active');
         this.overlay.classList.remove('levelup-mode');
@@ -123,7 +137,9 @@ class RewardManager {
 
             var container = document.createElement('div');
             container.className = 'reward-card-container';
-            container.style.animationDelay = (si * 0.12) + 's';
+            /* 时钟冻结场景下禁用动画，避免卡片停在 opacity:0 不可见 */
+            container.style.animation = 'none';
+            container.style.opacity = '1';
 
             var inner = document.createElement('div');
             inner.className = 'reward-card-inner';
@@ -214,21 +230,25 @@ class RewardManager {
 
         this.overlay.classList.add('active');
 
-        /* ── 出场发牌动画后延时翻转 ── */
+        /* ── 直接翻转卡牌正面朝上（跳过背面 ✦，避免时钟冻结时动画卡死）── */
         var cards = this.cardsContainer.querySelectorAll('.reward-card-container');
-        setTimeout(function() {
-            for (var fi = 0; fi < cards.length; fi++) {
-                (function(idx) {
-                    setTimeout(function() {
-                        if (cards[idx]) cards[idx].querySelector('.reward-card-inner').classList.add('flipped');
-                    }, idx * 180);
-                })(fi);
-            }
-        }, 150);
+        var overlayRef = this.overlay;
+        for (var ci = 0; ci < cards.length; ci++) {
+            (function(idx) {
+                setTimeout(function() {
+                    if (!cards[idx] || !cards[idx].parentNode) return; /* DOM 已移除 */
+                    if (!overlayRef || !overlayRef.classList.contains('active')) return; /* 面板已关闭 */
+                    var inner = cards[idx].querySelector('.reward-card-inner');
+                    if (inner) inner.classList.add('flipped');
+                }, idx * 100);
+            })(ci);
+        }
     }
 
     _animateSuckIn(cardEl, callback) {
         if (!cardEl) { if (callback) callback(); return; }
+        /* 防止快速点击 — 如果已有 clone 在 body 中，忽略本次 */
+        if (document.querySelector('.suckin-clone')) return;
         var self = this;
         self.overlay.classList.remove('active');
         self.overlay.classList.remove('levelup-mode');
@@ -256,20 +276,19 @@ class RewardManager {
         document.body.appendChild(clone);
         cardEl.style.opacity = '0';
 
-        requestAnimationFrame(function() {
-            clone.style.transform = 'translate(' + (targetRect.left + targetRect.width/2 - rect.left - rect.width/2) + 'px,' + (targetRect.top - rect.top) + 'px) scale(0.15)';
-            clone.style.opacity = '0.2';
-            clone.style.filter = 'blur(2px) brightness(1.4)';
-        });
-
-        setTimeout(function() {
-            if (clone.parentNode) clone.remove();
+        var suckinTimer = setTimeout(function() {
+            if (clone && clone.parentNode) clone.remove();
             if (slotBar) {
                 slotBar.classList.add('slot-ripple');
                 setTimeout(function() { slotBar.classList.remove('slot-ripple'); }, 500);
             }
             if (callback) callback();
         }, 460);
+        /* Store cleanup reference for page navigation */
+        self._suckinCleanup = function() {
+            clearTimeout(suckinTimer);
+            if (clone && clone.parentNode) clone.remove();
+        };
     }
 
     /* ── 点击新武器解锁卡 ── */
@@ -384,6 +403,8 @@ class RewardManager {
     }
 
     _cancelReplace() {
+        /* 将新武器暂存，下次升级面板自动加入选项 */
+        this._pendingWeapon = this._replaceWeaponId;
         this._replaceWeaponId = null;
         this.hidePanel();
         if (window.gameEngine._levelUpPending) {
@@ -418,6 +439,15 @@ class RewardManager {
 
         var currentIds = {};
         for (var ci = 0; ci < eng._activeWeapons.length; ci++) currentIds[eng._activeWeapons[ci].id] = true;
+
+        /* 注入暂存的武器（取消置换后重新加入候选池） */
+        if (this._pendingWeapon && !currentIds[this._pendingWeapon]) {
+            var pwInfo = this.weaponInfos[this._pendingWeapon];
+            if (pwInfo) {
+                pool.push({ type: 'weapon_new', id: this._pendingWeapon, name: pwInfo.name, desc: pwInfo.desc, cost: 0, cardData: pwInfo, _weight: pwInfo.atkFactor * 10 });
+            }
+            this._pendingWeapon = null;
+        }
 
         for (var wid in this.weaponInfos) {
             if (currentIds[wid]) continue;
@@ -619,7 +649,11 @@ class RewardManager {
         if (!window.fxManager) return;
         var cx = window.innerWidth / 2;
         var cy = window.innerHeight / 2;
-        window.fxManager.spawnText(cx, cy, text, 'normal');
+        var node = window.fxManager.spawnText(cx, cy, text, 'normal');
+        /* H-015: 时钟冻结场景下 FCT 飘字需要恢复 animation-play-state */
+        if (node && node.style) {
+            node.style.animationPlayState = 'running';
+        }
     }
 }
 

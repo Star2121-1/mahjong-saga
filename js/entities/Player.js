@@ -1,14 +1,15 @@
 class Player {
     constructor(x, y, heroId) {
-        this.heroId = heroId || 'Knight';
+        this.heroId = heroId || 'Hero';
         this.x = x;
         this.y = y;
         this._initFromConfig();
 
-        this.radius = 20;
+        this.radius = 28; // M-023: 匹配 CSS 48x64px 视觉边界
         this.speedMultiplier = 1.0;
         this.gold = 0;
         this.invulnTimer = 0;
+        this.hitFlashTimer = 0; /* 独立受击闪烁计时器，与无敌帧分离 */
         this.critRate = 0;
         this.hasDrone = false;
         this.droneTimer = 0;
@@ -59,7 +60,14 @@ class Player {
     }
 
     _initFromConfig() {
-        const cfg = window.heroConfig[this.heroId] || window.heroConfig.hero_swordsman;
+        const cfg = window.heroConfig[this.heroId];
+        if (!cfg) {
+            console.warn('[Player] 英雄配置缺失:', this.heroId, '— 使用默认值');
+            this.maxHp = 100; this.hp = 100; this.atk = 10;
+            this.baseSpeed = 180; this.speed = 180;
+            this.hue = 0; this.baseDodge = 0; this.dodgeRate = 0;
+            return;
+        }
         this.maxHp = cfg.hp;
         this.hp = cfg.hp;
         this.atk = cfg.atk;
@@ -68,6 +76,18 @@ class Player {
         this.hue = cfg.hue;
         this.baseDodge = cfg.baseDodge || 0;
         this.dodgeRate = this.baseDodge;
+        /* 从 HeroConfig 读取英雄特有参数 */
+        if (cfg.weaponSlots != null) this.maxWeaponSlots = cfg.weaponSlots;
+        if (cfg.cdFloor != null) this.cdFloor = cfg.cdFloor;
+        /* H-029: 雀灵流转 -- 攻击速度 +15% */
+        if (this.heroId === 'Hero') {
+            this.speed = this.baseSpeed * 1.15;
+        }
+        /* A-029: 暗影步 -- 10% 移速加成 */
+        if (this.heroId === 'Assassin') {
+            this.speedMultiplier += 0.10;
+            this.speed = this.baseSpeed * this.speedMultiplier;
+        }
     }
 
     applyTechTree(techTree) {
@@ -90,6 +110,11 @@ class Player {
         if (this.invulnTimer > 0) {
             this.invulnTimer -= dt;
             if (this.invulnTimer < 0) this.invulnTimer = 0;
+        }
+        /* H-030: hitFlashTimer 独立递减，与 invulnTimer 分离 */
+        if (this.hitFlashTimer > 0) {
+            this.hitFlashTimer -= dt;
+            if (this.hitFlashTimer < 0) this.hitFlashTimer = 0;
         }
 
         if (moveX !== 0 || moveY !== 0) {
@@ -134,8 +159,14 @@ class Player {
             dmg = Math.max(1, Math.floor(dmg * (1 - this.damageReduction)));
         }
 
+        /* L-008: 脆弱突变 — 受击伤害 +30% */
+        if (this._frailtyDebuff) {
+            dmg = Math.floor(dmg * 1.3);
+        }
+
         this.hp -= dmg;
-        this.invulnTimer = 0.35;
+        this.invulnTimer = Balance.PLAYER_INVULN_ON_HIT;
+        this.hitFlashTimer = 0.35; /* 独立受击闪烁计时器 */
         if (dmg > 0 && window.gameEngine && window.gameEngine._currentLevelId === 'level_1') {
             window.gameEngine.playerHitCountInLevel1++;
         }
@@ -151,10 +182,13 @@ class Player {
             if (this.evolvedArmor) {
                 const isCrit = Math.random() < this.critRate;
                 if (isCrit) {
-                    thornDmg = Math.floor(thornDmg * 2.5);
+                    thornDmg = Math.floor(thornDmg * 1.8);
                     this._thornCritX = attacker.x;
                     this._thornCritY = attacker.y;
                 }
+                /* 反伤伤害上限：不超过玩家 ATK 的 2 倍 */
+                const thornCap = Math.floor(this.atk * 2);
+                if (thornDmg > thornCap) thornDmg = thornCap;
             }
             if (this.evolvedVamp && this.lifestealRate > 0) {
                 const heal = Math.floor(thornDmg * this.lifestealRate);
@@ -173,7 +207,9 @@ class Player {
     shouldRevive(engine) {
         if (!this._hasRevive || !this._reviveCount || this._reviveCount <= 0) return false;
         this._reviveCount--;
-        this.hp = Math.floor(this.maxHp * 0.3);
+        /* H-031: 使用 _baseMaxHp 计算复活血量，避免临时增益膨胀 */
+        var baseHp = this._baseMaxHp || this.maxHp;
+        this.hp = Math.floor(baseHp * 0.3);
         this.invulnTimer = 3.0;
         if (this._reviveCount <= 0) this._hasRevive = false;
         return true;
@@ -194,9 +230,21 @@ class Player {
             this.atk += 2;
             this.maxHp += 10;
             this.hp += 10;
+            /* H-031: _baseMaxHp 随升级同步增长，防止临时增益过期后 HP 丢失 */
+            if (this._baseMaxHp) this._baseMaxHp += 10;
             leveled = true;
         }
         return leveled;
+    }
+
+    _recalcThornsRate() {
+        if (this.heroId !== 'Mage') return;
+        var lv = this.relicLevels.thorn_armor || 0;
+        if (lv === 0) {
+            this.thornsRate = 0;
+            return;
+        }
+        this.thornsRate = Math.min(1, lv * 0.15);
     }
 
     addRelic(id) {
@@ -225,20 +273,20 @@ class Player {
             case 'thorn_armor':
                 this.maxHp += 20;
                 this.hp += 20;
-                this.thornsRate = Math.min(1, this.thornsRate + 0.1);
+                this._recalcThornsRate();
                 break;
             case 'wind_walker':
                 this.speedMultiplier = 1.0 + lv * 0.12;
                 this.speed = this.baseSpeed * this.speedMultiplier;
                 break;
             case 'vamp_ring':
-                this.lifestealRate = Math.min(0.8, lv * 0.08);
+                this.lifestealRate = Math.min(Balance.MAX_LIFESTEAL_RATE, lv * Balance.LIFESTEAL_PER_VAMP_LEVEL);
                 break;
             case 'explosive_core':
-                this.explosionChance = Math.min(0.75, lv * 0.15);
+                this.explosionChance = Math.min(Balance.MAX_EXPLOSION_CHANCE, lv * Balance.EXPLOSION_PER_LEVEL);
                 break;
             case 'frost_core':
-                this.freezeChance = Math.min(0.5, lv * 0.10);
+                this.freezeChance = Math.min(Balance.MAX_FREEZE_CHANCE, lv * Balance.FREEZE_PER_LEVEL);
                 break;
             case 'evolved_drone':
                 this.evolvedDrone = true;
@@ -246,6 +294,7 @@ class Player {
             case 'evolved_armor':
                 this.evolvedArmor = true;
                 this.thornsRate = 1.0;
+                if (this.heroId === 'Mage') this._recalcThornsRate();
                 break;
             case 'evolved_speed':
                 this.evolvedSpeed = true;
@@ -266,7 +315,7 @@ class Player {
                     for (var _wi = 0; _wi < eng._activeWeapons.length; _wi++) {
                         var w = eng._activeWeapons[_wi];
                         w.atkFactor += 0.2;
-                        w.cd = Math.max(this.cdFloor || 0.2, w.cd * 0.95);
+                        w.cd = Math.max(this.cdFloor || 0.2, w.cd * 0.9);
                     }
                 }
                 break;
@@ -353,6 +402,7 @@ class Player {
             evolvedSpeed: this.evolvedSpeed,
             evolvedVamp: this.evolvedVamp,
             invulnTimer: this.invulnTimer,
+            hitFlashTimer: this.hitFlashTimer,
             currentLvl: this.currentLvl,
             currentExp: this.currentExp,
             nextLvlExp: this.nextLvlExp,
@@ -375,7 +425,7 @@ class Player {
     }
 
     restore(data) {
-        this.heroId = data.heroId || 'Knight';
+        this.heroId = data.heroId || 'Hero';
         this._initFromConfig();
         this.x = data.x || 0; this.y = data.y || 0;
         this.gold = data.gold || 0;
@@ -394,6 +444,7 @@ class Player {
         this.evolvedSpeed = !!data.evolvedSpeed;
         this.evolvedVamp = !!data.evolvedVamp;
         this.invulnTimer = data.invulnTimer || 0;
+        this.hitFlashTimer = data.hitFlashTimer || 0;
         this.currentLvl = data.currentLvl || 1;
         this.currentExp = data.currentExp || 0;
         this.nextLvlExp = data.nextLvlExp || 15;
@@ -406,8 +457,14 @@ class Player {
 
         this.relicLevels = data.relicLevels ? { ...data.relicLevels } : {};
         this.weaponSlots = data.weaponSlots ? data.weaponSlots.map(function(w) { return { id: w.id, level: w.level }; }) : [];
-        this.maxWeaponSlots = data.maxWeaponSlots || 6;
-        this.cdFloor = data.cdFloor || 0.2;
+        /* 从 HeroConfig 恢复英雄特有参数 */
+        const cfg = window.heroConfig[this.heroId];
+        if (cfg) {
+            if (cfg.weaponSlots != null) this.maxWeaponSlots = cfg.weaponSlots;
+            if (cfg.cdFloor != null) this.cdFloor = cfg.cdFloor;
+        }
+        this.maxWeaponSlots = data.maxWeaponSlots || this.maxWeaponSlots;
+        this.cdFloor = data.cdFloor || this.cdFloor;
         this.xpGainFactor = data.xpGainFactor || 1.0;
         this.iceDurationBonus = data.iceDurationBonus || 0;
         this.magnetRadius = data.magnetRadius || 60;
@@ -427,6 +484,7 @@ class Player {
 
         /* Epoch 23: restore 后重新应用天赋/声望/装备词缀 */
         this._reapplyMetaBonuses();
+        if (this.heroId === 'Mage') this._recalcThornsRate();
     }
 
     /** 重新应用 meta 天赋/声望/perk 加成 (用于 restore 后) */
@@ -543,7 +601,7 @@ class Player {
     }
 
     reset(heroId) {
-        this.heroId = heroId || 'Knight';
+        this.heroId = heroId || 'Hero';
         this._initFromConfig();
 
         /* ── 永久天赋加成 ── */
@@ -605,6 +663,7 @@ class Player {
 
         this.gold = 0;
         this.invulnTimer = 0;
+        this.hitFlashTimer = 0; /* 独立受击闪烁计时器，与无敌帧分离 */
         this.critRate = 0;
         this.hasDrone = false;
         this.droneTimer = 0;
@@ -619,6 +678,15 @@ class Player {
         this.evolvedVamp = false;
         this.speedMultiplier = 1.0;
         this.speed = this.baseSpeed;
+        /* H-029: 雀灵流转 -- reset 中恢复速度 */
+        if (this.heroId === 'Hero') {
+            this.speed = this.baseSpeed * 1.15;
+        }
+        /* A-029: 暗影步 -- reset 中恢复速度 */
+        if (this.heroId === 'Assassin') {
+            this.speedMultiplier += 0.10;
+            this.speed = this.baseSpeed * this.speedMultiplier;
+        }
         this.currentLvl = 1;
         this.currentExp = 0;
         this.nextLvlExp = 25;
@@ -668,5 +736,12 @@ class Player {
             evolved_speed: 0,
             evolved_vamp: 0
         };
+        if (this.heroId === 'Mage') this._recalcThornsRate();
+        /* 从 HeroConfig 重置英雄特有参数 */
+        const cfg = window.heroConfig[this.heroId];
+        if (cfg) {
+            if (cfg.weaponSlots != null) this.maxWeaponSlots = cfg.weaponSlots;
+            if (cfg.cdFloor != null) this.cdFloor = cfg.cdFloor;
+        }
     }
 }

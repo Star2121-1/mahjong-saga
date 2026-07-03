@@ -32,8 +32,8 @@
     SaveManager.prototype._getDefaultMeta = function() {
         return {
             metaTokens: 0, totalRuns: 0, totalKills: 0,
-            currentHero: 'Knight', unlockedHeroes: ['Knight'],
-            currentSelectedHero: 'Knight', lastSaveTimestamp: 0,
+            currentHero: 'Hero', unlockedHeroes: ['Hero'],
+            currentSelectedHero: 'Hero', lastSaveTimestamp: 0,
             lastHeroName: '光刃行者', lastLevelName: '试炼森林',
             techTree: { life_enhancement: 0, sharpening: 0, precision_training: 0 },
             bossCores: 0,
@@ -61,7 +61,11 @@
             compendium: { relics: [], weapons: [], enemies: [], equips: [], mutations: [] },
             discoveredSecrets: [],
             /* Epoch 36 */
-            weeklyVault: { active: false, challenge: null, bet: 0, completed: false, reward: null }
+            weeklyVault: { active: false, challenge: null, bet: 0, completed: false, reward: null },
+            /* Epoch 37: 赛季/声望/每日挑战默认值 */
+            prestigeLevel: 0, prestigeCoresSpent: 0,
+            season: { currentSeason: 0, startDate: 0, day: 1, claimedRewards: {} },
+            dailyChallenges: { active: [], lastRotation: 0, completed: {} }
         };
     };
 
@@ -69,12 +73,12 @@
         var OLD_TO_NEW = {
             hero_swordsman: 'Knight', hero_colossus: 'Mage', hero_phantom: 'Assassin'
         };
-        if (!data.unlockedHeroes) data.unlockedHeroes = ['Knight'];
-        if (!data.currentHero) data.currentHero = 'Knight';
+        if (!data.unlockedHeroes) data.unlockedHeroes = ['Hero'];
+        if (!data.currentHero) data.currentHero = 'Hero';
         if (data.currentSelectedHero && OLD_TO_NEW[data.currentSelectedHero]) {
             data.currentSelectedHero = OLD_TO_NEW[data.currentSelectedHero];
         }
-        if (!data.currentSelectedHero) data.currentSelectedHero = data.currentHero || 'Knight';
+        if (!data.currentSelectedHero) data.currentSelectedHero = data.currentHero || 'Hero';
         if (data.unlockedHeroes) {
             for (var _otn = 0; _otn < data.unlockedHeroes.length; _otn++) {
                 if (OLD_TO_NEW[data.unlockedHeroes[_otn]]) {
@@ -85,8 +89,12 @@
         if (data.currentHero && OLD_TO_NEW[data.currentHero]) {
             data.currentHero = OLD_TO_NEW[data.currentHero];
         }
-        if (!data.currentHero) data.currentHero = 'Knight';
+        if (!data.currentHero) data.currentHero = 'Hero';
         if (!data.inflationGuard) data.inflationGuard = { totalMetaTokens: 0, lastReset: 0 };
+        else {
+            if (data.inflationGuard.totalMetaTokens == null) data.inflationGuard.totalMetaTokens = 0;
+            if (data.inflationGuard.lastReset == null) data.inflationGuard.lastReset = 0;
+        }
         if (data.metaTokens == null) data.metaTokens = 0;
         if (data.totalRuns == null) data.totalRuns = 0;
         if (data.totalKills == null) data.totalKills = 0;
@@ -102,7 +110,11 @@
         }
         if (data.bossCores == null) data.bossCores = 0;
         if (!data.talents) {
-            data.talents = { health_boost: 0, speed_boost: 0, magnet_boost: 0, weapon_forge: 0 };
+            data.talents = {
+                health_boost: 0, speed_boost: 0, magnet_boost: 0, weapon_forge: 0,
+                listening_intuition: 0, gangpai_hardiness: 0, '摸牌_speed': 0,
+                starting_weapons: 0, core_resonance: 0, '雀魂_shield': 0
+            };
         } else {
             if (data.talents.health_boost == null) data.talents.health_boost = 0;
             if (data.talents.speed_boost == null) data.talents.speed_boost = 0;
@@ -138,6 +150,9 @@
         if (data.totalDodges == null) data.totalDodges = 0;
         if (data.fullSetActivated == null) data.fullSetActivated = false;
         if (!data.challenges) data.challenges = { active: [], completed: {}, lastRotation: 0 };
+        if (data.challenges.active == null) data.challenges.active = [];
+        if (data.challenges.completed == null) data.challenges.completed = {};
+        if (data.challenges.lastRotation == null) data.challenges.lastRotation = 0;
         if (!data.purchasedPerks) data.purchasedPerks = {};
         if (data.loginStreak == null) data.loginStreak = 0;
         if (!data.lastLoginDate) data.lastLoginDate = '';
@@ -147,6 +162,22 @@
         if (!data.compendium) data.compendium = { relics: [], weapons: [], enemies: [], equips: [], mutations: [] };
         if (!data.weeklyVault) data.weeklyVault = { active: false, challenge: null, bet: 0, completed: false, reward: null };
         if (!data.discoveredSecrets) data.discoveredSecrets = [];
+        /* Epoch 37: 赛季/声望/每日挑战迁移 */
+        if (data.prestigeLevel == null) data.prestigeLevel = 0;
+        if (data.prestigeCoresSpent == null) data.prestigeCoresSpent = 0;
+        if (!data.season) data.season = { currentSeason: 0, startDate: 0, day: 1, claimedRewards: {} };
+        else {
+            if (data.season.currentSeason == null) data.season.currentSeason = 0;
+            if (data.season.startDate == null) data.season.startDate = 0;
+            if (data.season.day == null) data.season.day = 1;
+            if (data.season.claimedRewards == null) data.season.claimedRewards = {};
+        }
+        if (!data.dailyChallenges) data.dailyChallenges = { active: [], lastRotation: 0, completed: {} };
+        else {
+            if (data.dailyChallenges.active == null) data.dailyChallenges.active = [];
+            if (data.dailyChallenges.lastRotation == null) data.dailyChallenges.lastRotation = 0;
+            if (data.dailyChallenges.completed == null) data.dailyChallenges.completed = {};
+        }
     };
 
     SaveManager.prototype.getMeta = async function() {
@@ -162,8 +193,12 @@
     };
 
     SaveManager.prototype.saveMeta = function(data) {
+        var self = this;
         this._metaCache = data;
-        return this._writeJSON('meta.json', data);
+        return new Promise(function(resolve) {
+            var ok = self._writeJSON('meta.json', data);
+            resolve(ok);
+        });
     };
 
     SaveManager.prototype._saveMetaToStorage = async function() {
@@ -236,6 +271,21 @@
             spawnInterval: engine._spawnInterval,
             difficultyTimer: engine._difficultyTimer,
             bossTimer: engine._bossTimer, spawnTimer: engine._spawnTimer,
+            loopCount: engine.loopCount || 0,
+            totalCritsThisRun: engine._totalCritsThisRun || 0,
+            totalDodgesThisRun: engine._totalDodgesThisRun || 0,
+            bossKillsThisRun: engine._bossKillsThisRun || 0,
+            finalBossKillsThisRun: engine._finalBossKillsThisRun || 0,
+            maxGoldThisRun: engine._maxGoldThisRun || 0,
+            playerHitCountThisRun: engine._playerHitCountThisRun || 0,
+            overdriveCount: engine._overdriveCount || 0,
+            vaultMutations: engine._vaultMutations || [],
+            gambleActive: engine._gambleActive || false,
+            shieldActive: engine._shieldActive || false,
+            eliteModeActive: engine._eliteModeActive || false,
+            godModeApplied: engine._godModeApplied || false,
+            bloodRageActive: engine._bloodRageActive || false,
+            currentWaveSpawnedCount: engine.currentWaveSpawnedCount || 0,
             player: engine.player.snapshot()
         };
     };
@@ -248,6 +298,21 @@
         engine._difficultyTimer = data.difficultyTimer || 0;
         engine._bossTimer = data.bossTimer || 0;
         engine._spawnTimer = data.spawnTimer || 0;
+        engine.loopCount = data.loopCount || 0;
+        engine._totalCritsThisRun = data.totalCritsThisRun || 0;
+        engine._totalDodgesThisRun = data.totalDodgesThisRun || 0;
+        engine._bossKillsThisRun = data.bossKillsThisRun || 0;
+        engine._finalBossKillsThisRun = data.finalBossKillsThisRun || 0;
+        engine._maxGoldThisRun = data.maxGoldThisRun || 0;
+        engine._playerHitCountThisRun = data.playerHitCountThisRun || 0;
+        engine._overdriveCount = data.overdriveCount || 0;
+        engine._vaultMutations = data.vaultMutations || [];
+        engine._gambleActive = data.gambleActive || false;
+        engine._shieldActive = data.shieldActive || false;
+        engine._eliteModeActive = data.eliteModeActive || false;
+        engine._godModeApplied = data.godModeApplied || false;
+        engine._bloodRageActive = data.bloodRageActive || false;
+        engine.currentWaveSpawnedCount = data.currentWaveSpawnedCount || 0;
         var levelId = data.levelId || 'level_1';
         engine._currentLevelId = levelId;
         var levelCfg = window.levelConfig[levelId];
@@ -291,7 +356,7 @@
             document.body.removeChild(a); URL.revokeObjectURL(url);
             return { success: true };
         } catch (e) {
-            return { success: false, error: (e && e.message) || '未知错误' };
+            return { success: false, error: (e && (e.message || String(e))) || '未知错误' };
         }
     };
 
@@ -310,6 +375,7 @@
                 });
                 input.click();
             });
+            text = text.replace(/^﻿/, '');
             var data = JSON.parse(text);
             if (!this._validateImportData(data)) {
                 return { success: false, error: '存档格式不合法，拒绝导入' };
@@ -319,27 +385,47 @@
             this._metaCache = null;
             return { success: true };
         } catch (e) {
-            return { success: false, error: (e && e.message) || '未知错误' };
+            return { success: false, error: (e && (e.message || String(e))) || '未知错误' };
         }
     };
 
     SaveManager.prototype._validateImportData = function(data) {
         if (!data || typeof data !== 'object' || Array.isArray(data)) return false;
-        if (!data.meta || typeof data.meta !== 'object') return false;
+        /* null 不是 object — typeof null === 'object' 是 JS 陷阱 */
+        if (data.meta === null || typeof data.meta !== 'object' || Array.isArray(data.meta)) return false;
         if (typeof data.meta.metaTokens !== 'number' || !Number.isFinite(data.meta.metaTokens) || data.meta.metaTokens < 0) return false;
         if (!data.meta.techTree || typeof data.meta.techTree !== 'object') return false;
-        if (!data.activeRun || typeof data.activeRun !== 'object') return false;
+        /* H-034: 深度验证 talents 子字段防止 Infinity/超大数组注入 */
+        if (data.meta.talents) {
+            if (typeof data.meta.talents !== 'object' || Array.isArray(data.meta.talents)) return false;
+            var talentKeys = Object.keys(data.meta.talents);
+            if (talentKeys.length > 50) return false; /* 防数组膨胀 */
+            for (var tk = 0; tk < talentKeys.length; tk++) {
+                var tv = data.meta.talents[talentKeys[tk]];
+                if (typeof tv !== 'number' || !Number.isFinite(tv) || tv < 0) return false;
+                if (tv > 1000) return false; /* 防异常大值 */
+            }
+        }
+        /* 深度验证 equipments 防止原型链污染/超大数组 */
+        if (data.meta.equipments) {
+            if (!Array.isArray(data.meta.equipments)) return false;
+            if (data.meta.equipments.length > 500) return false;
+        }
+        if (data.activeRun === null || typeof data.activeRun !== 'object' || Array.isArray(data.activeRun)) return false;
         if (typeof data.activeRun.isRunActive !== 'boolean') return false;
-        var validWeapons = ['TrackingBlade','OrbitShield','ShotgunBurst','GroundSlammer','LaserBeam','NovaPulse'];
+        var validWeapons = (window.rewardManager && window.rewardManager.weaponInfos) ? Object.keys(window.rewardManager.weaponInfos) : ['TrackingBlade','OrbitShield','ShotgunBurst','GroundSlammer','LaserBeam','NovaPulse'];
         if (data.meta.defaultWeapons) {
             if (!Array.isArray(data.meta.defaultWeapons) || data.meta.defaultWeapons.length < 1) return false;
+            if (data.meta.defaultWeapons.length > 10) return false;
             for (var wi = 0; wi < data.meta.defaultWeapons.length; wi++) {
                 if (validWeapons.indexOf(data.meta.defaultWeapons[wi]) === -1) return false;
             }
         }
         if (data.activeRun.weapons) {
             if (!Array.isArray(data.activeRun.weapons)) return false;
+            if (data.activeRun.weapons.length > 20) return false;
             for (var awi = 0; awi < data.activeRun.weapons.length; awi++) {
+                if (typeof data.activeRun.weapons[awi] !== 'object' || !data.activeRun.weapons[awi].id) return false;
                 if (validWeapons.indexOf(data.activeRun.weapons[awi].id) === -1) return false;
             }
         }

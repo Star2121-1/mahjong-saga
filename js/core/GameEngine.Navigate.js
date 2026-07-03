@@ -16,6 +16,7 @@ Gp.restart = function() {
     this._cleanEnemyProjectiles();
     this._resetAllWeapons();
     this._pendingReward = false;
+    this._pendingBossGamble = false; /* H-017: 防止 Boss Gamble 状态永久挂起 */
     this._bossTimer = 0;
     this._waveCount = 0;
     this.currentWaveSpawnedCount = 0;
@@ -24,6 +25,8 @@ Gp.restart = function() {
     this._mutatorTriggered = false;
     this._clearMutatorEffects();
     this._clearTotems();
+    if (this._qqueenShieldTimer) { clearTimeout(this._qqueenShieldTimer); this._qqueenShieldTimer = null; }
+    this._shieldActive = false;
     if (window.rewardManager) window.rewardManager.hidePanel();
     this.victoryOverlay.classList.remove('active');
     this.gameOverOverlay.classList.remove('active');
@@ -35,7 +38,7 @@ Gp.restart = function() {
     this._spawnInterval = 1.5;
     this._difficultyTimer = 0;
 
-    var heroId = this.player ? this.player.heroId : 'Knight';
+    var heroId = this.player ? this.player.heroId : 'Hero';
     var levelId = this._currentLevelId || 'level_1';
     this._startNewRun(heroId, levelId);
 };
@@ -54,6 +57,7 @@ Gp._goToSaveSelect = function() {
     this._resetAllWeapons();
     this._clearTotems();
     this._clearMutatorEffects();
+    this._pendingBossGamble = false; /* H-017: 离开页面时重置 Boss Gamble 状态 */
     if (this.bossHpBar) this.bossHpBar.classList.remove('active');
     /* Clear stale active run to prevent "继续游戏" from appearing incorrectly */
     if (window.saveManager) window.saveManager.clearActiveRun();

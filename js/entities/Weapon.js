@@ -16,9 +16,9 @@ window.Weapon = class {
     }
     upgrade() {
         this.level++;
-        this.atkFactor += 0.15;
-        var floor = (window.gameEngine && window.gameEngine.player) ? window.gameEngine.player.cdFloor : 0.2;
-        this.cd = Math.max(floor || 0.2, this.cd * 0.9);
+        this.atkFactor = Math.min(10.0, this.atkFactor + Balance.WEAPON_UPGRADE_ATK_INC);
+        var floor = (window.gameEngine && window.gameEngine.player && window.gameEngine.player.cdFloor != null) ? window.gameEngine.player.cdFloor : Balance.DEFAULT_CD_FLOOR;
+        this.cd = Math.max(floor || Balance.DEFAULT_CD_FLOOR, this.cd * Balance.WEAPON_UPGRADE_CD_MULT);
     }
 };
 
@@ -33,7 +33,7 @@ window.Projectile = class {
         this.radius = radius || 5;
         this.damage = damage;
         this.pierceCount = pierceCount == null ? 0 : pierceCount;
-        this.lifeTime = lifeTime || 3.0;
+        this.lifeTime = lifeTime || Balance.PROJECTILE_DEFAULT_LIFETIME;
         this.alive = true;
         this.hitEnemies = new Set();
         this.el = null;
@@ -92,8 +92,9 @@ window.TrackingBlade = class extends window.Weapon {
 
 window.OrbitShield = class extends window.Weapon {
     constructor(level) {
-        super('OrbitShield', '\u73af\u5f62\u62a4\u4f53', level || 1, 0.5, 0.3);
+        super('OrbitShield', '\u73af\u5f62\u62a4\u4f53', level || 1, 0.3, 0.5);
         this.orbitRadius = 50;
+        this.orbRadius = 8; /* M-015: 碰撞半径配置常量，与视觉 16x16 匹配 */
         this.rotationSpeed = 2.0;
         this.orbAngles = [0, Math.PI * 2 / 3, Math.PI * 4 / 3];
         this.orbitEls = [];
@@ -122,13 +123,14 @@ window.OrbitShield = class extends window.Weapon {
             el.style.top = (oy - 8) + 'px';
             this.orbitTickTimers[i] -= dt;
             if (this.orbitTickTimers[i] > 0) continue;
-            this.orbitTickTimers[i] = 0.3;
+            this.orbitTickTimers[i] = this.cd;
             for (var j = 0; j < enemies.length; j++) {
                 var e = enemies[j];
                 if (!e.alive) continue;
                 var dx = e.x - ox;
                 var dy = e.y - oy;
-                if (dx * dx + dy * dy < (e.radius + 8) * (e.radius + 8)) {
+                /* M-015: 碰撞半径使用配置常量 */
+                if (dx * dx + dy * dy < (e.radius + this.orbRadius) * (e.radius + this.orbRadius)) {
                     e.takeDamage(dmg, 'player');
                 }
             }
@@ -176,7 +178,7 @@ window.ShotgunBurst = class extends window.Weapon {
             engine._projectiles.push(proj);
         }
     }
-    update(dt) {
+    update(dt, player, enemies, engine) {
         this.cooldownTimer -= dt;
     }
     reset() {
@@ -295,7 +297,8 @@ window.LaserBeam = class extends window.Weapon {
             if (!e.alive) continue;
             var dx = e.x - player.x;
             var dy = e.y - player.y;
-            var t = (dx * cosA + dy * sinA) / len;
+            /* M-016: 使用 this.beamLength 而非局部变量 len，语义清晰 */
+            var t = (dx * cosA + dy * sinA) / this.beamLength;
             t = Math.max(0, Math.min(1, t));
             var cx = player.x + t * len * cosA;
             var cy = player.y + t * len * sinA;

@@ -21,6 +21,7 @@ desktop.ini
 # Session
 .memory/
 .claude/
+.traces/
 
 # Playwright MCP snapshots
 .playwright-mcp/

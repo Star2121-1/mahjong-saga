@@ -5,7 +5,7 @@
 /* ── 响应式字体基线 ── */
 #game-container {
     background: #1a5c38;
-    --_fs: 1.5;
+    --_fs: 1.4;
 }
 
 /* 16:9 战场主体 */
@@ -71,7 +71,7 @@
     height: 100%;
     background: linear-gradient(90deg, #1a5336, #4caf50);
     border-radius: 0 3px 3px 0;
-    box-shadow: 0 0 8px rgba(76,175,80,0.5);
+    box-shadow: 0 0 12px rgba(76,175,80,0.7), 0 0 4px rgba(76,175,80,0.4);
     transition: width 0.15s ease;
     position: absolute; top: 0; left: 0;
 }
@@ -84,7 +84,7 @@
 }
 
 /* 怒气条容器 */
-#rage-bar-container { width: 100%; height: 16px; background: rgba(0,0,0,0.5); position: relative; flex-shrink: 0; display: flex; align-items: center; }
+#rage-bar-container { width: 100%; height: 16px; background: rgba(0,0,0,0.7); position: relative; flex-shrink: 0; display: flex; align-items: center; }
 #rage-bar-fill {
     height: 100%;
     background: linear-gradient(90deg, #b62929, #ff1744);
@@ -156,10 +156,6 @@
     .stat { font-size: 11px; }
     #rage-bar-container { height: 12px; }
     #rage-bar-text { font-size: 9px; }
-    #weapon-slot-bar { height: 22px; }
-    .ws-icon { width: 8px; height: 8px; }
-    .ws-name { font-size: 8px; max-width: 36px; }
-    .ws-level { font-size: 7px; }
     #boss-hp-bar { height: 16px; padding: 0 6px; gap: 4px; }
     #boss-hp-bar .hp-bar-track { height: 6px; }
     #boss-hp-label { font-size: 9px; }

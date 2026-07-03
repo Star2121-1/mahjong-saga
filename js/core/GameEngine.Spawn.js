@@ -49,7 +49,9 @@ Gp._spawnEnemy = function(isBoss) {
         if (waveIdx >= maxWaves) {
             enemy.radius = 75;
             var baseHp = Math.floor(20 * Math.pow(1.2, level - 1));
-            enemy.maxHp = baseHp * 20;
+            /* H-026: 最终 Boss HP 动态倍率，防止不可战胜 */
+            var bossHpMult = Math.min(20, 5 + level);
+            enemy.maxHp = Math.floor(baseHp * bossHpMult);
             enemy.hp = enemy.maxHp;
             enemy.hue = 0;
         } else if (waveIdx === maxWaves - 1) {
@@ -179,7 +181,7 @@ Gp._tryDropEquipment = function(x, y, isBossLord) {
     var totalMult = abyssMult * surgeMult;
     if (Math.random() > chance) return;
     var roll = Math.random();
-    var quality = roll < 0.1 ? 'legendary' : roll < 0.4 ? 'epic' : 'rare';
+    var quality = roll < 0.15 ? 'legendary' : roll < 0.50 ? 'epic' : 'rare';
     var protoIds = Object.keys(window.equipmentRegistry.equipPool);
     var protoId = protoIds[Math.floor(Math.random() * protoIds.length)];
     var item = window.equipmentRegistry.createItem(protoId, quality);
@@ -190,6 +192,8 @@ Gp._tryDropEquipment = function(x, y, isBossLord) {
     if (!meta) return;
     meta.equipments = meta.equipments || [];
     meta.equipments.push(item);
+    /* 限制装备仓库最近 100 件，防止无限增长 */
+    if (meta.equipments.length > 100) meta.equipments = meta.equipments.slice(-100);
     window.saveManager._saveMetaToStorage();
     var qualityLabel = { rare: '稀有', epic: '史诗', legendary: '传说' }[quality] || quality;
     this._spawnCausalityText('🎁 获得装备：' + item.name + ' (' + qualityLabel + ')');
@@ -287,7 +291,7 @@ Gp._updateExpGems = function(dt) {
     for (var i = this._expGems.length - 1; i >= 0; i--) {
         var gem = this._expGems[i];
         /* Epoch 11: 过期清理，防止经验石无限堆积 */
-        if (gem.isExpired) {
+        if (gem.isExpired()) {
             if (gem.el && gem.el.parentNode) gem.el.remove();
             this._expGems.splice(i, 1);
             continue;
@@ -319,6 +323,8 @@ Gp._updateExpGems = function(dt) {
                 gem.y += (dy / dist) * move;
             }
         }
+        /* H-020: DOM 安全 — 如果 gem.el 被外部移除，跳过 */
+        if (!gem.el || !gem.el.parentNode) continue;
         gem.el.style.left = (gem.x - 4) + 'px';
         gem.el.style.top = (gem.y - 4) + 'px';
     }
@@ -360,11 +366,21 @@ Gp._rewardKill = function(enemy) {
     if (enemy.type === 'Stalker' && this._currentLevelId === 'level_2') {
         this.stalkersKilledInLevel2++;
     }
-    this._spawnCoinsAt(enemy.x, enemy.y, false, enemy.level);
-    if (!enemy.isBoss) this._spawnExpGemsAt(enemy.x, enemy.y, false, enemy.level);
-    if (this.player) {
-        this.player.rage = Math.min(this.player.maxRage, this.player.rage + 5 + (this._tempBerserkBonus ? 10 : 0));
-        if (this._tempBerserkBonus) this._tempBerserkBonus = false;
+    /* 直接给金币（自动吸取，不创建 DOM） */
+    var goldAmt = (enemy.isBoss ? Math.floor(5 + (enemy.level || 1) * 0.5 + Math.random() * 4) : Math.floor(3 + (enemy.level || 1) * 0.3 + Math.random() * 3));
+    this.player.addGold(goldAmt);
+    this.player.rage = Math.min(this.player.maxRage, this.player.rage + 5 + (this._tempBerserkBonus ? 10 : 0));
+    if (this._tempBerserkBonus) this._tempBerserkBonus = false;
+    /* 经验直接给（自动吸取，不创建 DOM） */
+    if (!enemy.isBoss) {
+        var gemVal = Math.floor(1 + (enemy.level || 1) * 0.5);
+        var leveled = this.player.gainExp(gemVal);
+        this._spawnExpText(this.player.x, this.player.y, gemVal);
+        if (leveled) {
+            this._levelUpPending = true;
+            window.audioManager && window.audioManager.play('levelup');
+            this._syncExpBar();
+        }
     }
 };
 

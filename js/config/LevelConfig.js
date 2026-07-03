@@ -58,11 +58,12 @@ window.levelConfig = {
         difficultyTier: 'extreme',
         /* 程序化参数 */
         abyssScaling: {
-            enemyHpMult: 1.15,      /* 每层敌人 HP 倍率 */
+            enemyHpMult: 1.10,      /* 每层敌人 HP 倍率（从 1.15 降为 1.10 防双重指数） */
             enemyAtkMult: 1.12,     /* 每层敌人攻击倍率 */
-            spawnCountMult: 1.10,   /* 每层刷怪数量倍率 */
+            spawnCountMult: 1.05,   /* 每层刷怪数量倍率（从 1.10 降为 1.05 防数值爆炸） */
             intervalReduce: 0.05,   /* 每层刷怪间隔减少 */
-            maxWavesBonus: 1        /* 每层额外波次 */
+            maxWavesBonus: 1,       /* 每层额外波次 */
+            maxWaveEnemyCap: 200    /* 单波敌人上限，防止 DOM 崩溃 */
         }
     }
 };
@@ -91,10 +92,13 @@ window.proceduralLevelGenerator = {
         for (var i = 0; i < effectiveWaves; i++) {
             var baseCount = 20 + i * 10;
             var count = Math.floor(baseCount * spawnMult);
+            if (count > scaling.maxWaveEnemyCap) count = scaling.maxWaveEnemyCap; /* 单波硬上限 */
             waveEnemyMax.push(count);
         }
-        /* 最后一波是 Boss */
-        waveEnemyMax[effectiveWaves - 1] = 1;
+        /* 最后一波是 Boss — guard for effectiveWaves <= 0 */
+        if (effectiveWaves > 0) {
+            waveEnemyMax[effectiveWaves - 1] = 1;
+        }
 
         return {
             id: 'level_procedural_' + abyssLevel,
@@ -151,9 +155,13 @@ window.proceduralSeedGenerator = {
         for (var i = 0; i < effectiveWaves; i++) {
             var baseCount = 20 + i * 10;
             var count = Math.floor(baseCount * spawnMult * (1 + (rng() - 0.5) * 0.15));
+            /* H-033: 种子关卡也需要 maxWaveEnemyCap 上限保护 */
+            if (count > scaling.maxWaveEnemyCap) count = scaling.maxWaveEnemyCap;
             waveEnemyMax.push(count);
         }
-        waveEnemyMax[effectiveWaves - 1] = 1;
+        if (effectiveWaves > 0) {
+            waveEnemyMax[effectiveWaves - 1] = 1;
+        }
 
         /* 根据种子调整敌人类型权重 */
         var enemyTypes = { Normal: 0.15, Tanker: 0.25, Stalker: 0.25, Shaman: 0.35 };

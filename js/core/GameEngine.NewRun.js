@@ -5,51 +5,8 @@
     'use strict';
     var Gp = window.GameEngine.prototype;
 
-Gp._initHandTiles = function() {
-    if (!this._handTileGrid) return;
-    this._handTileGrid.innerHTML = '';
-    this._handTileSlots = [];
-    for (var i = 0; i < 14; i++) {
-        var slot = document.createElement('div');
-        slot.className = 'hand-tile-slot';
-        slot.dataset.index = i;
-        this._handTileGrid.appendChild(slot);
-        this._handTileSlots.push(slot);
-    }
-    if (this._handTileBar) this._handTileBar.classList.add('active');
-};
-
-Gp._placeHandTile = function(index, tileText, tileClass) {
-    if (!this._handTileSlots[index]) return;
-    var slot = this._handTileSlots[index];
-    slot.classList.add('occupied');
-    slot.innerHTML = '<div class="tile-body ' + (tileClass || '') + '">' + tileText + '</div>';
-};
-
-Gp._clearHandTile = function(index) {
-    if (!this._handTileSlots[index]) return;
-    this._handTileSlots[index].classList.remove('occupied');
-    this._handTileSlots[index].innerHTML = '';
-};
-
-Gp._renderPlayerTile = function() {
-    if (!this.playerEl) return;
-    /* 雀牌 — 骨雕麻将质感 */
-    this.playerEl.style.width = '48px';
-    this.playerEl.style.height = '64px';
-    this.playerEl.style.background = '#fbfbf7';
-    this.playerEl.style.borderRadius = '6px';
-    this.playerEl.style.boxShadow = '0 4px 0 #1a5336, 0 6px 0.5px #dfc590, 0 8px 10px rgba(0,0,0,0.5)';
-    this.playerEl.style.display = 'flex';
-    this.playerEl.style.alignItems = 'center';
-    this.playerEl.style.justifyContent = 'center';
-    this.playerEl.style.fontSize = '24px';
-    this.playerEl.style.fontWeight = '900';
-    this.playerEl.style.color = '#b62929';
-    this.playerEl.style.textShadow = '0 0 8px rgba(182,41,41,0.6)';
-    /* 不要用 textContent 覆盖子元素 — 用 ::before 伪元素显示"雀"字 */
-    this.playerEl.style.setProperty('--tile-char', '"雀"');
-};
+/* 以下 4 个方法已被 GameEngine.Combat.js 覆盖（后者加载顺序在后） */
+/* Gp._initHandTiles / _placeHandTile / _clearHandTile / _renderPlayerTile — 保留在 NewRun.js 作为文档参考，实际使用 Combat.js 版本 */
 
 Gp._deliverHandTile = function(tileData) {
     /* tileData: { text, cssClass, slotIndex } */

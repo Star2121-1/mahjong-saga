@@ -4,6 +4,7 @@ window.FxManager = function() {
     this._pool = [];
     this._layer = null;
     this._poolSize = 50;
+    this._returnCount = 0; /* 健康检查计数器 */
 };
 
 var Fp = window.FxManager.prototype;
@@ -30,6 +31,7 @@ Fp.spawnText = function(x, y, text, typeOrColor, size, duration) {
     if (!this._layer) this.init();
     var node = this._borrowNode();
     if (!node) return;
+    node._lastUsed = Date.now();
     var type = (typeof typeOrColor === 'string' && typeOrColor.startsWith('#')) ? 'normal' : typeOrColor;
     var color = typeOrColor;
     if (typeof typeOrColor === 'string' && typeOrColor.startsWith('#')) color = typeOrColor;
@@ -87,6 +89,24 @@ Fp._returnNode = function(node) {
     node.className = 'fct-node';
     node._fctActive = false;
     if (node._fctTimeout) { clearTimeout(node._fctTimeout); node._fctTimeout = null; }
+    /* 健康检查：每 50 次归还扫描一次，强制回收超过 5s 未归还的节点 */
+    if (++this._returnCount % 50 === 0) this._healthCheck();
+};
+
+/* ── 健康检查：强制回收僵死的节点 ── */
+Fp._healthCheck = function() {
+    var now = Date.now();
+    for (var i = 0; i < this._pool.length; i++) {
+        var n = this._pool[i];
+        if (n._fctActive && now - n._lastUsed > 5000) {
+            n.style.display = 'none';
+            n._fctActive = false;
+            if (n.parentNode) n.parentNode.removeChild(n);
+            this._pool.splice(i, 1);
+            i--;
+        }
+    }
+};
 };
 
 window.fxManager = new window.FxManager();

@@ -55,11 +55,7 @@ Cs.spawnExpGemsAt = function(engine, x, y, isBoss, level) {
     }
 };
 
-/* ── 击杀奖励（已委托给 GameEngine._rewardKill，此函数保留作为别名） ── */
-
-Cs.rewardKill = function(engine, enemy) {
-    engine._rewardKill(enemy);
-};
+/* ── 击杀奖励已委托给 GameEngine._rewardKill ── */
 
 /* ── 装备掉落 ── (已迁移至 GameEngine._tryDropEquipment) */
 /* Cs.tryDropEquipment 已废弃，保留此注释防止重复添加 */
@@ -82,7 +78,7 @@ Cs.spawnFloatText = function(engine, x, y, text, isCrit) {
         el.style.color = '#1e6f42';
     }
     engine._worldLayer.appendChild(el);
-    setTimeout(function() { el.remove(); }, 650);
+    setTimeout(function() { el.remove(); }, Balance.FLOAT_TEXT_TIMEOUT_MS);
 };
 
 Cs.spawnHealText = function(engine, x, y, amount) {
@@ -96,7 +92,7 @@ Cs.spawnHealText = function(engine, x, y, amount) {
     el.style.left = x + 'px';
     el.style.top = (y - 20) + 'px';
     engine._worldLayer.appendChild(el);
-    setTimeout(function() { el.remove(); }, 650);
+    setTimeout(function() { el.remove(); }, Balance.FLOAT_TEXT_TIMEOUT_MS);
 };
 
 Cs.spawnExpText = function(engine, x, y, amount) {
@@ -110,7 +106,7 @@ Cs.spawnExpText = function(engine, x, y, amount) {
     el.style.left = (x - 10) + 'px';
     el.style.top = (y - 40) + 'px';
     engine._worldLayer.appendChild(el);
-    setTimeout(function() { el.remove(); }, 650);
+    setTimeout(function() { el.remove(); }, Balance.FLOAT_TEXT_TIMEOUT_MS);
 };
 
 /* ── 爆炸效果 ── */
@@ -134,14 +130,10 @@ Cs.spawnExplosion = function(engine, x, y, radius, damage, excludeId) {
     el.style.width = d + 'px';
     el.style.height = d + 'px';
     engine._worldLayer.appendChild(el);
-    setTimeout(function() { el.remove(); }, 400);
+    setTimeout(function() { el.remove(); }, Balance.EXPLOSION_EFFECT_TIMEOUT);
 };
 
-/* ── 屏幕震动 ── */
-
-Cs.screenShake = function(engine) {
-    engine.triggerShake(1, 200);
-};
+/* Cs.screenShake 已废弃 — 使用 Gp._screenShake */
 
 /* ── 成就文本 ── */
 
@@ -162,34 +154,9 @@ Cs.spawnCausalityText = function(engine, text) {
     el.style.cssText = 'position:absolute;top:20%;left:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:900;color:#ffd700;text-shadow:0 0 20px rgba(255,215,0,0.8),0 0 40px rgba(255,215,0,0.4);z-index:200;pointer-events:none;white-space:nowrap;animation:floatUp 0.6s ease-out forwards;';
     engine.battlefield.appendChild(el);
     var self = engine;
-    setTimeout(function() { if (el.parentNode) el.remove(); }, 2000);
+    setTimeout(function() { if (el.parentNode) el.remove(); }, Balance.CAUSALITY_TIMEOUT_MS);
 };
 
-/* ── 骑士闪避冲撞 ── */
-
-Cs.triggerKnightDodgeSlam = function(engine) {
-    var px = engine.player.x;
-    var py = engine.player.y;
-    var slamRadius = 100;
-    var slamEl = document.createElement('div');
-    slamEl.style.cssText = 'position:absolute;left:' + (px - slamRadius) + 'px;top:' + (py - slamRadius) + 'px;width:' + (slamRadius * 2) + 'px;height:' + (slamRadius * 2) + 'px;border-radius:50%;border:2px solid rgba(255,255,255,0.6);pointer-events:none;z-index:15;';
-    engine._worldLayer.appendChild(slamEl);
-    engine.triggerShake(1, 200);
-    setTimeout(function() { if (slamEl.parentNode) slamEl.remove(); }, 300);
-    for (var i = 0; i < engine.enemies.length; i++) {
-        var e = engine.enemies[i];
-        if (!e.alive) continue;
-        var dx = e.x - px;
-        var dy = e.y - py;
-        if (dx * dx + dy * dy <= slamRadius * slamRadius) {
-            var dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            var force = 200;
-            e.x += (dx / dist) * force;
-            e.y += (dy / dist) * force;
-            e._knockbackVelocity = 200;
-            if (typeof e._clampPosition === 'function') e._clampPosition(engine);
-        }
-    }
-};
+/* Cs.triggerKnightDodgeSlam 已废弃 — 使用 Gp._triggerKnightDodgeSlam */
 
 })();

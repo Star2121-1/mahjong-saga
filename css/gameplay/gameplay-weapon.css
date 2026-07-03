@@ -32,11 +32,11 @@
    ══════════════════════════════════════════════ */
 
 #hand-tile-bar {
-    position: absolute; bottom: 20px; left: 50%;
+    position: absolute; bottom: 80px; left: 50%;
     transform: translateX(-50%);
-    width: 80%;
+    width: 75%;
     z-index: 40;
-    display: none; /* 默认隐藏，游戏开始时启用 */
+    display: none;
 }
 #hand-tile-bar.active { display: block; }
 

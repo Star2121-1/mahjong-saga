@@ -9,7 +9,7 @@ if (window.Systems) {}
 
 window.GameEngine = function() {
     this._currentLevelId = 'level_1';
-    this._heroIds = ['Knight', 'Mage', 'Assassin'];
+    this._heroIds = ['Hero', 'Knight', 'Mage', 'Assassin'];
 
     this.running = false;
     this.gameOver = false;
@@ -129,84 +129,6 @@ var Gp = window.GameEngine.prototype;
 /* ══════════════════════════════════════════════
    GameEngine 模块化拆分 — 方法已移至独立文件
    ══════════════════════════════════════════════ */
-
-// [MOVED] → GameEngine.Boot.js// Gp.init = function() { ... }
-// [MOVED] → GameEngine.Boot.js// Gp._cacheStage3DOM = function() { ... }
-// [MOVED] → GameEngine.Boot.js// Gp._bindStage3Events = function() { ... }
-// [MOVED] → GameEngine.Boot.js// Gp._initBeforeUnload = function() { ... }
-// [MOVED] → GameEngine.Boot.js// Gp._startNewRun = function() { ... }
-// [MOVED] → GameEngine.Boot.js// Gp._announceWave = function() { ... }
-// [MOVED] → GameEngine.Boot.js// Gp._freezeClock = function() { ... }
-// [MOVED] → GameEngine.Boot.js// Gp._unfreezeClock = function() { ... }
-// [MOVED] → GameEngine.Boot.js// Gp._isPauseAllowed = function() { ... }
-// [MOVED] → GameEngine.Boot.js// Gp._togglePause = function() { ... }
-// [MOVED] → GameEngine.Boot.js// Gp._shouldShowGuide = function() { ... }
-// [MOVED] → GameEngine.Boot.js// Gp._showGuide = function() { ... }
-// [MOVED] → GameEngine.Boot.js// Gp._beginLoop = function() { ... }
-// [MOVED] → GameEngine.Boot.js// Gp._autoSave = function() { ... }
-// [MOVED] → GameEngine.Boot.js// Gp._initKeyboard = function() { ... }
-// [MOVED] → GameEngine.Boot.js// Gp._initJoystick = function() { ... }
-// [MOVED] → GameEngine.Boot.js// Gp._getInputVector = function() { ... }
-// [MOVED] → GameEngine.Loop.js// Gp._loop = function() { ... }
-// [MOVED] → GameEngine.Loop.js// Gp._getMaxWaves = function() { ... }
-// [MOVED] → GameEngine.Loop.js// Gp._getWaveEnemyMax = function() { ... }
-// [MOVED] → GameEngine.Spawn.js// Gp._spawnEnemy = function() { ... }
-// [MOVED] → GameEngine.Spawn.js// Gp._spawnCoinsAt = function() { ... }
-// [MOVED] → GameEngine.Spawn.js// Gp._spawnEliteEnemy = function() { ... }
-// [MOVED] → GameEngine.Spawn.js// Gp._tryDropEquipment = function() { ... }
-// [MOVED] → GameEngine.Spawn.js// Gp._spawnExpGemsAt = function() { ... }
-// [MOVED] → GameEngine.Spawn.js// Gp._updateCoins = function() { ... }
-// [MOVED] → GameEngine.Spawn.js// Gp._updateExpGems = function() { ... }
-// [MOVED] → GameEngine.Spawn.js// Gp._rewardKill = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._resumeAfterReward = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._resumeAfterLevelUp = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._checkQqueenShield = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._showVictory = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._showAbyssPanel = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._enterAbyss = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._showVictoryOverlay = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._buildVictoryTips = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._continueChallenge = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._spawnCausalityText = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._settleRun = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._gameOver = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._removeEnemyDOM = function() { ... }
-// [MOVED] → GameEngine.NewRun.js// Gp._initHandTiles = function() { ... }
-// [MOVED] → GameEngine.NewRun.js// Gp._placeHandTile = function() { ... }
-// [MOVED] → GameEngine.NewRun.js// Gp._clearHandTile = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._syncPlayerHP = function() { ... }
-// [MOVED] → GameEngine.NewRun.js// Gp._renderPlayerTile = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._syncEntities = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._checkAchievement = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._checkAchievementInflight = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._spawnAchievementText = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._syncUI = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._syncExpBar = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._moveTo = function() { ... }
-// [MOVED] → GameEngine.Combat.js// Gp._triggerKnightDodgeSlam = function() { ... }
-// [MOVED] → GameEngine.Endgame.js// Gp._onClick = function() { ... }
-// [MOVED] → GameEngine.Endgame.js// Gp._spawnFloatText = function() { ... }
-// [MOVED] → GameEngine.Endgame.js// Gp._spawnHealText = function() { ... }
-// [MOVED] → GameEngine.Endgame.js// Gp._spawnExpText = function() { ... }
-// [MOVED] → GameEngine.Endgame.js// Gp._spawnExplosion = function() { ... }
-// [MOVED] → GameEngine.Endgame.js// Gp._screenShake = function() { ... }
-// [MOVED] → GameEngine.Endgame.js// Gp.triggerShake = function() { ... }
-// [MOVED] → GameEngine.Render.js// Gp._initDefaultWeapons = function() { ... }
-// [MOVED] → GameEngine.Render.js// Gp._restoreWeapons = function() { ... }
-// [MOVED] → GameEngine.Render.js// Gp._cleanAllProjectiles = function() { ... }
-// [MOVED] → GameEngine.Render.js// Gp._resetAllWeapons = function() { ... }
-// [MOVED] → GameEngine.Render.js// Gp._updateWeapons = function() { ... }
-// [MOVED] → GameEngine.Render.js// Gp._updateProjectiles = function() { ... }
-// [MOVED] → GameEngine.Weapons.js// Gp._renderWeaponSlots = function() { ... }
-// [MOVED] → GameEngine.Weapons.js// Gp._syncWeaponSlotBar = function() { ... }
-// [MOVED] → GameEngine.Weapons.js// Gp._syncWeaponSlots = function() { ... }
-// [MOVED] → GameEngine.Weapons.js// Gp._addWeapon = function() { ... }
-// [MOVED] → GameEngine.Weapons.js// Gp._replaceWeapon = function() { ... }
-// [MOVED] → GameEngine.Weapons.js// Gp._upgradeWeapon = function() { ... }
-// [MOVED] → GameEngine.NewRun.js// Gp._deliverHandTile = function() { ... }
-// [MOVED] → GameEngine.NewRun.js// Gp._saveHandState = function() { ... }
-// [MOVED] → GameEngine.NewRun.js// Gp._restoreHandState = function() { ... }
-// [MOVED] → GameEngine.NewRun.js// Gp._defineGuideSteps = function() { ... }
 
 window.gameEngine = new GameEngine();
 

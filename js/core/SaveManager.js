@@ -41,6 +41,13 @@ class SaveManager {
 
     constructor() {
         this._metaCache = null;
+        /* M-005: 监听跨页面 localStorage 变更，使缓存失效 */
+        var self = this;
+        window.addEventListener('storage', function(e) {
+            if (e && e.key === 'cr_meta.json') {
+                self._metaCache = null;
+            }
+        });
     }
 
     async init() {
@@ -95,7 +102,7 @@ class SaveManager {
             starting_weapons: 5, core_resonance: 4, '雀魂_shield': 2
         };
         var base = bases[talentId] || 1;
-        return Math.floor(base * Math.pow(1.3, level));
+        return Math.floor(base * Math.pow(1.6, level));
     }
 
     async upgradeTalent(talentId) {

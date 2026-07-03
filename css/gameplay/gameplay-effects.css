@@ -36,7 +36,7 @@
     font-weight: 900; white-space: nowrap;
     pointer-events: none; will-change: transform, opacity;
     /* 最小字体钳制：不低于 18px 确保可读性 */
-    min-font-size: clamp(18px, 2vw, 45px);
+    font-size: clamp(18px, 2vw, 45px);
 }
 
 .fct-normal {

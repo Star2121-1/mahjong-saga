@@ -61,7 +61,7 @@ Ss.update = function(dt, engine) {
     this._difficultyTimer += dt;
     if (this._difficultyTimer >= 10) {
         this._difficultyTimer -= 10;
-        this._spawnInterval = Math.max(0.3, this._spawnInterval - this._spawnIntervalDecay);
+        this._spawnInterval = Math.max(0.5, this._spawnInterval - this._spawnIntervalDecay);
     }
 
     this._spawnTimer += dt;
@@ -133,6 +133,13 @@ Ss._spawnEnemy = function(engine, isBoss) {
     enemy.hp = enemy.maxHp;
     enemy.atk = Math.floor(enemy.atk * diff);
 
+    /* H-002: 精英模式 — 敌人获得 50% 属性加成 */
+    if (engine._eliteModeActive && engine._eliteMultiplier) {
+        enemy.maxHp = Math.floor(enemy.maxHp * engine._eliteMultiplier);
+        enemy.hp = enemy.maxHp;
+        enemy.atk = Math.floor(enemy.atk * engine._eliteMultiplier);
+    }
+
     /* Boss Lord 特殊处理 */
     if (isBoss && enemyType === 'Boss_Lord') {
         /* Boss Gamble: 先显示选择面板，玩家决定后再生成领主 */
@@ -192,52 +199,7 @@ Ss._spawnEnemy = function(engine, isBoss) {
 };
 
 /* ── Boss Lord 生成 ── */
-
-Ss.spawnBossLord = function(engine) {
-    var level = Math.floor(engine._elapsed / 15) + 1;
-    var x = this._mapW / 2;
-    var y = Math.floor(this._mapH * 0.35);
-    var margin = 100;
-    x = Math.max(margin, Math.min(this._mapW - margin, x));
-    y = Math.max(margin, Math.min(this._mapH - margin, y));
-
-    var id = this._enemyIdCounter++;
-    var lord = new (window.Enemy || window.GameEngine.prototype._enemyConstructor)(id, x, y, level, true, 'Boss_Lord');
-    var diff = 1;
-    try {
-        var cfg = window.levelConfig[this._currentLevelId];
-        if (cfg) diff = cfg.difficultyFactor || 1;
-    } catch(e) {}
-    lord.maxHp = Math.floor(lord.maxHp * diff);
-    lord.hp = lord.maxHp;
-    lord.atk = Math.floor(lord.atk * diff);
-
-    this.engine.enemies.push(lord);
-    this._bossLord = lord;
-
-    var el = document.createElement('div');
-    el.className = 'enemy boss boss-lord';
-    el.dataset.id = id;
-    var hpBar = document.createElement('div');
-    hpBar.className = 'enemy-hp-bar';
-    var hpFill = document.createElement('div');
-    hpFill.className = 'enemy-hp-fill';
-    hpBar.appendChild(hpFill);
-    el.appendChild(hpBar);
-    this.engine._worldLayer.appendChild(el);
-    this.engine._enemyElements.set(id, el);
-    lord.el = el;
-
-    if (this.engine._bloodRageActive) {
-        lord.speed = Math.floor(lord.speed * 1.2);
-        lord.baseSpeed = lord.speed;
-        if (lord.el) lord.el.classList.add('boss-blood-rage');
-    }
-
-    if (this.engine.bossHpBar) this.engine.bossHpBar.classList.add('active');
-    this.engine.triggerShake(1, 200);
-    return lord;
-};
+/* Ss.spawnBossLord 已废弃 — 使用 GameEngine.Events.js 中的 _spawnBossLordFromGamble */
 
 /* ── 图腾清理 ── */
 
@@ -248,62 +210,8 @@ Ss.clearTotems = function(engine) {
     this._totems = [];
 };
 
-/* ── 敌人投射物清理 ── */
-
-Ss.cleanEnemyProjectiles = function(engine) {
-    for (var i = 0; i < this._enemyProjectiles.length; i++) {
-        if (this._enemyProjectiles[i].el && this._enemyProjectiles[i].el.parentNode) {
-            this._enemyProjectiles[i].el.remove();
-        }
-    }
-    this._enemyProjectiles = [];
-};
-
-/* ── 敌人投射物更新 ── */
-
-Ss.updateEnemyProjectiles = function(dt, engine) {
-    if (engine._pendingReward) return;
-    for (var i = this._enemyProjectiles.length - 1; i >= 0; i--) {
-        var p = this._enemyProjectiles[i];
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
-        p.lifeTime -= dt;
-        if (p.lifeTime <= 0) p.alive = false;
-
-        if (!p.el) {
-            var pel = document.createElement('div');
-            pel.className = 'enemy-projectile';
-            var d = p.radius * 2;
-            pel.style.width = d + 'px';
-            pel.style.height = d + 'px';
-            engine._worldLayer.appendChild(pel);
-            p.el = pel;
-        }
-        p.el.style.left = (p.x - p.radius) + 'px';
-        p.el.style.top = (p.y - p.radius) + 'px';
-
-        if (p.x < -100 || p.x > this._mapW + 100 || p.y < -100 || p.y > this._mapH + 100) {
-            p.alive = false;
-        }
-
-        if (p.alive && engine.player) {
-            var dx = engine.player.x - p.x;
-            var dy = engine.player.y - p.y;
-            if (dx * dx + dy * dy < (engine.player.radius + p.radius) * (engine.player.radius + p.radius)) {
-                if (!p._hitPlayer) {
-                    p._hitPlayer = true;
-                    engine.player.takeDamage(p.damage, this._bossLord || engine);
-                }
-                p.alive = false;
-            }
-        }
-
-        if (!p.alive) {
-            if (p.el && p.el.parentNode) p.el.remove();
-            this._enemyProjectiles.splice(i, 1);
-        }
-    }
-};
+/* Ss.cleanEnemyProjectiles 已废弃 — 使用 Gp._cleanEnemyProjectiles */
+/* Ss.updateEnemyProjectiles 已废弃 — 使用 Gp._updateEnemyProjectiles */
 
 /* ── 波次查询 ── */
 

@@ -61,7 +61,7 @@
             if (challenge.reward.metaTokens) doubledReward.metaTokens = challenge.reward.metaTokens * tier.multiplier;
             if (challenge.reward.bossCores) doubledReward.bossCores = challenge.reward.bossCores * tier.multiplier;
             vault.active = true;
-            vault.challenge = { id: challenge.id, name: challenge.name, desc: challenge.desc, reward: doubledReward, checkFn: challenge.check };
+            vault.challenge = { id: challenge.id, name: challenge.name, desc: challenge.desc, reward: doubledReward };
             vault.bet = tier.bet;
             vault.multiplier = tier.multiplier;
             vault.completed = false;
@@ -88,15 +88,18 @@
     };
 
     SaveManager.prototype.evaluateWeeklyVault = function(runStats) {
+        var self = this;
         var meta = this._metaCache || {};
         var vault = meta.weeklyVault || {};
         if (!vault.active || !vault.challenge || vault.completed) return { evaluated: false };
-        var checkFn = vault.challenge.checkFn;
+        var checkFn = vault.challenge ? (SaveManager.CHALLENGE_POOL.find(function(c) { return c.id === vault.challenge.id; }) || {}).check : null;
         if (checkFn && checkFn(runStats)) {
             vault.completed = true;
             vault.reward = vault.challenge.reward;
             meta.weeklyVault = vault;
             this._metaCache = meta;
+            /* 持久化完成状态 */
+            self._saveMetaToStorage();
             return { evaluated: true, completed: true, reward: vault.reward };
         }
         return { evaluated: true, completed: false };
