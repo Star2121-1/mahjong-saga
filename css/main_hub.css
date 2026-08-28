@@ -609,16 +609,13 @@
     color: #fff; border: none; border-radius: 4px;
     cursor: pointer; font-weight: 700; transition: transform 0.1s;
 }
-.btn-hero-unlock:hover { transform: scale(1.06); }
-.btn-hero-unlock:disabled { background: #333; color: #666; cursor: not-allowed; transform: none; }
+
 .btn-hero-deploy {
     padding: 3px 10px; font-size: calc(10 * var(--_fs, 2.0) * 1px);
     background: linear-gradient(135deg, #1a5336, #0d3020);
     color: #fff; border: none; border-radius: 4px;
     cursor: pointer; font-weight: 700; transition: transform 0.1s;
 }
-.btn-hero-deploy:hover { transform: scale(1.06); }
-.btn-hero-deploy:disabled { background: #333; color: #666; cursor: not-allowed; transform: none; }
 
 /* ══════════════════════════════════════════════
    牌浪洗练 / 天赋面板
@@ -653,8 +650,6 @@
     color: #fbfbf7; border: none; border-radius: 5px;
     cursor: pointer; font-weight: 700; transition: transform 0.1s;
 }
-.btn-tech-upgrade:hover { transform: scale(1.06); }
-.btn-tech-upgrade:disabled { background: #333; color: #666; cursor: not-allowed; transform: none; }
 
 #talent-tree-market {
     border: 1px solid rgba(26,83,54,0.25);
@@ -690,8 +685,6 @@
     color: #fff; border: none; border-radius: 4px;
     cursor: pointer; font-weight: 700; transition: transform 0.1s;
 }
-.btn-talent-upgrade:hover { transform: scale(1.06); }
-.btn-talent-upgrade:disabled { background: #333; color: #666; cursor: not-allowed; transform: none; }
 
 /* 天赋分支 & 赛季通行证 */
 .talent-branch-header { padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 3px; }
@@ -798,6 +791,16 @@
 .forge-affix-btn:disabled { background: #333; color: #666; cursor: not-allowed; }
 .forge-affix-btn.rerolling { animation: rerollFlicker 0.4s ease-in-out 3; }
 @keyframes rerollFlicker { 0%,100%{ opacity:1; } 50%{ opacity:0.3; } }
+/* ─── 共享按钮样式 ─── */
+.btn-action {
+    padding: 4px 14px; font-size: calc(12 * var(--_fs, 2.0) * 1px);
+    background: linear-gradient(135deg, #1a5336, #0d3020);
+    color: #fff; border: none; border-radius: 5px;
+    cursor: pointer; font-weight: 700; transition: transform 0.1s;
+    white-space: nowrap;
+}
+.btn-action:hover { transform: scale(1.06); }
+.btn-action:disabled { background: #333; color: #666; cursor: not-allowed; transform: none; }
 
 /* ══════════════════════════════════════════════
    变异保险库

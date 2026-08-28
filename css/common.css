@@ -49,12 +49,7 @@ button:focus-visible, [tabindex]:focus-visible {
 button { touch-action: manipulation; transition-property: transform, box-shadow, filter, background-color, color, border-color; }
 
 /* 无障碍：用户偏好减弱动效时全局静默 */
-@media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
+
 }
 
 .hidden { display: none !important; }
@@ -109,11 +104,6 @@ button { touch-action: manipulation; transition-property: transform, box-shadow,
 }
 
 /* 减少动画偏好 */
-@media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
+
 }
 * { scrollbar-width: thin; scrollbar-color: #d4af37 #0c0f12; }

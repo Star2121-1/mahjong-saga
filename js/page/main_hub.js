@@ -59,11 +59,10 @@
             if (oldPanel) {
                 oldPanel.classList.add('flip-out');
                 oldPanel.classList.remove('active');
-                var self2 = this;
-                setTimeout(function() {
+                setTimeout((() => { {
                     oldPanel.style.display = 'none';
                     oldPanel.classList.remove('flip-out');
-                }, 300);
+                }, 400);
             }
 
             /* 4. 新面板翻入 */
@@ -73,8 +72,8 @@
                 newPanel.classList.remove('flip-in');
                 void newPanel.offsetWidth; /* 强制回流触发动画 */
                 newPanel.classList.add('flip-in', 'active');
-                var self3 = this;
-                setTimeout(function() {
+                
+                setTimeout(() => {
                     newPanel.classList.remove('flip-in');
                 }, 400);
             }
