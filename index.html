@@ -4,24 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>麻将江湖 - Mahjong Saga</title>
+    <meta name="theme-color" content="#0a1d12">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width: 100%; height: 100%; background: #1a1a2e; color: #e8e8e8;
-            font-family: 'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,monospace;
-            display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        html, body { width: 100%; height: 100%; color: #e8e8e8;
+            font-family: 'KaiTi','STKaiti','Segoe UI','PingFang SC','Microsoft YaHei',system-ui,serif;
+            display: flex; justify-content: center; align-items: center; overflow: hidden;
+            background:
+                radial-gradient(ellipse at 50% 15%, rgba(212,175,55,0.10), transparent 55%),
+                radial-gradient(ellipse at 50% 110%, rgba(30,111,66,0.4), transparent 65%),
+                linear-gradient(180deg,#0a1d12 0%,#133b26 100%); }
         .wrapper { text-align: center; }
-        h1 { font-size: 3em; color: #d4af37; margin-bottom: 0.5em;
-            text-shadow: 0 0 20px rgba(212,175,55,0.5); }
-        p { font-size: 1.2em; color: #888; margin-bottom: 2em; }
-        .btn { display: inline-block; padding: 16px 48px; font-size: 1.3em;
-            background: linear-gradient(135deg, #d4af37, #b8860b); color: #1a1a2e;
-            border: none; border-radius: 8px; cursor: pointer; text-decoration: none;
-            font-weight: bold; transition: transform 0.15s, box-shadow 0.15s; }
-        .btn:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(212,175,55,0.6); }
+        .tile-row { display: flex; gap: 14px; justify-content: center; margin-bottom: 28px; }
+        .mini-tile { width: 52px; height: 68px; border-radius: 8px; display: flex; justify-content: center; align-items: center;
+            font-size: 32px; font-weight: 800;
+            background: linear-gradient(150deg,#fefcf6 0%,#f5eedc 70%,#e8dfc6 100%);
+            box-shadow: inset 0 2px 3px rgba(255,255,255,0.9), inset 0 -6px 0 #c9b98d, inset 3px 0 2px rgba(255,255,255,0.5), 0 8px 18px rgba(0,0,0,0.5);
+            animation: tileFloat 3.2s ease-in-out infinite; }
+        .tile-row .mini-tile:nth-child(1) { transform: rotate(-8deg); }
+        .tile-row .mini-tile:nth-child(2) { transform: translateY(-7px); animation-delay: 0.4s; }
+        .tile-row .mini-tile:nth-child(3) { transform: rotate(8deg); animation-delay: 0.8s; }
+        @keyframes tileFloat { 0%,100% { margin-top: 0; } 50% { margin-top: -6px; } }
+        .t-zhong { color: #b62929; } .t-fa { color: #1e6f42; } .t-bai { color: #1b4f72; }
+        h1 { font-size: 3.4em; color: #d4af37; margin-bottom: 0.4em; letter-spacing: 14px; text-indent: 14px;
+            text-shadow: 0 2px 16px rgba(212,175,55,0.5), 0 0 50px rgba(212,175,55,0.3); }
+        p { font-size: 1em; color: #6a8a7a; letter-spacing: 4px; margin-bottom: 2.2em;
+            font-family: 'Georgia','Times New Roman',serif; font-style: italic; }
+        .btn { display: inline-block; padding: 16px 52px; font-size: 1.3em;
+            background: linear-gradient(160deg,#e8c96a,#d4af37 40%,#a8841f); color: #241c04;
+            border: none; border-radius: 10px; cursor: pointer; text-decoration: none;
+            font-weight: bold; letter-spacing: 4px;
+            box-shadow: 0 5px 18px rgba(212,175,55,0.3), inset 0 1px 2px rgba(255,255,255,0.55);
+            transition: transform 0.15s, box-shadow 0.15s, filter 0.15s; }
+        .btn:hover { transform: scale(1.05); filter: brightness(1.08); box-shadow: 0 8px 30px rgba(212,175,55,0.5), inset 0 1px 2px rgba(255,255,255,0.55); }
     </style>
 </head>
 <body>
     <div class="wrapper">
+        <div class="tile-row" aria-hidden="true">
+            <span class="mini-tile t-zhong">中</span><span class="mini-tile t-fa">發</span><span class="mini-tile t-bai">白</span>
+        </div>
         <h1>麻将江湖</h1>
         <p>Mahjong Saga — Roguelike Survival</p>
         <a href="pages/s1_save_select.html" class="btn">开始游戏</a>

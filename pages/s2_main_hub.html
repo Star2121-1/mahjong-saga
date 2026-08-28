@@ -4,50 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>麻将江湖 - 大本营</title>
-    <link rel="stylesheet" href="../css/common.css?v=20260701C">
-    <link rel="stylesheet" href="../css/main_hub.css?v=20260701C">
-    <script src="../js/core/SaveManager.js?v=20260701C"></script>
-    <script src="../js/core/SaveManager.Core.js?v=20260701C"></script>
-    <script src="../js/core/SaveManager.Season.js?v=20260701C"></script>
-    <script src="../js/core/SaveManager.Weekly.js?v=20260701C"></script>
-    <script src="../js/core/SaveManager.Compendium.js?v=20260701C"></script>
-    <script src="../js/core/SaveManager.RunStats.js?v=20260701C"></script>
-    <script src="../js/config/Balance.js?v=20260701C"></script>
+    <meta name="theme-color" content="#0a1d12">
+    <link rel="stylesheet" href="../css/common.css?v=20260828A">
+    <link rel="stylesheet" href="../css/main_hub.css?v=20260828A">
+    <script src="../js/core/SaveManager.js?v=20260828A"></script>
+    <script src="../js/core/SaveManager.Core.js?v=20260828A"></script>
+    <script src="../js/core/SaveManager.Season.js?v=20260828A"></script>
+    <script src="../js/core/SaveManager.Weekly.js?v=20260828A"></script>
+    <script src="../js/core/SaveManager.Compendium.js?v=20260828A"></script>
+    <script src="../js/core/SaveManager.RunStats.js?v=20260828A"></script>
+    <script src="../js/config/Balance.js?v=20260828A"></script>
 </head>
 <body>
     <div id="main-hub-screen">
-        <!-- 顶部统计（绝对定位右上角） -->
-        <div id="hub-top-stats">
-            <span>已通关: <span id="hub-total-runs">0</span></span>
-            <span class="hub-stat-sep">|</span>
-            <span>总击杀: <span id="hub-total-kills">0</span></span>
-            <span class="hub-stat-sep">|</span>
-            <span>核心: <span id="hub-meta-tokens">0</span></span>
-            <span class="hub-stat-sep">|</span>
-            <span class="hub-stat-sep">|</span>
-            <span id="login-streak-indicator" style="color:#ffd700;font-size:11px;">登录: 0 天</span>
-            <button id="makeup-token-btn" style="display:none;background:#4a2;color:#fff;border:1px solid #2a1;border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer;">💾 补签 x0</button>
-            <span id="season-indicator" style="color:#666;font-size:11px;">赛季未激活</span>
-            <span id="elite-mode-indicator" style="color:#666;font-size:11px;">精英模式 OFF</span>
-        </div>
 
-        <!-- ════════════════════════════ 左侧竹节导航 (20%) ════════════════════════════ -->
-        <aside id="hub-left-nav">
-            <div class="nav-item" data-panel="expedition">⚔ 血战到底</div>
-            <div class="nav-item active" data-panel="tavern">🍺 雀坛招募</div>
-            <div class="nav-item" data-panel="talents">👑 牌浪洗练</div>
-            <div class="nav-item" data-panel="forge">⚒ 百宝牌箩</div>
-            <div class="nav-item" data-panel="mutation">🧬 变异保险库</div>
-            <div class="sep"></div>
-            <div class="nav-item" data-panel="compendium">📕 武器图鉴</div>
-            <div class="nav-item" data-panel="achievements">🏆 雀理乾坤</div>
-            <div class="nav-item" data-panel="stats">📊 战绩统计</div>
-            <div class="nav-item" data-panel="history">📜 历史记录</div>
-            <div class="sep"></div>
-            <div class="nav-item nav-home" id="btn-hub-home">🏠 返回首页</div>
-        </aside>
+        <!-- ═══ 顶部资源条 ═══ -->
+        <header id="hub-top-stats">
+            <div id="hub-logo">麻将江湖</div>
+            <div id="hub-resources">
+                <span class="hub-res-pill"><span class="hub-res-icon">🀄</span><span class="hub-res-label">通关</span> <b id="hub-total-runs">0</b></span>
+                <span class="hub-res-pill"><span class="hub-res-icon">💀</span><span class="hub-res-label">击杀</span> <b id="hub-total-kills">0</b></span>
+                <span class="hub-res-pill"><span class="hub-res-icon">🔮</span><span class="hub-res-label">核心</span> <b id="hub-meta-tokens">0</b></span>
+                <span class="hub-res-pill"><span class="hub-res-icon">🪙</span><span class="hub-res-label">代币</span> <b id="hub-meta-token-count">0</b></span>
+            </div>
+            <div id="hub-meta-info">
+                <span id="login-streak-indicator" style="color:#ffd700;font-size:11px;">登录: 0 天</span>
+                <button id="makeup-token-btn" style="display:none;background:#4a2;color:#fff;border:1px solid #2a1;border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer;">🎫 补签 x0</button>
+                <span id="season-indicator" style="color:#666;font-size:11px;">赛季未激活</span>
+                <span id="elite-mode-indicator" style="color:#666;font-size:11px;">精英模式 OFF</span>
+            </div>
+        </header>
 
-        <!-- ════════════════════════════ 右侧内容画布 (85%) ════════════════════════════ -->
+        <!-- ═══ 横向导航条 ═══ -->
+        <nav id="hub-top-nav">
+            <div class="nav-item active" data-panel="expedition" tabindex="0" role="button" aria-label="出征" aria-current="true">⚔️ 血战到底</div>
+            <div class="nav-item" data-panel="tavern" tabindex="0" role="button" aria-label="雀坛招募">🀄 雀坛招募</div>
+            <div class="nav-item" data-panel="talents" tabindex="0" role="button" aria-label="牌浪洗练">🔮 牌浪洗练</div>
+            <div class="nav-item" data-panel="forge" tabindex="0" role="button" aria-label="百宝牌箩">⚒️ 百宝牌箩</div>
+            <div class="nav-item" data-panel="mutation" tabindex="0" role="button" aria-label="变异保险库">🧬 变异保险库</div>
+            <div class="nav-sep"></div>
+            <div class="nav-item" data-panel="compendium" tabindex="0" role="button" aria-label="武器图鉴">📖 武器图鉴</div>
+            <div class="nav-item" data-panel="achievements" tabindex="0" role="button" aria-label="雀士功勋">🏆 雀士功勋</div>
+            <div class="nav-item" data-panel="stats" tabindex="0" role="button" aria-label="战绩统计">📊 战绩统计</div>
+            <div class="nav-item" data-panel="history" tabindex="0" role="button" aria-label="历史记录">📜 历史记录</div>
+            <div class="nav-sep"></div>
+            <div class="nav-item nav-home" id="btn-hub-home" tabindex="0" role="button" aria-label="返回首页">🏠 返回首页</div>
+        </nav>
+
+        <!-- ═══ 内容画布 ═══ -->
         <main id="hub-right-canvas">
             <!-- 英雄详情弹窗(全局) -->
             <div id="hero-details-modal" class="hidden">
@@ -61,21 +65,60 @@
                 </div>
             </div>
 
-            <!-- ════════════════════════════ tab 1: 雀坛招募 ════════════════════════════ -->
-            <div id="panel-tavern" class="hub-panel">
+            <!-- ═══ 出征面板（默认） ═══ -->
+            <div id="panel-expedition" class="hub-panel active">
+                <!-- 英雄信息区 -->
+                <div class="expedition-hero-zone">
+                    <div class="expedition-hero-tile-wrap">
+                        <div id="hero-portrait" class="hero-portrait shape-circle"></div>
+                    </div>
+                    <div class="expedition-hero-info">
+                        <div id="hero-name-display">雀圣浪人</div>
+                        <div id="hero-status-display">均衡型战士</div>
+                        <div class="expedition-hero-stats" id="expedition-hero-stats"></div>
+                    </div>
+                    <div class="expedition-hero-actions">
+                        <button id="btn-hero-main-action" class="relic-btn" disabled>—</button>
+                        <button id="btn-hero-details" class="hub-secondary-btn">详情</button>
+                    </div>
+                </div>
+
+                <!-- 关卡选择 -->
+                <div class="expedition-levels">
+                    <div id="level-cards"></div>
+                </div>
+
+                <!-- 出征按钮 -->
+                <button id="btn-hub-start">轰 然 出 征</button>
+
+                <!-- 底部功能预览 -->
+                <div class="expedition-previews">
+                    <div class="expedition-preview-card">
+                        <div class="expedition-preview-title">🔮 牌浪洗练</div>
+                        <div id="expedition-talent-previews"></div>
+                    </div>
+                    <div class="expedition-preview-card">
+                        <div class="expedition-preview-title">🀄 雀坛招募</div>
+                        <div id="expedition-hero-previews"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ 雀坛招募 ═══ -->
+            <div id="panel-tavern" class="hub-panel" style="display:none">
                 <div class="panel-hero-header">
                     <div id="hero-carousel-compact">
                         <button id="btn-hero-prev" class="carousel-arrow">&#9664;</button>
                         <div id="hero-carousel-viewport">
-                            <div id="hero-portrait" class="hero-portrait shape-circle"></div>
-                            <div id="hero-name-display">光刃行者</div>
-                            <div id="hero-status-display">均衡型战士</div>
+                            <div id="panel-hero-portrait" class="hero-portrait shape-circle"></div>
+                            <div id="panel-hero-name-display">雀圣浪人</div>
+                            <div id="panel-hero-status-display">均衡型战士</div>
                         </div>
                         <button id="btn-hero-next" class="carousel-arrow">&#9654;</button>
                     </div>
                     <div class="panel-hero-actions">
-                        <button id="btn-hero-main-action" class="relic-btn" disabled>—</button>
-                        <button id="btn-hero-details" class="hub-secondary-btn">详情</button>
+                        <button id="panel-btn-hero-main-action" class="relic-btn" disabled>—</button>
+                        <button id="panel-btn-hero-details" class="hub-secondary-btn">详情</button>
                     </div>
                 </div>
                 <div id="hero-tavern-market">
@@ -84,7 +127,7 @@
                 </div>
             </div>
 
-            <!-- ════════════════════════════ tab 2: 牌浪洗练 ════════════════════════════ -->
+            <!-- ═══ 牌浪洗练 ═══ -->
             <div id="panel-talents" class="hub-panel" style="display:none">
                 <div id="tech-tree-panel">
                     <div id="tech-tree-nodes">
@@ -111,20 +154,18 @@
                         </div>
                     </div>
                 </div>
-
                 <div id="talent-tree-market">
                     <div class="talent-market-title">牌浪洗练 · 永久强化</div>
                     <div id="talent-cores-display" class="talent-cores-bar">魔王核心: <span id="talent-cores-count">0</span></div>
                     <div id="talent-nodes"></div>
                 </div>
-
                 <div id="abyss-record-board">
                     <div class="abyss-record-title">时空裂隙 · 深渊记录</div>
-                    <div id="abyss-record-value">0 轮重塑</div>
+                    <div id="abyss-record-value">0 轮重填</div>
                 </div>
             </div>
 
-            <!-- ════════════════════════════ tab 3: 百宝牌箩 ════════════════════════════ -->
+            <!-- ═══ 百宝牌箩 ═══ -->
             <div id="panel-forge" class="hub-panel" style="display:none">
                 <div id="forge-workshop">
                     <div class="forge-title">百宝牌箩 · 装备检视</div>
@@ -143,16 +184,7 @@
                 </div>
             </div>
 
-            <!-- ════════════════════════════ tab 4: 血战到底 ════════════════════════════ -->
-            <div id="panel-expedition" class="hub-panel" style="display:none">
-                <div id="level-selector">
-                    <div id="level-cards"></div>
-                    <div id="level-detail-panel">选择一个关卡</div>
-                </div>
-                <button id="btn-hub-start">轰然出征</button>
-            </div>
-
-            <!-- ════════════════════════════ tab 5: 变异保险库 ════════════════════════════ -->
+            <!-- ═══ 变异保险库 ═══ -->
             <div id="panel-mutation" class="hub-panel" style="display:none">
                 <div class="mutation-vault-title">🧬 变异保险库</div>
                 <div class="mutation-vault-desc">每通关结算时有20%概率解锁一个变异。出征前可携带已解锁变异（每个使Boss核心掉落翻倍），开局即生效。</div>
@@ -160,39 +192,42 @@
                 <div id="mutation-list"></div>
             </div>
 
-            <!-- ════════════════════════════ tab 8: 战绩统计 ════════════════════════════ -->
+            <!-- ═══ 武器图鉴 ═══ -->
+            <div id="panel-compendium" class="hub-panel" style="display:none">
+                <div class="compendium-title">📖 武器图鉴</div>
+                <div class="compendium-desc">六神兵全解 · 查看武器参数与协同圣物</div>
+                <div id="weapon-compendium-grid"></div>
+            </div>
+
+            <!-- ═══ 雀士功勋 ═══ -->
+            <div id="panel-achievements" class="hub-panel" style="display:none">
+                <div class="achievement-title">🏆 雀士功勋</div>
+                <div class="achievement-grid" id="achievement-grid"></div>
+            </div>
+
+            <!-- ═══ 战绩统计 ═══ -->
             <div id="panel-stats" class="hub-panel" style="display:none">
                 <div class="stats-title">📊 雀士战绩统计</div>
                 <div id="stats-grid"></div>
             </div>
 
-            <!-- ════════════════════════════ tab 9: 历史记录 ════════════════════════════ -->
+            <!-- ═══ 历史记录 ═══ -->
             <div id="panel-history" class="hub-panel" style="display:none">
                 <div class="stats-title">📜 战局历史记录</div>
                 <div id="history-grid"></div>
             </div>
-
-            <!-- ════════════════════════════ tab 6: 武器图鉴 ════════════════════════════ -->
-            <div id="panel-compendium" class="hub-panel" style="display:none">
-                <div class="compendium-title">📕 武器图鉴</div>
-                <div class="compendium-desc">六神兵全览 · 查看武器参数与协同圣物</div>
-                <div id="weapon-compendium-grid"></div>
-            </div>
-
-            <!-- ════════════════════════════ tab 7: 雀理乾坤 ════════════════════════════ -->
-            <div id="panel-achievements" class="hub-panel" style="display:none">
-                <div class="achievement-title">🏆 雀士功勋</div>
-                <div class="achievement-grid" id="achievement-grid"></div>
-            </div>
         </main>
     </div>
 
-    <script src="../js/entities/EquipmentRegistry.js?v=20260701C"></script>
-    <script src="../js/config/HeroConfig.js?v=20260701C"></script>
-    <script src="../js/entities/HeroRegistry.js?v=20260701C"></script>
-    <script src="../js/config/LevelConfig.js?v=20260701C"></script>
-    <script src="../js/config/AchievementConfig.js?v=20260701C"></script>
-    <script src="../js/page/main_hub.js?v=20260701C"></script>
-    <script src="../js/responsive.js?v=20260701C"></script>
-</body>
+    <script src="../js/entities/EquipmentRegistry.js?v=20260828A"></script>
+    <script src="../js/config/HeroConfig.js?v=20260828A"></script>
+    <script src="../js/entities/HeroRegistry.js?v=20260828A"></script>
+    <script src="../js/config/LevelConfig.js?v=20260828A"></script>
+    <script src="../js/config/AchievementConfig.js?v=20260828A"></script>
+    <script src="../js/core/ToastSystem.js?v=20260828A"></script>
+    <script src="../js/page/main_hub.js?v=20260828A"></script>
+    <script src="../js/responsive.js?v=20260828A"></script>
+        <!-- 屏幕阅读器通知区 -->
+        <div aria-live="assertive" aria-atomic="true" class="sr-only" id="game-announcements"></div>
+    </body>
 </html>

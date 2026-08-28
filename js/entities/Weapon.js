@@ -10,6 +10,7 @@ window.Weapon = class {
         this.atkFactor = atkFactor || 1.0;
         this.cd = cd || 1.0;
         this.cooldownTimer = 0;
+        this._justFired = false; /* Visual Enhancement D: 技能发射标记 */
     }
     update(dt, player, enemies, engine) {
         this.cooldownTimer -= dt;
@@ -47,12 +48,12 @@ window.Projectile = class {
 };
 
 /* ══════════════════════════════════════════════
-   Sub-agent 1: 追踪飞刃
+   Sub-agent 1: 追踪飞牌
    ══════════════════════════════════════════════ */
 
 window.TrackingBlade = class extends window.Weapon {
     constructor(level) {
-        super('TrackingBlade', '\u8ffd\u8e2a\u98de\u5203', level || 1, 1.0, 0.8);
+        super('TrackingBlade', '\u8ffd\u8e2a\u98de\u724c', level || 1, 1.0, 0.8);
     }
     update(dt, player, enemies, engine) {
         this.cooldownTimer -= dt;
@@ -69,6 +70,7 @@ window.TrackingBlade = class extends window.Weapon {
             if (dsq < minDistSq) { minDistSq = dsq; nearest = e; }
         }
         if (!nearest) return;
+        this._justFired = true;
         var theta = Math.atan2(nearest.y - player.y, nearest.x - player.x);
         var speed = 300 + this.level * 20;
         var dmg = Math.floor(player.atk * this.atkFactor);
@@ -87,7 +89,7 @@ window.TrackingBlade = class extends window.Weapon {
 };
 
 /* ══════════════════════════════════════════════
-   Sub-agent 2: 环形护体
+   Sub-agent 2: 三面环伺
    ══════════════════════════════════════════════ */
 
 window.OrbitShield = class extends window.Weapon {
@@ -146,18 +148,19 @@ window.OrbitShield = class extends window.Weapon {
 };
 
 /* ══════════════════════════════════════════════
-   Sub-agent 3: 扇形散射
+   Sub-agent 3: 七对散牌
    ══════════════════════════════════════════════ */
 
 window.ShotgunBurst = class extends window.Weapon {
     constructor(level) {
-        super('ShotgunBurst', '\u6247\u5f62\u6563\u5c04', level || 1, 0.6, 0.4);
+        super('ShotgunBurst', '\u4e03\u5bf9\u6563\u724c', level || 1, 0.6, 0.4);
         this.spreadCount = 5;
         this.spreadAngle = 0.3;
     }
     fireAt(targetX, targetY, player, engine) {
         if (this.cooldownTimer > 0) return;
         this.cooldownTimer = this.cd;
+        this._justFired = true;
         var baseAngle = Math.atan2(targetY - player.y, targetX - player.x);
         var speed = 250 + this.level * 10;
         var dmg = Math.floor(player.atk * this.atkFactor);
@@ -187,12 +190,12 @@ window.ShotgunBurst = class extends window.Weapon {
 };
 
 /* ══════════════════════════════════════════════
-   Sub-agent 4: 区域震荡
+   Sub-agent 4: 碰牌震波
    ══════════════════════════════════════════════ */
 
 window.GroundSlammer = class extends window.Weapon {
     constructor(level) {
-        super('GroundSlammer', '\u533a\u57df\u9707\u8361', level || 1, 1.5, 1.8);
+        super('GroundSlammer', '\u78b0\u724c\u9707\u6ce2', level || 1, 1.5, 1.8);
         this.activeShockwaves = [];
     }
     update(dt, player, enemies, engine) {
@@ -233,6 +236,7 @@ window.GroundSlammer = class extends window.Weapon {
         }
         if (this.cooldownTimer > 0) return;
         this.cooldownTimer = this.cd;
+        this._justFired = true;
         var tx = player.x;
         var ty = player.y;
         var el = document.createElement('div');
@@ -258,12 +262,12 @@ window.GroundSlammer = class extends window.Weapon {
 };
 
 /* ══════════════════════════════════════════════
-   Sub-agent 5: 持续线杀
+   Sub-agent 5: 一气贯通
    ══════════════════════════════════════════════ */
 
 window.LaserBeam = class extends window.Weapon {
     constructor(level) {
-        super('LaserBeam', '\u6301\u7eed\u7ebf\u6740', level || 1, 1.2, 0.3);
+        super('LaserBeam', '\u4e00\u6c14\u8d2f\u901a', level || 1, 1.2, 0.3);
         this.beamLength = 300;
         this.beamAngle = 0;
         this.laserEl = null;
@@ -291,6 +295,7 @@ window.LaserBeam = class extends window.Weapon {
         this.laserEl.style.transformOrigin = 'left center';
         if (this.cooldownTimer > 0) return;
         this.cooldownTimer = this.cd;
+        this._justFired = true;
         var dmg = Math.floor(player.atk * this.atkFactor);
         for (var i = 0; i < enemies.length; i++) {
             var e = enemies[i];
@@ -319,12 +324,12 @@ window.LaserBeam = class extends window.Weapon {
 };
 
 /* ══════════════════════════════════════════════
-   Sub-agent 6: 全屏脉冲
+   Sub-agent 6: 清一色
    ══════════════════════════════════════════════ */
 
 window.NovaPulse = class extends window.Weapon {
     constructor(level) {
-        super('NovaPulse', '\u5168\u5c4f\u8109\u51b2', level || 1, 5.0, 7.0);
+        super('NovaPulse', '\u6e05\u4e00\u8272', level || 1, 5.0, 7.0);
         this.activePulses = [];
     }
     update(dt, player, enemies, engine) {
@@ -358,6 +363,7 @@ window.NovaPulse = class extends window.Weapon {
         }
         if (this.cooldownTimer > 0) return;
         this.cooldownTimer = this.cd;
+        this._justFired = true;
         var viewW = engine.battlefield.clientWidth;
         var viewH = engine.battlefield.clientHeight;
         var maxR = Math.sqrt(viewW * viewW + viewH * viewH);

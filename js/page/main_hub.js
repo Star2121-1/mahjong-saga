@@ -8,6 +8,7 @@
     var DOM = {};
     var _tabLoopId = null; /* Tab 帧循环引用，用于清理 */
     var _tabIntervals = []; /* Tab 定时器数组，用于清理 */
+    var _talentBranchPaths = {}; /* Epoch 47: 分支路径等级 */
     var _hubListenersBound = false; /* 防止重复绑定事件监听器 */
 
     function $(id) { return document.getElementById(id); }
@@ -23,7 +24,7 @@
         init: function() {
             var self = this;
             /* 左侧竹节导航点击 */
-            var navItems = document.querySelectorAll('#hub-left-nav .nav-item');
+            var navItems = document.querySelectorAll('#hub-top-nav .nav-item');
             for (var i = 0; i < navItems.length; i++) {
                 navItems[i].addEventListener('click', function(e) {
                     e.preventDefault();
@@ -48,7 +49,7 @@
             this._destroyPreviousPanel();
 
             /* 2. 更新导航高亮 */
-            var navItems = document.querySelectorAll('#hub-left-nav .nav-item');
+            var navItems = document.querySelectorAll('#hub-top-nav .nav-item');
             for (var i = 0; i < navItems.length; i++) {
                 navItems[i].classList.toggle('active', navItems[i].getAttribute('data-panel') === panelId);
             }
@@ -137,6 +138,8 @@
         var meta = window.saveManager._metaCache || {};
         var el = document.getElementById('talent-cores-count');
         if (el) el.textContent = meta.bossCores || 0;
+        /* Epoch 47: 加载分支路径 */
+        _talentBranchPaths = meta.talentBranchPaths || {};
         if (typeof refreshTalentNodes === 'function') refreshTalentNodes();
     }
 
@@ -145,6 +148,31 @@
         if (el) {
             var meta = window.saveManager._metaCache || {};
             el.textContent = (meta.highestEndlessLoop || 0) + ' 轮重塑';
+        }
+        /* Epoch 47: 关卡进度指示 */
+        var cards = document.querySelectorAll('.level-card');
+        var meta = window.saveManager._metaCache || {};
+        var runHistory = meta.runHistory || [];
+        var completedLevels = {};
+        for (var i = 0; i < runHistory.length; i++) {
+            var r = runHistory[i];
+            if (r && r.won && r.levelId) {
+                completedLevels[r.levelId] = Math.max(completedLevels[r.levelId] || 0, r.loopCount || 0);
+            }
+        }
+        for (var c = 0; c < cards.length; c++) {
+            var lid = cards[c].dataset.levelId;
+            if (!lid) continue;
+            var badge = cards[c].querySelector('.level-progress-badge');
+            if (badge) badge.remove();
+            if (completedLevels[lid] != null) {
+                var b = document.createElement('span');
+                b.className = 'level-progress-badge';
+                b.style.cssText = 'position:absolute;top:-4px;right:-4px;background:#4caf50;color:#fff;font-size:10px;font-weight:900;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;';
+                b.textContent = completedLevels[lid];
+                cards[c].style.position = 'relative';
+                cards[c].appendChild(b);
+            }
         }
     }
 
@@ -197,7 +225,7 @@
                         makeupBtn.textContent = res.reason;
                         setTimeout(function() { refreshMainHub(); }, 1200);
                     }
-                }).catch(function(err) { console.warn('[main_hub] makeupToken claim failed:', err); });
+                }).catch(function(err) { window.toastSystem && window.toastSystem.warning('补签失败: ' + err.message); });
             });
         }
 
@@ -280,7 +308,7 @@
                     }
                     badge.textContent = nextLabel;
                 }
-            }).catch(function(err) { console.warn('[main_hub] loginStreak check failed:', err); });
+            }).catch(function(err) { window.toastSystem && window.toastSystem.warning('登录检查失败: ' + err.message); });
         }
 
         var seasonEl = document.getElementById('season-indicator');
@@ -306,13 +334,14 @@
                     }
                     refreshMainHub();
                 }
-            }).catch(function(err) { console.warn('[main_hub] loginStreak check failed:', err); });
+            }).catch(function(err) { window.toastSystem && window.toastSystem.warning('登录检查失败: ' + err.message); });
         }
 
         refreshHeroCarousel();
         refreshTechTree();
         refreshTalentMarket();
         buildLevelCards();
+        refreshLevelCards();
         refreshHubStartButton();
         refreshMutationVault();
     }
@@ -329,31 +358,38 @@
         var isUnlocked = unlocked.indexOf(heroId) !== -1;
         var isSelected = meta.currentSelectedHero === heroId;
 
-        if (DOM.heroNameDisplay) DOM.heroNameDisplay.textContent = cfg.name;
-        if (DOM.heroStatusDisplay) DOM.heroStatusDisplay.textContent = isUnlocked ? cfg.desc : '???';
+        var isExpedition = (HubTabController._currentPanel === 'expedition');
+        var portrait = isExpedition ? DOM.heroPortrait : (document.getElementById('panel-hero-portrait') || DOM.heroPortrait);
+        var nameDisp = isExpedition ? DOM.heroNameDisplay : (document.getElementById('panel-hero-name-display') || DOM.heroNameDisplay);
+        var statusDisp = isExpedition ? DOM.heroStatusDisplay : (document.getElementById('panel-hero-status-display') || DOM.heroStatusDisplay);
+        var mainAction = isExpedition ? DOM.btnHeroMainAction : (document.getElementById('panel-btn-hero-main-action') || DOM.btnHeroMainAction);
+        var detailBtn = isExpedition ? DOM.btnHeroDetails : (document.getElementById('panel-btn-hero-details') || DOM.btnHeroDetails);
 
-        if (DOM.heroPortrait) {
-            DOM.heroPortrait.className = 'hero-portrait ' + (cfg.shapeClass || 'shape-circle');
-            DOM.heroPortrait.dataset.heroId = heroId;
-            if (!isUnlocked) DOM.heroPortrait.classList.add('locked');
+        if (nameDisp) nameDisp.textContent = cfg.name;
+        if (statusDisp) statusDisp.textContent = isUnlocked ? cfg.desc : '???';
+
+        if (portrait) {
+            portrait.className = 'hero-portrait ' + (cfg.shapeClass || 'shape-circle');
+            portrait.dataset.heroId = heroId;
+            if (!isUnlocked) portrait.classList.add('locked');
         }
 
-        if (DOM.btnHeroMainAction) {
+        if (mainAction) {
             if (!isUnlocked) {
                 var cost = cfg.unlockCost;
-                DOM.btnHeroMainAction.textContent = '解锁: ' + cost + ' 核心';
-                DOM.btnHeroMainAction.disabled = (meta.bossCores || 0) < cost;
+                mainAction.textContent = '解锁: ' + cost + ' 核心';
+                mainAction.disabled = (meta.bossCores || 0) < cost;
             } else if (isSelected) {
-                DOM.btnHeroMainAction.textContent = '已使用';
-                DOM.btnHeroMainAction.disabled = true;
+                mainAction.textContent = '已使用';
+                mainAction.disabled = true;
             } else {
-                DOM.btnHeroMainAction.textContent = '使用该英雄';
-                DOM.btnHeroMainAction.disabled = false;
+                mainAction.textContent = '使用该英雄';
+                mainAction.disabled = false;
             }
         }
 
-        if (DOM.btnHeroDetails) {
-            DOM.btnHeroDetails.style.display = isUnlocked ? '' : 'none';
+        if (detailBtn) {
+            detailBtn.style.display = isUnlocked ? '' : 'none';
         }
     }
 
@@ -453,18 +489,23 @@
     /* ── 天赋商城 ── */
 
     window.TalentTreeManager = {
+        /* Epoch 47: 天赋树三分支系统 */
+        branches: [
+            { id: 'offense', name: '进攻', icon: '⚔️', color: '#ff5252', talents: ['ting_intuition', 'mo_pa_cd', 'he_resonance', 'que_forge'] },
+            { id: 'defense', name: '防御', icon: '🛡️', color: '#448aff', talents: ['hu_patro', 'gang_hardiness', 'que_spirit_shield'] },
+            { id: 'economy', name: '经济', icon: '💰', color: '#ffd740', talents: ['zimo_speed', 'lian_magnet', 'kaiju_weapons'] }
+        ],
         definitions: [
-            { id: 'health_boost', name: '生命壁垒', desc: '初始最大HP +20/级', maxLv: 5 },
-            { id: 'speed_boost', name: '迅捷之风', desc: '初始移速 +15/级', maxLv: 5 },
-            { id: 'magnet_boost', name: '引力场', desc: '初始吸附半径 +30/级', maxLv: 3 },
-            { id: 'weapon_forge', name: '神兵工坊', desc: '开局双神兵（飞刃+护体）', maxLv: 1 },
-            /* Epoch 2 新增天赋 */
-            { id: 'listening_intuition', name: '听牌直觉', desc: '暴击率 +2%/级', maxLv: 5 },
-            { id: 'gangpai_hardiness', name: '杠牌硬气', desc: '受到伤害 -3%/级', maxLv: 5 },
-            { id: '摸牌_speed', name: '摸牌速度', desc: '武器CD -5%/级', maxLv: 5 },
-            { id: 'starting_weapons', name: '开局双兵', desc: '额外初始武器槽', maxLv: 1 },
-            { id: 'core_resonance', name: '核心共鸣', desc: 'Boss掉落核心 +10%/级', maxLv: 5 },
-            { id: '雀魂_shield', name: '雀魂护盾', desc: '每10波触发1次护盾', maxLv: 3 }
+            { id: 'hu_patro', name: '糊牌护舵', desc: '初始最大HP +20/级', maxLv: 5, branch: 'defense' },
+            { id: 'zimo_speed', name: '自摸疾行', desc: '初始移速 +15/级', maxLv: 5, branch: 'economy' },
+            { id: 'lian_magnet', name: '连营聚宝', desc: '初始吸附半径 +30/级', maxLv: 3, branch: 'economy' },
+            { id: 'que_forge', name: '雀坛铸牌', desc: '开局双神兵（飞牌+环伺）', maxLv: 1, branch: 'offense' },
+            { id: 'ting_intuition', name: '听牌直觉', desc: '暴击率 +2%/级', maxLv: 5, branch: 'offense' },
+            { id: 'gang_hardiness', name: '杠上硬气', desc: '受到伤害 -3%/级', maxLv: 5, branch: 'defense' },
+            { id: 'mo_pa_cd', name: '摸牌快手', desc: '武器CD -5%/级', maxLv: 5, branch: 'offense' },
+            { id: 'kaiju_weapons', name: '开局双牌', desc: '额外初始武器槽', maxLv: 1, branch: 'economy' },
+            { id: 'he_resonance', name: '和牌共鸣', desc: 'Boss掉落核心 +10%/级', maxLv: 5, branch: 'offense' },
+            { id: 'que_spirit_shield', name: '雀魂护体', desc: '每10波触发1次护盾', maxLv: 3, branch: 'defense' }
         ],
         costOf: function(talentId, level) {
             /* Epoch 14: 使用 SaveManager 的指数成本函数 */
@@ -472,8 +513,8 @@
                 return window.saveManager._talentCostExponential(talentId, level);
             }
             /* 回退到旧线性公式 */
-            if (talentId === 'starting_weapons') return 5;
-            if (talentId === 'core_resonance') return (level + 1) * 4;
+            if (talentId === 'kaiju_weapons') return 5;
+            if (talentId === 'he_resonance') return (level + 1) * 4;
             return level + 1;
         }
     };
@@ -482,31 +523,52 @@
         var meta = window.saveManager._metaCache || {};
         var talents = meta.talents || {};
         var bossCores = meta.bossCores || 0;
+        var talentBranchPaths = meta.talentBranchPaths || _talentBranchPaths || {};
 
         if (DOM.talentCoresCount) DOM.talentCoresCount.textContent = bossCores;
         if (!DOM.talentNodes) return;
 
         DOM.talentNodes.innerHTML = '';
         var defs = window.TalentTreeManager.definitions;
+        var branches = window.TalentTreeManager.branches;
 
-        for (var i = 0; i < defs.length; i++) {
-            var def = defs[i];
-            var level = talents[def.id] || 0;
-            var isMaxed = level >= def.maxLv;
-            var cost = isMaxed ? 0 : window.TalentTreeManager.costOf(def.id, level);
-            var canBuy = !isMaxed && bossCores >= cost;
+        /* Epoch 47: 按分支分组渲染 */
+        for (var bi = 0; bi < branches.length; bi++) {
+            var branch = branches[bi];
+            var branchGroup = document.createElement('div');
+            branchGroup.className = 'talent-branch';
+            branchGroup.style.cssText = 'margin-bottom:16px;';
 
-            var node = document.createElement('div');
-            node.className = 'talent-node';
-            node.dataset.talent = def.id;
-            node.innerHTML =
-                '<span class="talent-node-name">' + def.name + '</span>' +
-                '<span class="talent-node-level">' + level + ' / ' + def.maxLv + '</span>' +
-                '<span class="talent-node-effect">' + def.desc + '</span>' +
-                (isMaxed
-                    ? '<span class="talent-node-cost">已满级</span><button class="btn-talent-upgrade" disabled>MAX</button>'
-                    : '<span class="talent-node-cost">' + cost + ' 核心</span><button class="btn-talent-upgrade"' + (canBuy ? '' : ' disabled') + '>升级</button>');
-            DOM.talentNodes.appendChild(node);
+            /* 分支标题 */
+            branchGroup.innerHTML =
+                '<div class="talent-branch-header" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
+                    '<span style="font-size:18px;">' + branch.icon + '</span>' +
+                    '<span style="font-size:14px;font-weight:900;color:' + branch.color + ';">' + branch.name + '系</span>' +
+                    '<span class="talent-branch-path" style="font-size:11px;color:#888;">路径 Lv.' + (talentBranchPaths[branch.id] || 0) + '</span>' +
+                '</div>';
+
+            var branchTalents = defs.filter(function(d) { return d.branch === branch.id; });
+            for (var ti = 0; ti < branchTalents.length; ti++) {
+                var def = branchTalents[ti];
+                var level = talents[def.id] || 0;
+                var isMaxed = level >= def.maxLv;
+                var cost = isMaxed ? 0 : window.TalentTreeManager.costOf(def.id, level);
+                var canBuy = !isMaxed && bossCores >= cost;
+
+                var node = document.createElement('div');
+                node.className = 'talent-node';
+                node.dataset.talent = def.id;
+                node.style.cssText = 'border-left: 3px solid ' + branch.color + '; margin-left: 12px; margin-bottom: 6px;';
+                node.innerHTML =
+                    '<span class="talent-node-name">' + def.name + '</span>' +
+                    '<span class="talent-node-level">' + level + ' / ' + def.maxLv + '</span>' +
+                    '<span class="talent-node-effect">' + def.desc + '</span>' +
+                    (isMaxed
+                        ? '<span class="talent-node-cost">已满级</span><button class="btn-talent-upgrade" disabled>MAX</button>'
+                        : '<span class="talent-node-cost">' + cost + ' 核心</span><button class="btn-talent-upgrade"' + (canBuy ? '' : ' disabled') + '>升级</button>');
+                branchGroup.appendChild(node);
+            }
+            DOM.talentNodes.appendChild(branchGroup);
         }
     }
 
@@ -520,6 +582,15 @@
 
         var result = await window.saveManager.upgradeTalent(talentId);
         if (result.ok) {
+            /* Epoch 47: 更新分支路径等级 */
+            var def = window.TalentTreeManager.definitions.find(function(d) { return d.id === talentId; });
+            if (def && def.branch) {
+                var meta = await window.saveManager.getMeta();
+                if (!meta.talentBranchPaths) meta.talentBranchPaths = {};
+                meta.talentBranchPaths[def.branch] = (meta.talentBranchPaths[def.branch] || 0) + 1;
+                await window.saveManager.saveMeta(meta);
+                _talentBranchPaths = meta.talentBranchPaths;
+            }
             refreshMainHub();
         } else {
             btn.textContent = result.reason;
@@ -545,7 +616,8 @@
             card.className = 'level-card' + (levelId === _currentLevelId ? ' selected' : '');
             card.dataset.levelId = levelId;
             var tierColor = window.difficultyTierColors[cfg.difficultyTier] || '#888';
-            card.innerHTML = cfg.name + '<span class="level-tier-badge" style="background:' + tierColor + '">●</span>';
+            var tierLabel = {easy:'简单',medium:'普通',hard:'困难',extreme:'极限'}[cfg.difficultyTier] || '';
+            var tierSymbol = {easy:'✓',medium:'●',hard:'✗',extreme:'◆'}[cfg.difficultyTier] || '●'; card.innerHTML = '<span class="level-card-name">' + cfg.name + '</span><span class="level-tier-badge" style="background:' + tierColor + '">' + tierSymbol + '</span>' + (tierLabel ? '<span class="level-card-sub">' + tierLabel + '</span>' : '');
             DOM.levelCards.appendChild(card);
         }
 
@@ -553,7 +625,7 @@
         var procCard = document.createElement('div');
         procCard.className = 'level-card' + ('level_procedural' === _currentLevelId ? ' selected' : '');
         procCard.dataset.levelId = 'level_procedural';
-        procCard.innerHTML = '程序裂隙 · 深渊 Lv.' + (abyssLevel + 1) + '<span class="level-tier-badge" style="background:#9c27b0">◆</span>';
+        procCard.innerHTML = '<span class="level-card-name">程序裂隙 · 深渊 Lv.' + (abyssLevel + 1) + '</span><span class="level-tier-badge" style="background:#9c27b0">◆</span>';
         DOM.levelCards.appendChild(procCard);
 
         refreshLevelDetail();
@@ -844,7 +916,7 @@
             { id: 'gravity', name: '引力逆转', desc: '经验吸附范围归零，必须肉身拾取', icon: '🧲' },
             { id: 'bloodmoon', name: '狂暴血月', desc: '怪物体型+30%，攻击+40%，掉落翻倍', icon: '🌍' },
             { id: 'frenzy', name: '狂乱之夜', desc: '敌人攻击速度+50%', icon: '🗡' },
-            { id: 'frailty', name: '虚弱诅咒', desc: '玩家攻击力-20%', icon: '💀' },
+            { id: 'frailty', name: '脆弱诅咒', desc: '玩家攻击力+80%，但受伤+30%（攻防双向提升）', icon: '💀' },
             { id: 'wither', name: '凋零领域', desc: '每秒损失 1% 最大生命', icon: '🌑' },
         ];
 
@@ -1132,6 +1204,48 @@
             }
         }
 
+        /* Epoch 47: 赛季通行证 */
+        var battlePassHtml = '';
+        if (typeof window.saveManager.getBattlePassData === 'function' && typeof window.saveManager.claimBattlePassTier === 'function') {
+            var bp = window.saveManager.getBattlePassData();
+            var bpTier = bp.tier || 0;
+            var bpXP = bp.xp || 0;
+            var bpClaimed = bp.claimedTiers || [];
+            var bpPremium = bp.premium || false;
+            var bpHtml = '<div class="battlepass-card">';
+            bpHtml += '<div class="battlepass-header">🏅 赛季通行证 · 第 ' + (cs || 0) + ' 赛季</div>';
+            bpHtml += '<div class="battlepass-progress">';
+            bpHtml += '<div class="battlepass-bar"><div class="battlepass-bar-fill" style="width:' + bpXP + '%"></div></div>';
+            bpHtml += '<span class="battlepass-xp-text">' + bpXP + '/100 XP → 下一层</span>';
+            bpHtml += '</div>';
+            bpHtml += '<div class="battlepass-tiers">';
+            for (var _bt = 1; _bt <= Math.min(10, 30); _bt++) {
+                var unlocked = _bt <= bpTier;
+                var claimed = bpClaimed.indexOf(_bt) !== -1;
+                var isPremium = window.BattlePassRewards && window.BattlePassRewards[_bt - 1] && window.BattlePassRewards[_bt - 1].premium;
+                var canClaim = unlocked && !claimed;
+                bpHtml += '<div class="battlepass-tier' +
+                    (claimed ? ' claimed' : '') +
+                    (unlocked && !claimed ? ' available' : '') +
+                    (isPremium && !bpPremium ? ' premium-locked' : '') +
+                    '" style="opacity:' + (unlocked ? 1 : 0.4) + ';">' +
+                    _bt +
+                    (claimed ? ' ✓' : (canClaim ? ' ▶' : '')) +
+                    '</div>';
+            }
+            bpHtml += '</div>';
+            if (bpTier < 30) {
+                bpHtml += '<button class="btn-perk-buy" id="bp-claim-btn" data-tier="' + (bpTier + 1) + '" style="margin-top:8px;width:100%;">领取第 ' + (bpTier + 1) + ' 层奖励</button>';
+            } else {
+                bpHtml += '<div class="stat-row"><span class="stat-value">已满级 🏆</span></div>';
+            }
+            if (!bpPremium) {
+                bpHtml += '<button class="btn-perk-buy" id="bp-premium-btn" style="margin-top:4px;width:100%;background:#7c4dff;">购买高级通行证 (100 代币)</button>';
+            }
+            bpHtml += '</div>';
+            battlePassHtml = bpHtml;
+        }
+
 
         /* Epoch 36: 每周金库 */
         var vaultHtml = '';
@@ -1197,7 +1311,10 @@
                     if (window.gameEngine) {
                         var eng = window.gameEngine;
                         if (wc.type === 'kills') progress = Math.min(100, Math.round((eng.kills || 0) / threshold * 100));
-                        else if (wc.type === 'wins') progress = Math.min(100, Math.round((eng.kills || 0) / threshold * 100));
+                        else if (wc.type === 'wins') {
+                            var rs = (window.saveManager && window.saveManager._metaCache) ? (window.saveManager._metaCache.runStats || {}) : {};
+                            progress = Math.min(100, Math.round(((rs.wins || 0) + (eng.won ? 1 : 0)) / threshold * 100));
+                        }
                         else if (wc.type === 'overdrives') progress = Math.min(100, Math.round((eng._overdriveCount || 0) / threshold * 100));
                         else if (wc.type === 'abyss') progress = Math.min(100, Math.round((eng.loopCount || 0) / threshold * 100));
                         else if (wc.type === 'flawless') progress = Math.min(100, Math.round((eng._playerHitCountThisRun || 0) > 0 ? 0 : 100));
@@ -1303,6 +1420,10 @@
             '<div class="stats-section">' +
             '<div class="stats-section-title">🌟 赛季奖励</div>' +
             '<div class="stats-grid">' + seasonRewardHtml + '</div>' +
+            '</div>' +
+            '<div class="stats-section">' +
+            '<div class="stats-section-title">🏅 赛季通行证</div>' +
+            '<div class="stats-grid">' + battlePassHtml + '</div>' +
             '</div>';
 
         /* 绑定购买按钮 */
@@ -1331,7 +1452,7 @@
                 var questId = this.dataset.quest;
                 window.saveManager.claimDailyQuestReward(questId).then(function(res) {
                     if (res.ok) refreshStatsPanel();
-                }).catch(function(err) { console.warn('[main_hub] loginStreak check failed:', err); });
+                }).catch(function(err) { window.toastSystem && window.toastSystem.warning('登录检查失败: ' + err.message); });
             });
         });
 
@@ -1350,16 +1471,32 @@
             });
         }
 
-        /* Epoch 24: 赛季奖励按钮 */
-        var seasonBtn = document.getElementById('season-reward-btn');
-        if (seasonBtn) {
-            seasonBtn.addEventListener('click', function() {
-                window.saveManager.claimSeasonReward().then(function(res) {
+        /* Epoch 47: 赛季通行证按钮 */
+        var bpClaimBtn = document.getElementById('bp-claim-btn');
+        if (bpClaimBtn) {
+            bpClaimBtn.addEventListener('click', function() {
+                var tier = parseInt(this.dataset.tier, 10);
+                window.saveManager.claimBattlePassTier(tier).then(function(res) {
                     if (res.ok) {
                         refreshStatsPanel();
                         refreshMainHub();
+                    } else {
+                        window.toastSystem && window.toastSystem.warning(res.reason);
                     }
-                }).catch(function(err) { console.warn('[main_hub] loginStreak check failed:', err); });
+                }).catch(function(err) { window.toastSystem && window.toastSystem.warning('通行证领取失败: ' + err.message); });
+            });
+        }
+        var bpPremiumBtn = document.getElementById('bp-premium-btn');
+        if (bpPremiumBtn) {
+            bpPremiumBtn.addEventListener('click', function() {
+                window.saveManager.buyBattlePassPremium().then(function(res) {
+                    if (res.ok) {
+                        refreshStatsPanel();
+                        refreshMainHub();
+                    } else {
+                        window.toastSystem && window.toastSystem.warning(res.reason);
+                    }
+                }).catch(function(err) { window.toastSystem && window.toastSystem.warning('购买高级失败: ' + err.message); });
             });
         }
 
@@ -1369,7 +1506,7 @@
             claimBtn.addEventListener('click', function() {
                 window.saveManager.claimWeeklyVaultReward().then(function(res) {
                     if (res.ok) refreshStatsPanel();
-                }).catch(function(err) { console.warn('[main_hub] loginStreak check failed:', err); });
+                }).catch(function(err) { window.toastSystem && window.toastSystem.warning('登录检查失败: ' + err.message); });
             });
         }
         var abandonBtn = document.getElementById('vault-abandon-btn');
@@ -1377,7 +1514,7 @@
             abandonBtn.addEventListener('click', function() {
                 window.saveManager.abandonWeeklyVault().then(function(res) {
                     if (res.ok) refreshStatsPanel();
-                }).catch(function(err) { console.warn('[main_hub] loginStreak check failed:', err); });
+                }).catch(function(err) { window.toastSystem && window.toastSystem.warning('登录检查失败: ' + err.message); });
             });
         }
         document.querySelectorAll('.vault-tier-btn').forEach(function(btn) {
@@ -1386,7 +1523,7 @@
                 window.saveManager.openWeeklyVault(bet).then(function(res) {
                     if (res.ok) refreshStatsPanel();
                     else alert(res.reason);
-                }).catch(function(err) { console.warn('[main_hub] loginStreak check failed:', err); });
+                }).catch(function(err) { window.toastSystem && window.toastSystem.warning('登录检查失败: ' + err.message); });
             });
         });
     }

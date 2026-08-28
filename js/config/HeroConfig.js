@@ -42,8 +42,8 @@ window.heroConfig = {
         hue: 120,
         unlockCost: 50,
         shapeClass: 'shape-square',
-        passiveName: null,
-        passiveDesc: null,
+        passiveName: '筒纹护体',
+        passiveDesc: '反伤率 = 5% + 等级 × 5%，上限 50%',
         weaponSlots: 6,
         cdFloor: 0.15
     },
@@ -58,8 +58,8 @@ window.heroConfig = {
         hue: 290,
         unlockCost: 100,
         shapeClass: 'shape-triangle',
-        passiveName: null,
-        passiveDesc: null,
+        passiveName: '暗影步',
+        passiveDesc: '15% 基础闪避率 + 10% 移速加成',
         weaponSlots: 6,
         cdFloor: 0.15
     }

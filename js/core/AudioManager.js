@@ -5,25 +5,32 @@ window.AudioManager = function() {
     this._muted = false;
     this._volume = 0.6;
     this._initialized = false;
+    /* Epoch 47: 分类音量控制 */
+    this._categoryVolumes = {
+        sfx: 1.0,    /* 攻击/暴击/受击等效果音 */
+        music: 0.8   /* 胜利/失败/升级等氛围音 */
+    };
 };
 
 var Ap = window.AudioManager.prototype;
 
 /* 延迟初始化 AudioContext（需用户手势触发） */
 Ap._ensureContext = function() {
-    if (this._initialized) return;
+    if (this._initialized) return true;
     try {
         var AC = window.AudioContext || window.webkitAudioContext;
-        if (!AC) { this._initialized = true; return; }
+        if (!AC) { this._initialized = true; return false; }
         this._ctx = new AC();
         /* Epoch 16: iOS 12.2+ 需要 resume() 才能播放 */
         if (this._ctx.state === 'suspended') {
             this._ctx.resume();
         }
         this._initialized = true;
+        return true;
     } catch (e) {
-        console.warn('[AudioManager] _ensureContext failed:', e);
         this._ctx = null;
+        this._initialized = true; /* 标记为已尝试，不再重试 */
+        return false;
     }
 };
 
@@ -47,6 +54,15 @@ Ap.play = function(sound, opts) {
         case 'freeze':   this._sine(1000, 0.1, vol * 0.3, 0.1); break;
         case 'explode':  this._noise(0.2, vol * 0.6); break;
     }
+};
+
+/* Epoch 47: 分类音量设置 */
+Ap.setCategoryVolume = function(category, vol) {
+    this._categoryVolumes[category] = Math.max(0, Math.min(1, vol));
+};
+
+Ap.getCategoryVolume = function(category) {
+    return this._categoryVolumes[category] || 1;
 };
 
 /* ── 合成原语 ── */

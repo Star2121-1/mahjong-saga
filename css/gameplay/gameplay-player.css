@@ -57,21 +57,21 @@
 /* 默认（无 data-hero 属性）— 红色雀 */
 #player {
     position: absolute;
-    width: 48px; height: 64px;
+    width: 60px; height: 80px;
     background: #fbfbf7;
-    border-radius: 6px;
+    border-radius: 7px;
     z-index: 10;
     transform: translate(-50%, -50%);
     display: flex; align-items: center; justify-content: center;
-    font-size: calc(24 * var(--_fs) * 1px); font-weight: 900;
+    font-size: calc(30 * var(--_fs) * 1px); font-weight: 900;
     color: #b62929;
     border: 2px solid #b62929;
     /* 2.5D 骨雕夹心 */
     box-shadow:
-        0 4px 0 #902020,
-        0 6px 0.5px #dfc590,
-        0 8px 10px rgba(0,0,0,0.5),
-        0 0 12px rgba(182,41,41,0.4);
+        0 5px 0 #902020,
+        0 7px 0.5px #dfc590,
+        0 10px 12px rgba(0,0,0,0.5),
+        0 0 14px rgba(182,41,41,0.4);
     text-shadow: 0 0 8px rgba(182,41,41,0.6);
     filter: drop-shadow(0 0 12px #b62929) drop-shadow(0 0 4px #b62929);
 }
@@ -80,16 +80,21 @@
     content: ''; display: none;
 }
 
-/* 玩家血条 */
+/* 玩家血条 — 文字移出条外避免叠压，字号提升至 15px 确保可读 */
 #player-hp-wrap {
-    position: absolute; top: -22px; left: 50%;
+    position: absolute; top: -26px; left: 50%;
     transform: translateX(-50%);
-    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    display: flex; flex-direction: column; align-items: center; gap: 1px;
     width: 70px;
 }
-#player-hp-bar { width: 100%; height: 6px; background: #333; border-radius: 3px; overflow: hidden; }
+#player-hp-bar { width: 100%; height: 5px; background: rgba(0,0,0,0.6); border-radius: 3px; overflow: hidden; }
 #player-hp-fill { height: 100%; background: linear-gradient(90deg, #1a5336, #00e676); border-radius: 3px; transition: width 0.15s ease; }
-#player-hp-text { font-size: calc(10 * var(--_fs) * 1px); color: #fffef5; font-weight: 700; white-space: nowrap; }
+#player-hp-text {
+    font-size: calc(13 * var(--_fs) * 1px); font-weight: 900; color: #fffef5;
+    white-space: nowrap; letter-spacing: 0.3px;
+    text-shadow: 0 0 4px rgba(0,0,0,1), 1px 1px 0 #000, -1px -1px 0 #000;
+    line-height: 1; margin-top: 1px;
+}
 
 /* 受击冻结特效 — 冰蓝色统一 */
 .frozen-crystal {
@@ -102,20 +107,120 @@
     100% { filter: drop-shadow(0 0 16px #b3e5fc); }
 }
 
-/* 响应式: 小视口玩家尺寸 */
+/* ══════════════════════════════════════════════
+   麻将牌面动态效果 (Visual Enhancement A)
+   ══════════════════════════════════════════════ */
+
+/* 牌面 hover 微光扫过 */
+#player:hover {
+    animation: tileShimmer 0.8s ease-in-out;
+}
+@keyframes tileShimmer {
+    0% { filter: drop-shadow(0 0 12px currentColor) brightness(1); }
+    50% { filter: drop-shadow(0 0 20px currentColor) brightness(1.3); }
+    100% { filter: drop-shadow(0 0 12px currentColor) brightness(1); }
+}
+
+/* 玩家受击震颤 */
+#player.hit-shake {
+    animation: playerHitShake 0.15s ease-out;
+}
+@keyframes playerHitShake {
+    0% { transform: translate(-50%, -50%) translate(0, 0); }
+    25% { transform: translate(-50%, -50%) translate(-4px, 2px); }
+    50% { transform: translate(-50%, -50%) translate(3px, -3px); }
+    75% { transform: translate(-50%, -50%) translate(-2px, 1px); }
+    100% { transform: translate(-50%, -50%) translate(0, 0); }
+}
+
+/* 英雄移动轨迹拖尾 (Visual Enhancement D) */
+.player-trail {
+    position: absolute;
+    width: 60px; height: 80px;
+    border-radius: 6px;
+    pointer-events: none;
+    z-index: 9;
+    transform: translate(-50%, -50%);
+    animation: trailFade 0.4s ease-out forwards;
+}
+@keyframes trailFade {
+    0% { opacity: 0.35; transform: translate(-50%, -50%) scale(0.9); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+}
+/* 英雄拖尾颜色 */
+.player-trail.hero-trail {
+    background: radial-gradient(circle, rgba(212,175,55,0.4), transparent 70%);
+    box-shadow: 0 0 12px rgba(212,175,55,0.3);
+}
+.player-trail.knight-trail {
+    background: radial-gradient(circle, rgba(21,101,192,0.4), transparent 70%);
+    box-shadow: 0 0 12px rgba(21,101,192,0.3);
+}
+.player-trail.mage-trail {
+    background: radial-gradient(circle, rgba(46,125,50,0.4), transparent 70%);
+    box-shadow: 0 0 12px rgba(46,125,50,0.3);
+}
+.player-trail.assassin-trail {
+    background: radial-gradient(circle, rgba(123,31,162,0.4), transparent 70%);
+    box-shadow: 0 0 12px rgba(123,31,162,0.3);
+}
+
+/* 英雄技能轮廓光 (Visual Enhancement D) */
+.player-skill-glow {
+    position: absolute;
+    inset: -8px;
+    border-radius: 10px;
+    pointer-events: none;
+    z-index: 11;
+    animation: skillGlowPulse 0.6s ease-out forwards;
+}
+@keyframes skillGlowPulse {
+    0% { box-shadow: 0 0 0 0 currentColor; opacity: 1; }
+    100% { box-shadow: 0 0 30px 15px transparent; opacity: 0; }
+}
+
+/* 受击抖动差异 (Visual Enhancement D) */
+#player[data-hero="Knight"].take-damage {
+    animation: knightTakeDamage 0.2s ease-out;
+}
+@keyframes knightTakeDamage {
+    0% { transform: translate(-50%, -50%) translate(0) scale(1); }
+    30% { transform: translate(-50%, -50%) translate(-6px, 0) scale(1.05); }
+    100% { transform: translate(-50%, -50%) translate(0) scale(1); }
+}
+#player[data-hero="Mage"].take-damage {
+    animation: mageTakeDamage 0.2s ease-out;
+}
+@keyframes mageTakeDamage {
+    0% { transform: translate(-50%, -50%) scale(1); filter: brightness(1); }
+    30% { transform: translate(-50%, -50%) scale(0.92); filter: brightness(1.5) hue-rotate(20deg); }
+    100% { transform: translate(-50%, -50%) scale(1); filter: brightness(1); }
+}
+#player[data-hero="Assassin"].take-damage {
+    animation: assassinTakeDamage 0.2s ease-out;
+}
+@keyframes assassinTakeDamage {
+    0% { transform: translate(-50%, -50%) translate(0) rotate(0); }
+    40% { transform: translate(-50%, -50%) translate(8px, -4px) rotate(5deg); }
+    100% { transform: translate(-50%, -50%) translate(0) rotate(0); }
+}
+
+/* ══════════════════════════════════════════════
+   响应式: 小视口玩家尺寸
+   ══════════════════════════════════════════════ */
 @media (max-height: 768px) {
-    #player { width: 40px; height: 54px; font-size: 20px; }
+    #player { width: 50px; height: 68px; font-size: 26px; }
     #player-hp-wrap { width: 60px; }
     #player-hp-bar { height: 5px; }
-    #player-hp-text { font-size: 9px; }
+    #player-hp-text { font-size: calc(11 * var(--_fs) * 1px); }
 }
 @media (max-height: 600px) {
-    #player { width: 32px; height: 44px; font-size: 16px; }
+    #player { width: 40px; height: 56px; font-size: 21px; }
     #player-hp-wrap { width: 50px; }
     #player-hp-bar { height: 4px; }
-    #player-hp-text { font-size: 8px; }
+    #player-hp-text { font-size: calc(10 * var(--_fs) * 1px); }
 }
 @media (max-height: 480px) {
-    #player { width: 28px; height: 38px; font-size: 14px; }
-    #player-hp-text { font-size: 7px; }
+    #player { width: 36px; height: 48px; font-size: 18px; }
+    #player-hp-text { font-size: calc(9 * var(--_fs) * 1px); }
 }

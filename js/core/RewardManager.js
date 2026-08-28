@@ -1,33 +1,45 @@
 class RewardManager {
     constructor() {
         this.baseRelics = [
-            { id: 'sharp_edge', name: '锐利锋芒', desc: '攻击力 +3', cost: 15 },
-            { id: 'golden_finger', name: '黄金右手指', desc: '暴击率 +15%', cost: 25 },
-            { id: 'auto_drone', name: '自动化随从', desc: '无人机攻击最近敌人', cost: 60 },
-            { id: 'thorn_armor', name: '荆棘反伤甲', desc: '最大HP+20，反伤+10%', cost: 30 },
-            { id: 'wind_walker', name: '疾风步', desc: '移动速度 +12%', cost: 20 },
-            { id: 'vamp_ring', name: '吮血指环', desc: '点击伤害 8% 吸血', cost: 50 },
-            { id: 'explosive_core', name: '爆破核心', desc: '15% 几率 50% 范围溅射', cost: 30 },
-            { id: 'frost_core', name: '冰霜核心', desc: '10% 几率冰冻 1.5s', cost: 25 },
-            { id: 'gravity_core', name: '引力核心', desc: '经验吸附范围 +40px', cost: 20 },
-            { id: 'weapon_amplify', name: '兵器增幅', desc: '攻击力+3，所有武器攻倍率+20%且冷却-5%', cost: 35 }
+            { id: 'sharp_edge', name: '清一色', desc: '牌面纯一，攻击力 +3', cost: 15 },
+            { id: 'golden_finger', name: '抢杠', desc: '旁家杠牌时截胡，暴击率 +15%', cost: 25 },
+            { id: 'auto_drone', name: '暗杠浮标', desc: '暗杠时浮现追踪浮标攻击最近牌敌', cost: 60 },
+            { id: 'thorn_armor', name: '杠上开花', desc: '杠后开花，最大HP+20，反伤+10%', cost: 30 },
+            { id: 'wind_walker', name: '四风环绕', desc: '东南西北风环绕，移动速度 +12%', cost: 20 },
+            { id: 'vamp_ring', name: '自摸加番', desc: '自摸时额外回血，点击伤害 8% 吸血', cost: 50 },
+            { id: 'explosive_core', name: '爆牌圈', desc: '15% 几率碰牌溅射，50% 范围伤害', cost: 30 },
+            { id: 'frost_core', name: '冰清玉洁', desc: '10% 几率冻住牌敌 1.5s', cost: 25 },
+            { id: 'gravity_core', name: '宝牌聚宝', desc: '宝牌吸引筹码，经验吸附范围 +40px', cost: 20 },
+            { id: 'weapon_amplify', name: '役牌加算', desc: '役牌加持，攻击力+3，所有武器攻倍率+20%且冷却-10%', cost: 35 }
         ];
 
         this.legendaries = [
-            { id: 'evolved_drone', name: '传说超武·歼灭者浮游炮', desc: '无人机攻速狂暴提升至0.2s，一次齐射3个目标且伤害翻倍！', cost: 0 },
-            { id: 'evolved_armor', name: '传说超武·太阳神巨像铠', desc: '反伤提升至100%，且反伤完美继承暴击，震碎全场！', cost: 0 },
-            { id: 'evolved_speed', name: '传说超武·凌波微步', desc: '30% 闪避率 + 永久 30% 移速加成！', cost: 0 },
-            { id: 'evolved_vamp', name: '传说超武·血魔之拥', desc: '反伤伤害亦触发吸血，双重续航！', cost: 0 }
+            { id: 'evolved_drone', name: '天和', desc: '起手天和！浮标攻速狂暴提升至0.2s，一次齐射3个目标且伤害翻倍！', cost: 0 },
+            { id: 'evolved_armor', name: '地和', desc: '地和牌运！反伤提升至100%，且反伤完美继承暴击，震碎全场！', cost: 0 },
+            { id: 'evolved_speed', name: '人和', desc: '人和身法！30% 闪避率 + 永久 30% 移速加成！', cost: 0 },
+            { id: 'evolved_vamp', name: '人面兽心', desc: '自摸加番极致——反伤伤害亦触发吸血，双重续航！', cost: 0 }
         ];
 
         this.weaponInfos = {
-            TrackingBlade: { name: '追踪飞刃', desc: '自动追踪最近敌人，穿透+3，远程切割', color: '#ff8f00', category: '单体', synergizes: ['auto_drone', 'weapon_amplify'], atkFactor: 1.0, cd: 0.8 },
-            OrbitShield:   { name: '环形护体', desc: '3 枚光星 120° 公转，持续摩擦伤害', color: '#2962ff', category: '持续', synergizes: ['explosive_core', 'frost_core'], atkFactor: 0.5, cd: 0.3 },
-            ShotgunBurst:  { name: '扇形散射', desc: '点击发射 5 发散弹，近距叠吃多段', color: '#ff6d00', category: '爆发', synergizes: ['golden_finger', 'sharp_edge'], atkFactor: 0.6, cd: 0.4 },
-            GroundSlammer: { name: '区域震荡', desc: '4s 冷却大范围震波扩散 + 击退', color: '#ffc107', category: '范围', synergizes: ['wind_walker', 'gravity_core'], atkFactor: 1.5, cd: 1.8 },
-            LaserBeam:     { name: '持续线杀', desc: '300px 激光高频融化，朝鼠标方向', color: '#ff1744', category: '持续', synergizes: ['vamp_ring', 'weapon_amplify'], atkFactor: 1.2, cd: 0.3 },
-            NovaPulse:     { name: '全屏脉冲', desc: '7s 蓄力全屏清场蒸发级伤害', color: '#d50000', category: '终极', synergizes: ['explosive_core', 'frost_core', 'weapon_amplify'], atkFactor: 5.0, cd: 7.0 }
+            TrackingBlade: { name: '飞牌切', desc: '自动追踪最近敌人，穿透+3，远程飞牌切割', color: '#ff8f00', category: '切牌', synergizes: ['auto_drone', 'weapon_amplify'], atkFactor: 1.0, cd: 0.8 },
+            OrbitShield:   { name: '三面环伺', desc: '3 枚宝牌 120° 公转，持续摩擦伤害', color: '#2962ff', category: '巡巡', synergizes: ['explosive_core', 'frost_core'], atkFactor: 0.5, cd: 0.3 },
+            ShotgunBurst:  { name: '七对子', desc: '点击打出 7 张散牌，近距叠吃多段', color: '#ff6d00', category: '对对', synergizes: ['golden_finger', 'sharp_edge'], atkFactor: 0.6, cd: 0.4 },
+            GroundSlammer: { name: '碰碰胡', desc: '4s 冷却大范围碰牌震波扩散 + 击退', color: '#ffc107', category: '碰碰', synergizes: ['wind_walker', 'gravity_core'], atkFactor: 1.5, cd: 1.8 },
+            LaserBeam:     { name: '一气贯通', desc: '300px 一气打通牌列高频融化，朝鼠标方向', color: '#ff1744', category: '一气', synergizes: ['vamp_ring', 'weapon_amplify'], atkFactor: 1.2, cd: 0.3 },
+            NovaPulse:     { name: '大四喜', desc: '7s 蓄力大四喜清场蒸发级伤害', color: '#d50000', category: '大四', synergizes: ['explosive_core', 'frost_core', 'weapon_amplify'], atkFactor: 5.0, cd: 7.0 }
         };
+
+        /* ── 武器间协同效果 ── */
+        this.weaponSynergies = [
+            { id: 'blade_laser', name: '飞牌 + 一气', desc: '飞牌每次攻击时 LaserBeam 额外穿透1个敌人', weapons: ['TrackingBlade', 'LaserBeam'], apply: function(engine) { engine._synBladeLaser = true; } },
+            { id: 'blade_shotgun', name: '飞牌 + 七对子', desc: '飞牌击杀时 ShotgunBurst 额外发射 2 发弹丸', weapons: ['TrackingBlade', 'ShotgunBurst'], apply: function(engine) { engine._synBladeShotgun = true; } },
+            { id: 'blade_orbit', name: '飞牌 + 三面', desc: '飞牌追踪范围扩大50%', weapons: ['TrackingBlade', 'OrbitShield'], apply: function(engine) { engine._synBladeOrbit = true; } },
+            { id: 'orbit_slammer', name: '三面 + 碰碰胡', desc: '轨道盾击中时 GroundSlammer 震波范围+30%', weapons: ['OrbitShield', 'GroundSlammer'], apply: function(engine) { engine._synOrbitSlammer = true; } },
+            { id: 'nova_laser', name: '大四喜 + 一气', desc: 'Nova蓄力期间 LaserBeam 伤害翻倍', weapons: ['NovaPulse', 'LaserBeam'], apply: function(engine) { engine._synNovaLaser = true; } },
+            { id: 'nova_shotgun', name: '大四喜 + 七对子', desc: 'Nova爆发时 ShotgunBurst 弹丸数+4', weapons: ['NovaPulse', 'ShotgunBurst'], apply: function(engine) { engine._synNovaShotgun = true; } },
+            { id: 'slammer_laser', name: '碰碰胡 + 一气', desc: 'GroundSlammer 击退时 LaserBeam 附带额外伤害', weapons: ['GroundSlammer', 'LaserBeam'], apply: function(engine) { engine._synSlammerLaser = true; } },
+            { id: 'nova_orbit', name: '大四喜 + 三面', desc: 'Nova爆发时 OrbitShield 旋转加速+伤害翻倍', weapons: ['NovaPulse', 'OrbitShield'], apply: function(engine) { engine._synNovaOrbit = true; } }
+        ];
 
         this.overlay = document.getElementById('reward-overlay');
         this.cardsContainer = this.overlay ? this.overlay.querySelector('.reward-cards') : null;
@@ -38,19 +50,19 @@ class RewardManager {
         /* ── 秘密图鉴 ── */
 
         this.secrets = [
-            { id: 'dragon_formation', name: '龙形阵', desc: '锐利锋芒Lv3+荆棘反伤甲Lv3+爆破核心Lv2 → 永久+10攻击力', check: function(p) { return (p.relicLevels.sharp_edge||0)>=3 && (p.relicLevels.thorn_armor||0)>=3 && (p.relicLevels.explosive_core||0)>=2; }, reward: function(p) { p.atk += 10; } },
-            { id: 'frost_blade', name: '霜刃', desc: '锐利锋芒Lv3+冰霜核心Lv3 → 暴击伤害+50%', check: function(p) { return (p.relicLevels.sharp_edge||0)>=3 && (p.relicLevels.frost_core||0)>=3; }, reward: function(p) { p.critDamageBonus = (p.critDamageBonus||1) + 0.5; } },
-            { id: 'thorn_garden', name: '荆棘花园', desc: '荆棘反伤甲Lv5+吮血指环Lv3 → 反伤伤害同时触发吸血', check: function(p) { return (p.relicLevels.thorn_armor||0)>=5 && (p.relicLevels.vamp_ring||0)>=3; }, reward: function(p) { p.thornsLifesteal = true; } },
-            { id: 'wind_fury', name: '狂风之怒', desc: '疾风步Lv3+黄金右手指Lv2 → 移速+25%, 闪避+10%', check: function(p) { return (p.relicLevels.wind_walker||0)>=3 && (p.relicLevels.golden_finger||0)>=2; }, reward: function(p) { p.speedMultiplier = (p.speedMultiplier||1) + 0.25; p.dodgeRate = Math.min(1, (p.dodgeRate||0) + 0.1); } },
-            { id: 'gravity_mastery', name: '引力 mastery', desc: '引力核心Lv3+兵器增幅Lv2 → 经验吸附范围+100px, 武器冷却-15%', check: function(p) { return (p.relicLevels.gravity_core||0)>=3 && (p.relicLevels.weapon_amplify||0)>=2; }, reward: function(p) { p.magnetRadius = (p.magnetRadius||60) + 100; } }
+            { id: 'dragon_formation', name: '龙七对', desc: '清一色Lv3+杠上开花Lv3+爆牌圈Lv2 → 永久+10攻击力', check: function(p) { return (p.relicLevels.sharp_edge||0)>=3 && (p.relicLevels.thorn_armor||0)>=3 && (p.relicLevels.explosive_core||0)>=2; }, reward: function(p) { p.atk += 10; } },
+            { id: 'frost_blade', name: '冰清一刀', desc: '清一色Lv3+冰清玉洁Lv3 → 暴击伤害+50%', check: function(p) { return (p.relicLevels.sharp_edge||0)>=3 && (p.relicLevels.frost_core||0)>=3; }, reward: function(p) { p.critDamageBonus = (p.critDamageBonus||1) + 0.5; } },
+            { id: 'thorn_garden', name: '花缠枝', desc: '杠上开花Lv5+自摸加番Lv3 → 反伤伤害同时触发吸血', check: function(p) { return (p.relicLevels.thorn_armor||0)>=5 && (p.relicLevels.vamp_ring||0)>=3; }, reward: function(p) { p.thornsLifesteal = true; } },
+            { id: 'wind_fury', name: '四风狂飙', desc: '四风环绕Lv3+抢杠Lv2 → 移速+25%, 闪避+10%', check: function(p) { return (p.relicLevels.wind_walker||0)>=3 && (p.relicLevels.golden_finger||0)>=2; }, reward: function(p) { p.speedMultiplier = (p.speedMultiplier||1) + 0.25; p.dodgeRate = Math.min(1, (p.dodgeRate||0) + 0.1); } },
+            { id: 'gravity_mastery', name: '宝牌引力', desc: '宝牌聚宝Lv3+役牌加算Lv2 → 经验吸附范围+100px, 武器冷却-15%', check: function(p) { return (p.relicLevels.gravity_core||0)>=3 && (p.relicLevels.weapon_amplify||0)>=2; }, reward: function(p) { p.magnetRadius = (p.magnetRadius||60) + 100; p._weaponCdReduction = ((p._weaponCdReduction||0) + 0.15); } }
         ];
 
         this.sacrificeOptions = [
-            { id: 'sacrifice_metatoken', name: '献祭之祭坛', icon: '🔥', desc: '献祭一个圣物，获得 3 元代币', type: 'metatoken', value: 3 },
-            { id: 'sacrifice_gold', name: '贪婪契约', icon: '💎', desc: '献祭一个圣物，获得当前等级 50% 的元宝', type: 'gold', value: 0.5 },
-            { id: 'sacrifice_temp_atk', name: '血怒仪式', icon: '⚡', desc: '献祭一个圣物，获得 +50% 攻击力临时增益（30秒）', type: 'temp_buff', buff: 'atkBoost', duration: 30, value: 0.5 },
-            { id: 'sacrifice_temp_hp', name: '铁壁祷言', icon: '🛡', desc: '献祭一个圣物，获得 +100 最大HP临时增益（30秒）', type: 'temp_buff', buff: 'tempHp', duration: 30, value: 100 },
-            { id: 'sacrifice_double_coin', name: '双倍诅咒', icon: '🪙', desc: '献祭一个圣物，下一波金币收益翻倍', type: 'double_coin', value: 1 }
+            { id: 'sacrifice_metatoken', name: '弃牌捐番', icon: '🀄', desc: '弃一张圣物牌，获得 3 元代币', type: 'metatoken', value: 3 },
+            { id: 'sacrifice_gold', name: '贪番夺金', icon: '💎', desc: '献祭一个圣物，获得当前等级 50% 的元宝', type: 'gold', value: 0.5 },
+            { id: 'sacrifice_temp_atk', name: '血番战吼', icon: '⚡', desc: '献祭一个圣物，获得 +50% 攻击力临时增益（30秒）', type: 'temp_buff', buff: 'atkBoost', duration: 30, value: 0.5 },
+            { id: 'sacrifice_temp_hp', name: '铁壁番护', icon: '🛡', desc: '献祭一个圣物，获得 +100 最大HP临时增益（30秒）', type: 'temp_buff', buff: 'tempHp', duration: 30, value: 100 },
+            { id: 'sacrifice_double_coin', name: '翻倍宝牌', icon: '🪙', desc: '献祭一个圣物，下一波金币收益翻倍', type: 'double_coin', value: 1 }
         ];
     }
 
@@ -99,6 +111,14 @@ class RewardManager {
         this.overlay.classList.remove('levelup-mode');
         var replaceEl = document.getElementById('replace-panel');
         if (replaceEl) replaceEl.remove();
+        /* P2-4: 面板关闭后重查手牌 — 补救被 _pendingReward 吞掉的胡牌/打牌判定 */
+        if (window.gameEngine && typeof window.gameEngine._onHandChanged === 'function' && window.gameEngine.running && !window.gameEngine.gameOver) {
+            try { window.gameEngine._onHandChanged(); } catch (e) { /* 容错 */ }
+        }
+        /* 奖励面板关闭后重新渲染武器槽，修复初始化时武器槽被覆盖的 bug */
+        if (window.gameEngine && window.gameEngine._renderWeaponSlots) {
+            window.gameEngine._renderWeaponSlots();
+        }
     }
 
     /* ── 渲染卡牌 ── */
@@ -189,13 +209,13 @@ class RewardManager {
                     '<div class="relic-cost" style="color:#ff6600">⚠ 献祭一个圣物</div>' +
                     '<div class="sacrifice-banner"><span>RISKY TRADE</span></div>' +
                     '<button class="relic-btn" style="background:#cc2200">献祭</button>';
-                (function(cardItem, mgr, cardContainer) {
+                (function(cardItem, mgr, cardContainer, isFreeFlag) {
                     front.querySelector('.relic-btn').addEventListener('click', function() {
                         mgr._animateSuckIn(cardContainer, function() {
-                            mgr._onSacrificeClick(cardItem, titleEl, originalTitle);
+                            mgr._onSacrificeClick(cardItem, isFreeFlag, titleEl, originalTitle);
                         });
                     });
-                })(item, self, container);
+                })(item, self, container, isFree);
             } else {
                 var relic = cardData;
                 var player = window.gameEngine.player;
@@ -590,7 +610,7 @@ class RewardManager {
         };
     }
 
-    _onSacrificeClick(item, titleEl, originalTitle) {
+    _onSacrificeClick(item, isFree, titleEl, originalTitle) {
         var eng = window.gameEngine;
         var p = eng.player;
 
@@ -623,12 +643,12 @@ class RewardManager {
                 var b = item.cardData && item.cardData.buff;
                 if (b === 'atkBoost') {
                     p._tempAtkBoost = (p._tempAtkBoost || 0) + item.value;
-                    p._tempBuffEnd = Date.now() / 1000 + item.duration;
-                    this._showFloatingText('+50% 攻击 30s', '#ff8800');
+                    p._tempBuffTimeLeft = item.duration;
+                    this._showFloatingText('+50% 攻击 ' + item.duration + 's', '#ff8800');
                 } else if (b === 'tempHp') {
                     p._tempHpBonus = (p._tempHpBonus || 0) + item.value;
-                    p._tempBuffEnd = Date.now() / 1000 + item.duration;
-                    this._showFloatingText('+100 HP 30s', '#4488ff');
+                    p._tempBuffTimeLeft = item.duration;
+                    this._showFloatingText('+100 HP ' + item.duration + 's', '#4488ff');
                 }
                 break;
             case 'double_coin':
@@ -642,7 +662,9 @@ class RewardManager {
 
         if (titleEl) titleEl.textContent = originalTitle;
         eng._syncUI();
-        eng._resumeAfterLevelUp();
+        /* R30-M-004: 根据来源面板类型选择恢复路径 */
+        if (isFree) eng._resumeAfterLevelUp();
+        else eng._resumeAfterReward();
     }
 
     _showFloatingText(text, color) {

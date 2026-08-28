@@ -1,4 +1,39 @@
 /* ══════════════════════════════════════════════
+   雀魂系统 · 胡牌演出
+   ══════════════════════════════════════════════ */
+.hu-bang {
+    position: absolute; top: 42%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'KaiTi','STKaiti',serif;
+    font-size: calc(120 * var(--_fs, 1.4) * 1px);
+    font-weight: 900;
+    color: #b62929;
+    text-shadow:
+        0 0 30px rgba(255,215,0,0.9),
+        0 4px 0 #7a1414,
+        0 8px 24px rgba(0,0,0,0.6);
+    z-index: 90;
+    pointer-events: none;
+    animation: huBangIn 1.6s cubic-bezier(0.2, 1.6, 0.4, 1) forwards;
+}
+@keyframes huBangIn {
+    0%   { opacity: 0; transform: translate(-50%,-50%) scale(3) rotate(-8deg); filter: blur(8px); }
+    18%  { opacity: 1; transform: translate(-50%,-50%) scale(1) rotate(0deg); filter: blur(0); }
+    75%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%,-56%) scale(1.05); }
+}
+#hand-tile-bar.hu-flash #hand-tile-grid {
+    animation: huHandFlash 0.9s ease-out;
+}
+@keyframes huHandFlash {
+    0%   { box-shadow: 0 -4px 24px rgba(0,0,0,0.5), 0 0 0 rgba(255,215,0,0); }
+    30%  { box-shadow: 0 -4px 40px rgba(0,0,0,0.5), 0 0 60px rgba(255,215,0,0.9); border-color: rgba(255,215,0,1); }
+    100% { box-shadow: 0 -4px 24px rgba(0,0,0,0.5), 0 0 0 rgba(255,215,0,0); }
+}
+/* 清一色金光环常驻 */
+#player.hu-qingyise { filter: drop-shadow(0 0 14px #ffd700) drop-shadow(0 0 30px rgba(212,175,55,0.7)); }
+
+/* ══════════════════════════════════════════════
    伤害飘字 — 麻将江湖配色
    ══════════════════════════════════════════════ */
 
@@ -22,6 +57,23 @@
     background: radial-gradient(circle, rgba(255,200,50,0.6), rgba(255,100,0,0));
     pointer-events: none; z-index: 15;
     animation: explosionExpand 0.35s ease-out forwards;
+}
+
+/* ══════════════════════════════════════════════
+   骑士闪避震荡
+   ══════════════════════════════════════════════ */
+
+.knight-dodge-slam {
+    position: absolute; border-radius: 50%;
+    border: 3px solid rgba(76, 175, 80, 0.7);
+    background: radial-gradient(circle, rgba(76,175,80,0.15), transparent);
+    pointer-events: none; z-index: 15;
+    animation: slamExpand 0.5s ease-out forwards;
+}
+
+@keyframes slamExpand {
+    0% { transform: scale(0.3); opacity: 1; border-width: 4px; }
+    100% { transform: scale(1); opacity: 0; border-width: 1px; }
 }
 
 /* ══════════════════════════════════════════════
@@ -174,6 +226,48 @@
     pointer-events: none; z-index: 4;
     box-shadow: 0 0 20px rgba(90,74,58,0.4), 0 0 60px rgba(90,74,58,0.1);
     transform: translate(-50%, -100%);
+}
+/* B3: 北冥图腾 — 冰蓝减速领域 */
+.totem-pillar.frost {
+    background: linear-gradient(180deg, #a5e8f5, #2e7d9e);
+    box-shadow: 0 0 22px rgba(112,214,255,0.55), 0 0 70px rgba(112,214,255,0.18);
+}
+.totem-pillar.frost::after {
+    content: '';
+    position: absolute; inset: -90px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(112,214,255,0.16) 0%, transparent 70%);
+    animation: frostFieldPulse 2.4s ease-in-out infinite;
+}
+@keyframes frostFieldPulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.08); }
+}
+
+/* B3: 盾甲半血裂纹 — 盾要碎了的可读性演出 */
+.enemy.tile-crack::after {
+    content: '';
+    position: absolute; inset: -2px;
+    border-radius: inherit;
+    background:
+        linear-gradient(115deg, transparent 46%, rgba(20,20,20,0.85) 47%, transparent 49%),
+        linear-gradient(65deg, transparent 60%, rgba(20,20,20,0.7) 61%, transparent 63%),
+        linear-gradient(160deg, transparent 30%, rgba(20,20,20,0.75) 31%, transparent 33%);
+    pointer-events: none;
+    animation: crackFlash 0.5s ease-out 1;
+}
+@keyframes crackFlash {
+    0% { filter: brightness(2.2); }
+    100% { filter: brightness(1); }
+}
+
+/* B3: 影袭蓄力三重紫拖影 */
+.enemy.stalker-charging {
+    box-shadow:
+        0 0 0 3px rgba(123,31,162,0.55),
+        0 0 18px 4px rgba(123,31,162,0.45),
+        0 0 36px 10px rgba(123,31,162,0.25),
+        0 0 54px 18px rgba(123,31,162,0.12);
 }
 
 /* Boss 血怒滤镜 */

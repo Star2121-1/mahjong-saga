@@ -12,11 +12,11 @@ Gp._initDefaultWeapons = function() {
     var meta = window.saveManager._metaCache || {};
     var weaponIds = (meta.defaultWeapons && meta.defaultWeapons.length > 0) ? meta.defaultWeapons : ['TrackingBlade'];
     var talents = meta.talents || {};
-    if (talents.weapon_forge === 1) {
+    if (talents.que_forge === 1) {
         weaponIds = ['TrackingBlade', 'OrbitShield'];
     }
-    /* Epoch 2: 开局双兵天赋 */
-    if (talents.starting_weapons > 0 && weaponIds.length < 2) {
+    /* Epoch 2: 开局双牌天赋 */
+    if (talents.kaiju_weapons > 0 && weaponIds.length < 2) {
         weaponIds.push('OrbitShield');
     }
     for (var _i = 0; _i < weaponIds.length; _i++) {
@@ -24,6 +24,7 @@ Gp._initDefaultWeapons = function() {
         if (W) this._activeWeapons.push(new W(1));
     }
     this._syncWeaponSlots();
+    this._renderWeaponSlots();
 };
 
 Gp._restoreWeapons = function(weaponData) {
@@ -43,6 +44,7 @@ Gp._restoreWeapons = function(weaponData) {
     }
     if (this._activeWeapons.length === 0) this._initDefaultWeapons();
     this._syncWeaponSlots();
+    this._renderWeaponSlots();
 };
 
 Gp._cleanAllProjectiles = function() {
@@ -64,6 +66,13 @@ Gp._resetAllWeapons = function() {
 
 Gp._updateWeapons = function(dt) {
     if (this._pendingReward) return;
+    /* 雀魂·疾风连打：临时攻速（只加速冷却流转，到期衰减） */
+    if (this._tempAspdT > 0) {
+        this._tempAspdT -= dt;
+        if (this._tempAspdT <= 0) { this._tempAspd = 0; this._tempAspdT = 0; }
+    }
+    var wdt = dt * (1 + (this._tempAspd || 0));
+    var cdReduction = (this.player && this.player._weaponCdReduction) || 0;
     for (var _i = 0; _i < this._activeWeapons.length; _i++) {
         var w = this._activeWeapons[_i];
         if (w instanceof window.LaserBeam) {
@@ -75,7 +84,13 @@ Gp._updateWeapons = function(dt) {
             w._origAtkFactor = w.atkFactor;
             w.atkFactor = w._origAtkFactor * 2;
         }
-        w.update(dt, this.player, this.enemies, this);
+        /* R29-C-003: 秘密宝牌引力武器冷却减免 */
+        if (cdReduction > 0) {
+            w.cd = w._baseCd || w.cd;
+            if (!w._baseCd) w._baseCd = w.cd;
+            w.cd = Math.max(this.player.cdFloor || Balance.DEFAULT_CD_FLOOR, w._baseCd * (1 - cdReduction));
+        }
+        w.update(wdt, this.player, this.enemies, this);
         if (this._overdriveActive) { w.atkFactor = w._origAtkFactor; }
     }
 };

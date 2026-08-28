@@ -53,7 +53,6 @@ Gp._triggerInterWaveEvent = function() {
     document.getElementById('interevent-accept').addEventListener('click', function() {
         overlay.classList.remove('active');
         overlay.classList.remove('levelup-mode');
-        self._pendingReward = false;
         self._interWaveEvent = null;
         self._interWaveTimer = 0;
         evt.apply.call(self);
@@ -64,6 +63,10 @@ Gp._triggerInterWaveEvent = function() {
 
 Gp._continueAfterInterWave = function() {
     this._pendingReward = false;
+    /* Epoch 47: 深渊商店入口 */
+    if (this._showAbyssShopEntrance && this._abyssShopVisible === false) {
+        this._showAbyssShopEntrance();
+    }
     if (this._extraEliteCount > 0) {
         /* Epoch 32: 怪物潮 — 额外精英怪 */
         for (var i = 0; i < this._extraEliteCount; i++) {
@@ -80,6 +83,7 @@ Gp._continueAfterInterWave = function() {
     this._tempShield = 0;
     this._tempShieldEnd = 0;
     this._tempBuffEnd = 0;
+    this._tempBuffTimeLeft = 0;
 
     /* H-05: 统一通过 _beginLoop 启动，确保 runId guard + _announcingWave 守卫 */
     this._unfreezeClock();
@@ -449,6 +453,9 @@ Gp._spawnEnemyType = function(type) {
     var el = document.createElement('div');
     el.className = 'enemy';
     el.dataset.id = id;
+    /* P1-8: 类型/花色标记（Boss 召唤路径同样驱动 per-type 造型） */
+    el.dataset.enemyType = enemy.type || 'Normal';
+    el.dataset.suit = ({ Normal: '萬', Tanker: '條', Stalker: '筒', Shaman: '風', Barrier: '白', Bomber: '發', Splitter: '中', Archer: '索' })[enemy.type] || '萬';
     var hpBar = document.createElement('div');
     hpBar.className = 'enemy-hp-bar';
     var hpFill = document.createElement('div');
@@ -516,6 +523,54 @@ Gp._cleanEnemyProjectiles = function() {
         }
     }
     this._enemyProjectiles = [];
+};
+
+/* ══════════════════════════════════════════════
+   Epoch 42: 骑士闪避震荡 — 100px 冲击波
+   ══════════════════════════════════════════════ */
+
+Gp._triggerKnightDodgeSlam = function() {
+    var radius = 100;
+    var dmg = Math.floor(this.player.atk * 0.5);
+    var px = this.player.x;
+    var py = this.player.y;
+    /* 视觉：冲击波 DOM */
+    var slamEl = document.createElement('div');
+    slamEl.className = 'knight-dodge-slam';
+    slamEl.style.left = (px - radius) + 'px';
+    slamEl.style.top = (py - radius) + 'px';
+    slamEl.style.width = (radius * 2) + 'px';
+    slamEl.style.height = (radius * 2) + 'px';
+    this._worldLayer.appendChild(slamEl);
+    var self = this;
+    setTimeout(function() { if (slamEl.parentNode) slamEl.remove(); }, 500);
+    /* 伤害范围内敌人 */
+    for (var i = 0; i < this.enemies.length; i++) {
+        var e = this.enemies[i];
+        if (!e.alive) continue;
+        var dx = e.x - px;
+        var dy = e.y - py;
+        if (dx * dx + dy * dy < radius * radius) {
+            e.takeDamage(dmg, 'knight_slam');
+        }
+    }
+    /* 击退 */
+    for (var j = 0; j < this.enemies.length; j++) {
+        var se = this.enemies[j];
+        if (!se.alive) continue;
+        var sx = se.x - px;
+        var sy = se.y - py;
+        var dist = Math.sqrt(sx * sx + sy * sy);
+        if (dist < radius && dist > 0) {
+            var force = 80;
+            se.x += (sx / dist) * force;
+            se.y += (sy / dist) * force;
+            se._knockbackVelocity = force;
+            if (typeof se._clampPosition === 'function') se._clampPosition(this);
+        }
+    }
+    /* FCT 飘字 */
+    if (window.fxManager) window.fxManager.spawnText(px, py - 30, '闪避震荡!', '#4caf50', 18, 1200);
 };
 
 })();

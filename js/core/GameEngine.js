@@ -35,6 +35,13 @@ window.GameEngine = function() {
     this._interWaveEvent = null;
     this._interWaveTimer = 0;
 
+    /* 雀魂系统状态（HUPAI_DESIGN.md v2.0） */
+    this._handTiles = [];        /* 上阵装备区：最多14张 */
+    this._formedMelds = {};      /* 已触发面子签名（一次性增益防重） */
+    this._jokersDropped = 0;     /* 癞子掉落计数（上限3） */
+    this._mainSuit = 'wan';      /* 主花色（V2 由本局任务指定） */
+    this._runSeq = 0;            /* P0-1: 局序号令牌 — 结算防 restart 竞态 */
+
     this.cameraX = 0;
     this.cameraY = 0;
 

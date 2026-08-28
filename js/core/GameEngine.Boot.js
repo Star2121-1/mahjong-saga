@@ -28,6 +28,15 @@ Gp.init = async function() {
         if (data && data.isRunActive === true && data.player) {
             window.saveManager.restoreRunToEngine(this, data);
             this._restoreWeapons(data.weapons);
+            /* A6: 雀魂手牌状态恢复 */
+            this._handTiles = data.handTiles ? data.handTiles.slice() : [];
+            this._formedMelds = data.formedMelds || {};
+            this._jokersDropped = data.jokersDropped || 0;
+            this._mainSuit = data.mainSuit || 'wan';
+            /* P1-1 修复：断点恢复路径补齐手牌 UI 槽位与点击绑定（防打牌模式软锁） */
+            this._initHandTiles();
+            this._bindHandTileClicks();
+            this._renderHandTiles();
             this._pendingReward = false;
             for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
             this._enemyElements.clear();
@@ -48,6 +57,7 @@ Gp.init = async function() {
             if (window.rewardManager) window.rewardManager.hidePanel();
             this._syncEntities();
             this._syncPlayerHP();
+            this._renderWeaponSlots();
             this._syncUI();
             this._beginLoop();
         } else if (data && data.mode === 'new') {
@@ -59,6 +69,7 @@ Gp.init = async function() {
 
     this._initKeyboard();
     this._initJoystick();
+    this._bindAudioButton();
     this._bindStage3Events();
     this._initBeforeUnload();
 
@@ -69,13 +80,21 @@ Gp.init = async function() {
 
     if (this.battlefield) {
         var self = this;
-        this.battlefield.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+            this.battlefield.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+            /* D2: 滚轮缩放战场 1.0~1.5x（HUD 不受影响） */
+            this.battlefield.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                var d = e.deltaY > 0 ? -0.1 : 0.1;
+                self._zoomLevel = Math.max(1, Math.min(1.5, (self._zoomLevel || 1) + d));
+            }, { passive: false });
         this.battlefield.addEventListener('pointerdown', function(e) {
             if (e.button !== 0) return;
             if (e.target.closest && e.target.closest('#joystick-container')) return;
             /* 排除 overlay 区域 — 防止拦截 modal 点击 */
             if (e.target.closest && (e.target.closest('#reward-overlay, #victory-overlay, #game-over-overlay, #pause-overlay, #guide-overlay, #mutator-overlay, #boss-gamble-panel'))) return;
             if (!self.running || self.gameOver || self._pendingReward) return;
+            /* P1-7: 打牌/胡牌演出期间冻结战场输入 */
+            if (self._discardMode || self._huLock) return;
 
             /* ── ScreenToGameCoordinate 工具：处理 responsive.js 的 transform:scale() ── */
             var bfRect = self.battlefield.getBoundingClientRect();
@@ -91,6 +110,14 @@ Gp.init = async function() {
             }
             var clickVX = (e.clientX - bfRect.left) * scaleX;
             var clickVY = (e.clientY - bfRect.top) * scaleY;
+            /* D2/P1-2: 战场缩放下点击反变换（与渲染端正变换互逆） */
+            var _wz = self._zoomLevel || 1;
+            if (_wz !== 1) {
+                var _cw = self.battlefield.clientWidth || 960;
+                var _ch = self.battlefield.clientHeight || 540;
+                clickVX = (clickVX - _cw * (1 - _wz) / 2) / _wz;
+                clickVY = (clickVY - _ch * (1 - _wz) / 2) / _wz;
+            }
             var clickWX = clickVX + self.cameraX;
             var clickWY = clickVY + self.cameraY;
 
@@ -188,12 +215,54 @@ Gp._bindStage3Events = function() {
         var s = this;
         var contBtn = this.pauseOverlay.querySelector('#pause-continue-btn');
         var hubBtn = this.pauseOverlay.querySelector('#pause-hub-btn');
+        var settingsBtn = this.pauseOverlay.querySelector('#pause-settings-btn');
+        var settingsPanel = this.pauseOverlay.querySelector('#pause-settings-panel');
+        var settingsCloseBtn = this.pauseOverlay.querySelector('#settings-close-btn');
         if (contBtn) contBtn.addEventListener('click', function() { s._togglePause(); });
         if (hubBtn) hubBtn.addEventListener('click', function() {
             s._paused = false;
             if (s.pauseOverlay) s.pauseOverlay.classList.remove('active');
             s._goToSaveSelect();
         });
+        if (settingsBtn) settingsBtn.addEventListener('click', function() {
+            if (settingsPanel) settingsPanel.style.display = settingsPanel.style.display === 'none' ? '' : 'none';
+        });
+        if (settingsCloseBtn) settingsCloseBtn.addEventListener('click', function() {
+            if (settingsPanel) settingsPanel.style.display = 'none';
+        });
+        /* 音量滑块 */
+        var volMaster = this.pauseOverlay.querySelector('#vol-master');
+        var volSfx = this.pauseOverlay.querySelector('#vol-sfx');
+        var volMusic = this.pauseOverlay.querySelector('#vol-music');
+        var muteToggle = this.pauseOverlay.querySelector('#mute-toggle');
+        if (volMaster) {
+            volMaster.addEventListener('input', function() {
+                if (window.audioManager) window.audioManager.setVolume(this.value / 100);
+                var v = this.pauseOverlay.querySelector('#vol-master-val');
+                if (v) v.textContent = this.value + '%';
+            });
+        }
+        if (volSfx) {
+            volSfx.addEventListener('input', function() {
+                if (window.audioManager) window.audioManager.setCategoryVolume('sfx', this.value / 100);
+                var v = this.pauseOverlay.querySelector('#vol-sfx-val');
+                if (v) v.textContent = this.value + '%';
+            });
+        }
+        if (volMusic) {
+            volMusic.addEventListener('input', function() {
+                if (window.audioManager) window.audioManager.setCategoryVolume('music', this.value / 100);
+                var v = this.pauseOverlay.querySelector('#vol-music-val');
+                if (v) v.textContent = this.value + '%';
+            });
+        }
+        if (muteToggle) {
+            muteToggle.addEventListener('change', function() {
+                if (window.audioManager) window.audioManager.setMuted(this.checked);
+                var btn = document.getElementById('audio-btn');
+                if (btn) btn.textContent = this.checked ? '🔇' : '🔊';
+            });
+        }
     }
     if (this.guideOverlay) {
         var self = this;
@@ -237,6 +306,22 @@ Gp._initBeforeUnload = function() {
 };
 
 Gp._startNewRun = function(heroId, levelId) {
+    /* P0-1: 局序号递增 — 使旧局未完成结算的 await 守卫失效 */
+    this._runSeq = (this._runSeq || 0) + 1;
+    /* P1-4: 跨局状态重置（雀魂手牌/面子/打牌态/金光环） */
+    this._handTiles = [];
+    this._formedMelds = {};
+    this._jokersDropped = 0;
+    this._discardMode = false;
+    this._discardSel = -1;
+    this._huLock = false;
+    this._huCountThisRun = 0;
+    this._tempAspd = 0;
+    this._tempAspdT = 0;
+    this._zoomLevel = 1;
+    if (this.battlefield) this.battlefield.classList.remove('discard-mode');
+    if (this.playerEl) this.playerEl.classList.remove('hu-qingyise');
+    if (this._handTileBar) this._handTileBar.classList.remove('hu-flash', 'discarding');
     var levelCfg = window.levelConfig[levelId] || window.levelConfig.level_1;
     /* Epoch 4: 程序化关卡生成 */
     if (levelCfg.isProcedural) {
@@ -252,7 +337,7 @@ Gp._startNewRun = function(heroId, levelId) {
     this._totalWaves = levelCfg.maxWaves || 5;
     this._spawnInterval = levelCfg.spawnIntervalMin || 1.5;
     this._spawnIntervalDecay = levelCfg.spawnIntervalDecay || 0.02;
-    this._enemyTypeWeights = levelCfg.enemyTypes || { Normal: 0.45, Tanker: 0.20, Stalker: 0.25, Shaman: 0.10 };
+    this._enemyTypeWeights = levelCfg.enemyTypes || window.Balance.DEFAULT_ENEMY_WEIGHTS;
 
     for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
     this._enemyElements.clear();
@@ -343,9 +428,9 @@ Gp._startNewRun = function(heroId, levelId) {
         this._spawnCausalityText('血海狂暴：领主强化，核心 +2');
     }
 
-    /* Epoch 2: weapon_forge 天赋 — 开局双神兵 */
-    if (meta && meta.talents && meta.talents.weapon_forge >= 1) {
-        this._spawnCausalityText('⚔ 双神兵开局：飞刃 + 环形护体');
+    /* Epoch 2: que_forge 天赋 — 开局双神兵 */
+    if (meta && meta.talents && meta.talents.que_forge >= 1) {
+        this._spawnCausalityText('⚔ 双神兵开局：飞牌 + 环伺');
     }
 
     /* ── Epoch 14: 关卡亲和减伤 ── */
@@ -380,6 +465,8 @@ Gp._startNewRun = function(heroId, levelId) {
 
     this._resetAllWeapons();
     this._initDefaultWeapons();
+    /* 武器协同检测 */
+    this._checkWeaponSynergies();
     this._syncEntities();
     this._syncPlayerHP();
     this._renderWeaponSlots();
@@ -394,6 +481,7 @@ Gp._startNewRun = function(heroId, levelId) {
 
     /* ── 初始化 14 格天命手牌槽 ── */
     this._initHandTiles();
+    this._bindHandTileClicks();
 
     this._freezeClock();
     /* ── 开场引导：首次游戏显示，否则直接播报第一波 ── */
@@ -479,10 +567,23 @@ Gp._shouldShowGuide = function() {
 
 Gp._showGuide = function() {
     this._defineGuideSteps();
+    /* Epoch 43: 初始化引导追踪状态 */
+    this._guideMoveDirs = {};
+    this._guideGemsPicked = 0;
+    this._guideHits = 0;
     if (this.guideOverlay) this.guideOverlay.classList.add('active');
     /* 高亮引导面板 */
     this._highlightElement('#guide-overlay', 6000);
     /* 注意：不在这里设置 hasSeenGuide，等 _completeGuide 时再设 */
+};
+
+/* Epoch 43: 公开方法 — 重新播放引导（调试用） */
+Gp._replayGuide = function() {
+    this._guideDismissed = false;
+    this._currentGuideStep = 0;
+    this._defineGuideSteps();
+    if (this.guideOverlay) this.guideOverlay.classList.add('active');
+    this._showGuideStep(0);
 };
 
 Gp._beginLoop = function() {
@@ -514,12 +615,25 @@ Gp._beginLoop = function() {
 
 Gp._autoSave = function(trigger) {
     var snap = window.saveManager.snapshotForRun(this);
-    window.saveManager.saveActiveRun(snap);
+    var ok = window.saveManager.saveActiveRun(snap);
+    /* Epoch 45: 存档确认 Toast */
+    if (window.toastSystem) {
+        var labels = { wave: '波次存档', relic: '圣物存档', victory: '结算存档', death: '死亡存档' };
+        var msg = labels[trigger] || '自动存档';
+        window.toastSystem.info('💾 ' + msg, 1500);
+    }
 };
 
 Gp._initKeyboard = function() {
     var self = this;
     document.addEventListener('keydown', function(e) {
+        /* Epoch 43: 引导移动追踪 */
+        if (self._guideMoveDirs && !self._guideDismissed) {
+            if (e.code === 'KeyW' || e.code === 'ArrowUp') self._guideMoveDirs.w = true;
+            if (e.code === 'KeyS' || e.code === 'ArrowDown') self._guideMoveDirs.s = true;
+            if (e.code === 'KeyA' || e.code === 'ArrowLeft') self._guideMoveDirs.a = true;
+            if (e.code === 'KeyD' || e.code === 'ArrowRight') self._guideMoveDirs.d = true;
+        }
         /* Escape 暂停/继续，任何状态下均可触发 */
         if (e.code === 'Escape') {
             self._togglePause();
@@ -535,6 +649,8 @@ Gp._initKeyboard = function() {
         self._pressedKeys[e.code] = true;
     });
     document.addEventListener('keyup', function(e) { self._pressedKeys[e.code] = false; });
+    /* Epoch 43: 键盘导航 */
+    document.addEventListener('keydown', function(e) { self._handleKeyNav(e); });
 };
 
 Gp._initJoystick = function() {
@@ -628,6 +744,69 @@ Gp._getInputVector = function() {
     var len = Math.sqrt(rawX * rawX + rawY * rawY);
     if (len > 1) return { x: rawX / len, y: rawY / len };
     return { x: rawX, y: rawY };
+};
+
+/* ══════════════════════════════════════════════
+   Epoch 44: 音频按钮绑定
+   ══════════════════════════════════════════════ */
+
+Gp._bindAudioButton = function() {
+    var btn = document.getElementById('audio-btn');
+    if (!btn) return;
+    var self = this;
+    btn.addEventListener('click', function() {
+        if (!window.audioManager) return;
+        var muted = !window.audioManager._muted;
+        window.audioManager.setMuted(muted);
+        btn.textContent = muted ? '🔇' : '🔊';
+        btn.title = muted ? '点击开启声音' : '点击静音';
+        /* 持久化到 meta */
+        try {
+            var meta = window.saveManager && window.saveManager._metaCache;
+            if (meta) { meta.audioMuted = muted; window.saveManager._saveMetaToStorage(); }
+        } catch(e) {}
+    });
+    /* 恢复上次状态 */
+    try {
+        var meta = window.saveManager && window.saveManager._metaCache;
+        if (meta && meta.audioMuted) {
+            if (window.audioManager) window.audioManager.setMuted(true);
+            btn.textContent = '🔇';
+            btn.title = '点击开启声音';
+        }
+    } catch(e) {}
+};
+
+/* ══════════════════════════════════════════════
+   Epoch 43: 键盘导航支持
+   ══════════════════════════════════════════════ */
+
+Gp._handleKeyNav = function(e) {
+    var code = e.code;
+    /* Tab 在 overlay 面板中导航 */
+    if (code === 'Tab') {
+        var overlay = this.guideOverlay || document.querySelector('.reward-overlay.active, .mutator-overlay.active');
+        if (overlay) {
+            var focusable = overlay.querySelectorAll('button, [tabindex="0"]');
+            if (focusable.length > 0) {
+                e.preventDefault();
+                var current = document.activeElement;
+                var idx = Array.prototype.indexOf.call(focusable, current);
+                var nextIdx = code === 'Tab' ? (e.shiftKey ? idx - 1 : idx + 1) : idx;
+                if (nextIdx < 0) nextIdx = focusable.length - 1;
+                if (nextIdx >= focusable.length) nextIdx = 0;
+                focusable[nextIdx].focus();
+            }
+        }
+    }
+    /* Enter/Space 激活聚焦元素 */
+    if (code === 'Enter' || code === 'Space') {
+        var active = document.activeElement;
+        if (active && (active.tagName === 'BUTTON' || active.classList.contains('relic-btn') || active.classList.contains('mutator-btn'))) {
+            e.preventDefault();
+            active.click();
+        }
+    }
 };
 
 })();

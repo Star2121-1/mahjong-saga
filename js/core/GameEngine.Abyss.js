@@ -1,0 +1,294 @@
+(function() {
+    'use strict';
+    var Gp = window.GameEngine.prototype;
+
+/* ══════════════════════════════════════════════
+   Epoch 47: 无尽深渊轮回扩展系统
+   ══════════════════════════════════════════════ */
+
+/* ── 深渊专属变异组合（每5层解锁新组合） ── */
+
+Gp._abyssComboDefinitions = [
+    { id: 'abyss_bloodmoon', name: '深渊血月', desc: '血月效果翻倍（HP+60%, ATK+80%）但掉落×2', unlockAt: 1, effects: { hpMult: 1.6, atkMult: 1.8, dropMult: 2 } },
+    { id: 'abyss_frenzy', name: '深渊狂乱', desc: '敌人攻速+100%，击杀返还50%生命', unlockAt: 5, effects: { speedMult: 2.0, lifestealOnKill: 0.5 } },
+    { id: 'abyss_gravity', name: '深渊引力', desc: '经验吸附范围×3，但金币掉落-50%', unlockAt: 10, effects: { magnetMult: 3, goldPenalty: 0.5 } },
+    { id: 'abyss_frailty', name: '深渊脆弱', desc: '玩家攻击+150%，受伤+50%', unlockAt: 15, effects: { playerAtkMult: 2.5, playerDamageMult: 1.5 } },
+    { id: 'abyss_wither', name: '深渊凋零', desc: '每秒损失2%HP但获得等量护盾', unlockAt: 20, effects: { drainPct: 0.02, shieldGen: 0.02 } }
+];
+
+/* ── 深渊专属敌人变体 ── */
+
+Gp._abyssVariantDefinitions = [
+    { id: 'abyss_tanker', name: '渊铠', type: 'Tanker', desc: '体型+50%，掉落+30%', hpMult: 1.5, dropMult: 1.3, suit: '条' },
+    { id: 'abyss_stalker', name: '渊影', type: 'Stalker', desc: '速度+40%，闪现距离+2倍', speedMult: 1.4, teleportMult: 2, suit: '筒' },
+    { id: 'abyss_shaman', name: '渊巫', type: 'Shaman', desc: '撤退距离+50%，治疗范围+2倍', retreatMult: 1.5, healMult: 2, suit: '风' },
+    { id: 'abyss_barrier', name: '渊壁', type: 'Barrier', desc: '屏障HP×2，破碎时生成2个小屏障', hpMult: 2.0, splitCount: 2, suit: '白' },
+    { id: 'abyss_bomber', name: '渊爆', type: 'Bomber', desc: '爆炸范围+50%，伤害+30%', rangeMult: 1.5, dmgMult: 1.3, suit: '发' },
+    { id: 'abyss_splitter', name: '渊分', type: 'Splitter', desc: '分裂数×2（共4个），带随机类型', splitMult: 2, suit: '中' },
+    { id: 'abyss_elite', name: '渊核', type: 'Normal', desc: '金色外观，全属性+100%，击杀掉落深渊币', hpMult: 2.0, atkMult: 2.0, dropAbyssCoin: true, suit: '萬' }
+];
+
+/* ── 深渊商店 ── */
+
+Gp._abyssShopItems = [
+    { id: 'abyss_revive', name: '轮回之泪', desc: '本轮额外1次复活机会', cost: 3, type: 'revive' },
+    { id: 'abyss_magnet', name: '黑洞核心', desc: '永久吸附范围+50px（仅本轮）', cost: 2, type: 'magnet' },
+    { id: 'abyss_cd', name: '时停碎片', desc: '所有武器CD-20%（仅本轮）', cost: 4, type: 'cdReduce' },
+    { id: 'abyss_hp', name: '命牌', desc: '最大HP+50（仅本轮）', cost: 2, type: 'hpBoost' },
+    { id: 'abyss_atk', name: '杀牌', desc: '攻击力+10（仅本轮）', cost: 3, type: 'atkBoost' },
+    { id: 'abyss_clear', name: '清台', desc: '清除场上所有敌人', cost: 5, type: 'clear' }
+];
+
+/* ── 运行时状态 ── */
+
+Gp._initAbyssState = function() {
+    this._abyssCoins = 0;           // 深渊币
+    this._abyssUnlockedCombos = [];  // 已解锁的深渊变异组合
+    this._abyssActiveCombo = null;   // 当前激活的组合
+    this._abyssVariantEnabled = false; // 是否启用深渊变体
+    this._abyssShopVisible = false;
+    this._abyssLoopHpScale = 1;      // 深渊层额外HP缩放
+    this._abyssLoopAtkScale = 1;     // 深渊层额外ATK缩放
+};
+
+/* ── 深渊层属性缩放 ── */
+
+Gp._updateAbyssScaling = function() {
+    var loop = this.loopCount || 0;
+    if (loop <= 0) {
+        this._abyssLoopHpScale = 1;
+        this._abyssLoopAtkScale = 1;
+        this._abyssVariantEnabled = false;
+        return;
+    }
+    /* 每层额外5%属性（叠加基础1.08） */
+    this._abyssLoopHpScale = 1 + loop * 0.05;
+    this._abyssLoopAtkScale = 1 + loop * 0.05;
+    /* 第3层起启用深渊变体 */
+    this._abyssVariantEnabled = loop >= 3;
+    /* 自动解锁已满足条件的组合 */
+    this._unlockAbyssCombos();
+};
+
+/* ── 解锁深渊变异组合 ── */
+
+Gp._unlockAbyssCombos = function() {
+    var loop = this.loopCount || 0;
+    var defs = this._abyssComboDefinitions;
+    for (var i = 0; i < defs.length; i++) {
+        var unlockAt = defs[i].unlockAt || (i + 1) * Balance.ABYSS_COMBO_UNLOCK_INTERVAL;
+        if (loop >= unlockAt && this._abyssUnlockedCombos.indexOf(defs[i].id) === -1) {
+            this._abyssUnlockedCombos.push(defs[i].id);
+            this._spawnCausalityText('🌀 解锁深渊变异: ' + defs[i].name);
+        }
+    }
+};
+
+/* ── 应用深渊变体到敌人 ── */
+
+Gp._applyAbyssVariant = function(enemy) {
+    if (!this._abyssVariantEnabled || !enemy || !enemy.isBoss) return enemy.type;
+    /* 15% 概率替换为深渊变体 */
+    if (Math.random() > 0.15) return enemy.type;
+    var variants = this._abyssVariantDefinitions;
+    var v = variants[Math.floor(Math.random() * variants.length)];
+    enemy._abyssVariant = v;
+    enemy._abyssVariantName = v.name;
+    if (v.hpMult) {
+        enemy.maxHp = Math.floor(enemy.maxHp * v.hpMult);
+        enemy.hp = Math.floor(enemy.hp * v.hpMult);
+    }
+    if (v.atkMult) enemy.atk = Math.floor(enemy.atk * v.atkMult);
+    if (v.speedMult) enemy.speed = Math.floor(enemy.speed * v.speedMult);
+    /* 视觉标记 */
+    if (enemy.el) {
+        enemy.el.classList.add('abyss-variant');
+        enemy.el.style.boxShadow = '0 0 12px rgba(156,39,176,0.8), 0 0 24px rgba(156,39,176,0.4)';
+    }
+    return v.id;
+};
+
+/* ── 深渊商店 ── */
+
+Gp._showAbyssShop = function() {
+    if (!this.battlefield) return;
+    this._freezeClock();
+    this._abyssShopVisible = true;
+
+    var panel = document.createElement('div');
+    panel.id = 'abyss-shop-panel';
+    panel.className = 'abyss-shop-panel';
+
+    var self = this;
+    var items = this._abyssShopItems;
+    var cardsHtml = '';
+    for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+        var canAfford = this._abyssCoins >= it.cost;
+        cardsHtml +=
+            '<div class="abyss-shop-card">' +
+                '<div class="abyss-shop-card-name">' + it.name + '</div>' +
+                '<div class="abyss-shop-card-desc">' + it.desc + '</div>' +
+                '<div class="abyss-shop-card-cost">' + it.cost + ' 深渊币</div>' +
+                '<button class="abyss-shop-btn"' + (canAfford ? '' : ' disabled') + '>购买</button>' +
+            '</div>';
+    }
+
+    panel.innerHTML =
+        '<div class="abyss-shop-title">🌀 深渊商店</div>' +
+        '<div class="abyss-shop-balance">深渊币: ' + this._abyssCoins + '</div>' +
+        '<div class="abyss-shop-grid">' + cardsHtml + '</div>' +
+        '<button class="abyss-shop-close">离开</button>';
+
+    this.battlefield.appendChild(panel);
+
+    /* 绑定按钮 */
+    panel.querySelectorAll('.abyss-shop-btn').forEach(function(btn, idx) {
+        btn.addEventListener('click', function() {
+            var item = items[idx];
+            if (self._abyssCoins < item.cost) return;
+            self._abyssCoins -= item.cost;
+            self._buyAbyssItem(item);
+            panel.querySelector('.abyss-shop-balance').textContent = '深渊币: ' + self._abyssCoins;
+            /* 更新按钮状态 */
+            panel.querySelectorAll('.abyss-shop-btn').forEach(function(b, i) {
+                b.disabled = self._abyssCoins < items[i].cost;
+            });
+        });
+    });
+
+    panel.querySelector('.abyss-shop-close').addEventListener('click', function() {
+        panel.remove();
+        self._abyssShopVisible = false;
+        self._unfreezeClock();
+        self._beginLoop();
+    });
+};
+
+Gp._buyAbyssItem = function(item) {
+    var p = this.player;
+    switch (item.type) {
+        case 'revive':
+            p._hasRevive = true;
+            p._reviveCount = (p._reviveCount || 0) + 1;
+            this._spawnCausalityText('💧 获得1次复活');
+            break;
+        case 'magnet':
+            p.magnetRadius += 50;
+            this._spawnCausalityText('🕳️ 吸附范围+50');
+            break;
+        case 'cdReduce':
+            if (this._activeWeapons) {
+                for (var i = 0; i < this._activeWeapons.length; i++) {
+                    this._activeWeapons[i].cd = Math.max(p.cdFloor || 0.2, this._activeWeapons[i].cd * 0.8);
+                }
+            }
+            this._spawnCausalityText('⏱️ 武器CD-20%');
+            break;
+        case 'hpBoost':
+            p.maxHp += 50;
+            p.hp = Math.min(p.hp + 50, p.maxHp);
+            this._spawnCausalityText('❤️ 最大HP+50');
+            break;
+        case 'atkBoost':
+            p.atk += 10;
+            this._spawnCausalityText('⚔️ 攻击力+10');
+            break;
+        case 'clear':
+            /* 清除场上所有敌人 */
+            for (var j = 0; j < this.enemies.length; j++) {
+                var e = this.enemies[j];
+                if (e.alive) {
+                    e.takeDamage(e.maxHp, 'abyss_clear');
+                }
+            }
+            this._spawnCausalityText('💥 清场！');
+            break;
+    }
+    window.audioManager && window.audioManager.play('pickup');
+};
+
+/* ── 深渊币掉落 ── */
+
+Gp._tryAbyssCoinDrop = function(enemy) {
+    if (!this._abyssVariantEnabled) return false;
+    /* 精英变体和 abyss_elite 类型有概率掉落 */
+    if (enemy._abyssVariant && enemy._abyssVariant.dropAbyssCoin) {
+        this._abyssCoins++;
+        this._spawnCausalityText('🪙 获得 1 深渊币');
+        return true;
+    }
+    /* 普通精英怪也有小概率 */
+    if (Math.random() < 0.05) {
+        this._abyssCoins++;
+        this._spawnCausalityText('🪙 获得 1 深渊币');
+        return true;
+    }
+    return false;
+};
+
+/* ── 深渊组合效果应用 ── */
+
+Gp._applyAbyssCombo = function(comboId) {
+    var defs = this._abyssComboDefinitions;
+    var combo = null;
+    for (var i = 0; i < defs.length; i++) {
+        if (defs[i].id === comboId) { combo = defs[i]; break; }
+    }
+    if (!combo) return;
+    if (this._abyssActiveCombo === comboId) {
+        /* 切换关闭 */
+        this._abyssActiveCombo = null;
+        this._spawnCausalityText('关闭深渊变异: ' + combo.name);
+        return;
+    }
+    this._abyssActiveCombo = comboId;
+    this._spawnCausalityText('激活深渊变异: ' + combo.name + ' — ' + combo.desc);
+};
+
+/* ── 在波次间事件中显示深渊商店入口 ── */
+
+Gp._showAbyssShopEntrance = function() {
+    if (this._abyssCoins <= 0 && this.loopCount < 3) return;
+    if (this.loopCount < 3) return; /* 3层后才开放商店 */
+
+    var overlay = document.getElementById('reward-overlay');
+    if (!overlay) return;
+    var cardsDiv = overlay.querySelector('.reward-cards');
+    if (!cardsDiv) return;
+
+    var shopBtn = document.createElement('button');
+    shopBtn.className = 'relic-btn';
+    shopBtn.style.cssText = 'background:#9c27b0;margin-top:12px;width:100%;';
+    shopBtn.textContent = '🌀 深渊商店 (' + this._abyssCoins + ' 币)';
+    var self = this;
+    shopBtn.addEventListener('click', function() {
+        overlay.classList.remove('active');
+        self._showAbyssShop();
+    });
+    cardsDiv.appendChild(shopBtn);
+};
+
+/* ── 初始化时设置深渊状态 ── */
+
+var _origStartNewRun = Gp._startNewRun;
+Gp._startNewRun = function(heroId, levelId) {
+    _origStartNewRun.call(this, heroId, levelId);
+    this._initAbyssState();
+    this._updateAbyssScaling();
+};
+
+var _origEnterAbyss = Gp._enterAbyss;
+Gp._enterAbyss = function() {
+    /* 保留深渊币和已解锁组合 */
+    var savedCoins = this._abyssCoins;
+    var savedCombos = this._abyssUnlockedCombos.slice();
+    var savedActiveCombo = this._abyssActiveCombo;
+    _origEnterAbyss.call(this);
+    this._abyssCoins = savedCoins;
+    this._abyssUnlockedCombos = savedCombos;
+    this._abyssActiveCombo = savedActiveCombo;
+    this._updateAbyssScaling();
+};
+
+})();

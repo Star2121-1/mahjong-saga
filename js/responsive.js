@@ -41,7 +41,8 @@
         c.style.position = 'fixed';
         /* 字体基线：反比补偿，使视觉字号不随缩放变化 (1.6 / s) */
         var fsTarget = 1.4;
-        c.style.setProperty('--_fs', Math.min(6, fsTarget / s).toFixed(3));
+        /* F2 测试修正：_fs 上限 6→3.5，防止极窄视口下卡片文字溢出 */
+        c.style.setProperty('--_fs', Math.min(3.5, fsTarget / s).toFixed(3));
         /* 居中: 缩放后尺寸 = BASE_W*s × BASE_H*s
            视口中的偏移 = (视口 - 缩放后尺寸) / 2 */
         var scaledW = BASE_W * s;

@@ -29,7 +29,7 @@ Gp._onClick = function(e) {
     if (this._tempCritBonus) this._tempCritBonus = 0;
     /* Epoch 32: 临时攻击增益 */
     var atkMult = 1 + (p._tempAtkBoost || 0);
-    var damage = isCrit ? Math.floor(p.atk * atkMult * 2.5) : Math.floor(p.atk * atkMult);
+    var damage = isCrit ? Math.floor(p.atk * atkMult * (2.5 + (p.critDamageBonus || 0))) : Math.floor(p.atk * atkMult);
     if (damage === 0) return;
 
     enemy.takeDamage(damage, this.player, undefined, undefined, isCrit ? 'crit' : undefined);
@@ -46,7 +46,11 @@ Gp._onClick = function(e) {
         this._checkAchievementInflight('crit_master', this._totalCritsThisRun);
     }
 
-    if (isCrit) this.triggerShake(2, 300);
+    if (isCrit) {
+        this.triggerShake(2, 300);
+        /* C2: 命中停顿 — 暴击顿帧，世界短暂减速 */
+        this._hitStopT = 0.06;
+    }
 
     if (p.lifestealRate > 0) {
         var heal = Math.floor(damage * p.lifestealRate);
@@ -162,6 +166,8 @@ Gp.triggerShake = function(intensity, duration) {
 };
 
 Gp.restart = function() {
+    var bc = document.getElementById('active-buffs-container');
+    if (bc) bc.remove();
     for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
     this._enemyElements.clear();
     this.enemies = [];

@@ -42,15 +42,20 @@ npx serve .
 
 - **自动战斗 + 走位**：WASD / 方向键 / 虚拟摇杆 / 点击地面移动，角色自动攻击
 - **点击攻击**：点击敌人触发普攻/暴击，触发吸血、溅射、冰冻、反伤等效果
-- **波次生存**：5+ 波递增敌人，每波最终 Boss 战，击败后三选一圣物/武器升级
+- **波次生存**：5+ 波递增敌人，每波最终 Boss 战，击败后三选一圣物/武器升级/牺牲
 - **Boss Lord 三阶段**：弹幕压制 → 瞬移砸地 → 绝命狂暴，每阶段不同行为模式
+- **Boss 豪赌**：Boss Lord 死亡前触发风险/回报选择（金币翻倍 vs 核心保底）
 - **Overdrive 暴走**：怒气满按空格，3 秒冻结全场 + 武器无 CD + 屏幕震颤
-- **波次突变**：战斗中随机触发环境异变（血月/枯萎/引力逆转等），3 选 1 适应策略
+- **波次突变**：战斗中随机触发环境异变（血月/枯萎/引力逆转/狂乱/脆弱），5 选 1 适应策略
 - **装备构筑**：20+ 装备原型，稀有/史诗/传说品质，词缀随机，套装共鸣触发光环
-- **英雄切换**：四英雄（雀圣/一万/九筒/一条），出战牌面颜色与被动技能随英雄改变
-- **天赋成长**：局外消耗核心解锁永久天赋，跨局累积进步
-- **无尽深渊**：通关后继续挑战，敌人属性指数递增
-- **成就系统**：50+ 成就，记录游戏行为与里程碑
+- **英雄切换**：四英雄（雀/一万/九筒/一条），出战牌面颜色与被动技能随英雄改变
+- **天赋成长**：局外消耗核心解锁永久天赋（10 个麻将主题天赋），跨局累积进步
+- **无尽深渊**：通关后继续挑战，敌人属性指数递增（深渊轮回）
+- **成就系统**：25+ 成就，记录游戏行为与里程碑
+- **秘密图鉴**：5 个隐藏组合，满足特定圣物等级触发额外效果
+- **献祭系统**：升级时可选择献祭一个圣物换取临时增益、元代币或金币
+- **赛季系统**：声望转生、赛季重置、每日/每周挑战
+- **登录奖励**：连续登录天数递增奖励，支持补签
 
 ---
 
@@ -63,6 +68,9 @@ npx serve .
 - **Web Audio API**：所有音效程序化合成（拾取/升级/受伤/Overdrive）
 - **LocalStorage 持久化**：`cr_meta.json`（永久进度）+ `cr_active_run.json`（断点续玩）
 - **模块化架构**：脚本通过 `<script>` 标签按依赖顺序加载到全局 `window`，无 `import`/`export`
+- **170+ 常量集中管理**：`Balance.js` 消除所有魔法数字
+- **对象池模式**：FCT 浮动文本 (50→200)、Toast 通知 (20→100)
+- **Grid 空间分割**：图腾 buff 检查 O(1) 邻域查找
 
 ---
 
@@ -73,12 +81,12 @@ Click Roguelike/
 ├── index.html                  # 首页入口（点击跳转到游戏）
 ├── pages/
 │   ├── s1_save_select.html     # 存档选择 / 设置
-│   ├── s2_main_hub.html        # 大本营（英雄/天赋/锻造/关卡/变异保险库）
+│   ├── s2_main_hub.html        # 大本营（英雄/天赋/锻造/关卡/变异/成就）
 │   └── s3_gameplay.html        # 核心战斗场景
 ├── css/
 │   ├── common.css              # 全局 reset / 动画 / 工具类
 │   ├── save_select.css         # 存档页样式
-│   ├── main_hub.css            # 大本营样式
+│   ├── main_hub.css            # 大本营、锻造、变异保险库、成就样式
 │   └── gameplay/
 │       ├── gameplay-layout.css      # 战场布局
 │       ├── gameplay-player.css      # 玩家角色 / 麻将牌渲染
@@ -92,7 +100,8 @@ Click Roguelike/
 │   ├── config/
 │   │   ├── HeroConfig.js       # 英雄定义（雀/一万/九筒/一条）
 │   │   ├── LevelConfig.js      # 关卡定义 + 波次配置
-│   │   └── AchievementConfig.js # 成就定义
+│   │   ├── AchievementConfig.js # 成就定义
+│   │   └── Balance.js          # 170+ 数值常量集中管理
 │   ├── entities/
 │   │   ├── Player.js           # 玩家实体、装备聚合、英雄被动
 │   │   ├── Enemy.js            # 敌人 AI、Boss Lord 三阶段
@@ -101,7 +110,7 @@ Click Roguelike/
 │   │   ├── HeroRegistry.js     # 英雄注册表
 │   │   └── EquipmentRegistry.js # 装备原型 + 工厂
 │   ├── core/
-│   │   ├── GameEngine.js       # 引擎入口（~200 行）
+│   │   ├── GameEngine.js       # 引擎入口（~130 行，仅构造+代理）
 │   │   ├── GameEngine.Boot.js      # 初始化 / DOM 绑定
 │   │   ├── GameEngine.NewRun.js    # 新游开始 / 难度选择
 │   │   ├── GameEngine.Loop.js      # 主循环 rAF / 状态机
@@ -117,14 +126,15 @@ Click Roguelike/
 │   │   ├── GameCombat.js         # 委托式战斗系统
 │   │   ├── GameSystems.js        # 委托式系统（Overdrive/突变/共鸣）
 │   │   ├── SaveManager.js        # 存档管理器入口
-│   │   ├── SaveManager.Core.js       # 核心存档逻辑
+│   │   ├── SaveManager.Core.js       # 核心存档逻辑 + 校验
 │   │   ├── SaveManager.Season.js     # 赛季系统
 │   │   ├── SaveManager.Weekly.js     # 周常系统
 │   │   ├── SaveManager.Compendium.js # 图鉴系统
 │   │   ├── SaveManager.RunStats.js   # 运行统计
 │   │   ├── RewardManager.js      # 奖励/圣物/武器面板
 │   │   ├── FxManager.js          # 浮动文本对象池（50→200 节点）
-│   │   └── AudioManager.js       # Web Audio 音效合成
+│   │   ├── AudioManager.js       # Web Audio 音效合成
+│   │   └── ToastSystem.js        # 全局 Toast 通知系统
 │   ├── page/
 │   │   ├── save_select.js      # 存档页控制器
 │   │   └── main_hub.js         # 大本营控制器
@@ -158,12 +168,14 @@ index.html → pages/s1_save_select.html → pages/s2_main_hub.html → pages/s3
 | `window.audioManager` | `AudioManager.js` | Web Audio 音效合成 |
 | `window.heroRegistry` | `HeroRegistry.js` | 英雄定义与切换 |
 | `window.equipmentRegistry` | `EquipmentRegistry.js` | 装备原型与实例工厂 |
+| `window.toastSystem` | `ToastSystem.js` | 全局 Toast 通知 |
+| `window.Balance` | `Balance.js` | 170+ 数值常量 |
 
 ### 数据持久化
 
 | localStorage 键 | 内容 |
 |----------------|------|
-| `cr_meta.json` | 永久进度：核心代币、天赋等级、英雄解锁、装备仓库、变异保险库、最高深渊层数、成就进度 |
+| `cr_meta.json` | 永久进度：核心代币、天赋等级、英雄解锁、装备仓库、变异保险库、最高深渊层、成就进度、赛季/周常/每日、登录 streak、战局历史 |
 | `cr_active_run.json` | 当前活跃局：波次、HP、金币、圣物等级、英雄 ID、断点续玩标志 |
 
 ### 关键技术实现
@@ -173,6 +185,8 @@ index.html → pages/s1_save_select.html → pages/s2_main_hub.html → pages/s3
 - **对象池**：FCT 浮动文本 50 节点起步，动态扩展到 200，避免频繁 create/remove DOM
 - **状态机守卫**：`_paused` / `_levelUpPending` / `_overdriveActive` / `_bossLordSpawned` 等标志控制流转
 - **时钟冻结**：覆盖层打开时给 `#game-container` 加 `.game-clock-frozen` 暂停所有 CSS 动画，面板内用 `animation-play-state: running !important` 恢复
+- **Grid 空间分割**：图腾 buff 检查使用 GRID_SIZE=80 网格，O(1) 邻域查找替代 O(n×m) 遍历
+- **存档校验**：DJB-like 哈希校验 + 自动备份回滚 + BOM 处理
 
 ---
 
@@ -184,6 +198,45 @@ index.html → pages/s1_save_select.html → pages/s2_main_hub.html → pages/s3
 4. **绿色吸血飘字**：所有生命回复弹出绿色加号浮字（`.damage-float.heal`）
 5. **超武暴击反伤继承**：`evolved_armor` 反伤时继承暴击率，触发 2.5 倍暴击反伤
 6. **Boss 上限控制**：每波最多 1 个 Boss，防止难度失控
+
+---
+
+## 英雄系统
+
+| 英雄 | 解锁费用 | HP | ATK | 速度 | 闪避 | 被动 |
+|------|---------|-----|-----|------|------|------|
+| 雀（Hero） | 0（默认） | 100 | 10 | 100 | 5% | 攻击速度+15%，武器冷却-10% |
+| 一万（Knight） | 30 核心 | 120 | 8 | 90 | 5% | 闪避成功时释放 100px 震荡波击退敌人 |
+| 九筒（Mage） | 50 核心 | 80 | 14 | 110 | 5% | 武器槽位+1，cdFloor 降低 |
+| 一条（Assassin） | 100 核心 | 70 | 12 | 130 | 15% | 移动速度+10%，对冰冻目标伤害×1.5 |
+
+---
+
+## 圣物与超武
+
+### 10 基础圣物（Lv.1-5）
+
+| ID | 麻将名 | 效果 |
+|----|--------|------|
+| sharp_edge | 清一色 | 攻击力 +3/级 |
+| golden_finger | 抢杠 | 暴击率 +15%/级 |
+| auto_drone | 暗杠浮标 | 无人机攻击最近敌人 |
+| thorn_armor | 杠上开花 | 最大 HP+20/级，反伤+10%/级 |
+| wind_walker | 四风环绕 | 移速 +12%/级 |
+| vamp_ring | 自摸加番 | 吸血率 +8%/级 |
+| explosive_core | 爆牌圈 | 溅射概率 +15%/级 |
+| frost_core | 冰清玉洁 | 冰冻概率 +10%/级 |
+| gravity_core | 宝牌聚宝 | 经验吸附范围 +40/级 |
+| weapon_amplify | 役牌加算 | 攻击+3/级，武器攻倍率+20%/级，冷却-10%/级 |
+
+### 4 传说超武
+
+| ID | 麻将名 | 解锁条件 |
+|----|--------|---------|
+| evolved_drone | 天和 | auto_drone Lv.5 + sharp_edge ≥ Lv.1 |
+| evolved_armor | 地和 | thorn_armor Lv.5 + golden_finger ≥ Lv.1 |
+| evolved_speed | 人和 | wind_walker Lv.5 + golden_finger ≥ Lv.1 |
+| evolved_vamp | 人面兽心 | vamp_ring Lv.5 + thorn_armor ≥ Lv.3 |
 
 ---
 

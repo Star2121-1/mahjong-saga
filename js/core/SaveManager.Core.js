@@ -5,23 +5,88 @@
 (function() {
     'use strict';
 
+    /* ── 简易校验和 ── */
+
+    SaveManager.prototype._computeChecksum = function(data) {
+        /* P0 修复: 排除 _checksum 自身再序列化 — 原实现写入端不含该字段、
+           读取端含该字段，哈希必然不一致 → 每次读档都误判损坏并回滚旧档 */
+        var copy = {};
+        for (var k in data) { if (Object.prototype.hasOwnProperty.call(data, k) && k !== '_checksum') copy[k] = data[k]; }
+        var str = JSON.stringify(copy);
+        var hash = 0;
+        for (var i = 0; i < str.length; i++) {
+            var ch = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + ch;
+            hash |= 0;
+        }
+        return 'c' + (hash >>> 0).toString(16);
+    };
+
     /* ── 静默 localStorage 读写 ── */
 
     SaveManager.prototype._readJSON = function(fileName) {
         try {
             var raw = localStorage.getItem('cr_' + fileName);
-            return raw ? JSON.parse(raw) : null;
+            if (!raw) return null;
+            /* 尝试解析 */
+            var data = JSON.parse(raw);
+            /* 校验和验证 */
+            if (data && data._checksum) {
+                var expected = this._computeChecksum(data);
+                if (data._checksum !== expected) {
+                    /* 校验和不匹配 → 数据可能损坏 */
+                    if (window.toastSystem) window.toastSystem.warning('存档 "' + fileName + '" 校验失败，尝试恢复备份');
+                    /* 尝试回滚 */
+                    return this._rollbackBackup(fileName) || null;
+                }
+            }
+            return data;
         } catch (e) {
             console.warn('SaveManager _readJSON error:', fileName, e);
-            return null;
+            /* 解析失败 → 尝试恢复备份 */
+            if (window.toastSystem) window.toastSystem.warning('存档 "' + fileName + '" 损坏，正在恢复...');
+            return this._rollbackBackup(fileName) || null;
         }
+    };
+
+    /* 回滚备份：尝试 cr_<fileName>.bak */
+    SaveManager.prototype._rollbackBackup = function(fileName) {
+        try {
+            var bak = localStorage.getItem('cr_' + fileName + '.bak');
+            if (bak) {
+                var data = JSON.parse(bak);
+                if (data) {
+                    /* 恢复备份到主文件 */
+                    localStorage.setItem('cr_' + fileName, JSON.stringify(data));
+                    if (window.toastSystem) window.toastSystem.success('已从备份恢复存档 "' + fileName + '"');
+                    return data;
+                }
+            }
+        } catch(e) { /* 备份也损坏，放弃 */ }
+        return null;
     };
 
     SaveManager.prototype._writeJSON = function(fileName, data) {
         try {
+            /* 备份当前文件（如果存在） */
+            var current = localStorage.getItem('cr_' + fileName);
+            if (current) {
+                try {
+                    var parsed = JSON.parse(current);
+                    localStorage.setItem('cr_' + fileName + '.bak', current);
+                } catch(e) { /* 当前文件已损坏，跳过备份 */ }
+            }
+            /* 写入校验和 */
+            data._checksum = this._computeChecksum(data);
             localStorage.setItem('cr_' + fileName, JSON.stringify(data));
             return true;
         } catch (e) {
+            /* Epoch 45: localStorage 满/写入失败 → Toast 警告 */
+            if (e.name === 'QuotaExceededError' || e.code === 22) {
+                if (window.toastSystem) window.toastSystem.error('存储空间不足，存档失败！请清理浏览器数据。');
+            } else {
+                if (window.toastSystem) window.toastSystem.warning('存档异常: ' + e.message);
+            }
             console.warn('SaveManager _writeJSON error:', fileName, e);
             return false;
         }
@@ -38,9 +103,9 @@
             techTree: { life_enhancement: 0, sharpening: 0, precision_training: 0 },
             bossCores: 0,
             talents: {
-                health_boost: 0, speed_boost: 0, magnet_boost: 0, weapon_forge: 0,
-                listening_intuition: 0, gangpai_hardiness: 0, 摸牌_speed: 0,
-                starting_weapons: 0, core_resonance: 0, 雀魂_shield: 0
+                hu_patro: 0, zimo_speed: 0, lian_magnet: 0, que_forge: 0,
+                ting_intuition: 0, gang_hardiness: 0, mo_pa_cd: 0,
+                kaiju_weapons: 0, he_resonance: 0, que_spirit_shield: 0
             },
             defaultWeapons: ['TrackingBlade'], equipments: [],
             equipped: { weapon: null, armor: null, talisman: null },
@@ -111,21 +176,46 @@
         if (data.bossCores == null) data.bossCores = 0;
         if (!data.talents) {
             data.talents = {
-                health_boost: 0, speed_boost: 0, magnet_boost: 0, weapon_forge: 0,
-                listening_intuition: 0, gangpai_hardiness: 0, '摸牌_speed': 0,
-                starting_weapons: 0, core_resonance: 0, '雀魂_shield': 0
+                hu_patro: 0, zimo_speed: 0, lian_magnet: 0, que_forge: 0,
+                ting_intuition: 0, gang_hardiness: 0, mo_pa_cd: 0,
+                kaiju_weapons: 0, he_resonance: 0, que_spirit_shield: 0
             };
+            /* Epoch 47: 天赋分支路径 */
+            if (!data.talentBranchPaths) data.talentBranchPaths = {};
         } else {
-            if (data.talents.health_boost == null) data.talents.health_boost = 0;
-            if (data.talents.speed_boost == null) data.talents.speed_boost = 0;
-            if (data.talents.magnet_boost == null) data.talents.magnet_boost = 0;
-            if (data.talents.weapon_forge == null) data.talents.weapon_forge = 0;
-            if (data.talents.listening_intuition == null) data.talents.listening_intuition = 0;
-            if (data.talents.gangpai_hardiness == null) data.talents.gangpai_hardiness = 0;
-            if (data.talents.摸牌_speed == null) data.talents.摸牌_speed = 0;
-            if (data.talents.starting_weapons == null) data.talents.starting_weapons = 0;
-            if (data.talents.core_resonance == null) data.talents.core_resonance = 0;
-            if (data.talents.雀魂_shield == null) data.talents.雀魂_shield = 0;
+            /* 旧天赋 ID → 新 ID 迁移映射 */
+            var OLD_TO_NEW_TALENT = {
+                health_boost: 'hu_patro',
+                speed_boost: 'zimo_speed',
+                magnet_boost: 'lian_magnet',
+                weapon_forge: 'que_forge',
+                listening_intuition: 'ting_intuition',
+                gangpai_hardiness: 'gang_hardiness',
+                '摸牌_speed': 'mo_pa_cd',
+                starting_weapons: 'kaiju_weapons',
+                core_resonance: 'he_resonance',
+                '雀魂_shield': 'que_spirit_shield'
+            };
+            for (var oldKey in OLD_TO_NEW_TALENT) {
+                var newKey = OLD_TO_NEW_TALENT[oldKey];
+                if (data.talents[oldKey] != null && data.talents[newKey] == null) {
+                    data.talents[newKey] = data.talents[oldKey];
+                }
+                delete data.talents[oldKey];
+            }
+            /* 确保所有新键存在 */
+            if (data.talents.hu_patro == null) data.talents.hu_patro = 0;
+            if (data.talents.zimo_speed == null) data.talents.zimo_speed = 0;
+            if (data.talents.lian_magnet == null) data.talents.lian_magnet = 0;
+            if (data.talents.que_forge == null) data.talents.que_forge = 0;
+            if (data.talents.ting_intuition == null) data.talents.ting_intuition = 0;
+            if (data.talents.gang_hardiness == null) data.talents.gang_hardiness = 0;
+            if (data.talents.mo_pa_cd == null) data.talents.mo_pa_cd = 0;
+            if (data.talents.kaiju_weapons == null) data.talents.kaiju_weapons = 0;
+            if (data.talents.he_resonance == null) data.talents.he_resonance = 0;
+            if (data.talents.que_spirit_shield == null) data.talents.que_spirit_shield = 0;
+            /* Epoch 47: 天赋分支路径迁移 */
+            if (!data.talentBranchPaths) data.talentBranchPaths = {};
         }
         if (!data.defaultWeapons) data.defaultWeapons = ['TrackingBlade'];
         if (!data.equipments) {
@@ -188,6 +278,8 @@
         } else {
             this._migrateMeta(data);
             this._metaCache = data;
+            /* Epoch 46: 成功加载 meta 后清理旧备份 */
+            try { localStorage.removeItem('cr_meta.json.bak'); } catch(e) {}
         }
         return this._metaCache;
     };
@@ -197,13 +289,22 @@
         this._metaCache = data;
         return new Promise(function(resolve) {
             var ok = self._writeJSON('meta.json', data);
+            /* H-002: 写入失败时通知调用方 */
+            if (!ok) {
+                console.warn('SaveManager saveMeta failed — localStorage full or error');
+                if (window.toastSystem) window.toastSystem.warning('存档保存失败，请检查存储空间');
+            }
             resolve(ok);
         });
     };
 
     SaveManager.prototype._saveMetaToStorage = async function() {
         try {
-            localStorage.setItem('cr_meta.json', JSON.stringify(this._metaCache));
+            /* R30-H-001: 统一走 _writeJSON 避免与 saveMeta 竞态 */
+            var ok = this._writeJSON('meta.json', this._metaCache);
+            if (!ok) {
+                console.warn('SaveManager _saveMetaToStorage via _writeJSON failed');
+            }
         } catch (e) {
             console.warn('SaveManager _saveMetaToStorage error:', e);
         }
@@ -286,6 +387,9 @@
             godModeApplied: engine._godModeApplied || false,
             bloodRageActive: engine._bloodRageActive || false,
             currentWaveSpawnedCount: engine.currentWaveSpawnedCount || 0,
+            abyssCoins: engine._abyssCoins || 0,
+            abyssUnlockedCombos: engine._abyssUnlockedCombos || [],
+            abyssActiveCombo: engine._abyssActiveCombo || null,
             player: engine.player.snapshot()
         };
     };
@@ -307,6 +411,9 @@
         engine._playerHitCountThisRun = data.playerHitCountThisRun || 0;
         engine._overdriveCount = data.overdriveCount || 0;
         engine._vaultMutations = data.vaultMutations || [];
+        engine._abyssCoins = data.abyssCoins || 0;
+        engine._abyssUnlockedCombos = data.abyssUnlockedCombos || [];
+        engine._abyssActiveCombo = data.abyssActiveCombo || null;
         engine._gambleActive = data.gambleActive || false;
         engine._shieldActive = data.shieldActive || false;
         engine._eliteModeActive = data.eliteModeActive || false;
@@ -383,6 +490,9 @@
             this._writeJSON('meta.json', data.meta);
             this._writeJSON('active_run.json', data.activeRun);
             this._metaCache = null;
+            /* R30-H-003: 导入成功后清除 .bak 防止回滚到旧数据 */
+            try { localStorage.removeItem('cr_meta.json.bak'); } catch(e) {}
+            try { localStorage.removeItem('cr_active_run.json.bak'); } catch(e) {}
             return { success: true };
         } catch (e) {
             return { success: false, error: (e && (e.message || String(e))) || '未知错误' };

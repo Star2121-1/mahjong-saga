@@ -1,4 +1,23 @@
 /* ══════════════════════════════════════════════
+   雀魂系统 · 九筒连环弹丸
+   ══════════════════════════════════════════════ */
+.projectile.tong-ring-pellet {
+    width: 12px; height: 12px;
+    background: radial-gradient(circle at 35% 35%, #e3f2fd 0%, #64b5f6 45%, #1b4f72 100%);
+    border-radius: 50%;
+    box-shadow:
+        0 0 10px rgba(79,195,247,0.8),
+        inset 0 -2px 0 rgba(13,71,101,0.8),
+        inset 0 1px 1px rgba(255,255,255,0.7);
+}
+.projectile.tong-ring-pellet::before {
+    content: '●';
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 7px; color: #0d47a1;
+}
+
+/* ══════════════════════════════════════════════
    武器系统视觉元素 — 动能弹道 Mahjong 主题
    ══════════════════════════════════════════════ */
 
@@ -10,15 +29,15 @@
     will-change: transform;
 }
 
-/* 追踪飞刃 — 飞旋麻将牌碎片（菱形切片） */
+/* 追踪飞刃 — 朱砂红骨牌碎片（C1 去金化） */
 .tracking-blade {
     width: 14px; height: 14px;
-    background: linear-gradient(135deg, #ffd740 0%, #ff6f00 100%);
+    background: linear-gradient(135deg, #ff8a80 0%, #b62929 100%);
     border-radius: 2px;
     transform: rotate(45deg);
     box-shadow:
-        0 0 12px rgba(255,143,0,0.8),
-        0 0 24px rgba(255,111,0,0.4),
+        0 0 12px rgba(182,41,41,0.8),
+        0 0 24px rgba(182,41,41,0.4),
         inset 0 0 4px rgba(255,255,255,0.5);
     animation: bladeSpin 0.3s linear infinite;
 }
@@ -26,7 +45,7 @@
     content: '';
     position: absolute;
     inset: -4px;
-    background: linear-gradient(90deg, transparent, rgba(255,215,64,0.3), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255,138,128,0.35), transparent);
     border-radius: 4px;
     animation: bladeTrail 0.4s linear infinite;
 }
@@ -87,18 +106,18 @@
     50% { transform: scale(1.3); opacity: 0; }
 }
 
-/* 区域震荡 — 麻将牌翻飞涟漪 */
+/* 区域震荡 — 玉白震环（C1 去金化） */
 .shockwave {
     position: absolute;
     border-radius: 50%;
     background:
-        radial-gradient(circle, rgba(255,215,0,0.15) 0%, transparent 60%),
-        repeating-conic-gradient(from 0deg, rgba(255,152,0,0.1) 0deg 10deg, transparent 10deg 20deg);
+        radial-gradient(circle, rgba(251,251,247,0.14) 0%, transparent 60%),
+        repeating-conic-gradient(from 0deg, rgba(112,214,255,0.10) 0deg 10deg, transparent 10deg 20deg);
     pointer-events: none;
     z-index: 8;
     transform: translate(-50%, -50%);
-    border: 2px solid rgba(255,215,0,0.3);
-    box-shadow: 0 0 20px rgba(255,215,0,0.3);
+    border: 2px solid rgba(251,251,247,0.45);
+    box-shadow: 0 0 20px rgba(112,214,255,0.35);
 }
 
 /* 全屏脉冲 — 红中爆裂 */
@@ -113,18 +132,18 @@
     box-shadow: 0 0 30px rgba(211,47,47,0.4), inset 0 0 20px rgba(255,215,0,0.2);
 }
 
-/* 持续线杀 — 光刃斩击 */
+/* 持续线杀 — 孔雀蓝电弧（C1 去金化） */
 .laser-beam {
     position: absolute;
     height: 5px;
-    background: linear-gradient(90deg, rgba(255,215,0,0.9), rgba(255,152,0,0.6), rgba(255,87,34,0.3));
+    background: linear-gradient(90deg, rgba(224,247,255,0.95), rgba(100,181,246,0.7), rgba(27,79,114,0.35));
     border-radius: 2px;
     pointer-events: none;
     z-index: 7;
     box-shadow:
-        0 0 16px rgba(255,215,0,0.7),
-        0 0 32px rgba(255,152,0,0.3),
-        inset 0 0 4px rgba(255,255,255,0.5);
+        0 0 16px rgba(100,181,246,0.75),
+        0 0 32px rgba(27,79,114,0.35),
+        inset 0 0 4px rgba(255,255,255,0.6);
 }
 .laser-beam::before {
     content: '';
@@ -137,8 +156,21 @@
 /* 置换面板 weapon-card: dead CSS — compendium uses .compendium-weapon-card */
 
 /* ══════════════════════════════════════════════
-   Overdrive 视觉
-   ══════════════════════════════════════════════ */
+    Overdrive 视觉 — 全屏脉冲 + 金色冲击波
+    ══════════════════════════════════════════════ */
+
+/* Overdrive 触发瞬间白闪 — 覆盖整个viewport，持续时间加长 */
+#overdrive-flash {
+    position: fixed; inset: 0;
+    background: radial-gradient(circle at center, rgba(255,255,255,1) 0%, rgba(255,215,0,0.6) 40%, rgba(182,41,41,0.2) 100%);
+    pointer-events: none; z-index: 9999;
+    animation: overdriveFlashFade 0.6s ease-out forwards;
+}
+@keyframes overdriveFlashFade {
+    0% { opacity: 1; }
+    60% { opacity: 0.8; }
+    100% { opacity: 0; }
+}
 
 #game-container.overdrive-active #battlefield {
     filter: saturate(1.6) hue-rotate(-10deg) brightness(1.15);
@@ -202,7 +234,28 @@
 .game-clock-frozen #fct-layer,
 .game-clock-frozen #fct-layer *,
 .game-clock-frozen #fct-layer *::before,
-.game-clock-frozen #fct-layer *::after {
+.game-clock-frozen #fct-layer *::after,
+.game-clock-frozen .weather-rain-drop,
+.game-clock-frozen .weather-rain-drop::before,
+.game-clock-frozen .weather-rain-drop::after,
+.game-clock-frozen .freeze-crystal-ring,
+.game-clock-frozen .freeze-crystal-ring::before,
+.game-clock-frozen .freeze-crystal-ring::after,
+.game-clock-frozen .ice-crystal,
+.game-clock-frozen .ice-crystal::before,
+.game-clock-frozen .ice-crystal::after,
+.game-clock-frozen .legendary-burst,
+.game-clock-frozen .legendary-burst::before,
+.game-clock-frozen .legendary-burst::after,
+.game-clock-frozen .enemy-shard,
+.game-clock-frozen .enemy-shard::before,
+.game-clock-frozen .enemy-shard::after,
+.game-clock-frozen .player-trail,
+.game-clock-frozen .player-trail::before,
+.game-clock-frozen .player-trail::after,
+.game-clock-frozen .player-skill-glow,
+.game-clock-frozen .player-skill-glow::before,
+.game-clock-frozen .player-skill-glow::after {
     animation-play-state: running !important;
     transition-property: all !important;
 }

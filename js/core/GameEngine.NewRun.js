@@ -91,49 +91,82 @@ Gp._restoreHandState = function() {
 };
 
 Gp._defineGuideSteps = function() {
+    var self = this;
     this._guideSteps = [
         {
             highlight: '#guide-overlay',
-            dimExcept: ['#guide-overlay'],
+            dimExcept: [],
             items: [
-                '<div class="guide-item"><span class="guide-key">WASD</span> / 方向键 移动雀士</div>',
-                '<div class="guide-item"><span class="guide-key">鼠标点击</span> 攻击范围内妖牌</div>',
-                '<div class="guide-item"><span class="guide-key">空格</span> 怒气满时触发 Overdrive 役满暴走</div>',
-                '<div class="guide-item"><span class="guide-key">Esc</span> / 暂停 暂停游戏</div>',
-                '<div class="guide-item">击杀妖牌掉落 <strong>铜筹码</strong> 和 <strong>经验石</strong></div>',
-                '<div class="guide-item">升级时弹出三张天命麻将牌，选择一张收入底部手牌槽</div>',
-                '<div class="guide-item">凑齐顺子/刻子激活强力技能，胡牌进入 Overdrive</div>'
-            ]
+                '<div class="guide-item">欢迎来到麻将江湖 — 雀牌冒险开始</div>',
+                '<div class="guide-item">你是最后一张骨雕麻将牌——<strong>「雀」</strong></div>',
+                '<div class="guide-item">准备好出征了吗？点击"开始练习" →</div>'
+            ],
+            interactive: false,
+            autoAdvance: true
         },
         {
             highlight: '#player',
             dimExcept: ['#player'],
             items: [
-                '<div class="guide-item">你是最后一张骨雕麻将牌——<strong>「雀」</strong></div>',
-                '<div class="guide-item">羊脂玉牌面，祖母绿侧边厚度，竹骨黄夹层</div>',
-                '<div class="guide-item">朱砂红「雀」字在牌面正中闪烁</div>',
-                '<div class="guide-item">移动躲避妖牌，点击攻击消灭它们</div>'
-            ]
+                '<div class="guide-item">🏃 <strong>第一步：移动</strong></div>',
+                '<div class="guide-item">按 <span class="guide-key">W</span><span class="guide-key">A</span><span class="guide-key">S</span><span class="guide-key">D</span> 或方向键移动雀士</div>',
+                '<div class="guide-item">向四个方向各移动一次 → 完成！</div>'
+            ],
+            interactive: true,
+            checkFn: function() {
+                /* 检测玩家是否向四个方向都移动过 */
+                var m = self._guideMoveDirs;
+                return m && m.w && m.a && m.s && m.d;
+            }
         },
         {
             highlight: '#exp-bar-container',
             dimExcept: ['#exp-bar-container'],
             items: [
-                '<div class="guide-item">拾取铜筹码和经验石提升等级</div>',
-                '<div class="guide-item">经验条满后弹出三张天命牌</div>',
-                '<div class="guide-item">选择一张收入底部 14 格手牌槽</div>'
-            ]
+                '<div class="guide-item">💰 <strong>第二步：拾取</strong></div>',
+                '<div class="guide-item">击杀妖牌掉落铜筹码和经验石</div>',
+                '<div class="guide-item">靠近它们自动吸附，拾取后升级</div>'
+            ],
+            interactive: true,
+            checkFn: function() {
+                return (self._guideGemsPicked || 0) >= 1;
+            }
         },
         {
             highlight: '#hand-tile-bar',
             dimExcept: ['#hand-tile-bar'],
             items: [
+                '<div class="guide-item">⚔ <strong>第三步：升级</strong></div>',
+                '<div class="guide-item">升级时弹出三张天命麻将牌，选择一张</div>',
                 '<div class="guide-item">底部 14 格为天命手牌槽</div>',
-                '<div class="guide-item">筒子牌（孔雀蓝）：弹跳飞环</div>',
-                '<div class="guide-item">条子牌（竹翠青）：直线剑气</div>',
-                '<div class="guide-item">万字牌（朱砂红）：范围爆裂</div>',
-                '<div class="guide-item">凑齐顺子 / 刻子激活组合技能</div>'
-            ]
+                '<div class="guide-item">凑齐顺子/刻子激活组合技能</div>'
+            ],
+            interactive: false,
+            autoAdvance: true
+        },
+        {
+            highlight: null,
+            dimExcept: [],
+            items: [
+                '<div class="guide-item">🎯 <strong>第四步：攻击</strong></div>',
+                '<div class="guide-item">鼠标点击范围内妖牌触发攻击</div>',
+                '<div class="guide-item">空格键在怒气满时触发 Overdrive</div>'
+            ],
+            interactive: true,
+            checkFn: function() {
+                return (self._guideHits || 0) >= 1;
+            }
+        },
+        {
+            highlight: '#guide-overlay',
+            dimExcept: [],
+            items: [
+                '<div class="guide-item">🀄 出征吧，雀士！</div>',
+                '<div class="guide-item">击杀妖牌，升级手牌，胡牌过关</div>',
+                '<div class="guide-item">祝你好运！</div>'
+            ],
+            interactive: false,
+            autoAdvance: true
         }
     ];
 };

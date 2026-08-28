@@ -2,19 +2,23 @@
    神兵装备栏
    ══════════════════════════════════════════════ */
 
+/* 武器槽条 — 玩家坞底座，与牌架同语言 */
 #weapon-slot-bar {
-    height: 28px; background: rgba(0,0,0,0.35);
-    display: flex; align-items: center; padding: 0 6px;
-    flex-shrink: 0; border-top: 1px solid rgba(26,83,54,0.15);
+    height: 32px;
+    background: linear-gradient(180deg, rgba(8,22,14,0.92), rgba(10,26,16,0.85));
+    display: flex; align-items: center; padding: 0 8px;
+    flex-shrink: 0;
+    border-top: 1px solid rgba(212,175,55,0.35);
+    box-shadow: 0 -3px 14px rgba(0,0,0,0.45);
     overflow: hidden;
 }
-.weapon-slots { display: flex; gap: 4px; width: 100%; }
+.weapon-slots { display: flex; gap: 5px; width: 100%; }
 .weapon-slot {
     flex: 1; min-width: 0; display: flex; align-items: center;
-    gap: 4px; padding: 2px 4px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 4px;
+    gap: 4px; padding: 2px 6px;
+    background: rgba(251,251,247,0.05);
+    border: 1px solid rgba(212,175,55,0.18);
+    border-radius: 6px;
     transition: box-shadow 0.3s;
 }
 .ws-icon { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 6px currentColor; }
@@ -32,38 +36,45 @@
    ══════════════════════════════════════════════ */
 
 #hand-tile-bar {
-    position: absolute; bottom: 80px; left: 50%;
+    position: absolute; bottom: 34px; left: 50%;
     transform: translateX(-50%);
-    width: 75%;
+    width: 83%;
     z-index: 40;
     display: none;
 }
 #hand-tile-bar.active { display: block; }
 
+/* 牌架：玉带木托质感，与武器条构成底部玩家坞 */
 #hand-tile-grid {
     display: grid;
     grid-template-columns: repeat(14, 1fr);
-    gap: 4px;
-    padding: 8px;
-    background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(26,83,54,0.3);
-    border-radius: 12px;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    gap: 5px;
+    padding: 10px 12px 12px;
+    background:
+        linear-gradient(180deg, rgba(212,175,55,0.25) 0%, transparent 5px),
+        linear-gradient(180deg, rgba(8,18,12,0.96) 0%, rgba(10,22,14,0.94) 100%);
+    border: 1px solid rgba(212,175,55,0.55);
+    border-top-color: rgba(255,215,0,0.75);
+    border-radius: 14px;
+    box-shadow: 0 -6px 32px rgba(0,0,0,0.65), inset 0 1px 2px rgba(255,255,255,0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .hand-tile-slot {
     aspect-ratio: 3/4;
-    background: rgba(251,251,247,0.03);
-    border: 1px dashed rgba(26,83,54,0.2);
+    background: rgba(251,251,247,0.25);
+    border: 1px dashed rgba(212,175,55,0.75);
     border-radius: 6px;
     position: relative;
+    box-shadow: inset 0 -3px 0 rgba(223,197,144,0.4), inset 0 1px 2px rgba(255,255,255,0.35);
     transition: border-color 0.2s, background 0.2s;
 }
+.hand-tile-slot:hover { border-color: rgba(212,175,55,1); background: rgba(251,251,247,0.35); }
 .hand-tile-slot.occupied {
     border-style: solid;
-    border-color: rgba(42,115,72,0.5);
-    background: rgba(251,251,247,0.06);
+    border-color: rgba(42,115,72,0.9);
+    background: rgba(251,251,247,0.2);
 }
 /* 2.5D 骨雕麻将牌 */
 .hand-tile-slot .tile-body {
@@ -93,19 +104,86 @@
 .hand-tile-slot .tile-body.tiao { color: #1e6f42; }
 /* 万字牌红色 */
 .hand-tile-slot .tile-body.wan { color: #b62929; }
-/* 风牌 */
-.hand-tile-slot .tile-body.wind { color: #1a5336; }
+/* 风牌（白/发/东等）— 加深颜色至 WCAG 4.5:1 */
+.hand-tile-slot .tile-body.wind { color: #0d3020; }
 /* 箭牌 */
 .hand-tile-slot .tile-body.arrow { color: #b62929; }
 
+/* ── 雀魂系统：听牌角标 + 清一色进度条 ── */
+.hand-tile-slot { overflow: hidden; }
+.ting-mark {
+    position: absolute; top: 3px; right: 3px;
+    width: 7px; height: 7px; z-index: 3;
+    pointer-events: none;
+}
+/* 差1成刻 = 金点 */
+.ting-mark.ting-pung {
+    border-radius: 50%;
+    background: #ffd700;
+    box-shadow: 0 0 6px rgba(255,215,0,0.9);
+    animation: tingPulse 1s ease-in-out infinite alternate;
+}
+/* 差1成杠 = 蓝菱形 */
+.ting-mark.ting-kong {
+    background: #4dd0e1;
+    box-shadow: 0 0 7px rgba(77,208,225,0.9);
+    transform: rotate(45deg);
+    border-radius: 1px;
+    animation: tingPulse 0.8s ease-in-out infinite alternate;
+}
+@keyframes tingPulse { from { opacity: 0.55; } to { opacity: 1; } }
+/* 清一色进度竖条（手牌栏左缘，高度=同花色占比） */
+#hand-tile-bar::before {
+    content: '';
+    position: absolute; left: -5px; top: 15%;
+    width: 3px; border-radius: 2px;
+    height: calc(70% * var(--qing-ratio, 0));
+    background: linear-gradient(180deg, #ffd700, rgba(212,175,55,0.25));
+    box-shadow: 0 0 6px rgba(255,215,0,0.4);
+    opacity: calc(0.25 + var(--qing-ratio, 0));
+    transition: height 0.3s ease;
+}
+#hand-tile-bar.qy-near::before { animation: qyBreath 1.2s ease-in-out infinite alternate; }
+@keyframes qyBreath {
+    from { box-shadow: 0 0 6px rgba(255,215,0,0.4); opacity: 1; }
+    to   { box-shadow: 0 0 16px rgba(255,215,0,0.95); opacity: 1; }
+}
+
+/* ── A5: 打牌模式 ── */
+#battlefield.discard-mode::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(4, 12, 8, 0.32);
+    pointer-events: none;
+    z-index: 30;
+}
+#hand-tile-bar.discarding .hand-tile-slot.occupied { cursor: pointer; }
+.hand-tile-slot.discard-sel {
+    outline: 3px solid #ff1744;
+    outline-offset: -1px;
+    transform: translateY(-8px) scale(1.1);
+    z-index: 2;
+}
+.hand-tile-slot.discard-sel .tile-body {
+    box-shadow:
+        0 6px 0 #902020,
+        0 8px 0.5px #dfc590,
+        0 14px 18px rgba(0,0,0,0.6);
+}
+
 /* 新武器横幅 */
+/* 新武器徽章 — 卡片流内丝带（修复 absolute 定位压住文字的 bug） */
 .new-weapon-banner {
-    position: absolute; left: 0; right: 0; bottom: 40px;
-    height: 24px; display: flex; align-items: center; justify-content: center;
+    position: relative; left: auto; right: auto; bottom: auto;
+    align-self: stretch;
+    height: auto; padding: 4px 0;
+    margin-top: 2px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(90deg, transparent, rgba(212,175,55,0.18) 22%, rgba(212,175,55,0.18) 78%, transparent);
 }
 .new-weapon-banner::before, .new-weapon-banner::after {
-    content: ''; position: absolute; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, #ffd700, transparent);
+    content: ''; position: absolute; left: 10%; right: 10%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,215,0,0.7), transparent);
     animation: laserSlice 0.5s ease-in-out infinite alternate;
 }
 .new-weapon-banner::before { top: 0; }
@@ -121,10 +199,10 @@
     animation: bannerBlink 0.8s ease-in-out infinite alternate;
 }
 .new-weapon-banner span {
-    font-size: calc(9 * var(--_fs) * 1px); font-weight: 900; color: #ffd700;
-    text-shadow: 0 0 12px rgba(255,215,0,0.8);
-    letter-spacing: 2px; transform: skewX(-15deg);
-    animation: bannerBlink 0.8s ease-in-out infinite alternate;
+    font-size: calc(8 * var(--_fs) * 1px); font-weight: 900; color: #ffd700;
+    text-shadow: 0 0 10px rgba(255,215,0,0.8);
+    letter-spacing: 1.5px; transform: skewX(-12deg);
+    line-height: 1.4;
 }
 @keyframes bannerBlink {
     0% { color: #ffd700; }

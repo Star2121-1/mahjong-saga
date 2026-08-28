@@ -11,6 +11,7 @@ class Player {
         this.invulnTimer = 0;
         this.hitFlashTimer = 0; /* 独立受击闪烁计时器，与无敌帧分离 */
         this.critRate = 0;
+        this._weaponCdReduction = 0; /* P1-3: 跨局冷却缩减清零 */
         this.hasDrone = false;
         this.droneTimer = 0;
         this.droneInterval = 0;
@@ -82,6 +83,11 @@ class Player {
         /* H-029: 雀灵流转 -- 攻击速度 +15% */
         if (this.heroId === 'Hero') {
             this.speed = this.baseSpeed * 1.15;
+        }
+        /* Epoch 42: 雀灵流转 -- 武器CD -10% */
+        if (this.heroId === 'Hero') {
+            this._heroCdReduction = 0.10;
+            this.cdFloor = Math.max(0.05, this.cdFloor * 0.90);
         }
         /* A-029: 暗影步 -- 10% 移速加成 */
         if (this.heroId === 'Assassin') {
@@ -177,6 +183,20 @@ class Player {
             window.fxManager.spawnText(this.x, this.y - 20, '-' + dmg, 'normal');
         }
 
+        /* Epoch 46: 玩家受击屏幕震动 */
+        if (dmg > 0 && window.gameEngine && typeof window.gameEngine.triggerShake === 'function') {
+            window.gameEngine.triggerShake(1, 200);
+        }
+
+        /* Visual Enhancement D: 英雄受击抖动差异 */
+        if (dmg > 0 && window.gameEngine && window.gameEngine.playerEl) {
+            var ppe = window.gameEngine.playerEl;
+            ppe.classList.remove('take-damage');
+            void ppe.offsetWidth;
+            ppe.classList.add('take-damage');
+            setTimeout(function(el) { if (el) el.classList.remove('take-damage'); }, 200, ppe);
+        }
+
         if (attacker && this.thornsRate > 0 && attacker.alive) {
             let thornDmg = Math.floor(dmg * this.thornsRate);
             if (this.evolvedArmor) {
@@ -190,7 +210,7 @@ class Player {
                 const thornCap = Math.floor(this.atk * 2);
                 if (thornDmg > thornCap) thornDmg = thornCap;
             }
-            if (this.evolvedVamp && this.lifestealRate > 0) {
+            if ((this.evolvedVamp || this.thornsLifesteal) && this.lifestealRate > 0) {
                 const heal = Math.floor(thornDmg * this.lifestealRate);
                 if (heal > 0) {
                     this.hp = Math.min(this.maxHp, this.hp + heal);
@@ -234,17 +254,16 @@ class Player {
             if (this._baseMaxHp) this._baseMaxHp += 10;
             leveled = true;
         }
+        if (leveled && this.heroId === 'Mage') this._recalcThornsRate();
         return leveled;
     }
 
     _recalcThornsRate() {
         if (this.heroId !== 'Mage') return;
+        /* Epoch 42: 九筒筒纹护体 — 基础反伤率 = 5% + 等级 * 5% */
         var lv = this.relicLevels.thorn_armor || 0;
-        if (lv === 0) {
-            this.thornsRate = 0;
-            return;
-        }
-        this.thornsRate = Math.min(1, lv * 0.15);
+        /* Mage 被动：即使没有 thorn_armor 也有 5% 基础反伤 */
+        this.thornsRate = Math.min(0.5, 0.05 + lv * 0.05);
     }
 
     addRelic(id) {
@@ -420,7 +439,8 @@ class Player {
             damageReduction: this.damageReduction,
             _reviveCount: this._reviveCount || 0,
             _baseMaxHp: this._baseMaxHp || this.maxHp,
-            _relicAffixes: this._relicAffixes ? { ...this._relicAffixes } : {}
+            _relicAffixes: this._relicAffixes ? { ...this._relicAffixes } : {},
+            _startsWithRelic: !!this._startsWithRelic
         };
     }
 
@@ -474,6 +494,7 @@ class Player {
         this._reviveCount = data._reviveCount || 0;
         this._baseMaxHp = data._baseMaxHp || this.maxHp;
         this._relicAffixes = data._relicAffixes ? { ...data._relicAffixes } : {};
+        this._startsWithRelic = !!data._startsWithRelic;
         this._hasRevive = this._reviveCount > 0;
         this.setResonanceSpeed = !!data.setResonanceSpeed;
         this.setResonanceIce = !!data.setResonanceIce;
@@ -492,9 +513,9 @@ class Player {
         var meta = (window.saveManager && window.saveManager._metaCache) || {};
         var talents = meta.talents || {};
         /* 天赋加成 */
-        var hpBoost = (talents.health_boost || 0) * 20;
-        var spdBoost = (talents.speed_boost || 0) * 15;
-        var magBoost = (talents.magnet_boost || 0) * 30;
+        var hpBoost = (talents.hu_patro || 0) * 20;
+        var spdBoost = (talents.zimo_speed || 0) * 15;
+        var magBoost = (talents.lian_magnet || 0) * 30;
         this.maxHp += hpBoost;
         this.hp = Math.min(this.hp + hpBoost, this.maxHp);
         this.speed += spdBoost;
@@ -541,9 +562,9 @@ class Player {
         this.setResonanceSpeed = (affixCounts.speed_pct || 0) >= 3;
         this.setResonanceIce = (affixCounts.ice_bonus || 0) >= 3;
         /* 天赋额外加成 */
-        this.critRate += (talents.listening_intuition || 0) * 0.02;
-        this.damageReduction += (talents.gangpai_hardiness || 0) * 0.03;
-        this.cdFloor = Math.max(0.05, (this.cdFloor || 0.2) - (talents['摸牌_speed'] || 0) * 0.01);
+        this.critRate += (talents.ting_intuition || 0) * 0.02;
+        this.damageReduction += (talents.gang_hardiness || 0) * 0.03;
+        this.cdFloor = Math.max(0.05, (this.cdFloor || 0.2) - (talents.mo_pa_cd || 0) * 0.01);
         /* perk */
         var perks = (meta.purchasedPerks || {});
         if (perks.token_revive > 0) {
@@ -607,11 +628,11 @@ class Player {
         /* ── 永久天赋加成 ── */
         var meta = (window.saveManager && window.saveManager._metaCache) || {};
         var talents = meta.talents || {};
-        this.maxHp += (talents.health_boost || 0) * 20;
+        this.maxHp += (talents.hu_patro || 0) * 20;
         this.hp = this.maxHp;
-        this.speed += (talents.speed_boost || 0) * 15;
+        this.speed += (talents.zimo_speed || 0) * 15;
         this.baseSpeed = this.speed;
-        this.magnetRadius += (talents.magnet_boost || 0) * 30;
+        this.magnetRadius += (talents.lian_magnet || 0) * 30;
 
         /* ── 装备属性聚合流 ── */
         this.xpGainFactor = 1.0;
@@ -665,6 +686,7 @@ class Player {
         this.invulnTimer = 0;
         this.hitFlashTimer = 0; /* 独立受击闪烁计时器，与无敌帧分离 */
         this.critRate = 0;
+        this._weaponCdReduction = 0; /* P1-3: 跨局冷却缩减清零 */
         this.hasDrone = false;
         this.droneTimer = 0;
         this.droneInterval = 0;
@@ -681,6 +703,11 @@ class Player {
         /* H-029: 雀灵流转 -- reset 中恢复速度 */
         if (this.heroId === 'Hero') {
             this.speed = this.baseSpeed * 1.15;
+        }
+        /* Epoch 42: 雀灵流转 -- reset 中恢复CD缩减 */
+        if (this.heroId === 'Hero') {
+            this._heroCdReduction = 0.10;
+            this.cdFloor = Math.max(0.05, this.cdFloor * 0.90);
         }
         /* A-029: 暗影步 -- reset 中恢复速度 */
         if (this.heroId === 'Assassin') {
@@ -702,9 +729,9 @@ class Player {
         this.maxRage = 100;
 
         /* Epoch 2: 新天赋开局加成（在全部重置后应用，避免被覆盖） */
-        this.critRate += (talents.listening_intuition || 0) * 0.02;
-        this.damageReduction += (talents.gangpai_hardiness || 0) * 0.03;
-        this.cdFloor = Math.max(0.05, (this.cdFloor || 0.2) - (talents.摸牌_speed || 0) * 0.01);
+        this.critRate += (talents.ting_intuition || 0) * 0.02;
+        this.damageReduction += (talents.gang_hardiness || 0) * 0.03;
+        this.cdFloor = Math.max(0.05, (this.cdFloor || 0.2) - (talents.mo_pa_cd || 0) * 0.01);
 
         /* Epoch 14: 元货币购买加成 */
         var perks = (meta.purchasedPerks || {});

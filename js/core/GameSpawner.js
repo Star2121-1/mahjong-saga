@@ -19,7 +19,7 @@ Ss.init = function(engine) {
     this._currentLevelId = engine._currentLevelId || 'level_1';
     this._mapW = engine._mapW || 1500;
     this._mapH = engine._mapH || 1500;
-    this._enemyTypeWeights = engine._enemyTypeWeights || { Normal: 0.45, Tanker: 0.20, Stalker: 0.25, Shaman: 0.10 };
+    this._enemyTypeWeights = engine._enemyTypeWeights || { Normal: 0.35, Tanker: 0.15, Stalker: 0.20, Shaman: 0.08, Barrier: 0.08, Bomber: 0.10, Splitter: 0.04 };
     this._spawnInterval = engine._spawnInterval || 1.5;
     this._spawnIntervalDecay = engine._spawnIntervalDecay || 0.02;
     this._waveCount = engine._waveCount || 0;
@@ -41,7 +41,7 @@ Ss.reset = function(engine) {
     this._currentLevelId = engine._currentLevelId || 'level_1';
     this._mapW = engine._mapW || 1500;
     this._mapH = engine._mapH || 1500;
-    this._enemyTypeWeights = engine._enemyTypeWeights || { Normal: 0.45, Tanker: 0.20, Stalker: 0.25, Shaman: 0.10 };
+    this._enemyTypeWeights = engine._enemyTypeWeights || { Normal: 0.35, Tanker: 0.15, Stalker: 0.20, Shaman: 0.08, Barrier: 0.08, Bomber: 0.10, Splitter: 0.04 };
     this._spawnInterval = engine._spawnInterval || 1.5;
     this._spawnIntervalDecay = engine._spawnIntervalDecay || 0.02;
     this._waveCount = engine._waveCount || 0;
@@ -57,6 +57,11 @@ Ss.reset = function(engine) {
 
 Ss.update = function(dt, engine) {
     if (!engine.running || engine.gameOver || engine._pendingReward) return;
+
+    /* P1-6: 波次同步 — 修复波次上限恒停在第一波值 */
+    this._waveCount = engine._waveCount || 0;
+    this._currentLevelId = engine._currentLevelId || this._currentLevelId;
+    this._enemyTypeWeights = engine._enemyTypeWeights || this._enemyTypeWeights;
 
     this._difficultyTimer += dt;
     if (this._difficultyTimer >= 10) {
@@ -166,6 +171,9 @@ Ss._spawnEnemy = function(engine, isBoss) {
     /* 创建 DOM */
     var el = document.createElement('div');
     el.className = 'enemy';
+    /* P1-8: 类型/花色标记 — 驱动 gameplay-enemy.css 的 per-type 造型与箭妖瞄准光 */
+    el.dataset.enemyType = enemyType;
+    el.dataset.suit = ({ Normal: '萬', Tanker: '條', Stalker: '筒', Shaman: '風', Barrier: '白', Bomber: '發', Splitter: '中', Archer: '索' })[enemyType] || '萬';
     if (enemy.isBoss) {
         el.classList.add('boss');
         var maxW = this._getMaxWaves();

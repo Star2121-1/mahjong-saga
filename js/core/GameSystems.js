@@ -34,6 +34,26 @@ Sys.triggerOverdrive = function(engine) {
     }
 
     if (engine.container) engine.container.classList.add('overdrive-active');
+
+    /* Overdrive 全屏冲击波白闪 */
+    var flash = document.createElement('div');
+    flash.id = 'overdrive-flash';
+    engine.container.appendChild(flash);
+    setTimeout(function() { if (flash.parentNode) flash.remove(); }, 350);
+
+    /* Visual Enhancement C: Overdrive 金色流光粒子爆发 */
+    if (engine._worldLayer) {
+        for (var _ob = 0; _ob < 8; _ob++) {
+            var burst = document.createElement('div');
+            burst.className = 'legendary-burst';
+            burst.style.left = (engine.player.x + (Math.random() - 0.5) * 100) + 'px';
+            burst.style.top = (engine.player.y + (Math.random() - 0.5) * 100) + 'px';
+            burst.style.background = 'radial-gradient(circle, rgba(255,215,0,0.6), rgba(255,152,0,0))';
+            engine._worldLayer.appendChild(burst);
+            setTimeout(function(el) { if (el && el.parentNode) el.remove(); }, 800, burst);
+        }
+    }
+
     Cs.spawnCausalityText(engine, '☀☀☀ Overdrive 轰炸 ☀☀☀');
 
     /* 成就：Overdrive 计数 */
@@ -53,7 +73,7 @@ Sys.endOverdrive = function(engine) {
     for (var oi = 0; oi < engine.enemies.length; oi++) {
         var oe = engine.enemies[oi];
         if (oe._overdriveStored) {
-            oe.speed = oe._overdriveOrigSpeed || oe.baseSpeed;
+            oe.speed = oe._overdriveOrigSpeed !== undefined ? oe._overdriveOrigSpeed : oe.baseSpeed;
             oe._overdriveStored = false;
             oe._overdriveOrigSpeed = undefined;
         }
@@ -127,7 +147,7 @@ Sys.applyMutator = function(engine, mutatorId) {
             if (!e._frenzyStored) {
                 e._frenzyStored = true;
                 e._frenzyOrigSpeed = e.speed;
-                e.speed = Math.floor(e.speed * 1.5);
+                e.speed = Math.round(e.speed * 1.5);
             }
         }
     } else if (mutatorId === 'frailty') {
@@ -260,6 +280,25 @@ Sys.updateResonanceAuras = function(engine, dt) {
                     e2.frozen = true;
                     e2.frozenTimer = dur;
                     if (e2.el) e2.el.classList.add('frozen-crystal');
+                    /* Visual Enhancement C: 冰冻冰晶扩散波纹 */
+                    if (engine._worldLayer) {
+                        var ring = document.createElement('div');
+                        ring.className = 'freeze-crystal-ring';
+                        ring.style.left = e2.x + 'px';
+                        ring.style.top = e2.y + 'px';
+                        engine._worldLayer.appendChild(ring);
+                        setTimeout(function(el) { if (el && el.parentNode) el.remove(); }, 800, ring);
+                        /* 冰晶碎片 */
+                        for (var _ic = 0; _ic < 4; _ic++) {
+                            var crystal = document.createElement('div');
+                            crystal.className = 'ice-crystal';
+                            crystal.style.left = e2.x + 'px';
+                            crystal.style.top = e2.y + 'px';
+                            crystal.style.setProperty('--rot', (45 + _ic * 45) + 'deg');
+                            engine._worldLayer.appendChild(crystal);
+                            setTimeout(function(el) { if (el && el.parentNode) el.remove(); }, 600, crystal);
+                        }
+                    }
                 }
             }
             var iceEl = engine._iceAuraEl;

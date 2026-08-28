@@ -5,29 +5,55 @@
 Gp._loop = function(timestamp) {
     if (!this.running || this.gameOver) return;
     try {
+        /* Epoch 44: 懒初始化音频上下文（首次循环时尝试） */
+        if (window.audioManager && !window.audioManager._initialized) {
+            window.audioManager._ensureContext();
+        }
         var dt = Math.min((timestamp - this._lastTime) / 1000, 0.05);
         var _skipToEnd = false;
         this._lastTime = timestamp;
+        /* C2: 命中停顿 — 顿帧期间世界时间减速至15% */
+        if (this._hitStopT > 0) {
+            this._hitStopT -= dt;
+            dt *= 0.15;
+        }
         this._elapsed += dt;
 
-        /* Epoch 32: 临时增益过期检查 */
+        /* R29-H-005: speed_demon 成就 — 3分钟内通关 */
+        this._checkAchievementInflight('speed_demon', this._elapsed);
+
+        /* Epoch 32: 临时增益过期检查 — 使用游戏时间而非墙钟时间，避免面板冻结导致意外过期 */
         var p = this.player;
-        if (p._tempBuffEnd && Date.now() / 1000 >= p._tempBuffEnd) {
-            p._tempAtkBoost = 0;
-            p._tempHpBonus = 0;
-            p._doubleCoinNextWave = false;
-            p._tempBuffEnd = 0;
+        if (p._tempBuffTimeLeft !== undefined && p._tempBuffTimeLeft > 0) {
+            p._tempBuffTimeLeft -= dt;
+            if (p._tempBuffTimeLeft <= 0) {
+                p._tempAtkBoost = 0;
+                p._tempHpBonus = 0;
+                p._doubleCoinNextWave = false;
+                p._tempBuffTimeLeft = 0;
+            }
         }
 
         var input = this._getInputVector();
         this._lastMoveX = input.x;
+        /* P1-7/P0-NEW 修复: 打牌/胡牌演出期间冻结逻辑，但必须维持 rAF 链（否则解锁后死锁） */
+        if (this._discardMode || this._huLock) {
+            this._syncEntities();
+            this._syncUI();
+            if (this.running && !this.gameOver) requestAnimationFrame(this._guardedLoop || this._boundLoop);
+            return;
+        }
+        /* B3: 北冥图腾减速 — 移动期间临时降速，更新后还原 */
+        var _spdSave = this.player.speed;
+        if (this.player._frostSlowed) this.player.speed = _spdSave * 0.75;
         this.player.update(dt, input.x, input.y, this._mapW, this._mapH);
+        this.player.speed = _spdSave;
 
         /* ── Step 5: 视差背景随玩家位置微移 ── */
-        if (this._battlefieldBg) {
+        if (this.battlefieldBg) {
             var px = -(this.player.x / this._mapW - 0.5) * 40;
             var py = -(this.player.y / this._mapH - 0.5) * 30;
-            this._battlefieldBg.style.transform = 'translate(' + px + 'px,' + py + 'px)';
+            this.battlefieldBg.style.transform = 'translate(' + px + 'px,' + py + 'px)';
         }
 
         if (!this._pendingReward) {
@@ -75,16 +101,59 @@ Gp._loop = function(timestamp) {
                 this.enemies[_ei].update(dt, this.player, this);
             }
 
-            /* ── 图腾 buff 应用 ── */
+            /* ── 图腾 buff 应用（Epoch 46: 网格空间分割优化） ── */
             for (var _toti = 0; _toti < this.enemies.length; _toti++) this.enemies[_toti]._totemBuffed = false;
-            for (var _to = 0; _to < this._totems.length; _to++) {
-                var t = this._totems[_to];
-                for (var _tei = 0; _tei < this.enemies.length; _tei++) {
-                    var te = this.enemies[_tei];
-                    if (!te.alive) continue;
-                    var tdx = te.x - t.x;
-                    var tdy = te.y - t.y;
-                    if (tdx * tdx + tdy * tdy < t.radius * t.radius) te._totemBuffed = true;
+            /* P2-7 真修: 复位移到 totems 分支外 — 防末图腾消失后减速标志永久残留 */
+            this.player._frostSlowed = false;
+            if (this._totems.length > 0) {
+                /* B3: 图腾寿命到期清理（8s） */
+                for (var _tex = this._totems.length - 1; _tex >= 0; _tex--) {
+                    var _tt = this._totems[_tex];
+                    if (_tt.born !== undefined && this._elapsed - _tt.born > 8) {
+                        if (_tt.el && _tt.el.parentNode) _tt.el.remove();
+                        this._totems.splice(_tex, 1);
+                    }
+                }
+                /* B3: 北冥图腾减速领域（玩家进入 r100 内移速-25%） */
+                for (var _tf = 0; _tf < this._totems.length; _tf++) {
+                    var tf = this._totems[_tf];
+                    if (tf.kind === 'frost') {
+                        var fdx = this.player.x - tf.x, fdy = this.player.y - tf.y;
+                        var fr = tf.radius || 100;
+                        if (fdx * fdx + fdy * fdy < fr * fr) { this.player._frostSlowed = true; break; }
+                    }
+                }
+                /* Epoch 46: 构建敌人网格 */
+                var GRID_SIZE = 80;
+                var totemGrid = {};
+                for (var _tg = 0; _tg < this.enemies.length; _tg++) {
+                    var _te = this.enemies[_tg];
+                    if (!_te.alive) continue;
+                    var _gx = Math.floor(_te.x / GRID_SIZE);
+                    var _gy = Math.floor(_te.y / GRID_SIZE);
+                    var _gk = _gx + ',' + _gy;
+                    if (!totemGrid[_gk]) totemGrid[_gk] = [];
+                    totemGrid[_gk].push(_te);
+                }
+                /* 对每个图腾，只检查其所在格及周边 8 格的敌人 */
+                for (var _to = 0; _to < this._totems.length; _to++) {
+                    var t = this._totems[_to];
+                    var tgx = Math.floor(t.x / GRID_SIZE);
+                    var tgy = Math.floor(t.y / GRID_SIZE);
+                    var tR2 = t.radius * t.radius;
+                    for (var dgx = -1; dgx <= 1; dgx++) {
+                        for (var dgy = -1; dgy <= 1; dgy++) {
+                            var ck = (tgx + dgx) + ',' + (tgy + dgy);
+                            var cell = totemGrid[ck];
+                            if (!cell) continue;
+                            for (var ci = 0; ci < cell.length; ci++) {
+                                var te = cell[ci];
+                                var tdx = te.x - t.x;
+                                var tdy = te.y - t.y;
+                                if (tdx * tdx + tdy * tdy < tR2) te._totemBuffed = true;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -98,11 +167,30 @@ Gp._loop = function(timestamp) {
                 }
             }
 
+            /* Epoch 47: 深渊变异组合自动激活 */
+            if (this.loopCount > 0 && this._abyssUnlockedCombos && this._abyssUnlockedCombos.length > 0 && !this._abyssActiveCombo) {
+                /* 自动激活第一个未激活的组合 */
+                var firstCombo = this._abyssUnlockedCombos[0];
+                this._abyssActiveCombo = firstCombo;
+                var comboName = '';
+                for (var _ci = 0; _ci < this._abyssComboDefinitions.length; _ci++) {
+                    if (this._abyssComboDefinitions[_ci].id === firstCombo) { comboName = this._abyssComboDefinitions[_ci].name; break; }
+                }
+                if (comboName) this._spawnCausalityText('🌀 自动激活深渊变异: ' + comboName);
+            }
+
+            /* Buff/Debuff 计时递减统一在上方 Epoch 32 块处理（修复双重递减 bug） */
+            /* 护盾过期 */
+            if (this._tempShieldEnd > 0 && Date.now() / 1000 > this._tempShieldEnd) {
+                this._tempShield = 0;
+                this._tempShieldEnd = 0;
+            }
+
             if (this.player._thornCritX !== undefined) {
                 if (this._combat && this._combat.spawnFloatText) {
-                    this._combat.spawnFloatText(this, this.player._thornCritX, this.player._thornCritY, '暴击反商!', true);
+                    this._combat.spawnFloatText(this, this.player._thornCritX, this.player._thornCritY, '暴击反伤!', true);
                 } else {
-                    this._spawnFloatText(this.player._thornCritX, this.player._thornCritY, '暴击反商!', true);
+                    this._spawnFloatText(this.player._thornCritX, this.player._thornCritY, '暴击反伤!', true);
                 }
                 this.player._thornCritX = undefined;
                 this.player._thornCritY = undefined;
@@ -163,7 +251,68 @@ Gp._loop = function(timestamp) {
             // 所有非Boss敌人死亡 → 波次结束奖励
             // is handled by _pendingReward block below
 
-            if (this.player.hp < prevHp) {
+            /* ── Visual Enhancement B: 昼夜循环 + 深渊变暗 ── */
+        if (this.battlefield) {
+            /* 昼夜循环：每 10 波切换一次 */
+            if (this._waveCount > 0) {
+                var cycleIndex = Math.floor(this._waveCount / 10) % 3; // 0=day, 1=dusk, 2=night
+                var dne = this._dayNightEl;
+                if (!dne) {
+                    dne = document.createElement('div');
+                    dne.id = 'day-night-overlay';
+                    dne.className = 'day';
+                    this.battlefield.appendChild(dne);
+                    this._dayNightEl = dne;
+                }
+                dne.className = ['day', 'dusk', 'night'][cycleIndex];
+            }
+
+            /* 深渊模式背景变暗 */
+            if (this.loopCount > 0) {
+                var ab = this.battlefield;
+                ab.classList.remove('abyss-depth-1', 'abyss-depth-2', 'abyss-depth-3', 'abyss-depth-n');
+                if (this.loopCount <= 1) ab.classList.add('abyss-depth-1');
+                else if (this.loopCount <= 3) ab.classList.add('abyss-depth-2');
+                else if (this.loopCount <= 6) ab.classList.add('abyss-depth-3');
+                else ab.classList.add('abyss-depth-n');
+
+                /* 红色雾霭 */
+                if (!this._abyssMistEl) {
+                    var mist = document.createElement('div');
+                    mist.className = 'abyss-red-mist';
+                    mist.style.left = Math.random() * 50 + '%';
+                    mist.style.top = Math.random() * 50 + '%';
+                    ab.appendChild(mist);
+                    this._abyssMistEl = mist;
+                }
+            } else if (this._abyssMistEl) {
+                if (this._abyssMistEl.parentNode) this._abyssMistEl.remove();
+                this._abyssMistEl = null;
+            }
+
+            /* Weather: 雨滴粒子 (每波 5+ 触发) */
+            if (this._waveCount >= 5 && !this._pendingReward) {
+                this._rainTimer = (this._rainTimer || 0) + dt;
+                if (this._rainTimer >= 0.05) {
+                    this._rainTimer = 0;
+                    if (this._rainDrops && this._rainDrops.length < 30) {
+                        var drop = document.createElement('div');
+                        drop.className = 'weather-rain-drop';
+                        var bw = this.battlefield.clientWidth;
+                        drop.style.left = Math.random() * bw + 'px';
+                        drop.style.top = '-10px';
+                        drop.style.height = (10 + Math.random() * 15) + 'px';
+                        drop.style.setProperty('--duration', (0.4 + Math.random() * 0.3) + 's');
+                        this.battlefield.appendChild(drop);
+                        if (!this._rainDrops) this._rainDrops = [];
+                        this._rainDrops.push(drop);
+                        setTimeout(function(el) { if (el && el.parentNode) el.remove(); }, 800, drop);
+                    }
+                }
+            }
+        }
+
+        if (this.player.hp < prevHp) {
                 /* Epoch 32: 临时护盾吸收 */
                 if (this._tempShield > 0) {
                     var absorbed = Math.min(this._tempShield, prevHp - this.player.hp);
@@ -177,6 +326,19 @@ Gp._loop = function(timestamp) {
 
         this._updateCoins(dt);
         this._updateExpGems(dt);
+
+        /* ── Epoch 43: 引导追踪 — 拾取经验石 ── */
+        if (!this._guideDismissed && this._expGems.length < (this._guidePrevGemCount || 0)) {
+            this._guideGemsPicked = (this._guideGemsPicked || 0) + 1;
+        }
+        this._guidePrevGemCount = this._expGems.length;
+
+        /* ── Epoch 43: 引导追踪 — 首次攻击命中 ── */
+        if (!this._guideDismissed && this.enemies.length > (this._guidePrevEnemyCount || 0)) {
+            /* 敌人减少了 = 被击杀了 = 有攻击 */
+            this._guideHits = (this._guideHits || 0) + 1;
+        }
+        this._guidePrevEnemyCount = this.enemies.length;
 
         /* ── BossLord 死亡：等待经验石吸完后再结算 ── */
         if (this._pendingBossLordSettle && this._expGems.length === 0) {
@@ -199,7 +361,36 @@ Gp._loop = function(timestamp) {
             return;
         }
 
+        /* ── Visual Enhancement D: 技能施放轮廓光 ── */
+        if (this._weaponJustFired && this.playerEl) {
+            var glow = document.createElement('div');
+            glow.className = 'player-skill-glow';
+            glow.style.left = (this.player.x - 28) + 'px';
+            glow.style.top = (this.player.y - 32) + 'px';
+            glow.style.width = '56px';
+            glow.style.height = '64px';
+            var heroColor = {
+                Hero: 'rgba(212,175,55,0.5)',
+                Knight: 'rgba(21,101,192,0.5)',
+                Mage: 'rgba(46,125,50,0.5)',
+                Assassin: 'rgba(123,31,162,0.5)'
+            }[this.player.heroId] || 'rgba(255,255,255,0.5)';
+            glow.style.boxShadow = '0 0 20px 10px ' + heroColor;
+            this._worldLayer.appendChild(glow);
+            setTimeout(function(el) { if (el && el.parentNode) el.remove(); }, 600, glow);
+            this._weaponJustFired = false;
+        }
+
         this._updateWeapons(dt);
+        /* 检测武器是否刚刚发射 */
+        for (var _wf = 0; _wf < this._activeWeapons.length; _wf++) {
+            var wf = this._activeWeapons[_wf];
+            if (wf._justFired) {
+                this._weaponJustFired = true;
+                wf._justFired = false;
+                break;
+            }
+        }
         this._updateProjectiles(dt);
         if (!this._pendingReward) this._updateEnemyProjectiles(dt);
 
@@ -249,6 +440,34 @@ Gp._loop = function(timestamp) {
                         var dmg = Math.max(1, Math.floor(_we.maxHp * 0.05));
                         _we.takeDamage(dmg, 'wither');
                     }
+                }
+            }
+        }
+
+        /* Epoch 47: 深渊变异组合效果持续应用 */
+        if (this._abyssActiveCombo && !this._pendingReward) {
+            var _abyssCombo = this._abyssActiveCombo;
+            if (_abyssCombo === 'abyss_frenzy') {
+                /* 深渊狂乱: 敌人攻速+100%（P1-5 修复：基于 baseSpeed 一次性派生，杜绝逐帧×2指数爆炸） */
+                for (var _af = 0; _af < this.enemies.length; _af++) {
+                    var _ae = this.enemies[_af];
+                    if (_ae.alive && !_ae._frenzyApplied) {
+                        _ae._frenzyApplied = true;
+                        _ae.speed = Math.floor(_ae.baseSpeed * 2.0);
+                    }
+                }
+                if (this.player.lifestealRate < 1) {
+                    /* 击杀回血通过 _rewardKill 中的额外逻辑处理 */
+                }
+            } else if (_abyssCombo === 'abyss_gravity') {
+                /* 深渊引力: 吸附×3 */
+                this.player.magnetRadius = (this.player._baseMagnetRadius || this.player.magnetRadius) * 3;
+            } else if (_abyssCombo === 'abyss_frailty') {
+                /* 深渊脆弱: 玩家攻击+150%，受伤+50% */
+                if (this.player._abyssFrailtyAtk !== 2.5) {
+                    this.player.atk = Math.floor(this.player.atk * 2.5 / (this.player._abyssFrailtyAtk || 1));
+                    this.player._abyssFrailtyAtk = 2.5;
+                    this.player._frailtyDebuff = true;
                 }
             }
         }
@@ -317,6 +536,13 @@ Gp._loop = function(timestamp) {
         this._syncEntities();
         this._syncPlayerHP();
         this._syncUI();
+
+        /* Epoch 47: 每3秒检查一次里程碑 */
+        this._milestoneCheckTimer = (this._milestoneCheckTimer || 0) + dt;
+        if (this._milestoneCheckTimer >= 3) {
+            this._milestoneCheckTimer = 0;
+            if (this._checkMilestones) this._checkMilestones();
+        }
     } catch (err) { console.error('Game loop error:', err); }
 
     if (this.running && !this.gameOver) requestAnimationFrame(this._guardedLoop || this._boundLoop);
@@ -332,6 +558,66 @@ Gp._getWaveEnemyMax = function() {
     if (!cfg || !cfg.waveEnemyMax) return 999;
     var idx = Math.min(this._waveCount, cfg.waveEnemyMax.length - 1);
     return cfg.waveEnemyMax[idx] || 999;
+};
+
+/* ══════════════════════════════════════════════
+   Epoch 47: 局内Buff/Debuff显示
+   ══════════════════════════════════════════════ */
+
+Gp._renderActiveBuffs = function() {
+    if (!this.battlefield) return;
+    var p = this.player;
+    var buffs = [];
+    if (p._tempAtkBoost > 0) buffs.push({ name: '⚔ 攻击+' + Math.round(p._tempAtkBoost * 100) + '%', timer: p._tempBuffTimeLeft });
+    if (p._tempHpBonus > 0) buffs.push({ name: '❤ 生命+' + Math.round(p._tempHpBonus), timer: p._tempBuffTimeLeft });
+    if (this._tempGoldMult > 1) buffs.push({ name: '💰 金币×' + this._tempGoldMult, timer: 1 }); /* 单波 */
+    if (this._tempBerserkBonus) buffs.push({ name: '🩸 狂战士', timer: 1 });
+    if (this._tempShield > 0) buffs.push({ name: '🛡 护盾' + Math.round(this._tempShield), timer: this._tempShieldEnd - Date.now() / 1000 });
+    if (p._doubleCoinNextWave) buffs.push({ name: '🪙 双倍金币', timer: 1 });
+
+    var container = document.getElementById('active-buffs-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'active-buffs-container';
+        container.style.cssText = 'position:absolute;top:30px;right:10px;display:flex;flex-direction:column;gap:2px;z-index:50;pointer-events:none;';
+        this.battlefield.appendChild(container);
+    }
+    container.innerHTML = '';
+    for (var i = 0; i < buffs.length; i++) {
+        var b = buffs[i];
+        var el = document.createElement('div');
+        el.style.cssText = 'background:rgba(0,0,0,0.7);color:#ffd740;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;border:1px solid rgba(255,215,0,0.3);';
+        if (b.timer > 0 && b.timer < 999) {
+            el.textContent = b.name + ' (' + Math.ceil(b.timer) + 's)';
+        } else {
+            el.textContent = b.name;
+        }
+        container.appendChild(el);
+    }
+};
+
+/* Epoch 47: 局内里程碑提示 */
+Gp._checkMilestones = function() {
+    var shown = this._milestonesShown || [];
+    var milestones = [
+        { id: 'kill_50', check: function() { return this.kills >= 50; }, msg: '🎯 击杀 50 — 势不可挡！' },
+        { id: 'kill_100', check: function() { return this.kills >= 100; }, msg: '💀 击杀 100 — 传奇猎手！' },
+        { id: 'wave_5', check: function() { return this._waveCount >= 5; }, msg: '🌊 第 5 波 — 坚持得很好！' },
+        { id: 'wave_10', check: function() { return this._waveCount >= 10; }, msg: '🌊 第 10 波 — 坚不可摧！' },
+        { id: 'overdrive_1', check: function() { return (this._overdriveCount || 0) >= 1; }, msg: '⚡ 首次 Overdrive — 力量觉醒！' },
+        { id: 'overdrive_5', check: function() { return (this._overdriveCount || 0) >= 5; }, msg: '⚡ Overdrive ×5 — 狂怒之王！' },
+        { id: 'lvl_5', check: function() { return this.player && this.player.currentLvl >= 5; }, msg: '⭐ 等级 5 — 战力飙升！' },
+        { id: 'lvl_10', check: function() { return this.player && this.player.currentLvl >= 10; }, msg: '⭐ 等级 10 — 巅峰战力！' }
+    ];
+    for (var i = 0; i < milestones.length; i++) {
+        var m = milestones[i];
+        if (shown.indexOf(m.id) !== -1) continue;
+        if (m.check.call(this)) {
+            shown.push(m.id);
+            this._milestonesShown = shown;
+            this._spawnCausalityText(m.msg);
+        }
+    }
 };
 
 })();

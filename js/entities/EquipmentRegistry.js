@@ -1,14 +1,14 @@
 window.equipmentRegistry = {
     equipPool: {
-        v2_wpn_sword: { id: 'v2_wpn_sword', name: '\u98ce\u66b4\u5927\u5251', slot: 'weapon', base: { atk_factor: 0.10 } },
-        v2_amr_plate: { id: 'v2_amr_plate', name: '\u72e9\u7ea2\u91cd\u94e0', slot: 'armor', base: { hp_boost: 30 } },
-        v2_talis_ring: { id: 'v2_talis_ring', name: '\u4e0d\u706d\u6307\u73af', slot: 'talisman', base: { magnet_boost: 20 } }
+        v2_wpn_sword: { id: 'v2_wpn_sword', name: '\u98ce\u88c1\u98de\u724c', slot: 'weapon', base: { atk_factor: 0.10 } },
+        v2_amr_plate: { id: 'v2_amr_plate', name: '\u8d64\u57a3\u94c1\u58c1', slot: 'armor', base: { hp_boost: 30 } },
+        v2_talis_ring: { id: 'v2_talis_ring', name: '\u4e0d\u706d\u5b9d\u724c\u6212', slot: 'talisman', base: { magnet_boost: 20 } }
     },
 
     affixPool: {
-        xp_gain:    { id: 'xp_gain',    name: '\u7ecf\u9a8c\u589e\u5e45',  min: 0.05, max: 0.15, fmt: '\u7ecf\u9a8c\u83b7\u53d6 +{val}%' },
-        ice_bonus:  { id: 'ice_bonus',  name: '\u51b0\u51bb\u5f3a\u5316',  min: 0.1,  max: 0.5,  fmt: '\u51b0\u51bb\u63a7\u5236\u65f6\u95f4 +{val}s' },
-        speed_pct:  { id: 'speed_pct',  name: '\u8fc5\u6377',      min: 0.05, max: 0.10, fmt: '\u79fb\u52a8\u901f\u5ea6 +{val}%' }
+        xp_gain:    { id: 'xp_gain',    name: '\u7ecf\u9a8c\u756a',  min: 0.05, max: 0.15, fmt: '\u7ecf\u9a8c\u83b7\u53d6 +{val}%' },
+        ice_bonus:  { id: 'ice_bonus',  name: '\u51b0\u51bb\u756a',  min: 0.1,  max: 0.5,  fmt: '\u51b0\u51bb\u63a7\u5236\u65f6\u95f4 +{val}s' },
+        speed_pct:  { id: 'speed_pct',  name: '\u81ea\u6478\u901f',  min: 0.05, max: 0.10, fmt: '\u79fb\u52a8\u901f\u5ea6 +{val}%' }
     },
 
     _affixKeys: ['xp_gain', 'ice_bonus', 'speed_pct'],

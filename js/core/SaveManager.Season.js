@@ -153,6 +153,113 @@
         });
     };
 
+    /* ── Epoch 47: 赛季通行证 (Battle Pass) ── */
+
+    SaveManager.prototype.getBattlePassData = function() {
+        var meta = this._metaCache || {};
+        var season = meta.season || {};
+        var bp = season.battlePass || {};
+        return {
+            tier: bp.currentTier || 0,
+            claimedTiers: bp.claimedTiers || [],
+            premium: bp.premium || false,
+            xp: bp.xp || 0
+        };
+    };
+
+    SaveManager.prototype.addBattlePassXP = function(amount) {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            var season = meta.season || {};
+            if (!season.battlePass) season.battlePass = { currentTier: 0, claimedTiers: [], premium: false, xp: 0 };
+            var bp = season.battlePass;
+            bp.xp = (bp.xp || 0) + amount;
+            /* 每 100 XP 升 1 级 */
+            while (bp.xp >= 100 && bp.currentTier < 30) {
+                bp.xp -= 100;
+                bp.currentTier++;
+            }
+            if (bp.currentTier >= 30) bp.currentTier = 30; /* 满级 */
+            meta.season = season;
+            return self.saveMeta(meta).then(function() { return { tier: bp.currentTier, xp: bp.xp }; });
+        });
+    };
+
+    SaveManager.prototype.claimBattlePassTier = async function(tier) {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            var season = meta.season || {};
+            if (!season.battlePass) return { ok: false, reason: '无通行证数据' };
+            var bp = season.battlePass;
+            if (tier <= 0 || tier > 30) return { ok: false, reason: '无效等级' };
+            if (tier > (bp.currentTier || 0)) return { ok: false, reason: '等级不足' };
+            if (!bp.claimedTiers) bp.claimedTiers = [];
+            if (bp.claimedTiers.indexOf(tier) !== -1) return { ok: false, reason: '已领取' };
+            bp.claimedTiers.push(tier);
+            /* 奖励 */
+            var reward = BattlePassRewards[tier - 1];
+            if (reward) {
+                if (reward.metaTokens) meta.metaTokens = (meta.metaTokens || 0) + reward.metaTokens;
+                if (reward.bossCores) meta.bossCores = (meta.bossCores || 0) + reward.bossCores;
+                if (reward.premium && !bp.premium) {
+                    /* 免费玩家不能领Premium奖励 */
+                    bp.claimedTiers.pop();
+                    return { ok: false, reason: '需要购买高级通行证' };
+                }
+            }
+            meta.season = season;
+            return self.saveMeta(meta).then(function() { return { ok: true, reward: reward }; });
+        });
+    };
+
+    SaveManager.prototype.buyBattlePassPremium = async function() {
+        var self = this;
+        return this.getMeta().then(function(meta) {
+            var season = meta.season || {};
+            if (!season.battlePass) season.battlePass = {};
+            if (season.battlePass.premium) return { ok: false, reason: '已是高级' };
+            if ((meta.metaTokens || 0) < 100) return { ok: false, reason: '需要 100 元代币' };
+            meta.metaTokens -= 100;
+            season.battlePass.premium = true;
+            meta.season = season;
+            return self.saveMeta(meta).then(function() { return { ok: true }; });
+        });
+    };
+
+    /* 30层通行证奖励表 */
+    window.BattlePassRewards = [
+        { metaTokens: 5 },                          /* Tier 1 */
+        { metaTokens: 5 },                          /* Tier 2 */
+        { premium: true, metaTokens: 10, bossCores: 1 }, /* Tier 3 Premium */
+        { metaTokens: 10 },                         /* Tier 4 Free */
+        { metaTokens: 10 },                         /* Tier 5 */
+        { premium: true, metaTokens: 15, bossCores: 2 }, /* Tier 6 Premium */
+        { metaTokens: 15 },                         /* Tier 7 */
+        { metaTokens: 15 },                         /* Tier 8 */
+        { metaTokens: 20 },                         /* Tier 9 */
+        { premium: true, metaTokens: 20, bossCores: 3 }, /* Tier 10 Premium */
+        { metaTokens: 20 },                         /* Tier 11 */
+        { metaTokens: 20 },                         /* Tier 12 */
+        { metaTokens: 25 },                         /* Tier 13 */
+        { metaTokens: 25 },                         /* Tier 14 */
+        { metaTokens: 30 },                         /* Tier 15 */
+        { premium: true, metaTokens: 30, bossCores: 5 }, /* Tier 16 Premium */
+        { metaTokens: 30 },                         /* Tier 17 */
+        { metaTokens: 30 },                         /* Tier 18 */
+        { metaTokens: 35 },                         /* Tier 19 */
+        { metaTokens: 35 },                         /* Tier 20 */
+        { premium: true, metaTokens: 40, bossCores: 8 }, /* Tier 21 Premium */
+        { metaTokens: 40 },                         /* Tier 22 */
+        { metaTokens: 40 },                         /* Tier 23 */
+        { metaTokens: 50 },                         /* Tier 24 */
+        { metaTokens: 50 },                         /* Tier 25 */
+        { premium: true, metaTokens: 60, bossCores: 10 }, /* Tier 26 Premium */
+        { metaTokens: 60 },                         /* Tier 27 */
+        { metaTokens: 60 },                         /* Tier 28 */
+        { metaTokens: 80 },                         /* Tier 29 */
+        { premium: true, metaTokens: 100, bossCores: 15 }  /* Tier 30 Premium */
+    ];
+
     /* ── Epoch 15: 精英模式 ── */
 
     SaveManager.prototype.enableEliteMode = async function() {

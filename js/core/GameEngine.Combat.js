@@ -20,6 +20,14 @@ Gp._resumeAfterReward = function() {
     this._cleanAllProjectiles();
     this._cleanEnemyProjectiles();
 
+    /* R30-H-007: 清理雨滴粒子防止累积 */
+    if (this._rainDrops) {
+        for (var _rd = 0; _rd < this._rainDrops.length; _rd++) {
+            if (this._rainDrops[_rd] && this._rainDrops[_rd].parentNode) this._rainDrops[_rd].remove();
+        }
+        this._rainDrops = [];
+    }
+
     this._waveCount++;
     this.currentWaveSpawnedCount = 0;
     this._mutatorTriggered = false;
@@ -52,7 +60,7 @@ Gp._resumeAfterLevelUp = function() {
 
 Gp._checkQqueenShield = function() {
     var meta = window.saveManager._metaCache || {};
-    var shieldLv = (meta.talents || {}).雀魂_shield || 0;
+    var shieldLv = (meta.talents || {}).que_spirit_shield || 0;
     if (shieldLv <= 0) return;
     /* 每10波触发一次 */
     if ((this._waveCount + 1) % 10 !== 0) return;
@@ -150,6 +158,8 @@ Gp._showAbyssPanel = function() {
 };
 
 Gp._enterAbyss = function() {
+    var bc = document.getElementById('active-buffs-container');
+    if (bc) bc.remove();
     this.loopCount++;
     this._waveCount = 0;
     this.currentWaveSpawnedCount = 0;
@@ -195,6 +205,14 @@ Gp._enterAbyss = function() {
     this._enemyIdCounter = 0;
     this._clearTotems();
     this._cleanEnemyProjectiles();
+
+    /* R30-H-007: 深渊轮回也清理雨滴 */
+    if (this._rainDrops) {
+        for (var _rd = 0; _rd < this._rainDrops.length; _rd++) {
+            if (this._rainDrops[_rd] && this._rainDrops[_rd].parentNode) this._rainDrops[_rd].remove();
+        }
+        this._rainDrops = [];
+    }
     this.gameOver = false;
     this.running = false; /* 显式确保 running=false，由 _announceWave → _beginLoop 恢复 */
     this._abyssPanelVisible = true;
@@ -276,11 +294,12 @@ Gp._spawnCausalityText = function(text) {
 };
 
 Gp._settleRun = async function(tokens) {
-    /* 防止 restart() 在 await 期间调用导致新游戏被覆盖 */
-    if (!this.running || this.gameOver) return;
+    /* P0-1 修复：原布尔守卫在胜利/死亡流程下恒真导致结算死代码。
+       改用局序号令牌 — 仅当 await 期间发生 restart（序号变化）才放弃写入 */
+    var _seq = this._runSeq || 0;
     var meta = await window.saveManager.getMeta();
     /* 再次检查 — await 后可能已 restart */
-    if (!this.running || this.gameOver) return;
+    if ((this._runSeq || 0) !== _seq) return;
     meta.metaTokens = (meta.metaTokens || 0) + tokens;
     meta.totalRuns = (meta.totalRuns || 0) + 1;
     meta.totalKills = (meta.totalKills || 0) + this.kills;
@@ -299,7 +318,7 @@ Gp._settleRun = async function(tokens) {
     if (this._bloodRageActive) bonusCores += 2;
     /* Epoch 2: 核心共鸣天赋 */
     var metaForResonance = window.saveManager._metaCache || {};
-    var coreResLevel = (metaForResonance.talents || {}).core_resonance || 0;
+    var coreResLevel = (metaForResonance.talents || {}).he_resonance || 0;
     if (coreResLevel > 0) {
         bonusCores = Math.floor(bonusCores * (1 + coreResLevel * 0.1));
     }
@@ -352,19 +371,24 @@ Gp._settleRun = async function(tokens) {
         }
     }
 
-    await window.saveManager.saveMeta(meta).catch(function(e){ console.warn('[SettleRun] saveMeta failed:', e); });
-    await window.saveManager.clearActiveRun().catch(function(e){ console.warn('[SettleRun] clearActiveRun failed:', e); });
+    await window.saveManager.saveMeta(meta).catch(function(e){ window.toastSystem && window.toastSystem.error('存档失败: ' + e.message); });
+    await window.saveManager.clearActiveRun().catch(function(e){ window.toastSystem && window.toastSystem.error('清除存档失败: ' + e.message); });
 
-    /* Epoch 14: 运行统计记录 */
+    /* Epoch 47: 赛季通行证XP */
+    if (typeof window.saveManager.addBattlePassXP === 'function') {
+        window.saveManager.addBattlePassXP(10 + Math.floor(this.kills / 10)).catch(function() {});
+    }
+
+    /* Epoch 47: Boss掉落事件 — 宝石雨 */
+    if (this._bossKillRewardEffect) this._bossKillRewardEffect();
+    if (this._renderActiveBuffs) this._renderActiveBuffs();
     try {
         var pR = this.player && this.player.relicLevels || {};
         var ur = Object.keys(pR).filter(function(k) { return (pR[k] || 0) > 0; }).length;
         if (typeof window.saveManager.recordRunStats === 'function') {
             window.saveManager.recordRunStats(this.kills, this._elapsed, this._maxGoldThisRun || 0, this._overdriveCount || 0, this._totalDodgesThisRun || 0, this._totalCritsThisRun || 0, this._waveCount, this._bossKillsThisRun || 0, this.loopCount || 0, true, this._playerHitCountThisRun || 0, ur);
         }
-    } catch(e) { console.warn('[GameEngine] error:', e); }
-
-    /* ── 成就：局末型检测 ── */
+    } catch(e) { window.toastSystem && window.toastSystem.error('统计记录失败: ' + e.message); }
     /* 击杀类 */
     if ((meta.totalKills || 0) >= 1)    this._checkAchievement('first_kill');
     if ((meta.totalKills || 0) >= 100)  this._checkAchievement('hundred_kills');
@@ -407,7 +431,7 @@ Gp._settleRun = async function(tokens) {
             var _newMut = _avail[Math.floor(Math.random() * _avail.length)];
             _unlocked.push(_newMut);
             meta.unlockedMutations = _unlocked;
-            if (this.running && !this.gameOver) await window.saveManager.saveMeta(meta);
+            if ((this._runSeq || 0) === _seq) await window.saveManager.saveMeta(meta); /* P1-NEW-b: 序号令牌守卫 */
             var _label = _newMut === 'gravity' ? '\u5f15\u529b\u9006\u8f6c' : '\u72c2\u66b4\u8840\u6708';
             var _notif = document.createElement('div');
             _notif.className = 'mutation-unlock-notif';
@@ -428,16 +452,30 @@ Gp._settleRun = async function(tokens) {
                 !this.gameOver, this.loopCount || 0, uniqueRelics, _wc
             );
         }
-    } catch(e) { console.warn('[GameEngine] error:', e); }
+    } catch(e) { window.toastSystem && window.toastSystem.error('战局记录失败: ' + e.message); }
+
+    /* P1-NEW-b: 终末确定性落盘 — 统计/历史/成就/变异解锁一次性持久化 */
+    if ((this._runSeq || 0) === _seq) {
+        meta.lastSaveTimestamp = Date.now();
+        await window.saveManager.saveMeta(meta).catch(function(e){ window.toastSystem && window.toastSystem.error('终末存档失败: ' + e.message); });
+    }
 };
 
 Gp._gameOver = async function() {
-    if (this.gameOver) return;
-    /* C-01: 增加 running 守卫，防止 restart() 在 await 期间覆盖 meta */
-    if (!this.running) return;
+    var _seqGO = this._runSeq || 0; /* P0-1: 局序号令牌 */
+    /* P0-1 修复: 移除恒真布尔守卫（调用方 Loop 已先行置 flags，原守卫使死亡结算永不执行） */
     this.gameOver = true;
     this.running = false;
     this._freezeClock();
+
+    /* Epoch 46: 玩家死亡动画 — 雀牌碎裂 */
+    if (this.playerEl) {
+        this.playerEl.style.transition = 'transform 0.6s ease-in, opacity 0.6s ease-in';
+        this.playerEl.style.transform = 'scale(0) rotate(180deg)';
+        this.playerEl.style.opacity = '0';
+        var self = this;
+        setTimeout(function() { if (self.playerEl) self.playerEl.style.display = 'none'; }, 700);
+    }
     for (var _c = 0; _c < this._activeCoins.length; _c++) this._activeCoins[_c].el.remove();
     this._activeCoins = [];
     for (var _g = 0; _g < this._expGems.length; _g++) { if (this._expGems[_g].el) this._expGems[_g].el.remove(); }
@@ -451,6 +489,8 @@ Gp._gameOver = async function() {
     this._clearMutatorEffects();
     if (this.mutatorOverlay) this.mutatorOverlay.classList.remove('active');
     if (this.bossHpBar) this.bossHpBar.classList.remove('active');
+    /* Epoch 46: 死亡时清理波次横幅 */
+    if (this.waveMilestoneBanner) this.waveMilestoneBanner.classList.remove('visible');
     for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
     this._enemyElements.clear();
     this.enemies = [];
@@ -488,9 +528,9 @@ Gp._gameOver = async function() {
 
     var tokens = window.saveManager.calcMetaTokens(this.kills, this._elapsed);
 
-    var meta = await window.saveManager.getMeta().catch(function(e){ console.warn('[GameOver] getMeta failed:', e); return {}; });
-    /* C-01: await 后二次守卫 — restart() 可能在 await 期间调用 */
-    if (!this.running || this.gameOver) return;
+    var meta = await window.saveManager.getMeta().catch(function(e){ window.toastSystem && window.toastSystem.error('获取存档失败: ' + e.message); return {}; });
+    /* P0-1 修复：序号令牌替代恒真布尔守卫 */
+    if ((this._runSeq || 0) !== _seqGO) return;
     if (!meta || typeof meta.metaTokens === 'undefined') meta = { metaTokens: 0 };
     meta.metaTokens = (meta.metaTokens || 0) + tokens;
     meta.totalRuns = (meta.totalRuns || 0) + 1;
@@ -502,7 +542,7 @@ Gp._gameOver = async function() {
         if (typeof window.mainHubCheckChallenge === 'function') {
             challengeResults = window.mainHubCheckChallenge(this);
         }
-    } catch(e) { console.warn('[GameEngine] error:', e); }
+    } catch(e) { window.toastSystem && window.toastSystem.error('结算错误: ' + e.message); }
     if (challengeResults && challengeResults.completed && challengeResults.completed.length > 0) {
         meta.metaTokens = (meta.metaTokens || 0) + (challengeResults.bonusTokens || 0);
         meta.bossCores = (meta.bossCores || 0) + (challengeResults.bonusCores || 0);
@@ -525,7 +565,7 @@ Gp._gameOver = async function() {
                 this._spawnCausalityText('🏆 周常完成: ' + wc.completed.length + ' 项');
             }
         }
-    } catch(e) { console.warn('[GameEngine] error:', e); }
+    } catch(e) { window.toastSystem && window.toastSystem.error('结算错误: ' + e.message); }
 
     /* Epoch 31: 每日任务完成检查 */
     try {
@@ -536,7 +576,7 @@ Gp._gameOver = async function() {
                 this._spawnCausalityText('✅ 每日任务完成: ' + completedQuests.join(', '));
             }
         }
-    } catch(e) { console.warn('[GameEngine] error:', e); }
+    } catch(e) { window.toastSystem && window.toastSystem.error('结算错误: ' + e.message); }
 
     /* ── Epoch 14: 运行统计记录 ── */
     var pRelics = this.player && this.player.relicLevels || {};
@@ -551,8 +591,18 @@ Gp._gameOver = async function() {
         );
     }
 
+    /* Epoch 31: 死亡奖励 — P1-NEW-a 修复: 移到 saveMeta 之前，否则确定性丢失 */
+    try {
+        var deathReward = window.saveManager.calcDeathReward(this.kills, this._maxGoldThisRun || 0, this._elapsed);
+        if (deathReward.metaTokens > 0 || deathReward.bossCores > 0) {
+            meta.metaTokens = (meta.metaTokens || 0) + deathReward.metaTokens;
+            meta.bossCores = (meta.bossCores || 0) + deathReward.bossCores;
+            this._spawnCausalityText('💀 死亡补偿: +' + deathReward.metaTokens + ' 代币' + (deathReward.bossCores > 0 ? ' +' + deathReward.bossCores + ' 核心' : ''));
+        }
+    } catch(e) { window.toastSystem && window.toastSystem.error('结算错误: ' + e.message); }
+
     meta.lastSaveTimestamp = Date.now();
-    await window.saveManager.saveMeta(meta).catch(function(e){ console.warn('[GameOver] saveMeta failed:', e); });
+    await window.saveManager.saveMeta(meta).catch(function(e){ window.toastSystem && window.toastSystem.error('存档失败: ' + e.message); });
 
     /* 显示补偿信息 */
     var compEl = document.getElementById('death-compensation');
@@ -570,17 +620,7 @@ Gp._gameOver = async function() {
                 false, this.loopCount || 0, ur, weeklyCompleted
             );
         }
-    } catch(e) { console.warn('[GameEngine] error:', e); }
-
-    /* Epoch 31: 死亡奖励 */
-    try {
-        var deathReward = window.saveManager.calcDeathReward(this.kills, this._maxGoldThisRun || 0, this._elapsed);
-        if (deathReward.metaTokens > 0 || deathReward.bossCores > 0) {
-            meta.metaTokens = (meta.metaTokens || 0) + deathReward.metaTokens;
-            meta.bossCores = (meta.bossCores || 0) + deathReward.bossCores;
-            this._spawnCausalityText('💀 死亡补偿: +' + deathReward.metaTokens + ' 代币' + (deathReward.bossCores > 0 ? ' +' + deathReward.bossCores + ' 核心' : ''));
-        }
-    } catch(e) { console.warn('[GameEngine] error:', e); }
+    } catch(e) { window.toastSystem && window.toastSystem.error('结算错误: ' + e.message); }
 
     /* Epoch 31: 更新本地排行榜 */
     try {
@@ -595,9 +635,9 @@ Gp._gameOver = async function() {
         if (typeof window.saveManager.updateLeaderboard === 'function') {
             window.saveManager.updateLeaderboard(lbStats);
         }
-    } catch(e) { console.warn('[GameEngine] error:', e); }
+    } catch(e) { window.toastSystem && window.toastSystem.error('结算错误: ' + e.message); }
 
-    await window.saveManager.clearActiveRun().catch(function(e){ console.warn('[GameOver] clearActiveRun failed:', e); });
+    await window.saveManager.clearActiveRun().catch(function(e){ window.toastSystem && window.toastSystem.error('清除存档失败: ' + e.message); });
 };
 
 Gp._removeEnemyDOM = function(enemy) {
@@ -651,16 +691,16 @@ Gp._renderPlayerTile = function() {
     /* 设置 data-hero 属性，供 CSS 差异化样式匹配 */
     this.playerEl.setAttribute('data-hero', heroId || 'Hero');
     var heroCfg = heroId ? (window.heroConfig[heroId] || null) : null;
-    /* 雀牌 — 骨雕麻将质感，根据英雄调整样式 */
-    this.playerEl.style.width = '48px';
-    this.playerEl.style.height = '64px';
+    /* 雀牌 — 骨雕麻将质感，根据英雄调整样式（D1: 放大 60×80） */
+    this.playerEl.style.width = '60px';
+    this.playerEl.style.height = '80px';
     this.playerEl.style.background = '#fbfbf7';
-    this.playerEl.style.borderRadius = '6px';
-    this.playerEl.style.boxShadow = '0 4px 0 #1a5336, 0 6px 0.5px #dfc590, 0 8px 10px rgba(0,0,0,0.5)';
+    this.playerEl.style.borderRadius = '7px';
+    this.playerEl.style.boxShadow = '0 5px 0 #1a5336, 0 7px 0.5px #dfc590, 0 10px 12px rgba(0,0,0,0.5)';
     this.playerEl.style.display = 'flex';
     this.playerEl.style.alignItems = 'center';
     this.playerEl.style.justifyContent = 'center';
-    this.playerEl.style.fontSize = '24px';
+    this.playerEl.style.fontSize = '30px';
     this.playerEl.style.fontWeight = '900';
     /* ── 查找或创建文字 span，避免 textContent 覆盖子元素（如 #player-hp-wrap） ── */
     var textSpan = this.playerEl.querySelector('.player-tile-text');
@@ -692,7 +732,19 @@ Gp._renderPlayerTile = function() {
 };
 
 Gp._syncEntities = function() {
-    this._worldLayer.style.transform = 'translate(' + (-this.cameraX) + 'px, ' + (-this.cameraY) + 'px)';
+    /* D2/P1-2: 战场缩放 — 焦点=视口中心（玩家），公式两端与点击反变换严格互逆 */
+    var _z = this._zoomLevel || 1;
+    if (_z !== 1) {
+        var _vw = (this.battlefield ? this.battlefield.clientWidth : 960) || 960;
+        var _vh = (this.battlefield ? this.battlefield.clientHeight : 540) || 540;
+        var _tx = _vw * (1 - _z) / 2 - _z * this.cameraX;
+        var _ty = _vh * (1 - _z) / 2 - _z * this.cameraY;
+        this._worldLayer.style.transformOrigin = '0 0';
+        this._worldLayer.style.transform = 'translate(' + _tx + 'px, ' + _ty + 'px) scale(' + _z + ')';
+    } else {
+        this._worldLayer.style.transformOrigin = '0 0';
+        this._worldLayer.style.transform = 'translate(' + (-this.cameraX) + 'px, ' + (-this.cameraY) + 'px)';
+    }
     var tilt = '';
     if (Math.abs(this._lastMoveX) > 0.1) {
         var deg = this._lastMoveX < -0.1 ? -6 : 6;
@@ -701,6 +753,23 @@ Gp._syncEntities = function() {
     this.playerEl.style.left = this.player.x + 'px';
     this.playerEl.style.top = this.player.y + 'px';
     this.playerEl.style.transform = 'translate(-50%,-50%)' + tilt;
+
+    /* Visual Enhancement D: 英雄移动轨迹拖尾 */
+    if (this.player && Math.abs(this._lastMoveX) > 0.1 && this.player.speed > 0) {
+        this._trailTimer = (this._trailTimer || 0) + (this._lastDt || 0.016);
+        if (this._trailTimer >= 0.08) {
+            this._trailTimer = 0;
+            var trail = document.createElement('div');
+            var heroId = this.player.heroId || 'Hero';
+            trail.className = 'player-trail ' + heroId.toLowerCase() + '-trail';
+            trail.style.left = this.player.x + 'px';
+            trail.style.top = this.player.y + 'px';
+            this._worldLayer.appendChild(trail);
+            var self = this;
+            setTimeout(function() { if (trail.parentNode) trail.remove(); }, 400);
+        }
+    }
+    this._lastDt = this._lastDt || 0.016;
 
     /* ── Step A: 受击平滑闪烁 — 使用独立 hitFlashTimer，不依赖 invulnTimer ── */
     if (this.player.hitFlashTimer > 0) {
@@ -770,7 +839,10 @@ Gp._checkAchievement = function(id) {
     if (meta.achievements[id]) return; /* 已解锁 */
     meta.achievements[id] = true;
     meta.achievements[id + '_at'] = Date.now();
-    window.saveManager._saveMetaToStorage();
+    /* R30-M-010: _saveMetaToStorage 现在是 async，加 catch 防止静默失败 */
+    window.saveManager._saveMetaToStorage().catch(function(e) {
+        console.warn('[Achievement] saveMetaToStorage failed:', e);
+    });
     var cfg = window.achievementConfig;
     for (var i = 0; i < cfg.length; i++) {
         if (cfg[i].id === id) {
@@ -806,7 +878,8 @@ Gp._spawnAchievementText = function(text) {
 Gp._syncUI = function() {
     this.waveDisplay.textContent = '\uD83C\uDF0A \u7b2c ' + (this._waveCount + 1) + ' \u6ce2';
 
-    /* \u2500\u2500 Wave milestone banner at 75% \u2500\u2500 */
+    /* Epoch 46: \u6b7b\u4ea1\u65f6\u6e05\u7406\u6ce2\u6b21\u6a2a\u5e45 */
+    if (this.waveMilestoneBanner) this.waveMilestoneBanner.classList.remove('visible');
     var maxWaves = this._getMaxWaves();
     if (this.waveMilestoneBanner && maxWaves > 0 && this._waveCount > 0) {
         var threshold75 = Math.ceil(maxWaves * 0.75);
@@ -837,8 +910,11 @@ Gp._syncUI = function() {
     if (this.rageDisplay && this.player) {
         var ragePct = this.player.maxRage > 0 ? (this.player.rage / this.player.maxRage * 100) : 0;
         this.rageDisplay.style.width = Math.min(100, Math.max(0, ragePct)) + '%';
+        /* 怒气全满 → 呼吸金光提示可触发 Overdrive（纯视觉 class 钩子，不影响逻辑） */
+        var rageContainer = this.rageDisplay.parentNode;
+        if (rageContainer) rageContainer.classList.toggle('rage-full', ragePct >= 100);
         var rtxt = document.getElementById('rage-bar-text');
-        if (rtxt) rtxt.textContent = '\u6124\u6012 ' + this.player.rage + ' / ' + this.player.maxRage;
+        if (rtxt) rtxt.textContent = '怒气 ' + this.player.rage + ' / ' + this.player.maxRage;
     }
 
     /* ── Boss Lord 血条同步 ── */

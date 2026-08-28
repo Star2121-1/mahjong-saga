@@ -2,6 +2,41 @@
     'use strict';
     var Gp = window.GameEngine.prototype;
 
+/* ── 武器协同检测 ── */
+
+Gp._checkWeaponSynergies = function() {
+    /* 重置所有协同标记 */
+    this._synBladeLaser = false;
+    this._synBladeShotgun = false;
+    this._synBladeOrbit = false;
+    this._synOrbitSlammer = false;
+    this._synNovaLaser = false;
+    this._synNovaShotgun = false;
+    this._synSlammerLaser = false;
+    this._synNovaOrbit = false;
+
+    /* 收集已装备武器ID */
+    var ids = {};
+    for (var _si = 0; _si < this._activeWeapons.length; _si++) {
+        ids[this._activeWeapons[_si].id] = true;
+    }
+
+    /* 检查每种协同 */
+    if (window.rewardManager && window.rewardManager.weaponSynergies) {
+        var syms = window.rewardManager.weaponSynergies;
+        for (var _sm = 0; _sm < syms.length; _sm++) {
+            var sym = syms[_sm];
+            var hasAll = true;
+            for (var _sw = 0; _sw < sym.weapons.length; _sw++) {
+                if (!ids[sym.weapons[_sw]]) { hasAll = false; break; }
+            }
+            if (hasAll && sym.apply) {
+                sym.apply(this);
+            }
+        }
+    }
+};
+
 /* ══════════════════════════════════════════════
    神兵装备栏 UI 渲染与同步
    ══════════════════════════════════════════════ */
@@ -71,10 +106,19 @@ Gp._addWeapon = function(weaponId) {
     if (this._activeWeapons.length >= this.player.maxWeaponSlots) return null;
     var W = window[weaponId];
     if (!W) return null;
+    /* X8 修复: 同名武器已存在时升级为已有武器而非重复添加 */
+    for (var i = 0; i < this._activeWeapons.length; i++) {
+        if (this._activeWeapons[i].id === weaponId) {
+            this._upgradeWeapon(i);
+            return this._activeWeapons[i];
+        }
+    }
     var w = new W(1);
     this._activeWeapons.push(w);
     this._syncWeaponSlots();
     this._renderWeaponSlots();
+    /* 武器协同检测 */
+    this._checkWeaponSynergies();
     return w;
 };
 
@@ -88,6 +132,8 @@ Gp._replaceWeapon = function(oldIndex, newWeaponId) {
     this._activeWeapons[oldIndex] = w;
     this._syncWeaponSlots();
     this._renderWeaponSlots();
+    /* 武器协同检测 */
+    this._checkWeaponSynergies();
     return w;
 };
 
@@ -96,6 +142,8 @@ Gp._upgradeWeapon = function(index) {
     this._activeWeapons[index].upgrade();
     this._syncWeaponSlots();
     this._renderWeaponSlots();
+    /* 武器协同检测 */
+    this._checkWeaponSynergies();
     return true;
 };
 

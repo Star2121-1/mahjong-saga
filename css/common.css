@@ -1,7 +1,62 @@
 * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
-html, body { width: 100%; height: 100%; background: #1a1a2e; color: #e8e8e8; font-family: 'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,monospace; overflow: hidden; }
+html { color-scheme: dark; }
+html, body { width: 100%; height: 100%; background: #081109; color: #e8e8e8; font-family: 'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,monospace; overflow: hidden; -webkit-tap-highlight-color: transparent; }
 body { position: relative; }
-/* Layout: each page positions its own root container; no global flex centering */
+
+/* ══════════════════════════════════════════════
+   雀坛绿金 · 设计令牌（Design Tokens 2.0）
+   所有页面样式从此取值，禁止散落魔法色值
+   ══════════════════════════════════════════════ */
+:root {
+    /* 色板 */
+    --mj-felt-deep: #0a1d12;      /* 桌面深处 */
+    --mj-felt: #133b26;           /* 雀坛极境绿（战场底色） */
+    --mj-felt-light: #1e6f42;     /* 竹翠青 */
+    --mj-ivory: #fbfbf7;          /* 羊脂玉象牙白 */
+    --mj-ivory-warm: #f5eedc;
+    --mj-bone-edge: #c9b98d;      /* 市井竹骨黄（牌侧） */
+    --mj-gold: #d4af37;           /* 鎏金强调 */
+    --mj-gold-bright: #ffd700;
+    --mj-cinnabar: #b62929;       /* 宫墙朱砂红 */
+    --mj-peacock: #1b4f72;        /* 琉璃孔雀蓝 */
+    --mj-danger: #ff1744;
+    --mj-ink: #243b2e;            /* 牌面墨字 */
+
+    /* 字体 */
+    --mj-font-display: 'KaiTi','STKaiti','LiSu',serif;   /* 标题书法体 */
+    --mj-font-body: 'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;
+
+    /* 圆角 */
+    --mj-radius-tile: 10px;
+    --mj-radius-panel: 16px;
+
+    /* 动效时长（只动 transform/opacity） */
+    --mj-dur-fast: 0.15s;
+    --mj-dur-med: 0.3s;
+    --mj-dur-slow: 0.6s;
+}
+
+/* 数字列对齐（统计/HUD） */
+.stat, .hub-stat-num, #top-bar span, .tech-level { font-variant-numeric: tabular-nums; }
+
+/* 键盘焦点环 — 无障碍兜底，鼠标点击不显示 */
+button:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--mj-gold-bright);
+    outline-offset: 2px;
+}
+
+/* 触控目标基础反馈 */
+button { touch-action: manipulation; transition-property: transform, box-shadow, filter, background-color, color, border-color; }
+
+/* 无障碍：用户偏好减弱动效时全局静默 */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
 .hidden { display: none !important; }
 .coin-placeholder, #coin-placeholder { position: absolute; width: 12px; height: 12px; background: radial-gradient(circle,#ffd700,#ff8c00); border-radius: 50%; pointer-events: none; z-index: 8; box-shadow: 0 0 8px rgba(255,215,0,0.5); }
 
@@ -42,4 +97,23 @@ body { position: relative; }
 ::-webkit-scrollbar-track { background: #0c0f12; }
 ::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #fff; }
+
+/* ══════════════════════════════════════════════
+   无障碍基础
+   ══════════════════════════════════════════════ */
+
+/* 键盘焦点可见性 */
+*:focus-visible {
+    outline: 3px solid #ffd700 !important;
+    outline-offset: 2px !important;
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
 * { scrollbar-width: thin; scrollbar-color: #d4af37 #0c0f12; }

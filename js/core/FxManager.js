@@ -58,12 +58,12 @@ Fp.spawnText = function(x, y, text, typeOrColor, size, duration) {
     };
     node._fctOnEnd = onEnd;
     node.addEventListener('animationend', onEnd);
-    /* fallback: 如果 animationend 未触发，5s 后强制回收 */
+    /* fallback: 如果 animationend 事件未触发，10s 后强制回收（大于最大 animation-duration） */
     node._fctTimeout = setTimeout(function() {
         node.removeEventListener('animationend', onEnd);
         node._fctActive = false;
         self._returnNode(node);
-    }, 5000);
+    }, 10000);
 };
 
 Fp._borrowNode = function() {
@@ -98,7 +98,7 @@ Fp._healthCheck = function() {
     var now = Date.now();
     for (var i = 0; i < this._pool.length; i++) {
         var n = this._pool[i];
-        if (n._fctActive && now - n._lastUsed > 5000) {
+        if (n._fctActive && now - n._lastUsed > 10000) {
             n.style.display = 'none';
             n._fctActive = false;
             if (n.parentNode) n.parentNode.removeChild(n);

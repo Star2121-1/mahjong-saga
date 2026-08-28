@@ -25,6 +25,11 @@ Gp.restart = function() {
     this._mutatorTriggered = false;
     this._clearMutatorEffects();
     this._clearTotems();
+    /* 雀魂系统重置 */
+    this._handTiles = [];
+    this._formedMelds = {};
+    this._jokersDropped = 0;
+    if (this._handTileSlots) this._renderHandTiles();
     if (this._qqueenShieldTimer) { clearTimeout(this._qqueenShieldTimer); this._qqueenShieldTimer = null; }
     this._shieldActive = false;
     if (window.rewardManager) window.rewardManager.hidePanel();
@@ -37,6 +42,19 @@ Gp.restart = function() {
     this._spawnTimer = 0;
     this._spawnInterval = 1.5;
     this._difficultyTimer = 0;
+
+    /* Visual Enhancement B: 清理天气粒子 */
+    if (this._rainDrops) {
+        for (var _rd = 0; _rd < this._rainDrops.length; _rd++) {
+            if (this._rainDrops[_rd] && this._rainDrops[_rd].parentNode) this._rainDrops[_rd].remove();
+        }
+        this._rainDrops = [];
+    }
+    if (this._dayNightEl && this._dayNightEl.parentNode) this._dayNightEl.remove();
+    this._dayNightEl = null;
+    if (this._abyssMistEl && this._abyssMistEl.parentNode) this._abyssMistEl.remove();
+    this._abyssMistEl = null;
+    if (this._battlefield) this._battlefield.classList.remove('abyss-depth-1', 'abyss-depth-2', 'abyss-depth-3', 'abyss-depth-n');
 
     var heroId = this.player ? this.player.heroId : 'Hero';
     var levelId = this._currentLevelId || 'level_1';

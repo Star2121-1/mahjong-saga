@@ -8,12 +8,18 @@
     --_fs: 1.4;
 }
 
-/* 16:9 战场主体 */
+/* 16:9 战场主体 — 竹席纹理叠加翡翠绿 */
 #battlefield {
     flex: 1;
+    width: 100%;
     position: relative;
     overflow: hidden;
-    background: radial-gradient(ellipse at center, #2a7348 0%, #1a5c38 50%, #134a2e 100%);
+    background:
+        radial-gradient(ellipse at center, rgba(255,244,200,0.05) 0%, transparent 55%),
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 4px),
+        repeating-linear-gradient(-45deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 4px),
+        radial-gradient(ellipse at center, #2a7348 0%, #1a5c38 50%, #134a2e 100%);
+    box-shadow: inset 0 0 140px rgba(4,14,8,0.55);
     touch-action: none;
 }
 /* 视差背景层 — 随玩家移动微移 */
@@ -32,16 +38,27 @@
 }
 #world-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; will-change: transform; z-index: 1; }
 
-/* 顶部状态栏 */
+/* ── 顶部状态栏：鎏金芯片 HUD（UI 后退，战场向前）── */
 #top-bar {
-    height: 36px; padding-top: 4px;
-    background: rgba(0,0,0,0.25);
+    height: 44px; padding-top: 5px;
+    background: linear-gradient(180deg, rgba(6,20,13,0.82) 0%, rgba(6,20,13,0.45) 100%);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     display: flex; justify-content: flex-start; align-items: center;
-    gap: 16px; z-index: 50; flex-shrink: 0;
-    border-bottom: 1px solid rgba(42,115,72,0.5);
-    padding-left: 12px;
+    gap: 8px; z-index: 50; flex-shrink: 0;
+    border-bottom: 1px solid rgba(212,175,55,0.48);
+    padding-left: 14px;
 }
-.stat { font-size: calc(13 * var(--_fs) * 1px); font-weight: 600; color: #fffef5; letter-spacing: 1px; }
+.stat {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 14px;
+    background: linear-gradient(180deg, rgba(251,251,247,0.09), rgba(251,251,247,0.05));
+    border: 1px solid rgba(212,175,55,0.28);
+    border-radius: 999px;
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.12), 0 2px 6px rgba(0,0,0,0.35);
+    font-size: calc(14 * var(--_fs) * 1px); font-weight: 700; color: #fffef5; letter-spacing: 1px;
+    line-height: 1;
+}
 
 /* 底部状态栏 */
 #bottom-bar {
@@ -60,44 +77,62 @@
 }
 #pause-btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(26,83,54,0.5); }
 
-/* 经验条容器 */
+/* ── 经验条容器：玉带质感 ── */
 #exp-bar-container {
-    width: 100%; height: 16px;
-    background: rgba(0,0,0,0.5);
+    width: 100%; height: 20px;
+    background: rgba(6,20,13,0.8);
     position: relative; flex-shrink: 0;
     display: flex; align-items: center;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+    border-bottom: 1px solid rgba(26,83,54,0.4);
+    z-index: 10;
 }
 #exp-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, #1a5336, #4caf50);
+    background: linear-gradient(180deg, #66d98a 0%, #2e9e57 45%, #1a5336 100%);
     border-radius: 0 3px 3px 0;
-    box-shadow: 0 0 12px rgba(76,175,80,0.7), 0 0 4px rgba(76,175,80,0.4);
+    box-shadow: 0 0 14px rgba(76,175,80,0.65), inset 0 1px 1px rgba(255,255,255,0.35);
     transition: width 0.15s ease;
     position: absolute; top: 0; left: 0;
 }
 #exp-bar-text {
-    position: absolute; left: 50%; transform: translateX(-50%);
-    font-size: calc(10 * var(--_fs) * 1px); color: #fff; font-weight: 700;
-    letter-spacing: 0.5px; white-space: nowrap;
-    text-shadow: 0 0 6px rgba(0,0,0,0.8);
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    font-size: calc(10 * var(--_fs) * 1px); color: #fffef5; font-weight: 700;
+    letter-spacing: 1px; white-space: nowrap;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.6);
     pointer-events: none; z-index: 1;
 }
 
-/* 怒气条容器 */
-#rage-bar-container { width: 100%; height: 16px; background: rgba(0,0,0,0.7); position: relative; flex-shrink: 0; display: flex; align-items: center; }
+/* ── 怒气条容器：朱砂玉带 ── */
+#rage-bar-container {
+    width: 100%; height: 20px;
+    background: rgba(6,20,13,0.9);
+    position: relative; flex-shrink: 0;
+    display: flex; align-items: center;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
+    border-bottom: 1px solid rgba(26,83,54,0.5);
+    z-index: 10;
+}
 #rage-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, #b62929, #ff1744);
+    background: linear-gradient(90deg, #7a1414 0%, #b62929 40%, #ff1744 100%);
     border-radius: 0 3px 3px 0;
-    box-shadow: 0 0 8px rgba(182,41,41,0.5);
+    box-shadow: 0 0 12px rgba(255,23,68,0.55), inset 0 1px 1px rgba(255,255,255,0.25);
     transition: width 0.12s ease;
     position: absolute; top: 0; left: 0;
 }
+/* 怒气全满：金色呼吸 + 边框脉冲，确保深绿底上醒目 */
+#rage-bar-container.rage-full #rage-bar-fill { animation: rageReadyGlow 0.8s ease-in-out infinite alternate; }
+@keyframes rageReadyGlow {
+    from { box-shadow: 0 0 8px rgba(255,215,0,0.6), inset 0 1px 1px rgba(255,255,255,0.35); }
+    to   { box-shadow: 0 0 20px rgba(255,215,0,0.8), inset 0 1px 1px rgba(255,255,255,0.5); }
+}
+#rage-bar-container.rage-full { border-color: rgba(255,215,0,0.4); }
 #rage-bar-text {
-    position: absolute; left: 50%; transform: translateX(-50%);
-    font-size: calc(10 * var(--_fs) * 1px); color: #fff; font-weight: 700;
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    font-size: calc(9 * var(--_fs) * 1px); color: #fffef5; font-weight: 700;
     white-space: nowrap;
-    text-shadow: 0 0 6px rgba(0,0,0,0.8);
+    text-shadow: 0 0 4px rgba(0,0,0,1), 1px 1px 0 #000;
     pointer-events: none; z-index: 1;
 }
 
@@ -110,7 +145,7 @@
     text-shadow: 0 0 40px rgba(255,215,0,0.5);
     letter-spacing: 4px;
 }
-#wave-announce.active { animation: waveAnnounce 1.2s ease-out forwards; }
+#wave-announce.active { animation: waveAnnounce 2s ease-out forwards; }
 
 /* Mutator badge + Resonance pills */
 .mutator-badge {
@@ -131,23 +166,26 @@
 .resonance-speed { background: rgba(255,109,0,0.2); color: #ff8a65; border: 1px solid #ff6d00; }
 .resonance-ice { background: rgba(76,175,80,0.2); color: #c8e6c0; border: 1px solid #4caf50; }
 
-/* 虚拟摇杆 */
+/* 虚拟摇杆 — 增强可见性 */
 #joystick-container {
     position: absolute; bottom: 24px; right: 24px;
     z-index: 40; touch-action: none;
 }
 #joystick-base {
     width: 100px; height: 100px; border-radius: 50%;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(26,83,54,0.3);
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.35);
+    box-shadow: 0 0 20px rgba(0,0,0,0.4), inset 0 0 15px rgba(0,0,0,0.2);
     position: relative; cursor: pointer;
 }
 #joystick-knob {
     width: 40px; height: 40px; border-radius: 50%;
-    background: rgba(30,111,66,0.5);
+    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9), rgba(200,195,180,0.8));
+    border: 2px solid rgba(255,255,255,0.7);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.5);
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    pointer-events: none; transition: none;
+    pointer-events: none;
 }
 
 /* 响应式: 小高度视口缩减顶部栏 */

@@ -5,31 +5,31 @@
  */
 class SaveManager {
     static CHALLENGE_POOL = [
-        { id: 'kill_50', name: '初露锋芒', desc: '单局击杀 50 个敌人', reward: { metaTokens: 30 }, check: function(stats) { return stats.kills >= 50; } },
-        { id: 'kill_100', name: '百人斩', desc: '单局击杀 100 个敌人', reward: { metaTokens: 60 }, check: function(stats) { return stats.kills >= 100; } },
-        { id: 'overdrive_3', name: '怒意沸腾', desc: '单局触发 3 次 Overdrive', reward: { bossCores: 1 }, check: function(stats) { return stats.overdriveCount >= 3; } },
-        { id: 'overdrive_10', name: '狂怒不息', desc: '单局触发 10 次 Overdrive', reward: { bossCores: 3 }, check: function(stats) { return stats.overdriveCount >= 10; } },
-        { id: 'survive_300', name: '久经沙场', desc: '单局存活 5 分钟', reward: { metaTokens: 40 }, check: function(stats) { return stats.elapsed >= 300; } },
-        { id: 'survive_600', name: '百战不殆', desc: '单局存活 10 分钟', reward: { metaTokens: 80 }, check: function(stats) { return stats.elapsed >= 600; } },
-        { id: 'gold_500', name: '财源广进', desc: '单局获取 500 金币', reward: { metaTokens: 25 }, check: function(stats) { return stats.maxGold >= 500; } },
-        { id: 'gold_1000', name: '金玉满堂', desc: '单局获取 1000 金币', reward: { metaTokens: 50 }, check: function(stats) { return stats.maxGold >= 1000; } },
-        { id: 'no_damage', name: '毫发无伤', desc: '单局 0 受击通关', reward: { bossCores: 2 }, check: function(stats) { return stats.hitsTaken === 0 && stats.won; } },
-        { id: 'relics_10', name: '博采众长', desc: '单局收集 10 种不同圣物', reward: { metaTokens: 35 }, check: function(stats) { return stats.uniqueRelics >= 10; } },
-        { id: 'boss_lord_kill', name: '斩首行动', desc: '击杀 Boss Lord', reward: { metaTokens: 20 }, check: function(stats) { return stats.bossKills >= 1; } },
-        { id: 'abyss_5', name: '深渊行者', desc: '抵达深渊第 5 层', reward: { bossCores: 2 }, check: function(stats) { return stats.abyssDepth >= 5; } },
-        { id: 'dodge_20', name: '幻影身法', desc: '单局闪避 20 次', reward: { metaTokens: 30 }, check: function(stats) { return stats.dodges >= 20; } },
-        { id: 'crit_30', name: '致命一击', desc: '单局暴击 30 次', reward: { metaTokens: 25 }, check: function(stats) { return stats.crits >= 30; } },
-        { id: 'wave_15', name: 'waves 不息', desc: '单局完成 15 波', reward: { metaTokens: 45 }, check: function(stats) { return stats.waves >= 15; } }
+        { id: 'kill_50', name: '初鸣', desc: '单局击杀 50 个敌人', reward: { metaTokens: 30 }, check: function(stats) { return stats.kills >= 50; } },
+        { id: 'kill_100', name: '百胡斩', desc: '单局击杀 100 个敌人', reward: { metaTokens: 60 }, check: function(stats) { return stats.kills >= 100; } },
+        { id: 'overdrive_3', name: '怒番沸腾', desc: '单局触发 3 次 Overdrive', reward: { bossCores: 1 }, check: function(stats) { return stats.overdriveCount >= 3; } },
+        { id: 'overdrive_10', name: '狂番不息', desc: '单局触发 10 次 Overdrive', reward: { bossCores: 3 }, check: function(stats) { return stats.overdriveCount >= 10; } },
+        { id: 'survive_300', name: '久战雀士', desc: '单局存活 5 分钟', reward: { metaTokens: 40 }, check: function(stats) { return stats.elapsed >= 300; } },
+        { id: 'survive_600', name: '百战雀魂', desc: '单局存活 10 分钟', reward: { metaTokens: 80 }, check: function(stats) { return stats.elapsed >= 600; } },
+        { id: 'gold_500', name: '财源番涨', desc: '单局获取 500 金币', reward: { metaTokens: 25 }, check: function(stats) { return stats.maxGold >= 500; } },
+        { id: 'gold_1000', name: '金玉满番', desc: '单局获取 1000 金币', reward: { metaTokens: 50 }, check: function(stats) { return stats.maxGold >= 1000; } },
+        { id: 'no_damage', name: '无伤胡', desc: '单局 0 受击通关', reward: { bossCores: 2 }, check: function(stats) { return stats.hitsTaken === 0 && stats.won; } },
+        { id: 'relics_10', name: '百家番长', desc: '单局收集 10 种不同圣物', reward: { metaTokens: 35 }, check: function(stats) { return stats.uniqueRelics >= 10; } },
+        { id: 'boss_lord_kill', name: '斩雀行动', desc: '击杀 Boss Lord', reward: { metaTokens: 20 }, check: function(stats) { return stats.bossKills >= 1; } },
+        { id: 'abyss_5', name: '深渊雀行', desc: '抵达深渊第 5 层', reward: { bossCores: 2 }, check: function(stats) { return stats.abyssDepth >= 5; } },
+        { id: 'dodge_20', name: '幻影自摸', desc: '单局闪避 20 次', reward: { metaTokens: 30 }, check: function(stats) { return stats.dodges >= 20; } },
+        { id: 'crit_30', name: '暴击一胡', desc: '单局暴击 30 次', reward: { metaTokens: 25 }, check: function(stats) { return stats.crits >= 30; } },
+        { id: 'wave_15', name: '番牌不息', desc: '单局完成 15 波', reward: { metaTokens: 45 }, check: function(stats) { return stats.waves >= 15; } }
     ];
 
     static DAILY_QUEST_POOL = [
-        { id: 'dq_kill_30', name: '连斩30', desc: '单局击杀 30 个敌人', check: function(s) { return s.kills >= 30; }, reward: { metaTokens: 20, bossCores: 1 } },
-        { id: 'dq_gold_300', name: '掘金', desc: '单局获取 300 金币', check: function(s) { return s.maxGold >= 300; }, reward: { metaTokens: 15 } },
-        { id: 'dq_no_hit_1', name: '无畏', desc: '单局 0 受击通关', check: function(s) { return s.hitsTaken === 0 && s.won; }, reward: { metaTokens: 30, bossCores: 2 } },
-        { id: 'dq_overdrive_2', name: '怒意', desc: '单局触发 2 次 Overdrive', check: function(s) { return s.overdriveCount >= 2; }, reward: { bossCores: 1 } },
-        { id: 'dq_wave_10', name: '坚守', desc: '通关 10 波', check: function(s) { return s.waves >= 10; }, reward: { metaTokens: 25 } },
-        { id: 'dq_crit_15', name: '暴击大师', desc: '单局暴击 15 次', check: function(s) { return s.crits >= 15; }, reward: { metaTokens: 20 } },
-        { id: 'dq_dodge_10', name: '幻影', desc: '单局闪避 10 次', check: function(s) { return s.dodges >= 10; }, reward: { metaTokens: 15 } },
+        { id: 'dq_kill_30', name: '连番30', desc: '单局击杀 30 个敌人', check: function(s) { return s.kills >= 30; }, reward: { metaTokens: 20, bossCores: 1 } },
+        { id: 'dq_gold_300', name: '掘金番', desc: '单局获取 300 金币', check: function(s) { return s.maxGold >= 300; }, reward: { metaTokens: 15 } },
+        { id: 'dq_no_hit_1', name: '无畏胡', desc: '单局 0 受击通关', check: function(s) { return s.hitsTaken === 0 && s.won; }, reward: { metaTokens: 30, bossCores: 2 } },
+        { id: 'dq_overdrive_2', name: '怒番', desc: '单局触发 2 次 Overdrive', check: function(s) { return s.overdriveCount >= 2; }, reward: { bossCores: 1 } },
+        { id: 'dq_wave_10', name: '坚守番', desc: '通关 10 波', check: function(s) { return s.waves >= 10; }, reward: { metaTokens: 25 } },
+        { id: 'dq_crit_15', name: '胡牌大师', desc: '单局暴击 15 次', check: function(s) { return s.crits >= 15; }, reward: { metaTokens: 20 } },
+        { id: 'dq_dodge_10', name: '幻影自摸', desc: '单局闪避 10 次', check: function(s) { return s.dodges >= 10; }, reward: { metaTokens: 15 } },
         { id: 'dq_abyss_3', name: '深渊探索', desc: '抵达深渊第 3 层', check: function(s) { return s.abyssDepth >= 3; }, reward: { metaTokens: 30, bossCores: 2 } }
     ];
 
@@ -89,17 +89,24 @@ class SaveManager {
     getTalents() {
         var meta = this._metaCache || {};
         return meta.talents || {
-            health_boost: 0, speed_boost: 0, magnet_boost: 0, weapon_forge: 0,
-            listening_intuition: 0, gangpai_hardiness: 0, 摸牌_speed: 0,
-            starting_weapons: 0, core_resonance: 0, 雀魂_shield: 0
+            hu_patro: 0,           // 糊牌护盾 — 初始HP
+            zimo_speed: 0,         // 自摸疾行 — 移速
+            lian_magnet: 0,        // 连营聚宝 — 吸附
+            que_forge: 0,          // 雀坛铸牌 — 开局双兵
+            ting_intuition: 0,     // 听牌直觉 — 暴击
+            gang_hardiness: 0,     // 杠上硬气 — 减伤
+            mo_pa_cd: 0,           // 摸牌快手 — CD缩减
+            kaiju_weapons: 0,      // 开局双牌 — 额外武器槽
+            he_resonance: 0,       // 和牌共鸣 — Boss掉落
+            que_spirit_shield: 0   // 雀魂护体 — 周期护盾
         };
     }
 
     _talentCostExponential(talentId, level) {
         var bases = {
-            health_boost: 1, speed_boost: 1, magnet_boost: 1, weapon_forge: 1,
-            listening_intuition: 1, gangpai_hardiness: 1, '摸牌_speed': 1,
-            starting_weapons: 5, core_resonance: 4, '雀魂_shield': 2
+            hu_patro: 1, zimo_speed: 1, lian_magnet: 1, que_forge: 1,
+            ting_intuition: 1, gang_hardiness: 1, mo_pa_cd: 1,
+            kaiju_weapons: 5, he_resonance: 4, que_spirit_shield: 2
         };
         var base = bases[talentId] || 1;
         return Math.floor(base * Math.pow(1.6, level));
@@ -108,15 +115,15 @@ class SaveManager {
     async upgradeTalent(talentId) {
         var meta = await this.getMeta();
         if (!meta.talents) meta.talents = {
-            health_boost: 0, speed_boost: 0, magnet_boost: 0, weapon_forge: 0,
-            listening_intuition: 0, gangpai_hardiness: 0, 摸牌_speed: 0,
-            starting_weapons: 0, core_resonance: 0, 雀魂_shield: 0
+            hu_patro: 0, zimo_speed: 0, lian_magnet: 0, que_forge: 0,
+            ting_intuition: 0, gang_hardiness: 0, mo_pa_cd: 0,
+            kaiju_weapons: 0, he_resonance: 0, que_spirit_shield: 0
         };
         var currentLevel = meta.talents[talentId] || 0;
         var maxLevels = {
-            health_boost: 5, speed_boost: 5, magnet_boost: 3, weapon_forge: 1,
-            listening_intuition: 5, gangpai_hardiness: 5, 摸牌_speed: 5,
-            starting_weapons: 1, core_resonance: 5, 雀魂_shield: 3
+            hu_patro: 5, zimo_speed: 5, lian_magnet: 3, que_forge: 1,
+            ting_intuition: 5, gang_hardiness: 5, mo_pa_cd: 5,
+            kaiju_weapons: 1, he_resonance: 5, que_spirit_shield: 3
         };
         var maxLevel = maxLevels[talentId] || 5;
         if (currentLevel >= maxLevel) return { ok: false, reason: '已达满级' };

@@ -60,7 +60,8 @@ Gp._showGuideStep = function(stepIndex) {
 
     var step = steps[stepIndex];
     if (step.highlight) this._highlightElement(step.highlight, 4000);
-    if (step.dimExcept) this._dimExcept(step.dimExcept);
+    if (step.dimExcept && step.dimExcept.length > 0) this._dimExcept(step.dimExcept);
+
     /* 更新引导面板内容 */
     var body = this.guideOverlay.querySelector('.guide-body');
     if (body) {
@@ -72,6 +73,7 @@ Gp._showGuideStep = function(stepIndex) {
             body.appendChild(div);
         });
     }
+
     /* 更新导航按钮状态 */
     var prevBtn = this.guideOverlay.querySelector('#guide-prev-btn');
     var nextBtn = this.guideOverlay.querySelector('#guide-next-btn');
@@ -80,8 +82,43 @@ Gp._showGuideStep = function(stepIndex) {
         if (stepIndex >= steps.length - 1) {
             nextBtn.textContent = '完成出征 ✓';
         } else {
-            nextBtn.textContent = '下一步 →';
+            /* 交互式步骤：检查条件 */
+            if (step.interactive && step.checkFn) {
+                nextBtn.textContent = '✓ 已完成，下一步 →';
+                nextBtn.style.color = '#4caf50';
+            } else {
+                nextBtn.textContent = '下一步 →';
+                nextBtn.style.color = '';
+            }
         }
+    }
+
+    /* Epoch 43: 步骤点指示器 */
+    var dotsContainer = this.guideOverlay.querySelector('.guide-steps-dots');
+    if (dotsContainer) {
+        dotsContainer.innerHTML = '';
+        for (var _di = 0; _di < steps.length; _di++) {
+            var dot = document.createElement('span');
+            dot.className = 'guide-dot';
+            if (_di === stepIndex) dot.classList.add('active');
+            else if (_di < stepIndex) dot.classList.add('done');
+            dotsContainer.appendChild(dot);
+        }
+    }
+
+    /* Epoch 43: 交互式步骤 — 自动推进 */
+    if (step.interactive && step.checkFn) {
+        var self = this;
+        var checkTimer = setInterval(function() {
+            if (step.checkFn.call(self)) {
+                clearInterval(checkTimer);
+                /* 自动前进到下一步 */
+                if (stepIndex < steps.length - 1) {
+                    self._currentGuideStep = stepIndex + 1;
+                    self._showGuideStep(stepIndex + 1);
+                }
+            }
+        }, 300);
     }
 };
 

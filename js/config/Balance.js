@@ -7,6 +7,9 @@ window.Balance = {
     ENEMY_LEVEL_HP_ATK_MULT: 1.15,   // 每级 HP/ATK 倍率 (Enemy.js)
     ABYSS_LOOP_HP_ATK_MULT: 1.08,   // 深渊轮回 HP/ATK 倍率 (Enemy.js)
     ABYSS_LOOP_SPEED_MULT: 1.05,    // 深渊轮回 Speed 倍率 (Enemy.js)
+    ABYSS_SHOP_PRICE_MULT: 1.5,     // 深渊商店价格倍率
+    ABYSS_COMBO_UNLOCK_INTERVAL: 5, // 每 N 层解锁一个新深渊变异组合
+    ABYSS_ENEMY_VARIANT_MULT: 1.2,  // 深渊变体属性倍率
     ENEMY_BASE_HP: 20,               // 普通敌人基础 HP (Enemy.js)
     ENEMY_BASE_ATK: 5,               // 普通敌人基础 ATK (Enemy.js)
     ENEMY_LEVEL_SPEED_SCALE: 3,      // 每级速度增量 (Enemy.js)
@@ -53,7 +56,7 @@ window.Balance = {
     ENEMY_SPAWN_RADIUS: 200,
     ENEMY_SPAWN_RADIUS_JITTER: 50,
     ENEMY_SPAWN_MARGIN: 20,
-    DEFAULT_ENEMY_WEIGHTS: { Normal: 0.45, Tanker: 0.20, Stalker: 0.25, Shaman: 0.10 },
+    DEFAULT_ENEMY_WEIGHTS: { Normal: 0.24, Tanker: 0.14, Stalker: 0.17, Archer: 0.14, Shaman: 0.09, Barrier: 0.12, Bomber: 0.10 },
 
     /* ── 玩家系统 ── */
     PLAYER_MAX_RAGE: 100,
@@ -172,4 +175,47 @@ window.Balance = {
     MS_PER_SECOND: 1000,
     PI_OVER_3: Math.PI * 2 / 3,
     PI_OVER_4: Math.PI * 4 / 3,
+
+    /* ── HUPAI / MahjongHand.js + GameEngine.Spawn.js + Player.js ── */
+    HUPAI_DROP_CHANCE: 0.06,
+    HUPAI_FLOWER_POOL_RATIO: 0.05,
+    HUPAI_MAIN_SUIT_WEIGHT: 0.50,
+    HUPAI_SIDE_SUIT_WEIGHT: 0.25,
+    HUPAI_HAND_MAX: 14,
+    HUPAI_WILDCARD_MAX: 3,
+    HUPAI_SWAP_GUARANTEE_PER_RUN: 2,
+    HUPAI_TIER_MULTS: [1.0, 1.3, 1.6],
+    HUPAI_MELD_EFFECT_MULT_JOKER: 1.5,
+    HUPAI_PUNG_WAN_ATK_FACTOR: 1.5,
+    HUPAI_PUNG_WAN_TARGETS: 3,
+    HUPAI_PUNG_TONG_PROJ_ATK: 0.6,
+    HUPAI_PUNG_TIAO_ASPD: 0.15,
+    HUPAI_PUNG_TIAO_DURATION: 5,
+    HUPAI_KONG_MULT_VS_PUNG: 2.2,
+    HUPAI_RUN_WAN_DMG_INC: 0.03,
+    HUPAI_RUN_TONG_CD_INC: 0.02,
+    HUPAI_RUN_TONG_CD_CAP: 0.30,
+    HUPAI_RUN_TIAO_SPD_INC: 0.02,
+    HUPAI_RUN_TIAO_DODGE_INC: 0.01,
+    HUPAI_RUN_TIAO_CAP: 0.15,
+    HU_PIHU_GOLD: 50,
+    HU_QINGYISE_DMG: 0.25,
+    HU_PENGPENG_ASPD: 0.25,
+    HU_PENGPENG_CD: 0.20,
+    HU_QIDUI_DODGE: 0.15,
+    HU_QIDUI_SPD: 0.15,
+    HU_QIDUI_MAGNET: 0.80,
+    HUPAI_ZI_EAST_KNOCKBACK: 250,
+
+    /* ── Archer 一索箭妖 ── */
+    ENEMY_ARCHER_HP_MULT: 0.7,
+    ENEMY_ARCHER_ATK_MULT: 0.9,
+    ENEMY_ARCHER_SPD_MULT: 0.95,
+    ENEMY_ARCHER_FIRE_INTERVAL: 2.2,
+    ENEMY_ARCHER_CHARGE_TIME: 0.5,
+    ENEMY_ARCHER_PROJ_SPEED: 140,
+    ENEMY_ARCHER_PROJ_RANGE: 320,
+    ENEMY_ARCHER_DMG_MULT: 1.0,
+    ENEMY_ARCHER_KITE_MIN: 170,
+    ENEMY_ARCHER_KITE_MAX: 240,
 };

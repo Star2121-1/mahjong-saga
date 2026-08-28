@@ -8,7 +8,7 @@ window.levelConfig = {
         difficultyFactor: 1.0,
         waveEnemyMax: [20, 30, 40, 50, 1],
         /* Epoch 4: 程序化难度参数 */
-        enemyTypes: { Normal: 0.45, Tanker: 0.20, Stalker: 0.25, Shaman: 0.10 },
+        enemyTypes: { Normal: 0.24, Tanker: 0.14, Stalker: 0.17, Archer: 0.14, Shaman: 0.09, Barrier: 0.12, Bomber: 0.10 },
         spawnIntervalMin: 1.5,
         spawnIntervalDecay: 0.02,
         bossThreshold: 5,
@@ -22,7 +22,7 @@ window.levelConfig = {
         maxWaves: 7,
         difficultyFactor: 1.3,
         waveEnemyMax: [25, 35, 45, 55, 65, 75, 1],
-        enemyTypes: { Normal: 0.30, Tanker: 0.25, Stalker: 0.30, Shaman: 0.15 },
+        enemyTypes: { Normal: 0.17, Tanker: 0.15, Stalker: 0.19, Archer: 0.16, Shaman: 0.11, Barrier: 0.13, Bomber: 0.09 },
         spawnIntervalMin: 1.2,
         spawnIntervalDecay: 0.03,
         bossThreshold: 7,
@@ -36,7 +36,7 @@ window.levelConfig = {
         maxWaves: 10,
         difficultyFactor: 1.7,
         waveEnemyMax: [30, 40, 50, 60, 70, 80, 90, 100, 110, 1],
-        enemyTypes: { Normal: 0.20, Tanker: 0.25, Stalker: 0.25, Shaman: 0.30 },
+        enemyTypes: { Normal: 0.11, Tanker: 0.15, Stalker: 0.17, Archer: 0.18, Shaman: 0.13, Barrier: 0.15, Bomber: 0.11 },
         spawnIntervalMin: 1.0,
         spawnIntervalDecay: 0.04,
         bossThreshold: 10,
@@ -51,7 +51,7 @@ window.levelConfig = {
         maxWaves: 15,
         difficultyFactor: 2.0,
         waveEnemyMax: null, /* 程序化生成 */
-        enemyTypes: { Normal: 0.15, Tanker: 0.25, Stalker: 0.25, Shaman: 0.35 },
+        enemyTypes: { Normal: 0.08, Tanker: 0.15, Stalker: 0.15, Archer: 0.20, Shaman: 0.14, Barrier: 0.16, Bomber: 0.12 },
         spawnIntervalMin: 0.8,
         spawnIntervalDecay: 0.05,
         bossThreshold: 15,
@@ -164,7 +164,7 @@ window.proceduralSeedGenerator = {
         }
 
         /* 根据种子调整敌人类型权重 */
-        var enemyTypes = { Normal: 0.15, Tanker: 0.25, Stalker: 0.25, Shaman: 0.35 };
+        var enemyTypes = { Normal: 0.08, Tanker: 0.15, Stalker: 0.15, Archer: 0.20, Shaman: 0.14, Barrier: 0.16, Bomber: 0.12 };
         if (typeBias < 0.33) { enemyTypes.Stalker += 0.1; enemyTypes.Normal -= 0.1; }
         else if (typeBias < 0.66) { enemyTypes.Shaman += 0.1; enemyTypes.Tanker -= 0.1; }
         else { enemyTypes.Tanker += 0.1; enemyTypes.Shaman -= 0.1; }

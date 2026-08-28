@@ -4,7 +4,7 @@
 
 #reward-overlay {
     position: fixed; inset: 0;
-    background: rgba(0,0,0,0.55); z-index: 1000;
+    background: rgba(0,0,0,0.35); z-index: 1000;
     display: none; flex-direction: column;
     justify-content: center; align-items: center; padding: 20px;
     pointer-events: auto;
@@ -16,10 +16,10 @@
     text-shadow: 0 0 20px rgba(255,215,0,0.3);
 }
 .reward-cards {
-    display: flex; flex-wrap: wrap; gap: 16px;
+    display: flex; flex-wrap: wrap; gap: 22px;
     justify-content: center; perspective: 1000px;
 }
-.reward-card-container { width: 140px; height: 200px; animation: cardDealIn 0.5s ease-out both; will-change: transform; }
+.reward-card-container { width: 178px; height: 304px; animation: cardDealIn 0.5s ease-out both; will-change: transform; }
 @keyframes cardDealIn {
     0% { opacity: 0; transform: translateY(80px) scale(0.8); }
     100% { opacity: 1; transform: translateY(0) scale(1); }
@@ -52,8 +52,10 @@
 }
 .card-front {
     transform: rotateY(180deg);
-    background: rgba(20,20,30,0.95);
+    background: rgba(10,29,18,0.95);
     border: 1px solid #2a4a3a;
+    border-radius: 14px;
+    overflow: hidden;
     display: flex; flex-direction: column; align-items: center;
     gap: 6px; padding: 16px; text-align: center;
 }
@@ -70,11 +72,12 @@
     background: rgba(255,215,0,0.06);
     box-shadow: 0 0 20px rgba(255,215,0,0.15);
 }
-.relic-name { font-size: calc(14 * var(--_fs) * 1px); font-weight: 700; color: #fffef5; }
+.relic-name { font-size: calc(15 * var(--_fs) * 1px); font-weight: 800; color: #fffef5; line-height: 1.35; }
 .relic-stars { font-size: calc(12 * var(--_fs) * 1px); color: #ffd700; letter-spacing: 2px; }
-.relic-desc { font-size: calc(11 * var(--_fs) * 1px); color: #a8c8b8; line-height: 1.3; }
+.relic-desc { font-size: calc(12 * var(--_fs) * 1px); color: #b8d4c4; line-height: 1.55; }
 .relic-cost { font-size: calc(12 * var(--_fs) * 1px); color: #ffd700; font-weight: 700; }
 .relic-btn {
+    margin-top: auto;
     padding: 6px 20px; font-size: calc(13 * var(--_fs) * 1px); font-weight: 700;
     background: #1a5336; color: #fffef5;
     border: none; border-radius: 6px; cursor: pointer;
@@ -215,34 +218,71 @@
 }
 #pause-hub-btn:hover { border-color: #666; color: #e8e8e0; }
 
+/* Epoch 47: 暂停设置面板 */
+#pause-settings-btn {
+    padding: 8px 0; font-size: calc(13 * var(--_fs) * 1px); font-weight: 600;
+    width: 100%; background: rgba(100,100,255,0.1);
+    color: #8888ff; border: 1px solid rgba(100,100,255,0.3); border-radius: 6px;
+    cursor: pointer;
+}
+#pause-settings-btn:hover { background: rgba(100,100,255,0.2); }
+.settings-section {
+    width: 100%;
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 8px;
+}
+.settings-title {
+    font-size: 14px; font-weight: 800; color: #ffd740;
+    text-align: center; margin-bottom: 8px;
+}
+.settings-section label {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: #ccc; margin-bottom: 6px;
+}
+.settings-section input[type="range"] {
+    flex: 1; accent-color: #ffd740;
+}
+.settings-section input[type="checkbox"] {
+    accent-color: #ffd740;
+}
+#settings-close-btn {
+    padding: 6px 0; font-size: 12px; font-weight: 700;
+    width: 100%; background: rgba(255,255,255,0.05);
+    color: #aaa; border: 1px solid #444; border-radius: 6px;
+    cursor: pointer; margin-top: 8px;
+}
+
 /* ══════════════════════════════════════════════
    开场引导
    ══════════════════════════════════════════════ */
 
 #guide-overlay {
     position: fixed; inset: 0;
-    background: rgba(0,0,0,0.6); z-index: 1000;
+    background: rgba(4,12,8,0.45); z-index: 1000;
     display: none; flex-direction: column;
     justify-content: center; align-items: center; padding: 16px;
 }
 #guide-overlay.active { display: flex; }
 .guide-panel {
-    background: rgba(20,40,30,0.9);
-    border: 1px solid rgba(42,115,72,0.5);
+    background: linear-gradient(180deg,#14301f 0%,#10281b 100%);
+    border: 1px solid rgba(212,175,55,0.55);
     border-radius: 16px; padding: 20px 22px;
     max-width: 400px; width: 100%;
     display: flex; flex-direction: column; gap: 12px;
-    box-shadow: 0 0 60px rgba(30,111,66,0.15);
+    box-shadow: 0 0 50px rgba(26,83,54,0.35), 0 0 24px rgba(212,175,55,0.2);
 }
-.guide-title { font-size: calc(20 * var(--_fs) * 1px); font-weight: 800; color: #4caf50; text-align: center; letter-spacing: 2px; }
+.guide-title { font-size: calc(20 * var(--_fs) * 1px); font-weight: 800; color: #d4af37; text-align: center; letter-spacing: 3px; }
 .guide-body { display: flex; flex-direction: column; gap: 8px; }
-.guide-item { font-size: calc(13 * var(--_fs) * 1px); color: #e8e8e0; line-height: 1.6; display: flex; align-items: center; gap: 8px; }
+.guide-item { font-size: calc(13 * var(--_fs) * 1px); color: #fbfbf7; line-height: 1.9; }
+.guide-item strong { color: #ffd700; }
 .guide-key {
-    display: inline-block; min-width: 64px; padding: 2px 8px;
+    display: inline-block; min-width: 40px; padding: 1px 7px; margin: 0 2px;
     background: rgba(30,111,66,0.12);
     border: 1px solid rgba(30,111,66,0.3);
     border-radius: 4px; color: #4caf50;
-    font-weight: 700; font-size: calc(12 * var(--_fs) * 1px); text-align: center; flex-shrink: 0;
+    font-weight: 700; font-size: calc(12 * var(--_fs) * 1px); text-align: center;
 }
 #guide-confirm-btn {
     padding: 12px 0; font-size: calc(15 * var(--_fs) * 1px); font-weight: 700;
@@ -252,6 +292,18 @@
     letter-spacing: 1px; transition: transform 0.1s; margin-top: 4px;
 }
 #guide-confirm-btn:hover { transform: scale(1.03); }
+
+/* Epoch 43: 引导步骤点指示器 */
+.guide-steps-dots {
+    display: flex; gap: 6px; justify-content: center; padding: 4px 0;
+}
+.guide-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(76,175,80,0.3); border: 1px solid rgba(76,175,80,0.5);
+    transition: background 0.2s;
+}
+.guide-dot.active { background: #4caf50; }
+.guide-dot.done { background: #66bb6a; }
 
 /* ══════════════════════════════════════════════
    波次突变面板
@@ -272,24 +324,24 @@
     margin-bottom: 8px;
 }
 .mutator-subtitle { font-size: calc(13 * var(--_fs) * 1px); color: #e8b8b0; margin-bottom: 20px; text-align: center; }
-.mutator-choices { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+.mutator-choices { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; max-width: 700px; }
 .mutator-card {
-    width: 180px; padding: 18px 14px;
+    width: 130px; padding: 14px 10px;
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(182,41,41,0.25);
     border-radius: 14px; text-align: center;
     display: flex; flex-direction: column; align-items: center;
-    gap: 8px; transition: all 0.15s;
+    gap: 6px; transition: all 0.15s;
 }
 .mutator-card:hover { border-color: #b62929; background: rgba(182,41,41,0.08); transform: scale(1.03); }
-.mutator-card-icon { font-size: calc(36 * var(--_fs) * 1px); line-height: 1; }
-.mutator-card-title { font-size: calc(16 * var(--_fs) * 1px); font-weight: 700; color: #ffccbc; }
-.mutator-card-desc { font-size: calc(12 * var(--_fs) * 1px); color: #e0e0d8; line-height: 1.4; }
+.mutator-card-icon { font-size: calc(28 * var(--_fs) * 1px); line-height: 1; }
+.mutator-card-title { font-size: calc(13 * var(--_fs) * 1px); font-weight: 700; color: #ffccbc; }
+.mutator-card-desc { font-size: calc(10 * var(--_fs) * 1px); color: #e0e0d8; line-height: 1.4; }
 .mutator-btn {
-    padding: 8px 24px; font-size: calc(14 * var(--_fs) * 1px); font-weight: 700;
+    padding: 6px 16px; font-size: calc(12 * var(--_fs) * 1px); font-weight: 700;
     background: rgba(182,41,41,0.2); color: #b62929;
     border: 1px solid #b62929; border-radius: 6px;
-    cursor: pointer; transition: all 0.15s; margin-top: 4px;
+    cursor: pointer; transition: all 0.15s; margin-top: 2px;
 }
 .mutator-btn:hover { background: rgba(182,41,41,0.4); }
 
@@ -404,7 +456,74 @@
 .replace-item-level { font-size: calc(10 * var(--_fs) * 1px); color: #c8c8c0; }
 
 /* ══════════════════════════════════════════════
-   变异解锁通知
+   UI 面板美化 (Visual Enhancement E)
+   ══════════════════════════════════════════════ */
+
+/* 升级卡牌翻转粒子跟随 */
+.reward-card-inner.flipping::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 16px;
+    background: radial-gradient(circle, rgba(255,215,0,0.3) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+    animation: cardFlipParticle 0.6s ease-out forwards;
+}
+@keyframes cardFlipParticle {
+    0% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 0; transform: scale(1.5); }
+}
+
+/* Toast slide-in 动画 */
+.toast-node {
+    animation: toastSlideIn 0.3s ease-out forwards;
+}
+@keyframes toastSlideIn {
+    0% { transform: translateX(100%) translateY(-50%); opacity: 0; }
+    100% { transform: translateX(0) translateY(-50%); opacity: 1; }
+}
+.toast-node.toast-exit {
+    animation: toastSlideOut 0.3s ease-in forwards;
+}
+@keyframes toastSlideOut {
+    0% { transform: translateX(0) translateY(-50%); opacity: 1; }
+    100% { transform: translateX(100%) translateY(-50%); opacity: 0; }
+}
+
+/* 天赋树连线发光 (main_hub.css 中定义) */
+
+/* 突变面板增强 */
+#mutator-overlay.active {
+    animation: mutatorPanelIn 0.3s ease-out;
+}
+@keyframes mutatorPanelIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* 豪赌面板增强 */
+#boss-gamble-panel {
+    animation: gamblePanelIn 0.4s ease-out;
+}
+@keyframes gamblePanelIn {
+    0% { opacity: 0; transform: scale(0.9); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* 深渊面板增强 */
+.abyss-panel {
+    animation: abyssPanelIn 0.5s ease-out;
+}
+@keyframes abyssPanelIn {
+    0% { opacity: 0; transform: scale(0.8); }
+    60% { transform: scale(1.02); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* ══════════════════════════════════════════════
+   原有样式保留
    ══════════════════════════════════════════════ */
 
 .mutation-unlock-notif {
@@ -450,3 +569,64 @@
     .relic-cost { font-size: 11px; }
     #reward-overlay .relic-btn { padding: 5px 14px; font-size: 11px; }
 }
+
+/* ══════════════════════════════════════════════
+   Epoch 47: 深渊商店
+   ══════════════════════════════════════════════ */
+
+#abyss-shop-panel {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, rgba(30,0,50,0.95), rgba(60,0,90,0.95));
+    border: 2px solid #9c27b0; border-radius: 16px;
+    padding: 20px; z-index: 200; min-width: 320px; max-width: 480px;
+    box-shadow: 0 0 40px rgba(156,39,176,0.5);
+    color: #e0e0e0;
+    animation: abyssShopAppear 0.3s ease-out;
+}
+@keyframes abyssShopAppear {
+    from { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+    to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+.abyss-shop-title {
+    font-size: 20px; font-weight: 900; color: #ce93d8;
+    text-align: center; margin-bottom: 8px;
+    text-shadow: 0 0 12px rgba(206,147,216,0.5);
+}
+.abyss-shop-balance {
+    text-align: center; font-size: 14px; color: #ffd740;
+    margin-bottom: 12px; font-weight: 700;
+}
+.abyss-shop-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px; margin-bottom: 12px;
+}
+.abyss-shop-card {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(156,39,176,0.3);
+    border-radius: 10px; padding: 10px; text-align: center;
+    transition: all 0.2s;
+}
+.abyss-shop-card:hover {
+    border-color: #9c27b0; background: rgba(156,39,176,0.1);
+}
+.abyss-shop-card-name {
+    font-size: 13px; font-weight: 800; color: #e1bee7; margin-bottom: 4px;
+}
+.abyss-shop-card-desc {
+    font-size: 10px; color: #aaa; margin-bottom: 6px; line-height: 1.3;
+}
+.abyss-shop-card-cost {
+    font-size: 11px; color: #ffd740; font-weight: 700; margin-bottom: 6px;
+}
+.abyss-shop-btn {
+    background: #9c27b0; color: #fff; border: none; border-radius: 6px;
+    padding: 4px 12px; font-size: 11px; cursor: pointer; font-weight: 700;
+    transition: all 0.2s;
+}
+.abyss-shop-btn:hover:not(:disabled) { background: #ba68c8; }
+.abyss-shop-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.abyss-shop-close {
+    width: 100%; background: rgba(255,255,255,0.1); color: #ccc;
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;
+    padding: 8px; font-size: 13px; cursor: pointer; font-weight: 700;
+}
+.abyss-shop-close:hover { background: rgba(255,255,255,0.15); }

@@ -2,7 +2,7 @@
    麻将主题敌人矩阵 — 2.5D 程序化麻将牌渲染
    ══════════════════════════════════════════════ */
 
-/* 基础麻将牌 — 骨白正面 + 翡翠绿背面 */
+/* 基础麻将牌 — 骨白正面 + 翡翠绿背面，增强厚度感 */
 .enemy {
     position: absolute;
     width: 36px; height: 48px;
@@ -12,7 +12,7 @@
     font-weight: 700;
     /* 2.5D 牌体：多层 box-shadow 堆叠厚度 */
     border-radius: 4px;
-    background: #f8f4e8;
+    background: linear-gradient(160deg, #fefcf6 0%, #f5eedc 50%, #e8dfc6 100%);
     border: 1px solid #c8c0a8;
     box-shadow:
         0 2px 0 #d8d0b8,
@@ -20,7 +20,10 @@
         0 5px 0 #b8b098,
         0 6px 0 #a8a088,
         0 7px 0 #989078,
-        0 8px 12px rgba(0,0,0,0.45);
+        0 8px 0 #887868,
+        0 9px 0 #786858,
+        0 10px 12px rgba(0,0,0,0.45),
+        inset 0 1px 2px rgba(255,255,255,0.5);
     /* 牌面内容 */
     flex-direction: column;
 }
@@ -78,6 +81,105 @@
 .enemy[data-enemy-type="Shaman"] {
     color: #00897b;
 }
+
+/* Archer 一索箭妖 — 窄长箭杆牌，竹翠青 */
+.enemy[data-enemy-type="Archer"] {
+    width: 34px; height: 52px;
+    color: #1e6f42;
+    border-radius: 5px 5px 8px 8px;
+    box-shadow:
+        0 3px 0 #14532d,
+        0 5px 0.5px #dfc590,
+        0 7px 10px rgba(0,0,0,0.5);
+}
+/* 蓄力瞄准：金描边呼吸 */
+.enemy[data-enemy-type="Archer"].draw-aim {
+    border-color: #ffd700;
+    animation: archerAimGlow 0.25s linear infinite alternate;
+}
+@keyframes archerAimGlow {
+    from { filter: brightness(1); box-shadow: 0 0 6px rgba(255,215,0,0.5), 0 3px 0 #14532d; }
+    to   { filter: brightness(1.45); box-shadow: 0 0 16px rgba(255,215,0,0.95), 0 3px 0 #14532d; }
+}
+/* 骨签弹道：细长竹青骨刺 */
+.enemy-projectile.arrow-dart {
+    width: 14px; height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, rgba(223,197,144,0.9), #1e6f42);
+    box-shadow: 0 0 8px rgba(30,111,66,0.7);
+}
+
+/* B4: Boss 特效包 ══════════════════════════════ */
+/* P1 蓄力齐射 — 金色呼吸描边 */
+.enemy.p1-charging {
+    border-color: #ffd700 !important;
+    animation: bossChargeGlow 0.4s linear infinite alternate;
+}
+@keyframes bossChargeGlow {
+    from { filter: brightness(1); box-shadow: 0 0 10px rgba(255,215,0,0.4), 0 0 0 rgba(255,215,0,0); }
+    to   { filter: brightness(1.5); box-shadow: 0 0 28px rgba(255,215,0,0.9), 0 0 60px rgba(255,215,0,0.4); }
+}
+/* P2 地裂余震 — 十字裂纹 */
+.ground-crack {
+    position: absolute; width: 0; height: 0;
+    pointer-events: none; z-index: 5;
+    animation: crackFade 0.8s ease-out forwards;
+}
+.ground-crack::before, .ground-crack::after {
+    content: '';
+    position: absolute; left: -110px; top: -3px;
+    width: 220px; height: 6px;
+    background: linear-gradient(90deg, transparent, rgba(30,10,5,0.9) 20%, rgba(90,30,10,0.8) 50%, rgba(30,10,5,0.9) 80%, transparent);
+    border-radius: 3px;
+}
+.ground-crack::before { transform: rotate(0deg); }
+.ground-crack::after  { transform: rotate(90deg); }
+@keyframes crackFade { 0% { opacity: 1; transform: scale(0.6); } 100% { opacity: 0; transform: scale(1.15); } }
+/* P2 红环扩张 */
+.boss-slam-ring {
+    position: absolute; width: 40px; height: 40px;
+    margin: -20px 0 0 -20px;
+    border: 4px solid rgba(255,23,68,0.85);
+    border-radius: 50%;
+    pointer-events: none; z-index: 6;
+    animation: slamRingExpand 0.7s ease-out forwards;
+}
+@keyframes slamRingExpand {
+    0% { opacity: 1; transform: scale(0.4); }
+    100% { opacity: 0; transform: scale(6); }
+}
+/* P2 全屏白闪 */
+.slam-flash {
+    position: absolute; inset: 0;
+    background: rgba(255,255,255,0.55);
+    pointer-events: none; z-index: 70;
+    animation: slamFlashFade 0.3s ease-out forwards;
+}
+@keyframes slamFlashFade { 0% { opacity: 1; } 100% { opacity: 0; } }
+/* P2 影武者白板诱饵 */
+.boss-decoy {
+    position: absolute; width: 48px; height: 64px;
+    margin: -32px 0 0 -24px;
+    background: linear-gradient(135deg, #f5f5f5, #cfcfcf);
+    border: 2px solid #9e9e9e;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 900; color: #757575;
+    pointer-events: none; z-index: 12;
+    animation: decoyDissolve 3s ease-in forwards;
+}
+@keyframes decoyDissolve {
+    0% { opacity: 0.95; filter: blur(0); }
+    70% { opacity: 0.8; filter: blur(0); }
+    100% { opacity: 0; filter: blur(4px); }
+}
+/* 深渊变体 */
+.enemy.abyss-boss-1 { filter: hue-rotate(30deg) saturate(1.3); }
+.enemy.abyss-boss-2 { filter: hue-rotate(30deg) saturate(1.3) brightness(0.85); }
+.enemy.abyss-boss-3 { width: 112px !important; height: 148px !important; filter: hue-rotate(45deg) saturate(1.5) contrast(1.1); }
+/* P3 血雾淡出 */
+.boss-mist { animation: bossMistFade 12s ease-in forwards; }
+@keyframes bossMistFade { 0% { opacity: 0; } 15% { opacity: 1; } 80% { opacity: 0.8; } 100% { opacity: 0; } }
 
 /* Boss 精英 — 金边牌 */
 .enemy.boss {
@@ -138,7 +240,230 @@
 }
 .enemy.boss.boss-lord::before { font-size: calc(42 * var(--_fs) * 1px); }
 
-/* Boss 基础 aura — 金色光晕 */
+/* ══════════════════════════════════════════════
+   麻将牌面动态效果 — 视觉增强 (Visual Enhancement A)
+   ══════════════════════════════════════════════ */
+
+/* 敌人受击碎裂动画 */
+.enemy.shatter-anim {
+    animation: enemyShatter 0.35s ease-out forwards;
+}
+@keyframes enemyShatter {
+    0% { filter: brightness(1); transform: translate(-50%, -50%) scale(1); }
+    30% { filter: brightness(3) saturate(0); transform: translate(-50%, -50%) scale(1.08); }
+    60% { filter: brightness(1.5); transform: translate(-50%, -50%) scale(0.95); opacity: 0.6; }
+    100% { filter: brightness(1); transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* 敌人碎裂粒子 */
+.enemy-shard {
+    position: absolute;
+    width: 6px; height: 6px;
+    background: #f8f4e8;
+    border: 1px solid #c8c0a8;
+    pointer-events: none;
+    z-index: 6;
+    animation: shardFly 0.4s ease-out forwards;
+}
+@keyframes shardFly {
+    0% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
+    100% { opacity: 0; transform: translate(var(--sx, 20px), var(--sy, -30px)) rotate(var(--rot, 180deg)) scale(0.3); }
+}
+
+/* Boss Lord 三阶段牌面颜色渐变 */
+.enemy.boss.boss-lord.phase-1 {
+    background: linear-gradient(135deg, #f5f0e0, #e8e0d0);
+    border-color: #d4af37;
+    box-shadow:
+        0 4px 0 #b8960b,
+        0 6px 0.5px #dfc590,
+        0 8px 10px rgba(0,0,0,0.5),
+        0 0 16px rgba(212,175,55,0.3);
+}
+.enemy.boss.boss-lord.phase-2 {
+    background: linear-gradient(135deg, #f5e0d0, #d4a090);
+    border-color: #b62929;
+    box-shadow:
+        0 4px 0 #8a1a1a,
+        0 6px 0.5px #dfc590,
+        0 8px 10px rgba(0,0,0,0.5),
+        0 0 20px rgba(182,41,41,0.4);
+}
+.enemy.boss.boss-lord.phase-3 {
+    background: linear-gradient(135deg, #ffe0e0, #ff9090);
+    border-color: #d32f2f;
+    animation: bossPhase3Pulse 0.6s ease-in-out infinite alternate;
+}
+@keyframes bossPhase3Pulse {
+    0% {
+        box-shadow:
+            0 4px 0 #8e1a26,
+            0 6px 0.5px #dfc590,
+            0 8px 10px rgba(0,0,0,0.5),
+            0 0 20px rgba(211,47,47,0.5);
+        filter: brightness(1);
+    }
+    100% {
+        box-shadow:
+            0 4px 0 #8e1a26,
+            0 6px 0.5px #dfc590,
+            0 8px 10px rgba(0,0,0,0.5),
+            0 0 40px rgba(211,47,47,0.9),
+            0 0 80px rgba(255,0,0,0.3);
+        filter: brightness(1.2);
+    }
+}
+
+/* ══════════════════════════════════════════════
+   战场环境氛围 (Visual Enhancement B)
+   ══════════════════════════════════════════════ */
+
+/* 昼夜循环遮罩 */
+#day-night-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    transition: background 3s ease-in-out;
+}
+#day-night-overlay.day { background: transparent; }
+#day-night-overlay.dusk {
+    background: radial-gradient(ellipse at center, rgba(180,100,50,0.08) 0%, rgba(80,40,20,0.15) 100%);
+}
+#day-night-overlay.night {
+    background: radial-gradient(ellipse at center, rgba(10,10,40,0.1) 0%, rgba(5,5,20,0.25) 100%);
+}
+
+/* 天气效果 — 雨滴 */
+.weather-rain-drop {
+    position: absolute;
+    width: 2px;
+    background: linear-gradient(180deg, transparent, rgba(150,200,255,0.4));
+    pointer-events: none;
+    z-index: 3;
+    animation: rainFall var(--duration, 0.6s) linear forwards;
+}
+@keyframes rainFall {
+    0% { transform: translateY(-20px); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(calc(100vh + 20px)); opacity: 0; }
+}
+
+/* 天气效果 — 雾效遮罩 */
+.weather-fog {
+    position: absolute;
+    inset: -100px;
+    pointer-events: none;
+    z-index: 2;
+    background:
+        radial-gradient(ellipse 300px 150px at 20% 50%, rgba(200,210,220,0.06) 0%, transparent 100%),
+        radial-gradient(ellipse 400px 200px at 70% 30%, rgba(200,210,220,0.05) 0%, transparent 100%),
+        radial-gradient(ellipse 250px 180px at 50% 70%, rgba(200,210,220,0.04) 0%, transparent 100%);
+    animation: fogDrift 12s ease-in-out infinite alternate;
+}
+@keyframes fogDrift {
+    0% { transform: translateX(-20px) translateY(5px); }
+    100% { transform: translateX(20px) translateY(-5px); }
+}
+
+/* 深渊模式背景逐层变暗 */
+#battlefield.abyss-depth-1 {
+    background: radial-gradient(ellipse at center, #2a6348 0%, #1a4c38 50%, #0d3a20 100%);
+}
+#battlefield.abyss-depth-2 {
+    background: radial-gradient(ellipse at center, #2a5348 0%, #1a3c38 50%, #0d2a18 100%);
+}
+#battlefield.abyss-depth-3 {
+    background: radial-gradient(ellipse at center, #2a4348 0%, #1a2c38 50%, #0d1a10 100%);
+}
+#battlefield.abyss-depth-n {
+    background: radial-gradient(ellipse at center, #1a2348 0%, #0a1c38 50%, #050a10 100%);
+}
+
+/* 深渊红色雾霭 */
+.abyss-red-mist {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    background:
+        radial-gradient(ellipse 200px 100px at var(--mx, 50%) var(--my, 50%), rgba(182,41,41,0.08) 0%, transparent 100%);
+    animation: mistPulse 4s ease-in-out infinite alternate;
+}
+@keyframes mistPulse {
+    0% { opacity: 0.4; }
+    100% { opacity: 0.8; }
+}
+
+/* ══════════════════════════════════════════════
+   技能特效升级 (Visual Enhancement C)
+   ══════════════════════════════════════════════ */
+
+/* Overdrive 全屏色相翻转 */
+#game-container.overdrive-active #battlefield {
+    filter: saturate(1.6) hue-rotate(-10deg) brightness(1.15);
+    transition: filter 0.15s;
+}
+#game-container.overdrive-active {
+    animation: overdriveHueFlip 3s linear infinite;
+}
+@keyframes overdriveHueFlip {
+    0% { filter: hue-rotate(0deg); }
+    50% { filter: hue-rotate(15deg); }
+    100% { filter: hue-rotate(0deg); }
+}
+
+/* 冰冻冰晶扩散波纹 */
+.freeze-crystal-ring {
+    position: absolute;
+    width: 40px; height: 40px;
+    border: 3px solid rgba(112,214,255,0.6);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 16;
+    transform: translate(-50%, -50%);
+    animation: freezeRingExpand 0.8s ease-out forwards;
+}
+@keyframes freezeRingExpand {
+    0% { width: 10px; height: 10px; opacity: 1; border-width: 4px; }
+    100% { width: 120px; height: 120px; opacity: 0; border-width: 1px; }
+}
+
+/* 冰晶碎片 */
+.ice-crystal {
+    position: absolute;
+    width: 8px; height: 8px;
+    background: linear-gradient(135deg, #b3e5fc, #4dd0e1);
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 16;
+    transform: translate(-50%, -50%) rotate(45deg);
+    animation: iceCrystalFade 0.6s ease-out forwards;
+}
+@keyframes iceCrystalFade {
+    0% { opacity: 1; transform: translate(-50%, -50%) rotate(45deg) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--rot, 225deg)) scale(0.2); }
+}
+
+/* 超武合成金色流光粒子爆发 */
+.legendary-burst {
+    position: absolute;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 30;
+    animation: burstExpand 0.8s ease-out forwards;
+}
+@keyframes burstExpand {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
+    50% { opacity: 0.8; transform: translate(-50%, -50%) scale(2); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(4); }
+}
+
+/* ══════════════════════════════════════════════
+   原有样式保留 — Boss 暴怒
+   ══════════════════════════════════════════════ */
 .enemy.boss::before {
     content: '';
     position: absolute;
@@ -258,6 +583,15 @@
 }
 
 /* Boss Lord 覆盖 — 删除冗余，统一使用上方 96x128 定义 */
+
+/* Epoch 47: 深渊变体敌人样式 */
+.enemy.abyss-variant {
+    animation: abyssVariantPulse 1.5s ease-in-out infinite alternate;
+}
+@keyframes abyssVariantPulse {
+    0% { filter: brightness(1) hue-rotate(0deg); }
+    100% { filter: brightness(1.2) hue-rotate(30deg); }
+}
 
 /* Boss 投射物 */
 .enemy-projectile {

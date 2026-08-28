@@ -2,128 +2,6 @@
     'use strict';
     var Gp = window.GameEngine.prototype;
 
-Gp._spawnEnemy = function(isBoss) {
-    if (!isBoss) {
-        var cap = this._getWaveEnemyMax();
-        if (this.currentWaveSpawnedCount >= cap) return;
-    }
-    var level = Math.floor(this._elapsed / 15) + 1;
-    var angle = Math.random() * Math.PI * 2;
-    var dist = 200 + Math.random() * 50;
-    var x = this.player.x + Math.cos(angle) * dist;
-    var y = this.player.y + Math.sin(angle) * dist;
-    var margin = 20;
-    x = Math.max(margin, Math.min(this._mapW - margin, x));
-    y = Math.max(margin, Math.min(this._mapH - margin, y));
-
-    var id = this._enemyIdCounter++;
-    var enemyType = 'Normal';
-    if (!isBoss) {
-        /* Epoch 4: 程序化敌人类型权重 */
-        if (this._enemyTypeWeights) {
-            var weights = this._enemyTypeWeights;
-            var roll = Math.random();
-            var cumulative = 0;
-            var types = Object.keys(weights);
-            for (var ti = 0; ti < types.length; ti++) {
-                cumulative += weights[types[ti]];
-                if (roll < cumulative) { enemyType = types[ti]; break; }
-            }
-        } else {
-            var typeRoll = Math.random();
-            if (typeRoll < 0.25) enemyType = 'Tanker';
-            else if (typeRoll < 0.55) enemyType = 'Stalker';
-            else if (typeRoll < 0.80) enemyType = 'Shaman';
-        }
-    }
-    var enemy = new Enemy(id, x, y, level, isBoss === true, enemyType);
-    var diff = 1;
-    try { diff = window.levelConfig[this._currentLevelId].difficultyFactor || 1; } catch(e) { console.warn('diff config read error', e); }
-    enemy.maxHp = Math.floor(enemy.maxHp * diff);
-    enemy.hp = enemy.maxHp;
-    enemy.atk = Math.floor(enemy.atk * diff);
-
-    if (enemy.isBoss) {
-        var waveIdx = this._waveCount;
-        var maxWaves = this._getMaxWaves();
-        if (waveIdx >= maxWaves) {
-            enemy.radius = 75;
-            var baseHp = Math.floor(20 * Math.pow(1.2, level - 1));
-            /* H-026: 最终 Boss HP 动态倍率，防止不可战胜 */
-            var bossHpMult = Math.min(20, 5 + level);
-            enemy.maxHp = Math.floor(baseHp * bossHpMult);
-            enemy.hp = enemy.maxHp;
-            enemy.hue = 0;
-        } else if (waveIdx === maxWaves - 1) {
-            enemy.speed *= 2;
-            enemy.hue = 30;
-        }
-    }
-
-    this.enemies.push(enemy);
-    if (!enemy.isBoss) this.currentWaveSpawnedCount++;
-
-    /* ── 变异保险库：血月对新生敌人生效 ── */
-    if (this._vaultMutations && this._vaultMutations.indexOf('bloodmoon') !== -1) {
-        enemy.atk = Math.floor(enemy.atk * 1.4);
-        enemy.maxHp = Math.floor(enemy.maxHp * 1.3);
-        enemy.hp = Math.floor(enemy.hp * 1.3);
-    }
-
-    /* Epoch 32: 波次间事件的临时敌方debuff */
-    if (this._tempEnemyAtkDebuff > 0) {
-        enemy.atk = Math.floor(enemy.atk * this._tempEnemyAtkDebuff);
-    }
-    if (this._tempEnemySpeedDebuff > 0) {
-        enemy.speed *= this._tempEnemySpeedDebuff;
-    }
-
-    var el = document.createElement('div');
-    el.className = 'enemy';
-    if (enemy.isBoss) {
-        el.classList.add('boss');
-        var maxWaves = this._getMaxWaves();
-        if (this._waveCount >= maxWaves) el.classList.add('final-boss');
-    }
-    el.dataset.id = id;
-    el.dataset.enemyType = enemyType;
-    /* Boss 用 DOM 内嵌字符（::before 留给 aura），普通敌人用 ::before */
-    if (enemy.isBoss) {
-        var bossChar = (this._waveCount >= maxWaves) ? '中' : '★';
-        el.innerHTML = '<span style="font-size:calc(28*1.5px);font-weight:900;color:#e65100;text-shadow:0 0 8px rgba(255,179,0,0.5);z-index:1;position:relative;">' + bossChar + '</span>';
-    } else {
-        /* Mahjong 牌面字符映射 — 仅普通敌人 */
-        var suitMap = {
-            'Normal': '萬',
-            'Tanker': '條',
-            'Stalker': '筒',
-            'Shaman': '風'
-        };
-        el.setAttribute('data-suit', suitMap[enemyType] || '萬');
-        el.setAttribute('data-type', enemyType === 'Normal' ? '' : enemyType.substring(0, 3));
-    }
-    /* 2.5D 麻将牌渲染 — CSS 负责样式，JS 仅设位置 */
-    el.style.background = '';
-    el.style.borderRadius = '';
-    el.style.boxShadow = '';
-    el.style.display = '';
-    el.style.alignItems = '';
-    el.style.justifyContent = '';
-    el.style.fontSize = '';
-    el.style.fontWeight = '';
-    el.style.color = '';
-    if (enemyType === 'Stalker') el.style.opacity = '0.85';
-    var hpBar = document.createElement('div');
-    hpBar.className = 'enemy-hp-bar';
-    var hpFill = document.createElement('div');
-    hpFill.className = 'enemy-hp-fill';
-    hpBar.appendChild(hpFill);
-    el.appendChild(hpBar);
-    this._worldLayer.appendChild(el);
-    this._enemyElements.set(id, el);
-    enemy.el = el;
-};
-
 
 Gp._spawnCoinsAt = function(x, y, isBoss, level) {
     /* Epoch 5: 委托掉落到 CombatSystem */
@@ -166,6 +44,14 @@ Gp._spawnEliteEnemy = function() {
     enemy.hp = enemy.maxHp;
     enemy.atk = Math.floor(enemy.atk * 1.3);
     enemy.el && enemy.el.classList.add('elite-marker');
+
+    /* R30-M-005: 精英怪也应用临时debuff */
+    if (this._tempEnemyAtkDebuff > 0) {
+        enemy.atk = Math.floor(enemy.atk * this._tempEnemyAtkDebuff);
+    }
+    if (this._tempEnemySpeedDebuff > 0) {
+        enemy.speed *= this._tempEnemySpeedDebuff;
+    }
 
     this.enemies.push(enemy);
     this.currentWaveSpawnedCount++;
@@ -356,6 +242,8 @@ Gp._rewardKill = function(enemy) {
     this.kills++;
     /* Epoch 32: 图鉴记录敌人类型 */
     if (window.saveManager && enemy.type) window.saveManager.recordCompendiumEntry('enemies', enemy.type);
+    /* Epoch 47: 深渊币掉落 */
+    if (this._tryAbyssCoinDrop) this._tryAbyssCoinDrop(enemy);
     /* Epoch 3: Boss 击杀计数 */
     if (enemy.isBoss) {
         this._bossKillsThisRun = (this._bossKillsThisRun || 0) + 1;
@@ -382,6 +270,424 @@ Gp._rewardKill = function(enemy) {
             this._syncExpBar();
         }
     }
+    /* 雀魂系统：击杀掉牌（HUPAI_DESIGN.md v2.0） */
+    this._tryTileDrop(enemy);
 };
+
+/* ════ 雀魂系统 · 掉牌与手牌管理 ════ */
+
+Gp._tryTileDrop = function (enemy) {
+    if (!window.MahjongHand) return;
+    var B = window.Balance;
+    if (enemy.isBoss) {
+        if ((this._jokersDropped || 0) < B.HUPAI_WILDCARD_MAX) {
+            this._jokersDropped++;
+            this._addTileToHand('joker', true);
+        }
+        return;
+    }
+    if (Math.random() >= B.HUPAI_DROP_CHANCE) return;
+    var id = window.MahjongHand.rollDrop(enemy.suitBias || this._mainSuit);
+    this._addTileToHand(id, false);
+};
+
+Gp._addTileToHand = function (id, isJoker) {
+    var MH = window.MahjongHand;
+    /* F4 加固：非法 ID 静默丢弃（外部注入容错） */
+    if (!id || typeof id !== 'string') { console.warn('Hupai: 非法牌ID已丢弃', id); return; }
+    if (MH.isFlower(id)) { this._triggerFlowerEvent(id); return; }
+    if (this._handTiles.length >= window.Balance.HUPAI_HAND_MAX) {
+        /* 满手牌：MVP 直接提示（V2 改为地上等待+打牌模式拾取） */
+        if (window.toastSystem && !this._handFullToastAt) { window.toastSystem.warning('手牌已满 14/14，点击手牌打出一张'); this._handFullToastAt = Date.now(); }
+        if (Date.now() - (this._handFullToastAt || 0) > 5000) this._handFullToastAt = 0;
+        return;
+    }
+    this._handTiles.push(id);
+    var info = MH.isJoker(id) ? { label: '癞', color: '#7c4dff' } : MH.faceInfo(id);
+    if (this._spawnFloatText && info) {
+        this._spawnFloatText(this.player.x, this.player.y - 30, '🀄 ' + info.label, true);
+    }
+    if (window.audioManager) window.audioManager.play('pickup');
+    this._onHandChanged();
+};
+
+Gp._onHandChanged = function () {
+    var MH = window.MahjongHand;
+    if (!MH || !this.player) return;
+    this._renderHandTiles();
+    /* 面子一次性触发（牌保留在手=上阵装备，增益不撤） */
+    var melds = MH.extractMelds(this._handTiles);
+    for (var i = 0; i < melds.length; i++) {
+        var m = melds[i];
+        if (m.type === 'pair') continue; /* 对子只作胡牌素材，不触发 */
+        var key = m.type + ':' + m.tiles[0] + (m.tiles.length > 1 ? '+' + m.tiles[1] : '');
+        if (this._formedMelds[key]) continue;
+        this._formedMelds[key] = true;
+        if (typeof this._triggerMeld === 'function') this._triggerMeld(m);
+    }
+    /* 胡牌判定（满14时）；未成番型 → 进入打牌模式（D2） */
+    if (this._handTiles.length >= window.Balance.HUPAI_HAND_MAX) {
+        var hu = MH.evaluateHu(this._handTiles);
+        if (hu && !this._pendingReward && !this.gameOver && typeof this._triggerHu === 'function') {
+            this._triggerHu(hu);
+        } else if (!hu && !this._discardMode && typeof this._enterDiscardMode === 'function') {
+            this._enterDiscardMode(-1);
+            if (window.toastSystem) window.toastSystem.warning('未成牌型 —— 点击一张牌打出换张');
+        }
+    }
+};
+
+Gp._renderHandTiles = function () {
+    if (!this._handTileSlots) return;
+    var MH = window.MahjongHand;
+    var ting = MH ? MH.tingInfo(this._handTiles) : null;
+    var tingMap = {};
+    if (ting) {
+        for (var i = 0; i < ting.tingPung.length; i++) tingMap[ting.tingPung[i]] = 'ting-pung';
+        for (var k = 0; k < ting.tingKong.length; k++) tingMap[ting.tingKong[k]] = 'ting-kong';
+    }
+    for (var s = 0; s < this._handTileSlots.length; s++) {
+        var slot = this._handTileSlots[s];
+        slot.classList.toggle('discard-sel', this._discardMode === true && s === this._discardSel);
+        if (s < this._handTiles.length) {
+            var id = this._handTiles[s];
+            var info = MH.isJoker(id) ? { label: '癞', color: '#7c4dff' } : (MH.faceInfo(id) || { label: '?', color: '#b62929' });
+            var cls = MH.isJoker(id) ? 'joker' : (id.replace(/[0-9]/g, '') === 'wan' ? 'wan' : id.indexOf('tong') === 0 ? 'tong' : id.indexOf('tiao') === 0 ? 'tiao' : (id.indexOf('feng_') === 0 ? 'wind' : 'arrow'));
+            var marker = tingMap[id] ? '<span class="ting-mark ' + tingMap[id] + '"></span>' : '';
+            slot.classList.add('occupied');
+            slot.innerHTML = marker + '<div class="tile-body ' + cls + '" style="color:' + (info.color || '#b62929') + '">' + (info.label || '?') + '</div>';
+        } else {
+            slot.classList.remove('occupied');
+            slot.innerHTML = '';
+        }
+    }
+    /* 清一色进度竖条（手牌栏左缘） */
+    if (this._handTileBar) {
+        if (this._discardMode) this._handTileBar.classList.add('discarding');
+        else this._handTileBar.classList.remove('discarding');
+        if (ting && ting.qingyise.ratio > 0) {
+            this._handTileBar.style.setProperty('--qing-ratio', ting.qingyise.ratio.toFixed(3));
+            this._handTileBar.classList.toggle('qy-near', ting.qingyise.count >= 9);
+        } else {
+            this._handTileBar.style.setProperty('--qing-ratio', '0');
+            this._handTileBar.classList.remove('qy-near');
+        }
+    }
+};
+
+/* ════ 雀魂系统 · 花牌拾取即触发（MVP 简化版，V2 接入 GameSystems 分发器） ════ */
+Gp._triggerFlowerEvent = function (id) {
+    if (!window.MahjongHand || !this.player) return;
+    var info = window.MahjongHand.faceInfo(id);
+    var label = info ? info.label : '?';
+    var p = this.player;
+    try {
+        switch (id) {
+            case 'hua_chun': p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.30); break;
+            case 'hua_xia': p._tempAtkBoost = (p._tempAtkBoost || 0) + 0.30; p._tempBuffTimeLeft = Math.max(p._tempBuffTimeLeft || 0, 5); break; /* P2-6: 5s 对齐设计表 */
+            case 'hua_qiu': p.addGold(20 * Math.max(1, this._waveCount)); break;
+            case 'hua_dongJ':
+                for (var i = 0; i < this.enemies.length; i++) { this.enemies[i].frozen = true; this.enemies[i].frozenTimer = 1.5; }
+                break;
+            case 'hua_mei': {
+                var ws = this.weapons || [];
+                if (ws.length > 0) ws[Math.floor(Math.random() * ws.length)].upgrade();
+                break;
+            }
+            case 'hua_lan': p.critRate = Math.min(1, (p.critRate || 0) + 0.10); break;
+            case 'hua_zhu': p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.15); break;
+            case 'hua_ju': p.addGold(10 * Math.max(1, this._waveCount)); break;
+        }
+    } catch (e) { console.warn('flower event error:', e); }
+    if (this._spawnFloatText) this._spawnFloatText(p.x, p.y - 50, '🌸 花·' + label, true);
+    if (window.toastSystem) window.toastSystem.success('花牌·' + label + ' 效果触发');
+};
+
+/* ════ 雀魂系统 · 面子效果（A1 刻/杠即时爆发 · A2 顺子永久 · A3 字牌事件） ════ */
+
+Gp._triggerMeld = function (meld) {
+    var B = window.Balance, MH = window.MahjongHand, p = this.player;
+    if (!MH || !p) return;
+    var first = meld.tiles[0];
+    /* A3: 字牌刻子 → 事件分发 */
+    if (MH.isHonor(first)) { this._triggerHonorMeld(meld); return; }
+    var info = MH.faceInfo(first);
+    var suit = info ? info.suit : 'wan';
+    var hasJoker = meld.tiles.indexOf('joker') > -1;
+    var mult = meld.tierMult *
+        (meld.type === 'kong' ? B.HUPAI_KONG_MULT_VS_PUNG : 1) *
+        (hasJoker ? B.HUPAI_MELD_EFFECT_MULT_JOKER : 1);
+
+    /* A2: 顺子 = 本局永久叠加 */
+    if (meld.type === 'run') { this._applyRunBonus(suit, meld.tierMult); return; }
+
+    /* A1: 刻子/杠 = 即时爆发 */
+    var isKong = meld.type === 'kong';
+    if (suit === 'wan') {
+        /* 万箭齐发：随机 N 敌各受 atk×1.5×mult */
+        var dmg = Math.floor(p.atk * B.HUPAI_PUNG_WAN_ATK_FACTOR * mult);
+        var pool = [];
+        for (var i = 0; i < this.enemies.length; i++) if (this.enemies[i].alive) pool.push(this.enemies[i]);
+        for (var n = 0; n < B.HUPAI_PUNG_WAN_TARGETS && pool.length > 0; n++) {
+            var e = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
+            e.takeDamage(dmg, 'player');
+            if (this._spawnFloatText) this._spawnFloatText(e.x, e.y, '万' + dmg, true);
+        }
+        this._meldFx('🀄 万箭齐发' + (isKong ? '·杠！' : ''), isKong);
+    } else if (suit === 'tong') {
+        /* 九筒连环：9 向环形弹幕，每发 atk×0.6×mult */
+        var pdmg = Math.floor(p.atk * B.HUPAI_PUNG_TONG_PROJ_ATK * mult);
+        for (var a = 0; a < 9; a++) {
+            var ang = (Math.PI * 2 / 9) * a;
+            var proj = new window.Projectile(p.x, p.y, Math.cos(ang) * 280, Math.sin(ang) * 280, 4, pdmg, 1, 1.2);
+            var el = document.createElement('div');
+            el.className = 'projectile tong-ring-pellet';
+            if (this._worldLayer) this._worldLayer.appendChild(el);
+            proj.el = el;
+            if (this._projectiles) this._projectiles.push(proj);
+        }
+        this._meldFx('🔵 九筒连环' + (isKong ? '·杠！' : ''), isKong);
+    } else if (suit === 'tiao') {
+        /* 疾风连打：临时攻速提升（Render._updateWeapons 消耗 _tempAspd） */
+        this._tempAspd = (this._tempAspd || 0) + B.HUPAI_PUNG_TIAO_ASPD * mult;
+        this._tempAspdT = B.HUPAI_PUNG_TIAO_DURATION;
+        this._meldFx('🌿 疾风连打' + (isKong ? '·杠！' : ''), isKong);
+    }
+};
+
+Gp._meldFx = function (label, big) {
+    if (this._spawnFloatText && this.player) this._spawnFloatText(this.player.x, this.player.y - 60, label, true);
+    if (this.triggerShake) this.triggerShake(big ? 2 : 1, big ? 300 : 150);
+    if (window.audioManager) window.audioManager.play(big ? 'overdrive' : 'pickup');
+};
+
+/* A2: 顺子永久叠加（万=攻 / 筒=冷却 / 条=闪避；数值锚定 Balance） */
+Gp._applyRunBonus = function (suit, tierMult) {
+    var B = window.Balance, p = this.player;
+    if (!p) return;
+    var tierIdx = B.HUPAI_TIER_MULTS.indexOf(tierMult);
+    if (tierIdx < 0) tierIdx = 1;
+    if (suit === 'wan') {
+        var inc = tierIdx + 1;
+        p.atk += inc;
+        if (this._spawnFloatText) this._spawnFloatText(p.x, p.y - 40, '万顺 攻+' + inc, false);
+    } else if (suit === 'tong') {
+        var floor = p.cdFloor || window.Balance.DEFAULT_CD_FLOOR;
+        var red = B.HUPAI_RUN_TONG_CD_INC * (tierIdx + 1);
+        for (var i = 0; i < this._activeWeapons.length; i++) {
+            var w = this._activeWeapons[i];
+            /* P1-3: 改 _baseCd 记账，避免被 Render 每帧 _weaponCdReduction 强写回滚 */
+            if (!w._baseCd) w._baseCd = w.cd;
+            w._baseCd = Math.max(floor, w._baseCd * (1 - red));
+            w.cd = w._baseCd;
+        }
+        if (this._spawnFloatText) this._spawnFloatText(p.x, p.y - 40, '筒顺 冷却−', false);
+    } else if (suit === 'tiao') {
+        var dodgeInc = B.HUPAI_RUN_TIAO_DODGE_INC * (tierIdx + 1);
+        p.dodgeRate = Math.min(B.MAX_LIFESTEAL_RATE, (p.dodgeRate || 0) + dodgeInc);
+        p.speed = (p.speed || 100) * (1 + Math.min(B.HUPAI_RUN_TIAO_CAP, B.HUPAI_RUN_TIAO_SPD_INC * (tierIdx + 1)));
+        if (this._spawnFloatText) this._spawnFloatText(p.x, p.y - 40, '条顺 敏捷↑', false);
+    }
+};
+
+/* A3: 字牌刻子事件表（HUPAI_DESIGN.md §4.3） */
+Gp._triggerHonorMeld = function (meld) {
+    var B = window.Balance, MH = window.MahjongHand, p = this.player;
+    if (!p) return;
+    var id = meld.tiles[0];
+    var isKong = meld.type === 'kong';
+    var kongMult = isKong ? B.HUPAI_KONG_MULT_VS_PUNG : 1;
+    try {
+        switch (id) {
+            case 'feng_dong': /* 东风破阵：全场击退250px+冰封1s */
+                for (var i = 0; i < this.enemies.length; i++) {
+                    var e1 = this.enemies[i];
+                    if (!e1.alive) continue;
+                    var dx = e1.x - p.x, dy = e1.y - p.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
+                    e1.x += (dx / d) * B.HUPAI_ZI_EAST_KNOCKBACK || 250;
+                    e1.y += (dy / d) * B.HUPAI_ZI_EAST_KNOCKBACK || 250;
+                    e1.frozen = true; e1.frozenTimer = 1;
+                }
+                break;
+            case 'feng_nan': /* 离火燎原：全场灼烧（MVP 即时 8%×kongMult maxHp） */
+                for (var j = 0; j < this.enemies.length; j++) {
+                    var e2 = this.enemies[j];
+                    if (e2.alive) e2.takeDamage(Math.floor(e2.maxHp * 0.08 * kongMult), 'player');
+                }
+                break;
+            case 'feng_xi': /* 肃杀之风：全场迟滞（MVP 冰封0.8s代理） */
+                for (var k = 0; k < this.enemies.length; k++) {
+                    if (this.enemies[k].alive) { this.enemies[k].frozen = true; this.enemies[k].frozenTimer = 0.8; }
+                }
+                break;
+            case 'feng_bei': /* 北冥冻结：全场冰冻2s */
+                for (var m = 0; m < this.enemies.length; m++) {
+                    if (this.enemies[m].alive) { this.enemies[m].frozen = true; this.enemies[m].frozenTimer = 2; }
+                }
+                break;
+            case 'jian_zhong': /* 红中贯日：全屏冲击波 atk×4×kongMult + 怒气+30 */
+                var zdmg = Math.floor(p.atk * 4 * kongMult);
+                for (var z = 0; z < this.enemies.length; z++) {
+                    if (this.enemies[z].alive) this.enemies[z].takeDamage(zdmg, 'player');
+                }
+                p.rage = Math.min(p.maxRage, p.rage + 30);
+                if (this.triggerShake) this.triggerShake(3, 400);
+                break;
+            case 'jian_fa': /* 招财进宝：金币雨 15×波次×kongMult */
+                p.addGold(Math.floor(15 * Math.max(1, this._waveCount) * kongMult));
+                break;
+            case 'jian_bai': /* 白板归真：清敌方弹幕+图腾+回20%HP */
+                if (this._enemyProjectiles) {
+                    for (var q = this._enemyProjectiles.length - 1; q >= 0; q--) {
+                        if (this._enemyProjectiles[q].el && this._enemyProjectiles[q].el.parentNode) this._enemyProjectiles[q].el.remove();
+                    }
+                    this._enemyProjectiles.length = 0;
+                }
+                if (this._clearTotems) this._clearTotems();
+                p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.20);
+                break;
+        }
+    } catch (err) { console.warn('honor meld error:', err); }
+    var info = MH.faceInfo(id);
+    this._meldFx('✦ ' + (info ? info.label : '字') + '·刻成！', isKong);
+};
+
+/* ════ 雀魂系统 · A4 胡牌演出（HUPAI_DESIGN.md §六） ════ */
+Gp._triggerHu = function (hu) {
+    var B = window.Balance, p = this.player;
+    if (!p || this._huLock || this.gameOver) return;
+    this._huLock = true;
+    var names = { pihu: '屁胡', qiduizi: '七对子', pengpenghu: '碰碰胡', qingyise: '清一色' };
+    var name = names[hu.huType] || '胡牌';
+    var self = this;
+
+    /* 全场时间冻结 */
+    this._freezeClock();
+
+    /* 「胡！」书法砸屏 */
+    if (this.battlefield) {
+        var bang = document.createElement('div');
+        bang.className = 'hu-bang';
+        bang.textContent = '胡！';
+        this.battlefield.appendChild(bang);
+        setTimeout(function () { if (bang.parentNode) bang.remove(); }, 1600);
+    }
+    /* 手牌扇形脉冲（MVP 简化，V2 做飞牌展扇） */
+    if (this._handTileBar) this._handTileBar.classList.add('hu-flash');
+
+    /* 番型增益（圣物Lv3-4锚定，本局生效） */
+    try {
+        switch (hu.huType) {
+            case 'pihu':
+                p.addGold(B.HU_PIHU_GOLD);
+                break;
+            case 'qingyise':
+                p.atk += Math.ceil(p.atk * B.HU_QINGYISE_DMG);
+                p.huQingyise = true;
+                if (this.playerEl) this.playerEl.classList.add('hu-qingyise');
+                break;
+            case 'pengpenghu':
+                p._weaponCdReduction = Math.min(0.6, (p._weaponCdReduction || 0) + B.HU_PENGPENG_CD);
+                this._tempAspd = (this._tempAspd || 0) + B.HU_PENGPENG_ASPD;
+                this._tempAspdT = 9999;
+                break;
+            case 'qiduizi':
+                p.dodgeRate = Math.min(0.8, (p.dodgeRate || 0) + B.HU_QIDUI_DODGE);
+                p.speed = (p.speed || 100) * (1 + B.HU_QIDUI_SPD);
+                p.magnetRadius = (p.magnetRadius || 60) * (1 + B.HU_QIDUI_MAGNET);
+                break;
+        }
+        /* 图鉴记录 */
+        if (window.saveManager && window.saveManager.recordCompendiumEntry) {
+            window.saveManager.recordCompendiumEntry('hupai', hu.huType);
+        }
+        /* 结算统计 */
+        this._huCountThisRun = (this._huCountThisRun || 0) + 1;
+    } catch (e) { console.warn('hu buff error:', e); }
+
+    if (this.triggerShake) this.triggerShake(3, 500);
+    if (window.audioManager) window.audioManager.play('overdrive');
+    if (window.toastSystem) window.toastSystem.success('—— ' + name + ' ——');
+
+    /* 清手牌重开一轮收集 */
+    this._handTiles = [];
+    this._formedMelds = {};
+    this._renderHandTiles();
+    if (this.player && typeof this.player.recalc === 'function') { /* 预留 */ }
+
+    setTimeout(function () {
+        self._unfreezeClock();
+        self._huLock = false;
+        if (self._handTileBar) self._handTileBar.classList.remove('hu-flash');
+    }, 900);
+};
+
+/* ════ 雀魂系统 · A5 打牌模式（满14未胡：冻结+点选打出） ════ */
+Gp._enterDiscardMode = function (slotIndex) {
+    if (this._discardMode || this.gameOver || this._pendingReward || this._huLock) return;
+    if (this._handTiles.length < window.Balance.HUPAI_HAND_MAX) return;
+    this._discardMode = true;
+    this._discardSel = slotIndex;
+    this._freezeClock();
+    if (this.battlefield) this.battlefield.classList.add('discard-mode');
+    this._renderHandTiles();
+    if (window.toastSystem) window.toastSystem.info('打牌模式：再点一次打出选中牌，点空白处取消');
+};
+
+Gp._exitDiscardMode = function () {
+    if (!this._discardMode) return;
+    this._discardMode = false;
+    this._discardSel = -1;
+    this._unfreezeClock();
+    if (this.battlefield) this.battlefield.classList.remove('discard-mode');
+    this._renderHandTiles();
+};
+
+Gp._confirmDiscard = function () {
+    if (!this._discardMode || this._discardSel < 0 || this._discardSel >= this._handTiles.length) return;
+    var discarded = this._handTiles.splice(this._discardSel, 1)[0];
+    this._discardMode = false;
+    this._discardSel = -1;
+    this._unfreezeClock();
+    if (this.battlefield) this.battlefield.classList.remove('discard-mode');
+    /* 增益不撤（roguelike 标准）：已触发面子签名保留 */
+    var info = window.MahjongHand.faceInfo(discarded);
+    if (this._spawnFloatText && this.player) {
+        this._spawnFloatText(this.player.x, this.player.y - 40, '打出 ' + (info ? info.label : ''), false);
+    }
+    this._onHandChanged();
+};
+
+Gp._bindHandTileClicks = function () {
+    if (!this._handTileGrid || this._handClicksBound) return;
+    this._handClicksBound = true;
+    var self = this;
+    this._handTileGrid.addEventListener('click', function (e) {
+        if (!self.running || self.gameOver || self._pendingReward) return;
+        var slot = e.target.closest('.hand-tile-slot');
+        if (!slot) { if (self._discardMode) self._exitDiscardMode(); return; }
+        var idx = Array.prototype.indexOf.call(self._handTileSlots, slot);
+        if (idx < 0 || idx >= self._handTiles.length) { if (self._discardMode) self._exitDiscardMode(); return; }
+        if (!self._discardMode) {
+            if (self._handTiles.length >= window.Balance.HUPAI_HAND_MAX) self._enterDiscardMode(idx);
+            return;
+        }
+        if (idx === self._discardSel) self._confirmDiscard();
+        else { self._discardSel = idx; self._renderHandTiles(); }
+    });
+};
+
+/* ════ A6: 手牌状态进断点续玩快照 ════ */
+if (window.saveManager) {
+    var _prevHupaiSnap = window.saveManager.snapshotForRun;
+    window.saveManager.snapshotForRun = function (engine) {
+        var snap = _prevHupaiSnap ? _prevHupaiSnap.call(this, engine) : {};
+        snap.handTiles = engine._handTiles ? engine._handTiles.slice() : [];
+        snap.formedMelds = engine._formedMelds || {};
+        snap.jokersDropped = engine._jokersDropped || 0;
+        snap.mainSuit = engine._mainSuit || 'wan';
+        return snap;
+    };
+}
 
 })();
