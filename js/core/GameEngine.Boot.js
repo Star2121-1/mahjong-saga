@@ -51,7 +51,7 @@ Gp.init = async function() {
             this.cameraX = Math.max(0, Math.min(this._mapW - vpW, this.player.x - vpW / 2));
             this.cameraY = Math.max(0, Math.min(this._mapH - vpH, this.player.y - vpH / 2));
 
-            this.player.invulnTimer = 1.5;
+            this.player.invulnTimer = Balance.REVIVE_INVULN_DURATION;
             this.gameOver = false;
 
             if (window.rewardManager) window.rewardManager.hidePanel();
@@ -455,7 +455,7 @@ Gp._startNewRun = function(heroId, levelId) {
 
     this.player.x = this._mapW / 2;
     this.player.y = this._mapH / 2;
-    this.player.invulnTimer = 1.5;
+    this.player.invulnTimer = Balance.REVIVE_INVULN_DURATION;
     this.gameOver = false;
 
     var vpW = this.battlefield.clientWidth;
