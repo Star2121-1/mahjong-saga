@@ -349,8 +349,8 @@ window.Enemy = class Enemy {
             }
         }
 
-        var retreatDist = 200;
-        var advanceDist = 250;
+        var retreatDist = Balance.SHAMAN_RETREAT_DIST;
+        var advanceDist = Balance.SHAMAN_ADVANCE_DIST;
 
         if (dist < retreatDist) {
             if (dist > 0.01) {

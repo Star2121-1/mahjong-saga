@@ -505,6 +505,13 @@ Gp._gameOver = async function() {
     this._bossLord = null;
     this._bossLordWave = false;
     this._bossLordSpawned = false;
+    /* R30-H-007: 清理雨滴粒子防止累积 */
+    if (this._rainDrops) {
+        for (var _rd = 0; _rd < this._rainDrops.length; _rd++) {
+            if (this._rainDrops[_rd] && this._rainDrops[_rd].parentNode) this._rainDrops[_rd].remove();
+        }
+        this._rainDrops = [];
+    }
 
     /* P3-NEW: 死亡时清除 Boss Gamble 超时计时器，防止状态泄漏 */
     if (this._gambleTimeout) {
