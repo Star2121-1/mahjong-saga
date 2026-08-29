@@ -107,7 +107,6 @@ Fp._healthCheck = function() {
         }
     }
 };
-};
 
 window.fxManager = new window.FxManager();
 
