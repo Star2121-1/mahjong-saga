@@ -101,6 +101,7 @@ window.Balance = {
     QQUEEN_SHIELD_DURATION_PER_LEVEL: 2,
 
     /* ── 波次 ── */
+    WAVE_MILESTONE_THRESHOLD: 0.75,
     WAVE_MEDITATION_HP_RESTORE: 0.3,   // 冥想泉源 HP 恢复比例 (Events.js)
     WAVE_MEDITATION_ATK_DEBUFF: 0.8,   // 冥想泉源怪物 ATK 减益 (Events.js)
     WAVE_TIME_DILATION_SPEED_DEBUFF: 0.7, // 时光缓流移速减益 (Events.js)
