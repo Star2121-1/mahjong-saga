@@ -37,6 +37,8 @@ window.Balance = {
     EVOLVED_DODGE_BONUS: 0.3,        // 极速图腾闪避加成 (Player.js)
     RELIC_WW_SPEED_PER_LEVEL: 0.15,  // 四风环绕Lv级移速加成 (Player.js)
     RELIC_WW_DODGE_PER_LEVEL: 0.1,   // 四风环绕Lv级闪避加成 (Player.js)
+    RELIC_FROST_CORE_DURATION_PER_LEVEL: 0.5,  // 冰霜核心长效词条每级冰时加成 (Player.js)
+    DRONE_INTERVALS: [0, 1.0, 0.8, 0.6, 0.4], // 无人机攻击间隔（Lv0~Lv4）(Player.js)
     RELIC_GOLDEN_FINGER_CRIT_INC: 0.15, // 鬼指每级暴击加成 (Player.js)
     MAX_LIFESTEAL_RATE: 0.8,         // 吸血上限 (Player.js)
     LIFESTEAL_PER_VAMP_LEVEL: 0.08,  // 吸血戒指每级增幅 (Player.js)
@@ -138,6 +140,17 @@ window.Balance = {
     BOSS_PHASE2_ABILITY_INTERVAL: 0.5,  // 龙王二阶段技能间隔 (Enemy.js)
     EQUIPMENT_DROPS_BOSS_LORD: 1.0,  // 龙王装备掉落概率 (GameEngine.Spawn.js)
     EQUIPMENT_DROPS_NORMAL: 0.25,    // 普通怪物装备掉落概率 (GameEngine.Spawn.js)
+    BARRIER_HP_MULT: 1.5,            // 屏障怪HP倍率 (Enemy.js)
+    BARRIER_ATK_MULT: 0.7,           // 屏障怪ATK倍率 (Enemy.js)
+    BARRIER_SPEED_MULT: 0.8,         // 屏障怪速度倍率 (Enemy.js)
+    BOMBER_HP_MULT: 0.6,             // 自爆怪HP倍率 (Enemy.js)
+    BOMBER_ATK_MULT: 2,              // 自爆怪ATK倍率 (Enemy.js)
+    BOMBER_SPEED_MULT: 1.8,          // 自爆怪速度倍率 (Enemy.js)
+    SPLITTER_HP_MULT: 1.2,           // 分身怪HP倍率 (Enemy.js)
+    BOSS_NONLORD_SPEED_MULT: 0.7,    // 非龙王Boss速度倍率 (Enemy.js)
+    STALKER_CHARGE_DURATION: 1.5,    // 猎杀者蓄力时长 (Enemy.js)
+    STALKER_CHARGE_OPACITY: 0.4,     // 猎杀者蓄力透明度 (Enemy.js)
+    ENEMY_DEAD_OPACITY: 0,           // 敌人死亡透明度 (Enemy.js)
     BOSS_PHASE1_BULLET_COUNT: 12,
     BOSS_WARNING_DURATION: 0.8,
     BOSS_PHASE3_SUMMON_INTERVAL: 4,
@@ -149,6 +162,7 @@ window.Balance = {
     /* ── 敌人 ── */
     TANKER_HP_MULT: 2,
     TANKER_SPEED_MULT: 0.5,
+    TANKER_CRACK_HP_THRESHOLD: 0.5,  // 坦克龟裂纹HP阈值 (Enemy.js)
     TANKER_SIDESHOT_REDUCTION: 0.5,
     ASSASSIN_CRIT_MULT: 1.5,
     BOSS_CONTACT_COOLDOWN: 0.5,

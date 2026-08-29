@@ -283,7 +283,7 @@ class Player {
                 this.critRate = Math.min(1, this.critRate + Balance.RELIC_GOLDEN_FINGER_CRIT_INC);
                 break;
             case 'auto_drone': {
-                const intervals = [0, 1.0, 0.8, 0.6, 0.4];
+                const intervals = Balance.DRONE_INTERVALS;
                 this.hasDrone = true;
                 this.droneInterval = intervals[Math.min(lv, 4)];
                 this.droneTimer = 0;
@@ -385,7 +385,7 @@ class Player {
                 { id: 'ec_power', name: '强化', apply: function(p) { p.atk += 3; } }
             ],
             frost_core: [
-                { id: 'fc_duration', name: '长效', apply: function(p) { p.iceDurationBonus = (p.iceDurationBonus || 0) + 0.5; } },
+                { id: 'fc_duration', name: '长效', apply: function(p) { p.iceDurationBonus = (p.iceDurationBonus || 0) + Balance.RELIC_FROST_CORE_DURATION_PER_LEVEL; } },
                 { id: 'fc_chance', name: '极寒', apply: function(p) { p.freezeChance = Math.min(0.8, (p.freezeChance || 0) + 0.1); } }
             ],
             gravity_core: [
@@ -609,7 +609,7 @@ class Player {
             { id: 'vr_atk', apply: function(p) { p.atk += 5; } },
             { id: 'ec_range', apply: function(p) { p.magnetRadius = (p.magnetRadius || 60) + 30; } },
             { id: 'ec_power', apply: function(p) { p.atk += 3; } },
-            { id: 'fc_duration', apply: function(p) { p.iceDurationBonus = (p.iceDurationBonus || 0) + 0.5; } },
+            { id: 'fc_duration', apply: function(p) { p.iceDurationBonus = (p.iceDurationBonus || 0) + Balance.RELIC_FROST_CORE_DURATION_PER_LEVEL; } },
             { id: 'fc_chance', apply: function(p) { p.freezeChance = Math.min(0.8, (p.freezeChance || 0) + 0.1); } },
             { id: 'gc_xp', apply: function(p) { p.xpGainFactor = (p.xpGainFactor || 1) + 0.15; } },
             { id: 'gc_magnet', apply: function(p) { p.magnetRadius = (p.magnetRadius || 60) + 50; } },

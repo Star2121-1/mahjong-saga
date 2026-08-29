@@ -54,7 +54,7 @@ window.Enemy = class Enemy {
         this._bossContactTimer = 0;
 
         if (this.type === 'Tanker') {
-            this.speed = this.baseSpeed * 0.5;
+            this.speed = this.baseSpeed * Balance.TANKER_SPEED_MULT;
             this.baseSpeed = this.speed;
             this.maxHp = Math.floor(this.maxHp * 2);
             this.hp = this.maxHp;
@@ -70,27 +70,27 @@ window.Enemy = class Enemy {
             this.hue = 160;
         } else if (this.type === 'Barrier') {
             /* 屏障怪 — 正面无敌，需要绕后 */
-            this.maxHp = Math.floor(this.maxHp * 1.5);
+            this.maxHp = Math.floor(this.maxHp * Balance.BARRIER_HP_MULT);
             this.hp = this.maxHp;
-            this.atk = Math.floor(this.atk * 0.7);
-            this.speed = this.baseSpeed * 0.8;
+            this.atk = Math.floor(this.atk * Balance.BARRIER_ATK_MULT);
+            this.speed = this.baseSpeed * Balance.BARRIER_SPEED_MULT;
             this.baseSpeed = this.speed;
             this.hue = 200;
             this._barrierAngle = 0;
             this._barrierFront = true;
         } else if (this.type === 'Bomber') {
             /* 自爆怪 — 接近玩家后爆炸 */
-            this.maxHp = Math.floor(this.maxHp * 0.6);
+            this.maxHp = Math.floor(this.maxHp * Balance.BOMBER_HP_MULT);
             this.hp = this.maxHp;
-            this.atk = Math.floor(this.atk * 2);
-            this.speed = this.baseSpeed * 1.8;
+            this.atk = Math.floor(this.atk * Balance.BOMBER_ATK_MULT);
+            this.speed = this.baseSpeed * Balance.BOMBER_SPEED_MULT;
             this.baseSpeed = this.speed;
             this.hue = 30;
             this._exploded = false;
             this._explodeRadius = 60;
         } else if (this.type === 'Splitter') {
             /* 分身怪 — 死亡分裂成 2 个小怪 */
-            this.maxHp = Math.floor(this.maxHp * 1.2);
+            this.maxHp = Math.floor(this.maxHp * Balance.SPLITTER_HP_MULT);
             this.hp = this.maxHp;
             this.hue = 120;
             this._splitDone = false;
@@ -139,8 +139,8 @@ window.Enemy = class Enemy {
             this.radius = 45;
             this.maxHp = Math.floor(this.maxHp * 6);
             this.hp = this.maxHp;
-            this.atk = Math.floor(this.atk * 2);
-            this.speed *= 0.7;
+            this.atk = Math.floor(this.atk * Balance.BOMBER_ATK_MULT);
+            this.speed *= Balance.BOSS_NONLORD_SPEED_MULT;
             this.baseSpeed = this.speed;
             this.hue = 270;
         }
@@ -169,7 +169,7 @@ window.Enemy = class Enemy {
         }
 
         /* B3: 盾甲半血裂纹演出 */
-        if (this.type === 'Tanker' && this.el && !this._cracked && this.hp < this.maxHp * 0.5) {
+        if (this.type === 'Tanker' && this.el && !this._cracked && this.hp < this.maxHp * Balance.TANKER_CRACK_HP_THRESHOLD) {
             this._cracked = true;
             this.el.classList.add('tile-crack');
         }
@@ -234,7 +234,7 @@ window.Enemy = class Enemy {
 
         if (dist <= 150 && this._stalkerState === 'idle' && this._stalkerCooldown <= 0) {
             this._stalkerState = 'charging';
-            this._stalkerTimer = 1.5;
+            this._stalkerTimer = Balance.STALKER_CHARGE_DURATION;
             /* B3: 蓄力三重紫拖影 */
             if (this.el) this.el.classList.add('stalker-charging');
         }
@@ -249,10 +249,10 @@ window.Enemy = class Enemy {
                 this.y += (dy / dist) * move;
                 this._clampPosition(engine);
             }
-            if (this.el) this.el.style.opacity = '0.4';
+            if (this.el) this.el.style.opacity = String(Balance.STALKER_CHARGE_OPACITY);
             if (this._stalkerTimer <= 0 || dist < attackRange) {
                 this._stalkerState = 'fatigue';
-                this._stalkerTimer = 3.0;
+                this._stalkerTimer = Balance.STALKER_FATIGUE_DURATION;
                 if (this.el) { this.el.style.opacity = '1'; this.el.classList.remove('stalker-charging'); }
                 if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
                     this.flashTimer = Balance.FLASH_DURATION;
@@ -280,7 +280,7 @@ window.Enemy = class Enemy {
                 if (dist > attackRange + Balance.ENEMY_ATTACK_PADDING) this.reachedPlayer = false;
             }
             if (!this.reachedPlayer && dist > 0.01) {
-                var spd = this.baseSpeed * 0.5;
+                var spd = this.baseSpeed * Balance.TANKER_SPEED_MULT;
                 spd = this._totemBuffed ? spd * Balance.TOTEM_BUFF_SPEED_MULT : spd;
                 this.x += (dx / dist) * spd * dt;
                 this.y += (dy / dist) * spd * dt;
@@ -498,7 +498,7 @@ window.Enemy = class Enemy {
             this._exploded = true;
             this.alive = false;
             if (this.el) {
-                this.el.style.opacity = '0';
+                this.el.style.opacity = String(Balance.ENEMY_DEAD_OPACITY);
                 this.el.style.transform = 'scale(1.5)';
             }
             /* 爆炸伤害 */
@@ -593,7 +593,7 @@ window.Enemy = class Enemy {
             }
             if (this._bossPhase === 3 && !this._bossEnraged) {
                 this._bossEnraged = true;
-                this.speed = this.baseSpeed * 1.8;
+                this.speed = this.baseSpeed * Balance.BOMBER_SPEED_MULT;
                 if (this.el) this.el.classList.add('boss-enraged');
                 /* B4: 血海沸腾 — 全场红雾 12s + Boss 血渍滴落 */
                 if (engine && engine._battlefield && !engine._bossMistEl) {
@@ -613,7 +613,7 @@ window.Enemy = class Enemy {
                 }
             }
             if (this._bossPhase === 2) {
-                this._bossAbilityTimer = 0.5;
+                this._bossAbilityTimer = Balance.BOSS_PHASE2_ABILITY_INTERVAL;
                 if (this._bossWarningEl && this._bossWarningEl.parentNode) this._bossWarningEl.remove();
                 this._bossWarningEl = null;
                 this._bossWarningActive = false;
@@ -681,7 +681,7 @@ window.Enemy = class Enemy {
                 this._bossAbilityTimer -= dt;
                 if (this._bossAbilityTimer <= 0) {
                     this._bossWarningActive = true;
-                    this._bossWarningTimer = 0.8;
+                    this._bossWarningTimer = Balance.BOSS_WARNING_DURATION;
                     this._bossWarningTargetX = player.x;
                     this._bossWarningTargetY = player.y;
                     var wz = (this._abyssTier >= 2) ? 84 : 120; /* B4: 影武者预警圈−30% */
@@ -751,7 +751,7 @@ window.Enemy = class Enemy {
                 this._clampPosition(engine);
             }
             if (this._bossContactTimer <= 0) {
-                this._bossContactTimer = 0.5;
+                this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
                 var contactDmg = this._bossEnraged ? Math.floor(this.atk * 2) : this.atk;
                 player.takeDamage(this._applyMapAffinityDmg(contactDmg, engine), this);
             }
