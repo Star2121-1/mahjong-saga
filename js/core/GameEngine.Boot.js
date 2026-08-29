@@ -28,6 +28,8 @@ Gp.init = async function() {
         if (data && data.isRunActive === true && data.player) {
             window.saveManager.restoreRunToEngine(this, data);
             this._restoreWeapons(data.weapons);
+            /* R30-H-022: 恢复后重新计算武器协同标志 */
+            this._checkWeaponSynergies();
             /* A6: 雀魂手牌状态恢复 */
             this._handTiles = data.handTiles ? data.handTiles.slice() : [];
             this._formedMelds = data.formedMelds || {};
