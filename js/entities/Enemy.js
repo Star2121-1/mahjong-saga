@@ -827,7 +827,7 @@ window.Enemy = class Enemy {
                 toPlayerX = 1; toPlayerY = 0;
             }
             var dot = toPlayerX * Math.cos(this._barrierAngle) + toPlayerY * Math.sin(this._barrierAngle);
-            if (dot > 0) actualDmg = Math.floor(actualDmg * Balance.BARRIER_FRONT_DAMAGE_MULT);
+            if (dot > 1e-6) actualDmg = Math.floor(actualDmg * Balance.BARRIER_FRONT_DAMAGE_MULT);
         }
         var isAssassinCrit = false;
         if (this.frozen) {

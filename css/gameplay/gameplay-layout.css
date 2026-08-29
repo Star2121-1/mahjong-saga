@@ -76,6 +76,14 @@
     transition: background 0.2s, border-color 0.2s; flex-shrink: 0;
 }
 #pause-btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(26,83,54,0.5); }
+#audio-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(26,83,54,0.3);
+    border-radius: 4px; color: #ecece4; font-size: calc(16 * var(--_fs) * 1px);
+    cursor: pointer; padding: 4px 10px; line-height: 1;
+    transition: background 0.2s, border-color 0.2s; flex-shrink: 0;
+}
+#audio-btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(26,83,54,0.5); }
 
 /* ── 经验条容器：玉带质感 ── */
 #exp-bar-container {
