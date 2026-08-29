@@ -379,7 +379,6 @@ Gp._startNewRun = function(heroId, levelId) {
     this._activeMutator = null;
     this.playerHitCountInLevel1 = 0;
     this._playerHitCountThisRun = 0;
-    this._recordedFlawless = false;
     this.stalkersKilledInLevel2 = 0;
     this._interWaveEvent = null;
     this._interWaveTimer = 0;
@@ -779,7 +778,7 @@ Gp._bindAudioButton = function() {
         /* 持久化到 meta */
         try {
             var meta = window.saveManager && window.saveManager._metaCache;
-            if (meta) { meta.audioMuted = muted; window.saveManager._saveMetaToStorage(); }
+            if (meta) { meta.audioMuted = muted; window.saveManager._saveMetaToStorage().catch(function(e) {}); }
         } catch(e) {}
     });
     /* 恢复上次状态 */

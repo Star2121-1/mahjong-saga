@@ -394,7 +394,7 @@ Gp._settleRun = async function(tokens) {
         var pR = this.player && this.player.relicLevels || {};
         var ur = Object.keys(pR).filter(function(k) { return (pR[k] || 0) > 0; }).length;
         if (typeof window.saveManager.recordRunStats === 'function') {
-            window.saveManager.recordRunStats(this.kills, this._elapsed, this._maxGoldThisRun || 0, this._overdriveCount || 0, this._totalDodgesThisRun || 0, this._totalCritsThisRun || 0, this._waveCount, this._bossKillsThisRun || 0, this.loopCount || 0, true, this._playerHitCountThisRun || 0, ur);
+            window.saveManager.recordRunStats(this.kills, this._elapsed, this._maxGoldThisRun || 0, this._overdriveCount || 0, this._totalDodgesThisRun || 0, this._totalCritsThisRun || 0, this._waveCount, this._bossKillsThisRun || 0, this.loopCount || 0, !this.gameOver, this._playerHitCountThisRun || 0, ur);
         }
     } catch(e) { window.toastSystem && window.toastSystem.error('统计记录失败: ' + e.message); }
     /* 击杀类 */
@@ -410,8 +410,8 @@ Gp._settleRun = async function(tokens) {
     if ((meta.highestEndlessLoop || 0) >= 5) this._checkAchievement('deep_abyss');
     if ((meta.highestEndlessLoop || 0) >= 10) this._checkAchievement('deep_abyss_10');
     if ((meta.highestEndlessLoop || 0) >= 20) this._checkAchievement('deep_abyss_20');
-    /* 无伤 */
-    if (this._playerHitCountThisRun === 0) {
+    /* 无伤 — 必须获胜才算（P0: 原代码死亡时也会触发，现加 won 条件） */
+    if (this._playerHitCountThisRun === 0 && !this.gameOver) {
         meta.flawlessRuns = (meta.flawlessRuns || 0) + 1;
     }
     if ((meta.flawlessRuns || 0) >= 1) this._checkAchievement('flawless');

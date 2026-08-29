@@ -27,7 +27,7 @@ Fp.init = function() {
     }
 };
 
-Fp.spawnText = function(x, y, text, typeOrColor, size, duration) {
+Fp.spawnText = function(x, y, text, typeOrColor, size) { /* P1: 移除未使用的duration参数 */
     if (!this._layer) this.init();
     var node = this._borrowNode();
     if (!node) return;
@@ -57,12 +57,12 @@ Fp.spawnText = function(x, y, text, typeOrColor, size, duration) {
     };
     node._fctOnEnd = onEnd;
     node.addEventListener('animationend', onEnd);
-    /* fallback: 如果 animationend 事件未触发，10s 后强制回收（大于最大 animation-duration） */
+    /* fallback: 如果 animationend 事件未触发，5s 后强制回收（原10s过长） */
     node._fctTimeout = setTimeout(function() {
         node.removeEventListener('animationend', onEnd);
         node._fctActive = false;
         self._returnNode(node);
-    }, 10000);
+    }, 5000);
 };
 
 Fp._borrowNode = function() {

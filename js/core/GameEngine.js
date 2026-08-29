@@ -101,7 +101,6 @@ window.GameEngine = function() {
     this._bossKillsThisRun = 0;
     this._finalBossKillsThisRun = 0;
     this._startElapsed = 0;
-    this._recordedFlawless = false;
 
     this.battlefield = null;
     this.container = null;

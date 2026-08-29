@@ -102,7 +102,7 @@
             meta.weeklyVault = vault;
             this._metaCache = meta;
             /* 持久化完成状态 */
-            self._saveMetaToStorage();
+            this.saveMeta(meta).then(function() {}).catch(function(e) { console.warn('evaluateWeeklyVault save failed:', e); });
             return { evaluated: true, completed: true, reward: vault.reward };
         }
         return { evaluated: true, completed: false };
@@ -247,6 +247,10 @@
                 completed.push(q.id);
             }
         }
+        /* P0: 持久化每日任务完成状态到存档 */
+        if (completed.length > 0) {
+            this.saveMeta(this._metaCache).catch(function(e) { console.warn('daily quest save failed:', e); });
+        }
         return completed;
     };
 
@@ -328,8 +332,7 @@
         for (var i = 0; i < picked.length; i++) { picked[i].progress = 0; picked[i].completed = false; }
         meta.currentWeek = weekKey || ('W' + Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000))); /* P0: 统一使用Unix epoch基准 */
         meta.weeklyChallenges = { week: meta.currentWeek, challenges: picked };
-        this.saveMeta(meta);
-        return picked;
+        return this.saveMeta(meta).then(function() { return picked; }); /* P0: await saveMeta 防止数据丢失 */
     };
 
     SaveManager.prototype.checkWeeklyCompletion = function(stats) {

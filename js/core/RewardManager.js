@@ -676,7 +676,7 @@ class RewardManager {
         if (!window.fxManager) return;
         var cx = window.innerWidth / 2;
         var cy = window.innerHeight / 2;
-        var node = window.fxManager.spawnText(cx, cy, text, 'normal');
+        var node = window.fxManager.spawnText(cx, cy, text, color || 'normal'); /* P1: 传入颜色而非硬编码'normal' */
         /* H-015: 时钟冻结场景下 FCT 飘字需要恢复 animation-play-state */
         if (node && node.style) {
             node.style.animationPlayState = 'running';

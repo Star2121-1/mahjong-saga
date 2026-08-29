@@ -58,7 +58,7 @@ window.Enemy = class Enemy {
         if (this.type === 'Tanker') {
             this.speed = this.baseSpeed * Balance.TANKER_SPEED_MULT;
             this.baseSpeed = this.speed;
-            this.maxHp = Math.floor(this.maxHp * 2);
+            this.maxHp = Math.floor(this.maxHp * Balance.TANKER_HP_MULT);
             this.hp = this.maxHp;
             this.radius = 26;
             this.hue = 40;
@@ -117,8 +117,8 @@ window.Enemy = class Enemy {
             var _lc = ((this._eng || window.gameEngine) && (this._eng || window.gameEngine).loopCount) || 0;
             this._abyssTier = _lc >= 3 ? 3 : (_lc >= 2 ? 2 : (_lc >= 1 ? 1 : 0));
             if (this._abyssTier >= Balance.BOSS_ABYSS_TIER_3) this.radius = 84;
-            this.speed = 20;
-            this.baseSpeed = 20;
+            this.speed = Balance.BOSS_LORD_BASE_SPEED;
+            this.baseSpeed = Balance.BOSS_LORD_BASE_SPEED;
             this.hue = 0;
             this._bossPhase = 1;
             this._bossAbilityTimer = 1.8;
@@ -238,7 +238,7 @@ window.Enemy = class Enemy {
 
         if (this._stalkerCooldown > 0) this._stalkerCooldown -= dt;
 
-        if (dist <= 150 && this._stalkerState === 'idle' && this._stalkerCooldown <= 0) {
+        if (dist <= Balance.STALKER_TRIGGER_DIST && this._stalkerState === 'idle' && this._stalkerCooldown <= 0) {
             this._stalkerState = 'charging';
             this._stalkerTimer = Balance.STALKER_CHARGE_DURATION;
             /* B3: 蓄力三重紫拖影 */
@@ -272,7 +272,7 @@ window.Enemy = class Enemy {
             this._stalkerTimer -= dt;
             if (this._stalkerTimer <= 0) {
                 this._stalkerState = 'idle';
-                this._stalkerCooldown = 2.0;
+                this._stalkerCooldown = Balance.STALKER_COOLDOWN;
             }
             if (this.reachedPlayer) {
                 this.attackTimer -= dt;

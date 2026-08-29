@@ -402,17 +402,10 @@
    技能特效升级 (Visual Enhancement C)
    ══════════════════════════════════════════════ */
 
-/* Overdrive 全屏色相翻转 — 仅作用于战场，隔离HUD */
+/* Overdrive 全屏滤镜 — 由 gameplay-ui.css 统一控制 (后加载，优先级高) */
+/* 注: 原 animation: overdriveHueFlip 已被 gameplay-ui.css 的 filter 覆盖，保留注释说明 */
 #game-container.overdrive-active {
     isolation: isolate;
-}
-#game-container.overdrive-active #battlefield {
-    animation: overdriveHueFlip 3s linear infinite;
-}
-@keyframes overdriveHueFlip {
-    0% { filter: hue-rotate(0deg); }
-    50% { filter: hue-rotate(15deg); }
-    100% { filter: hue-rotate(0deg); }
 }
 
 /* 冰冻冰晶扩散波纹 */

@@ -100,7 +100,7 @@
         return {
             isActive: true, season: season.currentSeason,
             daysElapsed: daysElapsed,
-            rewardClaimed: !!season.lastRewardClaimed
+            rewardClaimed: !!(season.claimedRewards && season.claimedRewards['s' + season.currentSeason]) /* P0: 使用正确字段 */
         };
     };
 
