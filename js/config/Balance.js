@@ -23,6 +23,7 @@ window.Balance = {
     WEAPON_UPGRADE_ATK_INC: 0.15,    // 武器升级 ATK 因子增量 (Weapon.js)
     WEAPON_UPGRADE_CD_MULT: 0.9,     // 武器升级 CD 倍率 (Weapon.js)
     DEFAULT_CD_FLOOR: 0.2,           // 默认 CD 下限 (Weapon.js)
+    WEAPON_ASPD_CAP: 3.0,            // 最大临时攻速叠加上限（防止无限加速）
     PROJECTILE_DEFAULT_LIFETIME: 3.0,// 弹道默认存活时间 (Weapon.js)
 
     /* ── Player (玩家机制) ── */

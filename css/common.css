@@ -49,7 +49,12 @@ button:focus-visible, [tabindex]:focus-visible {
 button { touch-action: manipulation; transition-property: transform, box-shadow, filter, background-color, color, border-color; }
 
 /* 无障碍：用户偏好减弱动效时全局静默 */
-
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }
 
 .hidden { display: none !important; }
@@ -107,3 +112,15 @@ button { touch-action: manipulation; transition-property: transform, box-shadow,
 
 }
 * { scrollbar-width: thin; scrollbar-color: #d4af37 #0c0f12; }
+
+/* 屏幕阅读器专用 - 视觉隐藏但可访问 */
+.sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+}
+

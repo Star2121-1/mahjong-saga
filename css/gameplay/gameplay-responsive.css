@@ -2,29 +2,29 @@
    响应式: 小视口战场优化
    ══════════════════════════════════════════════ */
 
-/* ≤768px 高度: 缩小角色和敌人尺寸 */
+/* ≤768px 高度: 缩小角色和敌人尺寸 (宽高由 gameplay-enemy.css 权威定义) */
 @media (max-height: 768px) {
-    .enemy { width: 30px; height: 40px; font-size: 10px; }
+    .enemy { width: 30px; height: 40px; }
 }
 
 /* ≤600px 高度: 大幅缩小 */
 @media (max-height: 600px) {
-    .enemy { width: 24px; height: 32px; font-size: 9px; }
+    .enemy { width: 24px; height: 32px; }
     .pause-panel { padding: 20px 24px; }
-    .pause-title { font-size: 22px; }
+    .pause-title { font-size: calc(22 * var(--_fs) * 1px); }
     .guide-panel { padding: 16px 18px; }
-    .guide-title { font-size: 16px; }
-    .guide-item { font-size: 12px; }
-    .guide-key { min-width: 48px; font-size: 11px; }
-    .mutator-card { width: 150px; padding: 12px 10px; }
-    .mutator-card-icon { font-size: 28px; }
-    .mutator-card-title { font-size: 14px; }
-    .mutator-card-desc { font-size: 11px; }
+    .guide-title { font-size: calc(16 * var(--_fs) * 1px); }
+    .guide-item { font-size: calc(12 * var(--_fs) * 1px); }
+    .guide-key { min-width: calc(48 * var(--_fs) * 1px); font-size: calc(11 * var(--_fs) * 1px); }
+    .mutator-card { width: calc(150 * var(--_fs) * 1px); padding: calc(12 * var(--_fs) * 1px) calc(10 * var(--_fs) * 1px); }
+    .mutator-card-icon { font-size: calc(28 * var(--_fs) * 1px); }
+    .mutator-card-title { font-size: calc(14 * var(--_fs) * 1px); }
+    .mutator-card-desc { font-size: calc(11 * var(--_fs) * 1px); }
 }
 
 /* ≤480px 极小视口 */
 @media (max-height: 480px) {
-    .enemy { width: 20px; height: 28px; font-size: 8px; }
+    .enemy { width: 20px; height: 28px; }
 }
 
 /* 超宽屏: 战场居中 */

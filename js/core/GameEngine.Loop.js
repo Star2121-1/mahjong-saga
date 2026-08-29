@@ -180,8 +180,8 @@ Gp._loop = function(timestamp) {
             }
 
             /* Buff/Debuff 计时递减统一在上方 Epoch 32 块处理（修复双重递减 bug） */
-            /* 护盾过期 */
-            if (this._tempShieldEnd > 0 && Date.now() / 1000 > this._tempShieldEnd) {
+            /* 护盾过期 — 使用游戏时间而非墙钟时间，避免面板冻结导致意外过期 */
+            if (this._tempShieldEnd > 0 && this._elapsed > this._tempShieldEnd) {
                 this._tempShield = 0;
                 this._tempShieldEnd = 0;
             }
@@ -344,6 +344,7 @@ Gp._loop = function(timestamp) {
         if (this._pendingBossLordSettle && this._expGems.length === 0) {
             if (this._levelUpPending) {
                 this._levelUpPending = false;
+                this._pendingBossLordSettle = false; /* R30-H-012: 防止状态标志残留 */
                 this.running = false;
                 this._freezeClock();
                 this._syncUI();
@@ -572,7 +573,7 @@ Gp._renderActiveBuffs = function() {
     if (p._tempHpBonus > 0) buffs.push({ name: '❤ 生命+' + Math.round(p._tempHpBonus), timer: p._tempBuffTimeLeft });
     if (this._tempGoldMult > 1) buffs.push({ name: '💰 金币×' + this._tempGoldMult, timer: 1 }); /* 单波 */
     if (this._tempBerserkBonus) buffs.push({ name: '🩸 狂战士', timer: 1 });
-    if (this._tempShield > 0) buffs.push({ name: '🛡 护盾' + Math.round(this._tempShield), timer: this._tempShieldEnd - Date.now() / 1000 });
+    if (this._tempShield > 0) buffs.push({ name: '🛡 护盾' + Math.round(this._tempShield), timer: this._tempShieldEnd - this._elapsed });
     if (p._doubleCoinNextWave) buffs.push({ name: '🪙 双倍金币', timer: 1 });
 
     var container = document.getElementById('active-buffs-container');

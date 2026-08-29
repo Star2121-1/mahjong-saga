@@ -193,6 +193,9 @@ Gp._enterAbyss = function() {
     this._tempShield = 0;
     this._extraEliteCount = 0;
     this._milestoneShown = false;
+    /* R30-H-011: 清除打牌/胡牌模式状态，防止深渊轮回后游戏冻结 */
+    this._discardMode = false;
+    this._huLock = false;
 
     /* ── 深渊轮回保留保险库变异 ── */
     if (this._vaultMutations && this._vaultMutations.indexOf('gravity') !== -1) {

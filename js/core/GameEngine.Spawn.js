@@ -450,7 +450,7 @@ Gp._triggerMeld = function (meld) {
         this._meldFx('🔵 九筒连环' + (isKong ? '·杠！' : ''), isKong);
     } else if (suit === 'tiao') {
         /* 疾风连打：临时攻速提升（Render._updateWeapons 消耗 _tempAspd） */
-        this._tempAspd = (this._tempAspd || 0) + B.HUPAI_PUNG_TIAO_ASPD * mult;
+        this._tempAspd = Math.min((this._tempAspd || 0) + B.HUPAI_PUNG_TIAO_ASPD * mult, B.WEAPON_ASPD_CAP);
         this._tempAspdT = B.HUPAI_PUNG_TIAO_DURATION;
         this._meldFx('🌿 疾风连打' + (isKong ? '·杠！' : ''), isKong);
     }
@@ -589,7 +589,7 @@ Gp._triggerHu = function (hu) {
                 break;
             case 'pengpenghu':
                 p._weaponCdReduction = Math.min(0.6, (p._weaponCdReduction || 0) + B.HU_PENGPENG_CD);
-                this._tempAspd = (this._tempAspd || 0) + B.HU_PENGPENG_ASPD;
+                this._tempAspd = Math.min((this._tempAspd || 0) + B.HU_PENGPENG_ASPD, B.WEAPON_ASPD_CAP);
                 this._tempAspdT = 9999;
                 break;
             case 'qiduizi':

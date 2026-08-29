@@ -521,14 +521,9 @@
     100% { filter: brightness(1); }
 }
 
-/* Boss 暴怒 */
-.enemy.boss-enraged {
-    animation: enragedPulse 0.5s ease-in-out infinite alternate;
-}
-
-@keyframes enragedPulse {
-    0% { filter: brightness(1) drop-shadow(0 0 4px rgba(255,0,0,0.3)); }
-    100% { filter: brightness(1.3) drop-shadow(0 0 12px rgba(255,0,0,0.7)); }
+/* Boss 暴怒 — JS 使用 .boss-enraged (不带 .enemy 前缀) */
+.boss-enraged {
+    animation: bossEnrageGlow 0.4s ease-in-out infinite alternate;
 }
 .enemy-hp-bar {
     position: absolute; top: -10px; left: 50%;

@@ -100,7 +100,7 @@ window.OrbitShield = class extends window.Weapon {
         this.rotationSpeed = 2.0;
         this.orbAngles = [0, Math.PI * 2 / 3, Math.PI * 4 / 3];
         this.orbitEls = [];
-        this.orbitTickTimers = [0, 0, 0];
+        this.orbitTickTimers = [0, this.cd * 0.33, this.cd * 0.66]; /* R30-H-013: 错开3 orb冷却，轮流攻击 */
         this.initialized = false;
     }
     _init(engine) {

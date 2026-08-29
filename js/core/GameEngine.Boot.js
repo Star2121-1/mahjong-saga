@@ -792,7 +792,7 @@ Gp._handleKeyNav = function(e) {
                 e.preventDefault();
                 var current = document.activeElement;
                 var idx = Array.prototype.indexOf.call(focusable, current);
-                var nextIdx = code === 'Tab' ? (e.shiftKey ? idx - 1 : idx + 1) : idx;
+                var nextIdx = e.shiftKey ? idx - 1 : idx + 1; /* R30-H-014: code==='Tab'恒为true，直接用shiftKey判断 */
                 if (nextIdx < 0) nextIdx = focusable.length - 1;
                 if (nextIdx >= focusable.length) nextIdx = 0;
                 focusable[nextIdx].focus();
