@@ -924,6 +924,50 @@ window.Enemy = class Enemy {
         this.hp -= actualDmg;
         this.flashTimer = Balance.FLASH_DURATION;
 
+        /* ── Epoch 47: 玩家RPG属性应用（武器/弹道/Drone路径）──
+           onClick路径已处理crit/lifesteal/freeze/explosion，通过_fctTypeOverride标记防重复。
+           此处仅对非onClick来源(武器/弹道/Drone)补充属性应用。
+        ── */
+        var _isPlayerSrc = (source === 'player' || (source && typeof source.x === 'number'));
+        if (_isPlayerSrc && actualDmg > 0) {
+            var _eng = this._eng || window.gameEngine;
+            var _pg = _eng && _eng.player;
+            if (_pg) {
+                /* 暴击：onClick传'crit'override，此处跳过已处理的情况 */
+                if (!_fctTypeOverride && _pg.critRate > 0) {
+                    var _wc = Math.random() < (_pg.critRate + (_eng._tempCritBonus || 0));
+                    if (_wc) {
+                        actualDmg = Math.floor(actualDmg * (2.5 + (_pg.critDamageBonus || 0)));
+                        this.hp -= actualDmg;
+                        this.flashTimer = Balance.FLASH_DURATION;
+                    }
+                }
+                /* 冰冻：onClick已在外部冻结，此处防武器路径漏检 */
+                if (!this.frozen && _pg.freezeChance > 0 && Math.random() < _pg.freezeChance) {
+                    this.frozen = true;
+                    this.frozenTimer = Balance.FROZEN_TIMER_BONUS_BASE + (_pg.iceDurationBonus || 0);
+                    if (this.el) this.el.classList.add('frozen-crystal');
+                }
+                /* 吸血：onClick在外部处理，此处仅武器路径 */
+                if (!_fctTypeOverride && _pg.lifestealRate > 0) {
+                    var _wl = Math.floor(actualDmg * _pg.lifestealRate);
+                    if (_wl > 0) {
+                        _pg.hp = Math.min(_pg.maxHp, _pg.hp + _wl);
+                        if (window.fxManager) window.fxManager.spawnText(_pg.x, _pg.y - 20, '+' + _wl, 'heal');
+                    }
+                }
+                /* 爆炸溅射：onClick在外部调用_spawnExplosion，此处仅武器/弹道路径 */
+                if (!_fctTypeOverride && _pg.explosionChance > 0 && Math.random() < _pg.explosionChance) {
+                    var _exX = sourceX != null ? sourceX : (_pg.x || this.x);
+                    var _exY = sourceY != null ? sourceY : (_pg.y || this.y);
+                    var _splashDmg = Math.floor(actualDmg * 0.5);
+                    if (_eng && _eng._combat && _eng._combat.spawnExplosion) {
+                        _eng._combat.spawnExplosion(_eng, _exX, _exY, 50, _splashDmg, this.id);
+                    }
+                }
+            }
+        }
+
         /* ── FCT 喷射 ── */
         if (window.fxManager && actualDmg > 0) {
             var _fctType = _fctTypeOverride || 'normal';
