@@ -160,8 +160,8 @@ window.Enemy = class Enemy {
             }
             if (this.type === 'Boss_Lord') {
                 var hpPct = this.hp / this.maxHp;
-                if (hpPct >= 0.7) this._bossPhase = 1;
-                else if (hpPct >= 0.3) this._bossPhase = 2;
+                if (hpPct >= Balance.BOSS_PHASE1_THRESHOLD) this._bossPhase = 1;
+                else if (hpPct >= Balance.BOSS_PHASE2_THRESHOLD) this._bossPhase = 2;
                 else this._bossPhase = 3;
             }
             if (this.type === 'Stalker') this._stalkerCooldown -= dt;
@@ -566,8 +566,8 @@ window.Enemy = class Enemy {
     _updateBossLord(dt, player, engine) {
         var hpPct = this.hp / this.maxHp;
         var prevPhase = this._bossPhase;
-        if (hpPct >= 0.7) this._bossPhase = 1;
-        else if (hpPct >= 0.3) this._bossPhase = 2;
+        if (hpPct >= Balance.BOSS_PHASE1_THRESHOLD) this._bossPhase = 1;
+        else if (hpPct >= Balance.BOSS_PHASE2_THRESHOLD) this._bossPhase = 2;
         else this._bossPhase = 3;
         /* B4: 深渊变体视觉（赤鳞 hue / 巨神尺寸） */
         if (this._abyssTier >= 1 && this.el && !this._abyssStyled) {

@@ -23,13 +23,21 @@ window.Balance = {
     WEAPON_UPGRADE_ATK_INC: 0.15,    // 武器升级 ATK 因子增量 (Weapon.js)
     WEAPON_UPGRADE_CD_MULT: 0.9,     // 武器升级 CD 倍率 (Weapon.js)
     DEFAULT_CD_FLOOR: 0.2,           // 默认 CD 下限 (Weapon.js)
+    WEAPON_AMPLIFY_ATK_FACTOR_INC: 0.2,  // 役牌加算 ATK 因子增量 (Player.js)
     WEAPON_ASPD_CAP: 3.0,            // 最大临时攻速叠加上限（防止无限加速）
     PROJECTILE_DEFAULT_LIFETIME: 3.0,// 弹道默认存活时间 (Weapon.js)
 
     /* ── Player (玩家机制) ── */
     PLAYER_INVULN_ON_HIT: 0.35,      // 受击无敌帧时长 (Player.js)
     HERO_SPEED_BONUS: 1.15,          // 雀灵流转移速加成 (Player.js Hero)
+    HERO_ASSASSIN_SPEED_MULT: 1.10,  // 暗影步移速加成 (Player.js Assassin)
     HERO_CD_FLOOR_REDUCTION: 0.90,   // 雀灵流转CD降低 (Player.js Hero)
+    HERO_CD_REDUCTION_RATE: 0.10,    // 雀灵流转武器CD减免率 (Player.js Hero)
+    EVOLVED_SPEED_PER_LEVEL: 0.12,   // 极速图腾每级移速加成 (Player.js)
+    EVOLVED_DODGE_BONUS: 0.3,        // 极速图腾闪避加成 (Player.js)
+    RELIC_WW_SPEED_PER_LEVEL: 0.15,  // 四风环绕Lv级移速加成 (Player.js)
+    RELIC_WW_DODGE_PER_LEVEL: 0.1,   // 四风环绕Lv级闪避加成 (Player.js)
+    RELIC_GOLDEN_FINGER_CRIT_INC: 0.15, // 鬼指每级暴击加成 (Player.js)
     MAX_LIFESTEAL_RATE: 0.8,         // 吸血上限 (Player.js)
     LIFESTEAL_PER_VAMP_LEVEL: 0.08,  // 吸血戒指每级增幅 (Player.js)
     MAX_EXPLOSION_CHANCE: 0.75,      // 爆炸概率上限 (Player.js)
@@ -93,7 +101,11 @@ window.Balance = {
     QQUEEN_SHIELD_DURATION_PER_LEVEL: 2,
 
     /* ── 波次 ── */
-    WAVE_MILESTONE_THRESHOLD: 0.75,
+    WAVE_MEDITATION_HP_RESTORE: 0.3,   // 冥想泉源 HP 恢复比例 (Events.js)
+    WAVE_MEDITATION_ATK_DEBUFF: 0.8,   // 冥想泉源怪物 ATK 减益 (Events.js)
+    WAVE_TIME_DILATION_SPEED_DEBUFF: 0.7, // 时光缓流移速减益 (Events.js)
+    WAVE_IRON_FIST_CRIT_BONUS: 0.25,   // 铁拳暴击加成 (Events.js)
+    KNIGHT_SLAM_ATK_FACTOR: 0.5,       // 骑士闪避冲击波 ATK 系数 (Events.js)
 
     /* ── 图腾 ── */
     TOTEM_SPAWN_INTERVAL: 5,
@@ -120,6 +132,11 @@ window.Balance = {
     BOSS_ATK_MULT: 2,
     BOSS_SPEED_MULT: 0.7,
     BOSS_PHASE3_SPEED_MULT: 1.8,
+    BOSS_PHASE1_THRESHOLD: 0.7,    // 龙王第一阶段HP阈值 (Enemy.js)
+    BOSS_PHASE2_THRESHOLD: 0.3,    // 龙王第二阶段HP阈值 (Enemy.js)
+    BOSS_PHASE2_ABILITY_INTERVAL: 0.5,  // 龙王二阶段技能间隔 (Enemy.js)
+    EQUIPMENT_DROPS_BOSS_LORD: 1.0,  // 龙王装备掉落概率 (GameEngine.Spawn.js)
+    EQUIPMENT_DROPS_NORMAL: 0.25,    // 普通怪物装备掉落概率 (GameEngine.Spawn.js)
     BOSS_PHASE1_BULLET_COUNT: 12,
     BOSS_WARNING_DURATION: 0.8,
     BOSS_PHASE3_SUMMON_INTERVAL: 4,
@@ -136,6 +153,10 @@ window.Balance = {
     BOSS_CONTACT_COOLDOWN: 0.5,
     FROZEN_DAMAGE_MULT: 1.25,
     FROZEN_HIT_DECAY: 0.25,
+    FROZEN_TIMER_ZI_EAST: 1.0,       // 子东冰封时长 (GameEngine.Spawn.js)
+    FROZEN_TIMER_FENG_XI: 0.8,       // 肃杀之风冰封时长 (GameEngine.Spawn.js)
+    FROZEN_TIMER_FENG_BEI: 2.0,      // 北冥冻结时长 (GameEngine.Spawn.js)
+    FROZEN_TIMER_BONUS_BASE: 1.5,    // 冰霜核心基础冰封时长 (GameEngine.Endgame.js)
 
     /* ── 武器 ── */
     ORBIT_SHIELD_RADIUS: 50,

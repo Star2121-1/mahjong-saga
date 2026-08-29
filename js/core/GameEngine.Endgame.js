@@ -21,7 +21,7 @@ Gp._onClick = function(e) {
 
     if (p.freezeChance > 0 && Math.random() < p.freezeChance) {
         enemy.frozen = true;
-        enemy.frozenTimer = 1.5 + (p.iceDurationBonus || 0);
+        enemy.frozenTimer = B.FROZEN_TIMER_BONUS_BASE + (p.iceDurationBonus || 0);
         if (enemy.el) enemy.el.classList.add('frozen-crystal');
     }
 

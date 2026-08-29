@@ -61,7 +61,7 @@ Gp._spawnEliteEnemy = function() {
 /* ── Boss 装备掉落 ── */
 Gp._tryDropEquipment = function(x, y, isBossLord) {
     if (!window.equipmentRegistry || !window.saveManager) return;
-    var chance = isBossLord ? 1.0 : 0.25;
+    var chance = isBossLord ? B.EQUIPMENT_DROPS_BOSS_LORD : B.EQUIPMENT_DROPS_NORMAL;
     /* Epoch 16: Abyss Gamble 3x 掉落 + 怪物潮双倍 */
     var abyssMult = this._gambleAbyssBonus ? 3 : 1;
     var surgeMult = this._monsterSurgeDoubleDrops ? 2 : 1;
@@ -388,7 +388,7 @@ Gp._triggerFlowerEvent = function (id) {
             case 'hua_xia': p._tempAtkBoost = (p._tempAtkBoost || 0) + 0.30; p._tempBuffTimeLeft = Math.max(p._tempBuffTimeLeft || 0, 5); break; /* P2-6: 5s 对齐设计表 */
             case 'hua_qiu': p.addGold(20 * Math.max(1, this._waveCount)); break;
             case 'hua_dongJ':
-                for (var i = 0; i < this.enemies.length; i++) { this.enemies[i].frozen = true; this.enemies[i].frozenTimer = 1.5; }
+                for (var i = 0; i < this.enemies.length; i++) { this.enemies[i].frozen = true; this.enemies[i].frozenTimer = B.FROZEN_TIMER_BONUS_BASE; }
                 break;
             case 'hua_mei': {
                 var ws = this.weapons || [];
@@ -507,7 +507,7 @@ Gp._triggerHonorMeld = function (meld) {
                     var dx = e1.x - p.x, dy = e1.y - p.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
                     e1.x += (dx / d) * B.HUPAI_ZI_EAST_KNOCKBACK || 250;
                     e1.y += (dy / d) * B.HUPAI_ZI_EAST_KNOCKBACK || 250;
-                    e1.frozen = true; e1.frozenTimer = 1;
+                    e1.frozen = true; e1.frozenTimer = B.FROZEN_TIMER_ZI_EAST;
                 }
                 break;
             case 'feng_nan': /* 离火燎原：全场灼烧（MVP 即时 8%×kongMult maxHp） */
@@ -518,12 +518,12 @@ Gp._triggerHonorMeld = function (meld) {
                 break;
             case 'feng_xi': /* 肃杀之风：全场迟滞（MVP 冰封0.8s代理） */
                 for (var k = 0; k < this.enemies.length; k++) {
-                    if (this.enemies[k].alive) { this.enemies[k].frozen = true; this.enemies[k].frozenTimer = 0.8; }
+                    if (this.enemies[k].alive) { this.enemies[k].frozen = true; this.enemies[k].frozenTimer = B.FROZEN_TIMER_FENG_XI; }
                 }
                 break;
             case 'feng_bei': /* 北冥冻结：全场冰冻2s */
                 for (var m = 0; m < this.enemies.length; m++) {
-                    if (this.enemies[m].alive) { this.enemies[m].frozen = true; this.enemies[m].frozenTimer = 2; }
+                    if (this.enemies[m].alive) { this.enemies[m].frozen = true; this.enemies[m].frozenTimer = B.FROZEN_TIMER_FENG_BEI; }
                 }
                 break;
             case 'jian_zhong': /* 红中贯日：全屏冲击波 atk×4×kongMult + 怒气+30 */

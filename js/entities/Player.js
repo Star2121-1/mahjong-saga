@@ -25,7 +25,7 @@ class Player {
         this.evolvedSpeed = false;
         this.evolvedVamp = false;
         this.maxWeaponSlots = 6;
-        this.cdFloor = 0.2;
+        this.cdFloor = Balance.DEFAULT_CD_FLOOR;
         this.magnetRadius = 60;
         this.xpGainFactor = 1.0;
         this.iceDurationBonus = 0;
@@ -86,12 +86,12 @@ class Player {
         }
         /* Epoch 42: 雀灵流转 -- 武器CD -10% */
         if (this.heroId === 'Hero') {
-            this._heroCdReduction = 0.10;
+            this._heroCdReduction = Balance.HERO_CD_REDUCTION_RATE;
             this.cdFloor = Math.max(0.05, this.cdFloor * Balance.HERO_CD_FLOOR_REDUCTION);
         }
         /* A-029: 暗影步 -- 10% 移速加成 */
         if (this.heroId === 'Assassin') {
-            this.speedMultiplier += 0.10;
+            this.speedMultiplier += Balance.HERO_ASSASSIN_SPEED_MULT - 1;
             this.speed = this.baseSpeed * this.speedMultiplier;
         }
     }
@@ -280,7 +280,7 @@ class Player {
                 this.atk += 3;
                 break;
             case 'golden_finger':
-                this.critRate = Math.min(1, this.critRate + 0.15);
+                this.critRate = Math.min(1, this.critRate + Balance.RELIC_GOLDEN_FINGER_CRIT_INC);
                 break;
             case 'auto_drone': {
                 const intervals = [0, 1.0, 0.8, 0.6, 0.4];
@@ -295,7 +295,7 @@ class Player {
                 this._recalcThornsRate();
                 break;
             case 'wind_walker':
-                this.speedMultiplier = 1.0 + lv * 0.12;
+                this.speedMultiplier = 1.0 + lv * Balance.EVOLVED_SPEED_PER_LEVEL;
                 this.speed = this.baseSpeed * this.speedMultiplier;
                 break;
             case 'vamp_ring':
@@ -317,8 +317,8 @@ class Player {
                 break;
             case 'evolved_speed':
                 this.evolvedSpeed = true;
-                this.dodgeRate = Math.min(1, this.dodgeRate + 0.3);
-                this.speedMultiplier += 0.3;
+                this.dodgeRate = Math.min(1, this.dodgeRate + Balance.EVOLVED_DODGE_BONUS);
+                this.speedMultiplier += Balance.EVOLVED_DODGE_BONUS;
                 this.speed = this.baseSpeed * this.speedMultiplier;
                 break;
             case 'evolved_vamp':
@@ -333,8 +333,8 @@ class Player {
                 if (eng && eng._activeWeapons) {
                     for (var _wi = 0; _wi < eng._activeWeapons.length; _wi++) {
                         var w = eng._activeWeapons[_wi];
-                        w.atkFactor += 0.2;
-                        w.cd = Math.max(this.cdFloor || 0.2, w.cd * 0.9);
+                        w.atkFactor += Balance.WEAPON_AMPLIFY_ATK_FACTOR_INC;
+                        w.cd = Math.max(this.cdFloor || Balance.DEFAULT_CD_FLOOR, w.cd * 0.9);
                     }
                 }
                 break;
@@ -373,8 +373,8 @@ class Player {
                 { id: 'ta_crit', name: '暴击', apply: function(p) { p.critRate = Math.min(1, (p.critRate || 0) + 0.1); } }
             ],
             wind_walker: [
-                { id: 'ww_dodge', name: '闪避', apply: function(p) { p.dodgeRate = Math.min(1, (p.dodgeRate || 0) + 0.1); } },
-                { id: 'ww_speed', name: '极速', apply: function(p) { p.speedMultiplier = (p.speedMultiplier || 1) + 0.15; p.speed = p.baseSpeed * p.speedMultiplier; } }
+                { id: 'ww_dodge', name: '闪避', apply: function(p) { p.dodgeRate = Math.min(1, (p.dodgeRate || 0) + Balance.RELIC_WW_DODGE_PER_LEVEL); } },
+                { id: 'ww_speed', name: '极速', apply: function(p) { p.speedMultiplier = (p.speedMultiplier || 1) + Balance.RELIC_WW_SPEED_PER_LEVEL; p.speed = p.baseSpeed * p.speedMultiplier; } }
             ],
             vamp_ring: [
                 { id: 'vr_crit', name: '暴击', apply: function(p) { p.critRate = Math.min(1, (p.critRate || 0) + 0.1); } },
@@ -393,7 +393,7 @@ class Player {
                 { id: 'gc_magnet', name: '巨吸', apply: function(p) { p.magnetRadius = (p.magnetRadius || 60) + 50; } }
             ],
             weapon_amplify: [
-                { id: 'wa_cd', name: '迅捷', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { eng._activeWeapons[i].cd = Math.max(eng.player.cdFloor || 0.2, eng._activeWeapons[i].cd * 0.9); } } } },
+                { id: 'wa_cd', name: '迅捷', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { eng._activeWeapons[i].cd = Math.max(eng.player.cdFloor || Balance.DEFAULT_CD_FLOOR, eng._activeWeapons[i].cd * 0.9); } } } },
                 { id: 'wa_atk', name: '强化', apply: function(p) { p.atk += 5; } }
             ]
         };
@@ -564,7 +564,7 @@ class Player {
         /* 天赋额外加成 */
         this.critRate += (talents.ting_intuition || 0) * 0.02;
         this.damageReduction += (talents.gang_hardiness || 0) * 0.03;
-        this.cdFloor = Math.max(0.05, (this.cdFloor || 0.2) - (talents.mo_pa_cd || 0) * 0.01);
+        this.cdFloor = Math.max(0.05, (this.cdFloor || Balance.DEFAULT_CD_FLOOR) - (talents.mo_pa_cd || 0) * 0.01);
         /* perk */
         var perks = (meta.purchasedPerks || {});
         if (perks.token_revive > 0) {
@@ -603,8 +603,8 @@ class Player {
             { id: 'gf_thorns', apply: function(p) { p.thornsRate = Math.min(1, (p.thornsRate || 0) + 0.1); } },
             { id: 'ta_hp', apply: function(p) { p.maxHp += 30; p.hp = Math.min(p.hp + 30, p.maxHp); } },
             { id: 'ta_crit', apply: function(p) { p.critRate = Math.min(1, (p.critRate || 0) + 0.1); } },
-            { id: 'ww_dodge', apply: function(p) { p.dodgeRate = Math.min(1, (p.dodgeRate || 0) + 0.1); } },
-            { id: 'ww_speed', apply: function(p) { p.speedMultiplier = (p.speedMultiplier || 1) + 0.15; p.speed = p.baseSpeed * p.speedMultiplier; } },
+            { id: 'ww_dodge', apply: function(p) { p.dodgeRate = Math.min(1, (p.dodgeRate || 0) + Balance.RELIC_WW_DODGE_PER_LEVEL); } },
+            { id: 'ww_speed', apply: function(p) { p.speedMultiplier = (p.speedMultiplier || 1) + Balance.RELIC_WW_SPEED_PER_LEVEL; p.speed = p.baseSpeed * p.speedMultiplier; } },
             { id: 'vr_crit', apply: function(p) { p.critRate = Math.min(1, (p.critRate || 0) + 0.1); } },
             { id: 'vr_atk', apply: function(p) { p.atk += 5; } },
             { id: 'ec_range', apply: function(p) { p.magnetRadius = (p.magnetRadius || 60) + 30; } },
@@ -613,7 +613,7 @@ class Player {
             { id: 'fc_chance', apply: function(p) { p.freezeChance = Math.min(0.8, (p.freezeChance || 0) + 0.1); } },
             { id: 'gc_xp', apply: function(p) { p.xpGainFactor = (p.xpGainFactor || 1) + 0.15; } },
             { id: 'gc_magnet', apply: function(p) { p.magnetRadius = (p.magnetRadius || 60) + 50; } },
-            { id: 'wa_cd', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { eng._activeWeapons[i].cd = Math.max(p.cdFloor || 0.2, eng._activeWeapons[i].cd * 0.9); } } } },
+            { id: 'wa_cd', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { eng._activeWeapons[i].cd = Math.max(p.cdFloor || Balance.DEFAULT_CD_FLOOR, eng._activeWeapons[i].cd * 0.9); } } } },
             { id: 'wa_atk', apply: function(p) { p.atk += 5; } }
         ];
         var map = {};
@@ -706,12 +706,12 @@ class Player {
         }
         /* Epoch 42: 雀灵流转 -- reset 中恢复CD缩减 */
         if (this.heroId === 'Hero') {
-            this._heroCdReduction = 0.10;
+            this._heroCdReduction = Balance.HERO_CD_REDUCTION_RATE;
             this.cdFloor = Math.max(0.05, this.cdFloor * Balance.HERO_CD_FLOOR_REDUCTION);
         }
         /* A-029: 暗影步 -- reset 中恢复速度 */
         if (this.heroId === 'Assassin') {
-            this.speedMultiplier += 0.10;
+            this.speedMultiplier += Balance.HERO_ASSASSIN_SPEED_MULT - 1;
             this.speed = this.baseSpeed * this.speedMultiplier;
         }
         this.currentLvl = 1;
@@ -731,7 +731,7 @@ class Player {
         /* Epoch 2: 新天赋开局加成（在全部重置后应用，避免被覆盖） */
         this.critRate += (talents.ting_intuition || 0) * 0.02;
         this.damageReduction += (talents.gang_hardiness || 0) * 0.03;
-        this.cdFloor = Math.max(0.05, (this.cdFloor || 0.2) - (talents.mo_pa_cd || 0) * 0.01);
+        this.cdFloor = Math.max(0.05, (this.cdFloor || Balance.DEFAULT_CD_FLOOR) - (talents.mo_pa_cd || 0) * 0.01);
 
         /* Epoch 14: 元货币购买加成 */
         var perks = (meta.purchasedPerks || {});

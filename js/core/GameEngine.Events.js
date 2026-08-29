@@ -8,12 +8,12 @@
 
 Gp._interWaveEvents = [
     { id: 'coin_rush', name: '金币雨', icon: '🪙', desc: '场上立即掉落 20 金币！', weight: 40, apply: function() { this.player.addGold(20); this._spawnCoinBurst(20); } },
-    { id: 'meditation', name: '冥想泉源', icon: '🧘', desc: '恢复 30% HP，下波怪物 -20% 攻击力', weight: 25, apply: function() { this.player.hp = Math.min(this.player.maxHp, this.player.hp + Math.floor(this.player.maxHp * 0.3)); this._tempEnemyAtkDebuff = 0.8; } },
+    { id: 'meditation', name: '冥想泉源', icon: '🧘', desc: '恢复 30% HP，下波怪物 -20% 攻击力', weight: 25, apply: function() { this.player.hp = Math.min(this.player.maxHp, this.player.hp + Math.floor(this.player.maxHp * Balance.WAVE_MEDITATION_HP_RESTORE)); this._tempEnemyAtkDebuff = Balance.WAVE_MEDITATION_ATK_DEBUFF; } },
     { id: 'monster_surge', name: '怪物潮', icon: '👹', desc: '额外生成 5 个精英怪！但掉落翻倍', weight: 20, apply: function() { this._extraEliteCount = 5; this._monsterSurgeDoubleDrops = true; } },
-    { id: 'time_dilation', name: '时光缓流', icon: '⏳', desc: '下波怪物移速 -30%', weight: 20, apply: function() { this._tempEnemySpeedDebuff = 0.7; } },
+    { id: 'time_dilation', name: '时光缓流', icon: '⏳', desc: '下波怪物移速 -30%', weight: 20, apply: function() { this._tempEnemySpeedDebuff = Balance.WAVE_TIME_DILATION_SPEED_DEBUFF; } },
     { id: 'berserk', name: '狂战士祝福', icon: '⚔', desc: '下波击杀额外 +10 怒气', weight: 15, apply: function() { this._tempBerserkBonus = true; } },
     { id: 'golden_touch', name: '点金术', icon: '✨', desc: '下波金币收益 ×3', weight: 15, apply: function() { this._tempGoldMult = 3; } },
-    { id: 'iron_fist', name: '铁拳', icon: '👊', desc: '下波暴击率 +25%', weight: 20, apply: function() { this._tempCritBonus = 0.25; } },
+    { id: 'iron_fist', name: '铁拳', icon: '👊', desc: '下波暴击率 +25%', weight: 20, apply: function() { this._tempCritBonus = Balance.WAVE_IRON_FIST_CRIT_BONUS; } },
     { id: 'shield_of_faith', name: '信仰护盾', icon: '🛡', desc: '获得可吸收 50 伤害的护盾（持续 15 秒）', weight: 15, apply: function() { this._tempShield = 50; this._tempShieldEnd = this._elapsed + 15; } }
 ];
 
@@ -212,7 +212,7 @@ Gp._endOverdrive = function() {
     this._overdriveActive = false;
     this._overdriveTimer = 0;
 
-    if (this.player) this.player.cdFloor = this._origCdFloor || 0.2;
+    if (this.player) this.player.cdFloor = this._origCdFloor || Balance.DEFAULT_CD_FLOOR;
 
     for (var _oi = 0; _oi < this.enemies.length; _oi++) {
         var _oe = this.enemies[_oi];
@@ -531,7 +531,7 @@ Gp._cleanEnemyProjectiles = function() {
 
 Gp._triggerKnightDodgeSlam = function() {
     var radius = 100;
-    var dmg = Math.floor(this.player.atk * 0.5);
+    var dmg = Math.floor(this.player.atk * Balance.KNIGHT_SLAM_ATK_FACTOR);
     var px = this.player.x;
     var py = this.player.y;
     /* 视觉：冲击波 DOM */
