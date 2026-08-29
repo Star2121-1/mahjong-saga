@@ -28,6 +28,8 @@ window.Balance = {
 
     /* ── Player (玩家机制) ── */
     PLAYER_INVULN_ON_HIT: 0.35,      // 受击无敌帧时长 (Player.js)
+    HERO_SPEED_BONUS: 1.15,          // 雀灵流转移速加成 (Player.js Hero)
+    HERO_CD_FLOOR_REDUCTION: 0.90,   // 雀灵流转CD降低 (Player.js Hero)
     MAX_LIFESTEAL_RATE: 0.8,         // 吸血上限 (Player.js)
     LIFESTEAL_PER_VAMP_LEVEL: 0.08,  // 吸血戒指每级增幅 (Player.js)
     MAX_EXPLOSION_CHANCE: 0.75,      // 爆炸概率上限 (Player.js)
@@ -97,6 +99,7 @@ window.Balance = {
     TOTEM_SPAWN_INTERVAL: 5,
     MAX_TOTEMS: 10,
     TOTEM_RADIUS: 100,
+    TOTEM_BUFF_SPEED_MULT: 1.3,              // 图腾增益速度倍率 (Enemy.js)
 
     /* ── Stalker ── */
     STALKER_TRIGGER_DIST: 150,

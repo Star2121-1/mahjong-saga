@@ -212,7 +212,7 @@ window.Enemy = class Enemy {
                 this.reachedPlayer = true;
                 this.attackTimer = this.attackCooldown;
             } else if (dist > 0.01) {
-                var spd = this._totemBuffed ? this.speed * 1.3 : this.speed;
+                var spd = this._totemBuffed ? this.speed * Balance.TOTEM_BUFF_SPEED_MULT : this.speed;
                 var move = spd * dt;
                 /* M-028: 限制单帧位移不超过到攻击边界的距离，防止越过攻击范围 */
                 var toAttackEdge = dist - attackRange;
@@ -241,8 +241,8 @@ window.Enemy = class Enemy {
 
         if (this._stalkerState === 'charging') {
             this._stalkerTimer -= dt;
-            var chargeSpeed = this.baseSpeed * 2.5;
-            chargeSpeed = this._totemBuffed ? chargeSpeed * 1.3 : chargeSpeed;
+            var chargeSpeed = this.baseSpeed * Balance.STALKER_CHARGE_SPEED_MULT;
+            chargeSpeed = this._totemBuffed ? chargeSpeed * Balance.TOTEM_BUFF_SPEED_MULT : chargeSpeed;
             if (dist > 0.01) {
                 var move = chargeSpeed * dt;
                 this.x += (dx / dist) * move;
@@ -281,7 +281,7 @@ window.Enemy = class Enemy {
             }
             if (!this.reachedPlayer && dist > 0.01) {
                 var spd = this.baseSpeed * 0.5;
-                spd = this._totemBuffed ? spd * 1.3 : spd;
+                spd = this._totemBuffed ? spd * Balance.TOTEM_BUFF_SPEED_MULT : spd;
                 this.x += (dx / dist) * spd * dt;
                 this.y += (dy / dist) * spd * dt;
                 this._clampPosition(engine);
@@ -306,7 +306,7 @@ window.Enemy = class Enemy {
                 this.reachedPlayer = true;
                 this.attackTimer = this.attackCooldown;
             } else if (dist > 0.01) {
-                var spd = this._totemBuffed ? this.speed * 1.3 : this.speed;
+                var spd = this._totemBuffed ? this.speed * Balance.TOTEM_BUFF_SPEED_MULT : this.speed;
                 this.x += (dx / dist) * spd * dt;
                 this.y += (dy / dist) * spd * dt;
                 this._clampPosition(engine);
@@ -348,7 +348,7 @@ window.Enemy = class Enemy {
 
         if (dist < retreatDist) {
             if (dist > 0.01) {
-                var spd = this._totemBuffed ? this.speed * 1.3 : this.speed;
+                var spd = this._totemBuffed ? this.speed * Balance.TOTEM_BUFF_SPEED_MULT : this.speed;
                 this.x -= (dx / dist) * spd * dt;
                 this.y -= (dy / dist) * spd * dt;
                 this._clampPosition(engine);
@@ -358,7 +358,7 @@ window.Enemy = class Enemy {
 
         if (dist > advanceDist) {
             if (dist > 0.01) {
-                var spd = this._totemBuffed ? this.speed * 1.3 : this.speed;
+                var spd = this._totemBuffed ? this.speed * Balance.TOTEM_BUFF_SPEED_MULT : this.speed;
                 this.x += (dx / dist) * spd * dt;
                 this.y += (dy / dist) * spd * dt;
                 this._clampPosition(engine);
@@ -467,7 +467,7 @@ window.Enemy = class Enemy {
                 this.reachedPlayer = true;
                 this.attackTimer = this.attackCooldown;
             } else if (dist > 0.01) {
-                var spd = this._totemBuffed ? this.speed * 1.3 : this.speed;
+                var spd = this._totemBuffed ? this.speed * Balance.TOTEM_BUFF_SPEED_MULT : this.speed;
                 var move = spd * dt;
                 var toAttackEdge = dist - attackRange;
                 if (move > toAttackEdge) move = toAttackEdge;
@@ -488,7 +488,7 @@ window.Enemy = class Enemy {
 
         /* 一直冲向玩家，不减速 */
         if (dist > 0.01) {
-            var spd = this._totemBuffed ? this.speed * 1.3 : this.speed;
+            var spd = this._totemBuffed ? this.speed * Balance.TOTEM_BUFF_SPEED_MULT : this.speed;
             this.x += (dx / dist) * spd * dt;
             this.y += (dy / dist) * spd * dt;
         }
@@ -554,7 +554,7 @@ window.Enemy = class Enemy {
                 this.reachedPlayer = true;
                 this.attackTimer = this.attackCooldown;
             } else if (dist > 0.01) {
-                var spd = this._totemBuffed ? this.speed * 1.3 : this.speed;
+                var spd = this._totemBuffed ? this.speed * Balance.TOTEM_BUFF_SPEED_MULT : this.speed;
                 this.x += (dx / dist) * spd * dt;
                 this.y += (dy / dist) * spd * dt;
                 this._clampPosition(engine);

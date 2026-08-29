@@ -82,12 +82,12 @@ class Player {
         if (cfg.cdFloor != null) this.cdFloor = cfg.cdFloor;
         /* H-029: 雀灵流转 -- 攻击速度 +15% */
         if (this.heroId === 'Hero') {
-            this.speed = this.baseSpeed * 1.15;
+            this.speed = this.baseSpeed * Balance.HERO_SPEED_BONUS;
         }
         /* Epoch 42: 雀灵流转 -- 武器CD -10% */
         if (this.heroId === 'Hero') {
             this._heroCdReduction = 0.10;
-            this.cdFloor = Math.max(0.05, this.cdFloor * 0.90);
+            this.cdFloor = Math.max(0.05, this.cdFloor * Balance.HERO_CD_FLOOR_REDUCTION);
         }
         /* A-029: 暗影步 -- 10% 移速加成 */
         if (this.heroId === 'Assassin') {
@@ -167,7 +167,7 @@ class Player {
 
         /* L-008: 脆弱突变 — 受击伤害 +30% */
         if (this._frailtyDebuff) {
-            dmg = Math.floor(dmg * 1.3);
+            dmg = Math.floor(dmg * Balance.MUTATOR_FRAILTY_DAMAGE_TAKEN_MULT);
         }
 
         this.hp -= dmg;
@@ -229,7 +229,7 @@ class Player {
         this._reviveCount--;
         /* H-031: 使用 _baseMaxHp 计算复活血量，避免临时增益膨胀 */
         var baseHp = this._baseMaxHp || this.maxHp;
-        this.hp = Math.floor(baseHp * 0.3);
+        this.hp = Math.floor(baseHp * Balance.REVIVE_HP_PERCENT);
         this.invulnTimer = 3.0;
         if (this._reviveCount <= 0) this._hasRevive = false;
         return true;
@@ -702,12 +702,12 @@ class Player {
         this.speed = this.baseSpeed;
         /* H-029: 雀灵流转 -- reset 中恢复速度 */
         if (this.heroId === 'Hero') {
-            this.speed = this.baseSpeed * 1.15;
+            this.speed = this.baseSpeed * Balance.HERO_SPEED_BONUS;
         }
         /* Epoch 42: 雀灵流转 -- reset 中恢复CD缩减 */
         if (this.heroId === 'Hero') {
             this._heroCdReduction = 0.10;
-            this.cdFloor = Math.max(0.05, this.cdFloor * 0.90);
+            this.cdFloor = Math.max(0.05, this.cdFloor * Balance.HERO_CD_FLOOR_REDUCTION);
         }
         /* A-029: 暗影步 -- reset 中恢复速度 */
         if (this.heroId === 'Assassin') {
