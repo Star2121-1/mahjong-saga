@@ -76,7 +76,7 @@ Ss.update = function(dt, engine) {
     }
 
     this._bossTimer += dt;
-    if (this._bossTimer >= 30) {
+    if (this._bossTimer >= Balance.BOSS_SPAWN_INTERVAL) {
         this._bossTimer = 0;
         var bossCount = 0;
         for (var bi = 0; bi < engine.enemies.length; bi++) {
@@ -118,11 +118,11 @@ Ss._spawnEnemy = function(engine, isBoss) {
 
     var level = Math.floor(this.engine._elapsed / 15) + 1;
     var angle = Math.random() * Math.PI * 2;
-    var dist = 200 + Math.random() * 50;
+    var dist = Balance.ENEMY_SPAWN_RADIUS + Math.random() * Balance.ENEMY_SPAWN_RADIUS_JITTER;
     var player = engine.player;
     var x = player.x + Math.cos(angle) * dist;
     var y = player.y + Math.sin(angle) * dist;
-    var margin = 20;
+    var margin = Balance.ENEMY_SPAWN_MARGIN;
     x = Math.max(margin, Math.min(this._mapW - margin, x));
     y = Math.max(margin, Math.min(this._mapH - margin, y));
 
