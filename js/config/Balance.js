@@ -6,7 +6,7 @@ window.Balance = {
     /* ── Enemy (敌人基础属性 / 缩放) ── */
     ENEMY_LEVEL_HP_ATK_MULT: 1.15,   // 每级 HP/ATK 倍率 (Enemy.js)
     ABYSS_LOOP_HP_ATK_MULT: 1.08,   // 深渊轮回 HP/ATK 倍率 (Enemy.js)
-    ABYSS_SCALE_BASE: 1.15,          // 深渊轮次属性倍增基数 (Combat.js)
+    // ABYSS_SCALE_BASE removed: use ABYSS_LOOP_HP_ATK_MULT (1.08) as single source of truth
     ABYSS_LOOP_SPEED_MULT: 1.05,    // 深渊轮回 Speed 倍率 (Enemy.js)
     ABYSS_SHOP_PRICE_MULT: 1.5,     // 深渊商店价格倍率
     ABYSS_COMBO_UNLOCK_INTERVAL: 5, // 每 N 层解锁一个新深渊变异组合

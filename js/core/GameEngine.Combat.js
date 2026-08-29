@@ -828,8 +828,12 @@ Gp._syncEntities = function() {
                 el._flashHandler = null;
             }
         }
-        /* 冰冻 */
-        el.classList.toggle('frozen-crystal', enemy.frozen);
+        /* 冰冻 - 只在状态变化时操作classList，避免每帧无意义写入 */
+        if (enemy.frozen) {
+            if (!el.classList.contains('frozen-crystal')) el.classList.add('frozen-crystal');
+        } else {
+            if (el.classList.contains('frozen-crystal')) el.classList.remove('frozen-crystal');
+        }
         /* M-024: Stalker 冰冻时恢复完全不透明 */
         if (enemy.type === 'Stalker') {
             el.style.opacity = enemy.frozen ? '1' : '0.85';

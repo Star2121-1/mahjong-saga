@@ -110,13 +110,18 @@ Gp._updateProjectiles = function(dt) {
         if (!grid[key]) grid[key] = [];
         grid[key].push(ge);
         /* M-031: 加入所有 8 个相邻格，防止跨格漏检（原代码只加了右下格） */
+        /* P1: 使用Set-based去重替代indexOf O(N)查找 */
+        var geId = ge.id;
         for (var dgx = -1; dgx <= 1; dgx++) {
             for (var dgy = -1; dgy <= 1; dgy++) {
                 if (dgx === 0 && dgy === 0) continue;
                 var ngx = gx + dgx; var ngy = gy + dgy;
                 var nkey = ngx + ',' + ngy;
                 if (!grid[nkey]) grid[nkey] = [];
-                if (grid[nkey].indexOf(ge) === -1) grid[nkey].push(ge);
+                if (grid[nkey]._seenIds && grid[nkey]._seenIds[geId]) continue;
+                grid[nkey].push(ge);
+                if (!grid[nkey]._seenIds) grid[nkey]._seenIds = {};
+                grid[nkey]._seenIds[geId] = true;
             }
         }
     }

@@ -444,11 +444,13 @@ window.Enemy = class Enemy {
 
         /* 屏障朝向玩家 */
         this._barrierAngle = Math.atan2(dy, dx);
-
-        /* 判断是否从正面（面对玩家的方向无敌） */
-        var facingAngle = Math.atan2(-(player.y - this.y), -(player.x - this.x));
-        var angleDiff = Math.abs(((facingAngle - this._barrierAngle) + Math.PI) % (Math.PI * 2) - Math.PI);
-        this._barrierFront = angleDiff < Balance.BARRIER_ANGLE_HALF_WIDTH; // 正面 60° 扇区无敌
+        /* P1: 使用点积替代冗余的atan2，计算方向向量余弦值 */
+        var cosA = Math.cos(this._barrierAngle);
+        var sinA = Math.sin(this._barrierAngle);
+        var len = Math.sqrt(dx * dx + dy * dy);
+        var nx = dx / len, ny = dy / len;
+        /* 玩家相对于屏障法线的点积，正值表示在正面 */
+        this._barrierFront = (nx * cosA + ny * sinA) > 0.866; // cos(30°) ≈ 0.866，正面 60° 扇区
 
         if (this.reachedPlayer) {
             this.attackTimer -= dt;
