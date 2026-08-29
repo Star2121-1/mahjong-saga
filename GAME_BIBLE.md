@@ -260,18 +260,31 @@ Lv3/Lv5 有 20% 概率掷随机词条（存 `player._relicAffixes`，支持 rest
 2. **打击感全面改造**（排队中）：用户确认现状"全都弱"——命中反馈、击杀反馈、震屏、飘字层级、音效层次全部需要加强；胡牌演出将复用同一套冻结/震颤管线。升级面板 "NEW WEAPON UNLOCKED!" 横幅与卡片文字重叠问题在此轮一并处理。
 3. **UI 美术精致化**（第一轮已完成 2026-08-22，见第九节修复记录）：s1/index/s2/s3 四页主题统一为雀坛绿金；下一轮候选：s3 HUD 经验/怒气条文字排版、引导面板步骤指示器美化、大本营其余 8 个面板的视觉体检。
 
-### 🔧 2026-08-29 flash/waves 问题排查（feat/fix-flash-and-waves）
+### 🔧 2026-08-29 flash/waves 问题排查 + 11领域Agent审查修复（feat/fix-flash-and-waves）
 
-**发现的 Bug**：
-1. **R30-H-010: 波次计数错误** — Spawn.js:57 Boss 被计入 `currentWaveSpawnedCount`，导致提前触发奖励面板。已修复：添加 `!enemy.isBoss` 判断。
-2. **H-030: 玩家受击闪烁参数不一致** — Player.js 设置 `hitFlashTimer = 0.35`，但 Combat.js 归一化分母使用 `0.3`，导致闪烁曲线计算有误。已修复：统一为 `0.3`。
+**第一轮（自主排查）发现的 Bug**：
+1. **R30-H-010: 波次计数错误** — Spawn.js:57 Boss 被计入 `currentWaveSpawnedCount`，导致提前触发奖励面板。已修复。
+2. **H-030: 玩家受击闪烁参数不一致** — Player.js `hitFlashTimer=0.35` 但 Combat.js 归一化分母用 `0.3`。已修复。
 
-**验证通过**：
-- flash-hit animationend 处理器清理逻辑正确，元素移除时自动解绑事件
-- enemyElements Map 在 _removeEnemyDOM 中正确清理
-- 波次间事件概率 60% 正常
+**第二轮（11个独立Agent审查）发现并修复的 Bug**：
+3. **BUG-9 [P0死锁]**: `_enterAbyss` 未清除 `_discardMode`/`_huLock`，打牌模式进入深渊后游戏永久冻结 → 已修复
+4. **BUG-5 [P0高]**: `_tempShieldEnd` 使用墙钟时间 `Date.now()`，面板冻结时护盾意外消失 → 已改为 `this._elapsed`
+5. **CSS P0**: `common.css` 断裂的 `@media prefers-reduced-motion` 块 → 已修复
+6. **A11y P0**: s3 页面缺失 `aria-live` 区域 → 已添加
+7. **CSS P0**: `gameplay-responsive.css` 重复覆盖敌人尺寸 + font-size 裸像素 → 已删除重复定义，改用 `calc(var(--_fs))`
+8. **CSS P0**: `.boss-enraged` 双重定义（第525行死代码） → 已删除
+9. **Weapon [P1]**: OrbitShield 3 orb 同时冷却无法轮流攻击 → 已错开初始化 `[0, cd/3, cd*2/3]`
+10. **A11y [P1]**: `_handleKeyNav` Tab导航 bug（`code==='Tab'`恒为true） → 已修复
+11. **Weapon [P1]**: `_tempAspd` 无累积上限可无限加速 → 已添加 `WEAPON_ASPD_CAP: 3.0`
+12. **Gameplay [P1]**: `_pendingBossLordSettle` 在升级路径未重置 → 已修复
 
-**遗留问题**：无重大遗留，两个 Bug 均已修复。
+**Agent审查验证通过（非Bug）**：
+- SaveManager.Core.js `_validateImportData` 代码结构正确，审计误报
+- Overdrive 计时器双重递减说法有误 — `Sys.updateOverdrive` 从未被Loop调用
+- `_renderActiveBuffs` 实际被 Combat.js L387 调用，非死代码
+- GameSpawner.js/GameCombat.js 仍加载但有守卫保护，暂不清理
+
+**版本**：v=20260829A（三页HTML同步）
 
 ## 十一、文档索引
 
