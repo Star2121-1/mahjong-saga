@@ -79,7 +79,6 @@ window.Balance = {
     REVIVE_HP_PERCENT: 0.3,
     REVIVE_INVULN_DURATION: 3.0,
     TEMP_HP_REGEN_PER_SEC: 2,
-    PLAYER_HITFLASH_DURATION: 0.35,
 
     /* ── FxManager ── */
     FCT_POOL_SIZE_INIT: 50,
