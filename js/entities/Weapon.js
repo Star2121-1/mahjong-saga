@@ -404,8 +404,8 @@ window.NovaPulse = class extends window.Weapon {
         if (this.cooldownTimer > 0) return;
         this.cooldownTimer = this.cd;
         this._justFired = true;
-        /* Syn-NovaLaser: mark active for LaserBeam damage doubling */
-        if (engine._synNovaLaser) {
+        /* Syn-NovaLaser: 在伤害循环前设置标志，确保同帧其他武器能读取 */
+        if (engine && engine._synNovaLaser) {
             engine._synNovaLaserActive = true;
         }
         var maxR = Balance.NOVA_PULSE_MAX_RADIUS;
