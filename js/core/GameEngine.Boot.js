@@ -434,10 +434,10 @@ Gp._startNewRun = function(heroId, levelId) {
     }
 
     /* ── Epoch 14: 关卡亲和减伤 ── */
-    if (this.player && this.player.mapAffinityLevel > 0) {
-        var affinityReduction = this.player.mapAffinityLevel * 0.1;
-        this._mapAffinityReduction = affinityReduction;
-        this._spawnCausalityText('🗺️ 关卡亲和 Lv.' + this.player.mapAffinityLevel + ' — 伤害 -' + (affinityReduction * 100) + '%');
+    var _affinityLvl = (this.player && this.player.mapAffinityLevel > 0) ? this.player.mapAffinityLevel : 0;
+    this._mapAffinityReduction = _affinityLvl * Balance.MAP_AFFINITY_REDUCTION_PER_LEVEL;
+    if (_affinityLvl > 0) {
+        this._spawnCausalityText('🗺️ 关卡亲和 Lv.' + _affinityLvl + ' — 伤害 -' + Math.floor(_affinityLvl * 10) + '%');
     }
 
     /* ── Epoch 15: 精英模式全局加成 ── */

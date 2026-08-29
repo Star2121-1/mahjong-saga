@@ -12,7 +12,9 @@ window.Balance = {
     ABYSS_COMBO_UNLOCK_INTERVAL: 5, // 每 N 层解锁一个新深渊变异组合
     ABYSS_ENEMY_VARIANT_MULT: 1.2,  // 深渊变体属性倍率
     ENEMY_BASE_HP: 20,               // 普通敌人基础 HP (Enemy.js)
-    ENEMY_BASE_ATK: 5,               // 普通敌人基础 ATK (Enemy.js)
+    ENEMY_BASE_ATK: 5,
+    MAP_AFFINITY_REDUCTION_PER_LEVEL: 0.1,   // 每级关卡亲和减伤比例 (Boot.js)
+    MAP_AFFINITY_MAX_LEVEL: 3,                // 关卡亲和最高等级               // 普通敌人基础 ATK (Enemy.js)
     ENEMY_LEVEL_SPEED_SCALE: 3,      // 每级速度增量 (Enemy.js)
     ENEMY_RADIUS: 18,                // 普通敌人碰撞半径 (Enemy.js)
     ENEMY_ATTACK_COOLDOWN: 1.5,      // 敌人攻击冷却 (Enemy.js)
