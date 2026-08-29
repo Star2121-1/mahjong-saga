@@ -658,7 +658,14 @@ window.Enemy = class Enemy {
             var dx = player.x - this.x;
             var dy = player.y - this.y;
             var dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist > Balance.BOSS_P1_MIN_DIST && dist > 0.01) {
+            /* R30-H-016: Boss P1保持最小距离而非完全停走 — 防止玩家贴脸 exploit */
+            if (dist < Balance.BOSS_P1_MIN_DIST && dist > 0.01) {
+                /* 玩家过近时后退 */
+                var spd = this.speed * dt;
+                this.x -= (dx / dist) * spd;
+                this.y -= (dy / dist) * spd;
+                this._clampPosition(engine);
+            } else if (dist > 0.01) {
                 var spd = this.speed * dt;
                 this.x += (dx / dist) * spd;
                 this.y += (dy / dist) * spd;
@@ -910,7 +917,14 @@ window.Enemy = class Enemy {
                     fromSrcY /= fromSrcLen;
                 }
                 var dot = toPlayerX * fromSrcX + toPlayerY * fromSrcY;
-                if (dot > 1e-10) actualDmg = Math.floor(actualDmg * Balance.KNOCKBACK_DAMAGE_REDUCTION);
+                /* R30-H-016: Tanker正面不受减伤，侧面/背面用TANKER_SIDESHOT_REDUCTION */
+                if (dot < -Balance.TANKER_SIDESHOT_REDUCTION * 2 - 0.1) {
+                    /* 背面攻击：全额减伤 */
+                    actualDmg = Math.floor(actualDmg * Balance.TANKER_SIDESHOT_REDUCTION);
+                } else if (dot < 0.7) {
+                    /* 侧面攻击：减半伤害 */
+                    actualDmg = Math.floor(actualDmg * Balance.TANKER_SIDESHOT_REDUCTION);
+                }
             }
         }
         /* K-029: 万子连击 -- 15% 几率造成额外 50% 伤害，有全局冷却防高频触发 */

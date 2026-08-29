@@ -22,6 +22,7 @@ Ss.init = function(engine) {
     this._enemyTypeWeights = engine._enemyTypeWeights || window.Balance.DEFAULT_ENEMY_WEIGHTS;
     this._spawnInterval = engine._spawnInterval || 1.5;
     this._spawnIntervalDecay = engine._spawnIntervalDecay || 0.02;
+    this._spawnIntervalMin = engine._spawnIntervalMin || 0.5;
     this._waveCount = engine._waveCount || 0;
     this.currentWaveSpawnedCount = 0;
     this._bossLordWave = false;
@@ -66,7 +67,7 @@ Ss.update = function(dt, engine) {
     this._difficultyTimer += dt;
     if (this._difficultyTimer >= 10) {
         this._difficultyTimer -= 10;
-        this._spawnInterval = Math.max(0.5, this._spawnInterval - this._spawnIntervalDecay);
+        this._spawnInterval = Math.max(this._spawnIntervalMin, this._spawnInterval - this._spawnIntervalDecay);
     }
 
     this._spawnTimer += dt;

@@ -247,16 +247,8 @@ Gp._loop = function(timestamp) {
                     if (isLord) {
                         this.triggerShake(3, 500);
                         this._cleanEnemyProjectiles();
-                        /* P1-NEW: 击杀 Boss Lord 后，对剩余活敌发放击杀奖励 */
-                        for (var _ldi = this.enemies.length - 1; _ldi >= 0; _ldi--) {
-                            var _le = this.enemies[_ldi];
-                            if (_le.alive) {
-                                this._rewardKill(_le);
-                                this._tryDropEquipment(_le.x, _le.y, _le.type === 'Boss_Lord');
-                                this._removeEnemyDOM(_le);
-                                this.enemies.splice(_ldi, 1);
-                            }
-                        }
+                        /* R30-H-016: Boss Lord死亡后清理金币/宝石，但不移除其他活敌 */
+                        // 注：非Boss活敌由主死亡循环正常处理，此处仅清理掉落物和状态
                         for (var _lci = 0; _lci < this._activeCoins.length; _lci++) this._activeCoins[_lci].el.remove();
                         this._activeCoins = [];
                         if (this.bossHpBar) this.bossHpBar.classList.remove('active');

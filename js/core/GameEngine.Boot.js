@@ -337,6 +337,7 @@ Gp._startNewRun = function(heroId, levelId) {
     this._totalWaves = levelCfg.maxWaves || 5;
     this._spawnInterval = levelCfg.spawnIntervalMin || 1.5;
     this._spawnIntervalDecay = levelCfg.spawnIntervalDecay || 0.02;
+    this._spawnIntervalMin = levelCfg.spawnIntervalMin || 0.5;
     this._enemyTypeWeights = levelCfg.enemyTypes || window.Balance.DEFAULT_ENEMY_WEIGHTS;
 
     for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
