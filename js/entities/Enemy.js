@@ -668,7 +668,7 @@ window.Enemy = class Enemy {
                     this._clampPosition(engine);
                     var pdx = player.x - this.x;
                     var pdy = player.y - this.y;
-                    if (pdx * pdx + pdy * pdy <= 120 * 120) {
+                    if (pdx * pdx + pdy * pdy <= Balance.BOSS_SLAM_RANGE * Balance.BOSS_SLAM_RANGE) {
                         player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * 2.5), engine), this);
                     }
                     this._slamFx(engine); /* B4: 地裂余震 */
