@@ -25,6 +25,13 @@ Ap._ensureContext = function() {
         if (this._ctx.state === 'suspended') {
             this._ctx.resume();
         }
+        /* P0-2: 页面可见性恢复机制 */
+        var self = this;
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && self._ctx && self._ctx.state === 'suspended') {
+                self._ctx.resume();
+            }
+        });
         this._initialized = true;
         return true;
     } catch (e) {
