@@ -21,7 +21,7 @@ Gp._onClick = function(e) {
 
     if (p.freezeChance > 0 && Math.random() < p.freezeChance) {
         enemy.frozen = true;
-        enemy.frozenTimer = B.FROZEN_TIMER_BONUS_BASE + (p.iceDurationBonus || 0);
+        enemy.frozenTimer = Balance.FROZEN_TIMER_BONUS_BASE + (p.iceDurationBonus || 0);
         if (enemy.el) enemy.el.classList.add('frozen-crystal');
     }
 
@@ -179,6 +179,9 @@ Gp.restart = function() {
         clearInterval(this._guideCheckTimer);
         this._guideCheckTimer = null;
     }
+    /* R30-H-017: 清理Boss Phase 3红色雾霭DOM */
+    if (this._bossMistEl && this._bossMistEl.parentNode) this._bossMistEl.remove();
+    this._bossMistEl = null;
     var bc = document.getElementById('active-buffs-container');
     if (bc) bc.remove();
     for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }

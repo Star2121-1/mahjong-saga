@@ -158,6 +158,9 @@ Gp._showAbyssPanel = function() {
 };
 
 Gp._enterAbyss = function() {
+    /* R30-H-017: 清理Boss Phase 3红色雾霭 */
+    if (this._bossMistEl && this._bossMistEl.parentNode) this._bossMistEl.remove();
+    this._bossMistEl = null;
     var bc = document.getElementById('active-buffs-container');
     if (bc) bc.remove();
     this.loopCount++;
@@ -467,6 +470,9 @@ Gp._settleRun = async function(tokens) {
 };
 
 Gp._gameOver = async function() {
+    /* R30-H-017: 清理Boss Phase 3红色雾霭 */
+    if (this._bossMistEl && this._bossMistEl.parentNode) this._bossMistEl.remove();
+    this._bossMistEl = null;
     /* P2: 确保 Overdrive 结束时重置状态 */
     if (this._overdriveActive) this._endOverdrive();
     var _seqGO = this._runSeq || 0; /* P0-1: 局序号令牌 */

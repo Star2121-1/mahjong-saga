@@ -318,6 +318,8 @@ Gp._startNewRun = function(heroId, levelId) {
     this._huCountThisRun = 0;
     this._tempAspd = 0;
     this._tempAspdT = 0;
+    /* R30-H-017: 重置深渊combo状态，防止跨局污染 */
+    if (typeof this._initAbyssState === 'function') this._initAbyssState();
     this._zoomLevel = 1;
     if (this.battlefield) this.battlefield.classList.remove('discard-mode');
     if (this.playerEl) this.playerEl.classList.remove('hu-qingyise');
