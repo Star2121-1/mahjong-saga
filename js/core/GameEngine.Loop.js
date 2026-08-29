@@ -259,7 +259,7 @@ Gp._loop = function(timestamp) {
 
             /* ── Visual Enhancement B: 昼夜循环 + 深渊变暗 ── */
         if (this.battlefield) {
-            /* 昼夜循环：每 10 波切换一次 */
+            /* 昼夜循环：每 10 波切换一次（脏检查：仅在waveCount变化时更新） */
             if (this._waveCount > 0) {
                 var cycleIndex = Math.floor(this._waveCount / 10) % 3; // 0=day, 1=dusk, 2=night
                 var dne = this._dayNightEl;
@@ -270,17 +270,24 @@ Gp._loop = function(timestamp) {
                     this.battlefield.appendChild(dne);
                     this._dayNightEl = dne;
                 }
-                dne.className = ['day', 'dusk', 'night'][cycleIndex];
+                if (this._lastDayNightCycle !== cycleIndex) {
+                    this._lastDayNightCycle = cycleIndex;
+                    dne.className = ['day', 'dusk', 'night'][cycleIndex];
+                }
             }
 
-            /* 深渊模式背景变暗 */
+            /* 深渊模式背景变暗（脏检查：仅在loopCount变化时更新） */
             if (this.loopCount > 0) {
                 var ab = this.battlefield;
-                ab.classList.remove('abyss-depth-1', 'abyss-depth-2', 'abyss-depth-3', 'abyss-depth-n');
-                if (this.loopCount <= 1) ab.classList.add('abyss-depth-1');
-                else if (this.loopCount <= 3) ab.classList.add('abyss-depth-2');
-                else if (this.loopCount <= 6) ab.classList.add('abyss-depth-3');
-                else ab.classList.add('abyss-depth-n');
+                var abyssLevel = this.loopCount <= 1 ? 1 : (this.loopCount <= 3 ? 2 : (this.loopCount <= 6 ? 3 : 'n'));
+                if (this._lastAbyssDepth !== abyssLevel) {
+                    this._lastAbyssDepth = abyssLevel;
+                    ab.classList.remove('abyss-depth-1', 'abyss-depth-2', 'abyss-depth-3', 'abyss-depth-n');
+                    if (abyssLevel === 1) ab.classList.add('abyss-depth-1');
+                    else if (abyssLevel === 2) ab.classList.add('abyss-depth-2');
+                    else if (abyssLevel === 3) ab.classList.add('abyss-depth-3');
+                    else ab.classList.add('abyss-depth-n');
+                }
 
                 /* 红色雾霭 */
                 if (!this._abyssMistEl) {
