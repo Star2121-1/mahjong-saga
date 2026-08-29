@@ -109,18 +109,18 @@
         </div>
 
         <!-- Overlay layers — 放在 battlefield 外面 -->
-        <div id="reward-overlay">
+        <div id="reward-overlay" role="dialog" aria-modal="true" aria-labelledby="reward-title">
             <div class="reward-title">选择圣物</div>
             <div class="reward-cards"></div>
         </div>
 
-        <div id="mutator-overlay">
+        <div id="mutator-overlay" role="dialog" aria-modal="true" aria-labelledby="mutator-title">
             <div class="mutator-title">⚠ 波次突变</div>
             <div class="mutator-subtitle">当前波次出现异常战况，请选择一种适应策略</div>
             <div class="mutator-choices" id="mutator-choices"></div>
         </div>
 
-        <div id="victory-overlay">
+        <div id="victory-overlay" role="dialog" aria-modal="true" aria-labelledby="victory-title">
             <h1>胡牌！大捷！</h1>
             <div class="result">存活时间：<span id="victory-time">00:00</span></div>
             <div class="result">击杀数：<span id="victory-kills">0</span></div>
@@ -132,7 +132,7 @@
             <button id="victory-hub-btn">返回大本营</button>
         </div>
 
-        <div id="game-over-overlay">
+        <div id="game-over-overlay" role="dialog" aria-modal="true" aria-labelledby="gameover-title">
             <h1>GAME OVER</h1>
             <div class="result">存活时间：<span id="result-time">00:00</span></div>
             <div class="result">击杀数：<span id="result-kills">0</span></div>
@@ -143,7 +143,7 @@
             <button id="hub-btn" style="padding:8px 0;font-size:13px;font-weight:600;width:200px;margin-top:4px;background:rgba(255,255,255,0.04);color:#888;border:1px solid #333;border-radius:6px;cursor:pointer;">返回大本营</button>
         </div>
 
-        <div id="pause-overlay">
+        <div id="pause-overlay" role="dialog" aria-modal="true" aria-labelledby="pause-title">
             <div class="pause-panel">
                 <div class="pause-title">⏸ 游戏暂停</div>
                 <button id="pause-continue-btn">▶ 继续游戏</button>
@@ -151,7 +151,7 @@
             </div>
         </div>
 
-        <div id="guide-overlay">
+        <div id="guide-overlay" role="dialog" aria-modal="true" aria-labelledby="guide-title">
             <div class="guide-panel">
                 <div class="guide-title">⚔ 新手指引</div>
                 <div class="guide-body">
