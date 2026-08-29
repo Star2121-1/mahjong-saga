@@ -100,6 +100,27 @@ Gp._loop = function(timestamp) {
             for (var _ei = 0; _ei < this.enemies.length; _ei++) {
                 this.enemies[_ei].update(dt, this.player, this);
             }
+            /* R30-H-015: 敌人间碰撞分离 — 防止堆叠穿模 */
+            for (var _ci = 0; _ci < this.enemies.length; _ci++) {
+                var _a = this.enemies[_ci];
+                if (!_a.alive) continue;
+                for (var _cj = _ci + 1; _cj < this.enemies.length; _cj++) {
+                    var _b = this.enemies[_cj];
+                    if (!_b.alive) continue;
+                    var _cdx = _b.x - _a.x, _cdy = _b.y - _a.y;
+                    var _cd2 = _cdx * _cdx + _cdy * _cdy;
+                    var _minD = _a.radius + _b.radius;
+                    if (_cd2 < _minD * _minD && _cd2 > 0.01) {
+                        var _cd = Math.sqrt(_cd2);
+                        var _push = (_minD - _cd) * 0.5;
+                        var _cnx = _cdx / _cd, _cny = _cdy / _cd;
+                        _a.x -= _cnx * _push; _a.y -= _cny * _push;
+                        _b.x += _cnx * _push; _b.y += _cny * _push;
+                        _a._clampPosition(this);
+                        _b._clampPosition(this);
+                    }
+                }
+            }
 
             /* ── 图腾 buff 应用（Epoch 46: 网格空间分割优化） ── */
             for (var _toti = 0; _toti < this.enemies.length; _toti++) this.enemies[_toti]._totemBuffed = false;

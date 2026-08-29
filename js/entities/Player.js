@@ -353,7 +353,7 @@ class Player {
                     for (var _wi = 0; _wi < eng._activeWeapons.length; _wi++) {
                         var w = eng._activeWeapons[_wi];
                         w.atkFactor += Balance.WEAPON_AMPLIFY_ATK_FACTOR_INC;
-                        w.cd = Math.max(this.cdFloor || Balance.DEFAULT_CD_FLOOR, w.cd * 0.9);
+                        w.cd = Math.max(this.cdFloor || Balance.DEFAULT_CD_FLOOR, (w._baseCd || w.cd) * 0.9);
                     }
                 }
                 break;
@@ -412,7 +412,7 @@ class Player {
                 { id: 'gc_magnet', name: '巨吸', apply: function(p) { p.magnetRadius = (p.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT) + 50; } }
             ],
             weapon_amplify: [
-                { id: 'wa_cd', name: '迅捷', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { eng._activeWeapons[i].cd = Math.max(eng.player.cdFloor || Balance.DEFAULT_CD_FLOOR, eng._activeWeapons[i].cd * 0.9); } } } },
+                { id: 'wa_cd', name: '迅捷', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { eng._activeWeapons[i].cd = Math.max(eng.player.cdFloor || Balance.DEFAULT_CD_FLOOR, (eng._activeWeapons[i]._baseCd || eng._activeWeapons[i].cd) * 0.9); } } } },
                 { id: 'wa_atk', name: '强化', apply: function(p) { p.atk += 5; } }
             ]
         };
@@ -638,7 +638,7 @@ class Player {
             { id: 'fc_chance', apply: function(p) { p.freezeChance = Math.min(0.8, (p.freezeChance || 0) + 0.1); } },
             { id: 'gc_xp', apply: function(p) { p.xpGainFactor = (p.xpGainFactor || 1) + 0.15; } },
             { id: 'gc_magnet', apply: function(p) { p.magnetRadius = (p.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT) + 50; } },
-            { id: 'wa_cd', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { eng._activeWeapons[i].cd = Math.max(p.cdFloor || Balance.DEFAULT_CD_FLOOR, eng._activeWeapons[i].cd * 0.9); } } } },
+            { id: 'wa_cd', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { eng._activeWeapons[i].cd = Math.max(p.cdFloor || Balance.DEFAULT_CD_FLOOR, (eng._activeWeapons[i]._baseCd || eng._activeWeapons[i].cd) * 0.9); } } } },
             { id: 'wa_atk', apply: function(p) { p.atk += 5; } }
         ];
         var map = {};

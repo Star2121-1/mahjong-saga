@@ -9,6 +9,7 @@ window.Weapon = class {
         this.level = level || 1;
         this.atkFactor = atkFactor || 1.0;
         this.cd = cd || 1.0;
+        this._baseCd = this.cd; /* P0: baseline CD for wa_cd modifier — prevents multiplicative stacking */
         this.cooldownTimer = 0;
         this._justFired = false; /* Visual Enhancement D: 技能发射标记 */
     }
@@ -60,7 +61,9 @@ window.TrackingBlade = class extends window.Weapon {
         super('TrackingBlade', '\u8ffd\u8e2a\u98de\u724c', level || 1, 1.0, Balance.TRACKING_BLADE_CD);
     }
     update(dt, player, enemies, engine) {
-        this.cooldownTimer -= dt;
+        /* P0: 应用刺客被动攻击速度修正，与基类Weapon.update()保持一致 */
+        var aspdMult = (player && player._dodgeAspdTimer > 0) ? (1.0 / Balance.HERO_ASSASSIN_DODGE_ASPD_MULT) : 1.0;
+        this.cooldownTimer -= dt * aspdMult;
         if (this.cooldownTimer > 0) return;
         this.cooldownTimer = this.cd;
         var nearest = null;
