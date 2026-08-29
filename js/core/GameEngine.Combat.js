@@ -368,7 +368,7 @@ Gp._settleRun = async function(tokens) {
             crits: this._totalCritsThisRun || 0,
             waves: this._waveCount || 0,
             hitsTaken: this._playerHitCountThisRun || 0,
-            won: true
+            won: !this.gameOver  /* P0: 金库挑战正确反映胜负状态，非硬编码true */
         };
         var vaultResult = window.saveManager.evaluateWeeklyVault(runStats);
         if (vaultResult.evaluated && vaultResult.completed) {
