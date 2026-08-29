@@ -7,6 +7,7 @@ window.Enemy = class Enemy {
         this.isBoss = isBoss === true;
         this.type = type || 'Normal';
         this.el = null;
+        this._eng = null; /* Engine ref — set by caller */
 
         const hpMult = Math.pow(Balance.ENEMY_LEVEL_HP_ATK_MULT, level - 1);
         const atkMult = Math.pow(Balance.ENEMY_LEVEL_HP_ATK_MULT, level - 1);
@@ -17,7 +18,7 @@ window.Enemy = class Enemy {
         this.speed = 40 + (level - 1) * Balance.ENEMY_LEVEL_SPEED_SCALE;
 
         /* ── 无尽深渊指数暴涨 ── */
-        var eng = window.gameEngine;
+        var eng = this._eng || window.gameEngine;
         var loopCount = (eng && eng.loopCount) || 0;
         if (loopCount > 0) {
             this.maxHp = Math.floor(this.maxHp * Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, loopCount));
@@ -107,11 +108,12 @@ window.Enemy = class Enemy {
             this._archerCharging = 0;
         } else if (this.type === 'Boss_Lord') {
             this.radius = 70;
-            this.maxHp = Math.floor(80 * hpMult);
+            /* H-029: 使用 Balance 常量替代硬编码值 */
+            this.maxHp = Math.floor(Balance.BOSS_LORD_BASE_HP * hpMult);
             this.hp = this.maxHp;
-            this.atk = Math.floor(30 * atkMult);
+            this.atk = Math.floor(Balance.BOSS_LORD_BASE_ATK * atkMult);
             /* B4: 深渊变体阶梯（≥1赤鳞 / ≥2影武者 / ≥3灭世巨神） */
-            var _lc = (window.gameEngine && window.gameEngine.loopCount) || 0;
+            var _lc = ((this._eng || window.gameEngine) && (this._eng || window.gameEngine).loopCount) || 0;
             this._abyssTier = _lc >= 3 ? 3 : (_lc >= 2 ? 2 : (_lc >= 1 ? 1 : 0));
             if (this._abyssTier >= Balance.BOSS_ABYSS_TIER_3) this.radius = 84;
             this.speed = 20;
@@ -518,8 +520,9 @@ window.Enemy = class Enemy {
                     if (!e.alive || e.id === this.id) continue;
                     var exdx = e.x - this.x;
                     var exdy = e.y - this.y;
-                    var exdist = Math.sqrt(exdx * exdx + exdy * exdy);
-                    if (exdist <= this._explodeRadius) {
+                    /* P1: 使用平方距离比较避免 sqrt */
+                    var explodeR2 = this._explodeRadius * this._explodeRadius;
+                    if (exdx * exdx + exdy * exdy <= explodeR2) {
                         e.takeDamage(Math.floor(this.atk * 0.5));
                     }
                 }
@@ -554,6 +557,7 @@ window.Enemy = class Enemy {
                 this.attackTimer = this.attackCooldown;
             } else if (dist > 0.01) {
                 var spd = this._totemBuffed ? this.speed * Balance.TOTEM_BUFF_SPEED_MULT : this.speed;
+                this.x += (dx / dist) * spd * dt; /* P2: 修复 Splitter 只沿 Y 轴移动 */
                 this.y += (dy / dist) * spd * dt;
                 this._clampPosition(engine);
             }
@@ -647,7 +651,7 @@ window.Enemy = class Enemy {
             var dx = player.x - this.x;
             var dy = player.y - this.y;
             var dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist > 120 && dist > 0.01) {
+            if (dist > Balance.BOSS_P1_MIN_DIST && dist > 0.01) {
                 var spd = this.speed * dt;
                 this.x += (dx / dist) * spd;
                 this.y += (dy / dist) * spd;
@@ -666,7 +670,9 @@ window.Enemy = class Enemy {
                     this._clampPosition(engine);
                     var pdx = player.x - this.x;
                     var pdy = player.y - this.y;
-                    if (pdx * pdx + pdy * pdy <= Balance.BOSS_SLAM_RANGE * Balance.BOSS_SLAM_RANGE) {
+                    /* P1: Slam 伤害范围叠加玩家半径 */
+                    var slamReach = Balance.BOSS_SLAM_RANGE + player.radius;
+                    if (pdx * pdx + pdy * pdy <= slamReach * slamReach) {
                         player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * 2.5), engine), this);
                     }
                     this._slamFx(engine); /* B4: 地裂余震 */
@@ -716,7 +722,7 @@ window.Enemy = class Enemy {
             var dy = player.y - this.y;
             var dist = Math.sqrt(dx * dx + dy * dy);
             if (dist > 30 && dist > 0.01) {
-                var spd = this.speed * dt;
+                var spd = this.speed * Balance.BOSS_PHASE3_SPEED_MULT * dt;
                 this.x += (dx / dist) * spd;
                 this.y += (dy / dist) * spd;
                 this._clampPosition(engine);
@@ -731,6 +737,26 @@ window.Enemy = class Enemy {
                     if (this._abyssTier >= Balance.BOSS_ABYSS_TIER_3) {
                         for (var ai = 0; ai < 2; ai++) engine._spawnEnemyType('Archer');
                         engine._spawnEnemyType('Shaman');
+                    }
+                }
+            }
+            /* P3: 全屏辐射弹幕 — 每隔1.5秒向8方向发射 */
+            this._bossRadiationTimer = (this._bossRadiationTimer || 0) + dt;
+            if (this._bossRadiationTimer >= 1.5) {
+                this._bossRadiationTimer = 0;
+                if (engine && engine._enemyProjectiles) {
+                    var radDmg = Math.floor(this.atk * 0.6);
+                    var radSpd = Balance.BOSS_P3_RADIATION_SPEED;
+                    for (var ri = 0; ri < Balance.BOSS_P3_RADIATION_COUNT; ri++) {
+                        var radAngle = (ri / Balance.BOSS_P3_RADIATION_COUNT) * Math.PI * 2;
+                        engine._enemyProjectiles.push({
+                            x: this.x, y: this.y,
+                            vx: Math.cos(radAngle) * radSpd,
+                            vy: Math.sin(radAngle) * radSpd,
+                            radius: 5, damage: radDmg,
+                            alive: true, lifeTime: Balance.BOSS_P3_RADIATION_LIFE,
+                            _hitPlayer: false, el: null
+                        });
                     }
                 }
             }
@@ -815,7 +841,7 @@ window.Enemy = class Enemy {
         var actualDmg = dmg;
         /* Barrier 正面无敌: 检查攻击方向 */
         if (this.type === 'Barrier' && this._barrierFront !== undefined) {
-            var engine = window.gameEngine;
+            var engine = this._eng || window.gameEngine;
             var player = engine && engine.player;
             var toPlayerX = (player ? player.x : this.x) - this.x;
             var toPlayerY = (player ? player.y : this.y) - this.y;
@@ -841,7 +867,7 @@ window.Enemy = class Enemy {
                 this.frozenTimer = 0;
             }
         }
-        if (window.gameEngine && window.gameEngine.player && window.gameEngine.player.heroId === 'Assassin') {
+        var _pg = (this._eng || window.gameEngine) && (this._eng || window.gameEngine).player; if (_pg && _pg.heroId === 'Assassin') {
             if (this.frozen || this._knockbackVelocity > 0) {
                 actualDmg = Math.floor(actualDmg * 1.5);
                 isAssassinCrit = true;
@@ -853,7 +879,7 @@ window.Enemy = class Enemy {
                 srcX = source.x;
                 srcY = source.y;
             }
-            if (srcX != null && srcY != null && window.gameEngine && window.gameEngine.player) {
+            var _pg2 = (this._eng || window.gameEngine) && (this._eng || window.gameEngine).player; if (srcX != null && srcY != null && _pg2) {
                 var toPlayerX = window.gameEngine.player.x - this.x;
                 var toPlayerY = window.gameEngine.player.y - this.y;
                 var toPlayerLen = Math.sqrt(toPlayerX * toPlayerX + toPlayerY * toPlayerY);
@@ -876,8 +902,8 @@ window.Enemy = class Enemy {
             }
         }
         /* K-029: 万子连击 -- 15% 几率造成额外 50% 伤害 */
-        if (source === 'player' && window.gameEngine && window.gameEngine.player
-            && window.gameEngine.player.heroId === 'Knight' && Math.random() < Balance.KNIGHT_COMBO_CHANCE) {
+        var _pg3 = (this._eng || window.gameEngine) && (this._eng || window.gameEngine).player; if (source === 'player' && _pg3
+            && _pg3.heroId === 'Knight' && Math.random() < Balance.KNIGHT_COMBO_CHANCE) {
             actualDmg = Math.floor(actualDmg * 1.5);
         }
         this.hp -= actualDmg;
@@ -886,7 +912,7 @@ window.Enemy = class Enemy {
         /* ── FCT 喷射 ── */
         if (window.fxManager && actualDmg > 0) {
             var _fctType = _fctTypeOverride || 'normal';
-            var _eng = window.gameEngine;
+            var _eng = this._eng || window.gameEngine;
             if (isAssassinCrit) _fctType = 'crit';
             if (_eng && _eng._overdriveActive) _fctType = 'overdrive';
             if (this.frozen && _fctType === 'normal') _fctType = 'freeze';
@@ -902,7 +928,7 @@ window.Enemy = class Enemy {
             if (this.el && !this.isBoss) {
                 this.el.classList.add('shatter-anim');
                 /* 生成碎裂粒子 */
-                var engRef2 = window.gameEngine;
+                var engRef2 = this._eng || window.gameEngine;
                 if (engRef2 && engRef2._worldLayer) {
                     for (var _sp2 = 0; _sp2 < 4; _sp2++) {
                         var shard = document.createElement('div');
@@ -918,9 +944,9 @@ window.Enemy = class Enemy {
             }
 
             /* ── Splitter 分身怪: 死亡分裂成 2 个小怪 ── */
-            if (this.type === 'Splitter' && !this._splitDone && window.gameEngine && window.gameEngine.enemies) {
+            var _engRef_check = this._eng || window.gameEngine; if (this.type === 'Splitter' && !this._splitDone && _engRef_check && _engRef_check.enemies) {
                 this._splitDone = true;
-                var engRef = window.gameEngine;
+                var engRef = this._eng || window.gameEngine;
                 var childTypes = ['Normal', 'Normal', 'Tanker', 'Stalker'];
                 for (var _sp = 0; _sp < 2; _sp++) {
                     var ct = childTypes[Math.floor(Math.random() * childTypes.length)];
@@ -954,11 +980,11 @@ window.Enemy = class Enemy {
             }
 
             /* ── 掉落经验石 ── */
-            var _engRef = window.gameEngine;
+            var _engRef = this._eng || window.gameEngine;
             var arr = _engRef._pendingExpGems = _engRef._pendingExpGems || [];
             var diff = 1;
-            try { diff = window.levelConfig[window.gameEngine._currentLevelId].difficultyFactor || 1; } catch(e) { console.warn('diff config read error', e); }
-            var _engRef = window.gameEngine;
+            try { diff = window.levelConfig[(this._eng || window.gameEngine)._currentLevelId].difficultyFactor || 1; } catch(e) { console.warn('diff config read error', e); }
+            var _engRef = this._eng || window.gameEngine;
             var _vaultBlood = _engRef && _engRef._vaultMutations && _engRef._vaultMutations.indexOf('bloodmoon') !== -1;
             var gemMul = (_engRef && _engRef._activeMutator === 'bloodmoon' || _vaultBlood) ? 2 : 1;
             if (this.isBoss) {

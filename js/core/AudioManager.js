@@ -38,7 +38,9 @@ Ap._ensureContext = function() {
 Ap.play = function(sound, opts) {
     if (this._muted || !this._ctx) return;
     opts = opts || {};
-    var vol = (opts.volume != null ? opts.volume : 1) * this._volume;
+    /* P1: 应用分类音量 */
+    var catKey = (sound === 'victory' || sound === 'gameover' || sound === 'levelup') ? 'music' : 'sfx';
+    var vol = (opts.volume != null ? opts.volume : 1) * this._volume * (this._categoryVolumes[catKey] || 1);
     switch (sound) {
         case 'attack': this._sine(300, 0.06, vol, -0.3); break;
         case 'crit':   this._sine(600, 0.12, vol, -0.5); break;

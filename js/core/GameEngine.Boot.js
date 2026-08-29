@@ -593,7 +593,7 @@ Gp._beginLoop = function() {
     this.running = true;
     this.gameOver = false;
     this._lastTime = performance.now();
-    this._elapsed = 0;
+    /* P1-NEW: 不重置 _elapsed，防止难度曲线断裂 */
     /* H-028: run ID counter 防止过时调用重入循环 */
     this._loopRunId = (this._loopRunId || 0) + 1;
     var myRunId = this._loopRunId;
@@ -641,7 +641,7 @@ Gp._initKeyboard = function() {
         }
         if (!self.running || self.gameOver) return;
         if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyW','KeyA','KeyS','KeyD'].includes(e.code)) e.preventDefault();
-        if (e.code === 'Space' && self.player && self.player.rage >= self.player.maxRage && !self._overdriveActive) {
+        if (e.code === 'Space' && self.player && self.player.rage >= self.player.maxRage && !self._overdriveActive && !self._paused) {
             self._pressedKeys[e.code] = false;
             self._triggerOverdrive();
             return;

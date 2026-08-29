@@ -129,8 +129,8 @@ window.Balance = {
     SHAMAN_ADVANCE_DIST: 250,
 
     /* ── Boss ── */
-    BOSS_LORD_BASE_HP: 80,
-    BOSS_LORD_BASE_ATK: 30,
+    BOSS_LORD_BASE_HP: 250,
+    BOSS_LORD_BASE_ATK: 50,
     BOSS_LORD_BASE_SPEED: 20,
     BOSS_LORD_BASE_RADIUS: 70,
     BOSS_HP_MULT: 6,
@@ -138,8 +138,9 @@ window.Balance = {
     BOSS_SPEED_MULT: 0.7,
     BOSS_PHASE3_SPEED_MULT: 1.8,
     BOSS_PHASE1_THRESHOLD: 0.7,    // 龙王第一阶段HP阈值 (Enemy.js)
+    BOSS_P1_MIN_DIST: 200,          // 龙王P1保持最小距离(px) (Enemy.js)
     BOSS_PHASE2_THRESHOLD: 0.3,    // 龙王第二阶段HP阈值 (Enemy.js)
-    BOSS_PHASE2_ABILITY_INTERVAL: 0.5,  // 龙王二阶段技能间隔 (Enemy.js)
+    BOSS_PHASE2_ABILITY_INTERVAL: 2.0,  // 龙王二阶段技能间隔 (Enemy.js)
     EQUIPMENT_DROPS_BOSS_LORD: 1.0,  // 龙王装备掉落概率 (GameEngine.Spawn.js)
     EQUIPMENT_DROPS_NORMAL: 0.25,    // 普通怪物装备掉落概率 (GameEngine.Spawn.js)
     BARRIER_HP_MULT: 1.5,            // 屏障怪HP倍率 (Enemy.js)
@@ -157,6 +158,9 @@ window.Balance = {
     BOSS_PHASE1_BULLET_COUNT: 12,
     BOSS_WARNING_DURATION: 0.8,
     BOSS_PHASE3_SUMMON_INTERVAL: 4,
+    BOSS_P3_RADIATION_COUNT: 6,     // P3辐射弹幕数量 (Enemy.js)
+    BOSS_P3_RADIATION_SPEED: 80,    // P3辐射弹幕速度 (Enemy.js)
+    BOSS_P3_RADIATION_LIFE: 3,      // P3辐射弹幕生命(s) (Enemy.js)
     BOSS_PHASE3_SUMMON_STALKER: 4,
     BOSS_PHASE3_SUMMON_TANKER: 2,
     BOSS_PROJECTILE_SPEED_NORMAL: 100,
@@ -190,6 +194,7 @@ window.Balance = {
     GROUND_SLAMMER_RADIUS_GROWTH: 70,
     GROUND_SLAMMER_KNOCKBACK_FORCE: 200,
     LASER_BEAM_LENGTH: 300,
+    LASER_BEAM_MAX_HITS: 1,
     LASER_HIT_RADIUS: 4,
     TRACKING_BLADE_PROJ_LIFE: 2.0,
     SHOTGUN_PROJ_LIFE: 0.8,

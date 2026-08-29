@@ -32,7 +32,7 @@ CSS: common.css → gameplay-layout → gameplay-player → gameplay-enemy → g
 JS:  SaveManager → SaveManager.Core → SaveManager.Season → SaveManager.Weekly → SaveManager.Compendium → SaveManager.RunStats → FxManager → AudioManager → RewardManager → Balance.js
      → GameSpawner → GameCombat → GameSystems
      → EquipmentRegistry → HeroConfig → HeroRegistry → LevelConfig → Player → Enemy → ExpGem → Weapon
-     → GameEngine.js + 12 sub-modules (Boot/NewRun/Loop/Spawn/Combat/Endgame/Render/Weapons/Events/Guide/Navigate)
+     → GameEngine.js + 11 sub-modules (Boot/NewRun/Loop/Spawn/Combat/Endgame/Render/Weapons/Events/Guide/Navigate)
      → AchievementConfig → main.js → responsive.js
 ```
 
@@ -125,7 +125,7 @@ Two localStorage keys:
 
 - **No build tools** — raw HTML/CSS/JS. Any change to script load order in HTML must propagate to all three HTML files.
 - **Global namespace** — all modules attach to `window`. No `import`/`export`. Respect dependency order.
-- **GameEngine is split into 14 files** — never edit the monolith. The base file is only ~130 lines of constructor + delegation stubs.
+- **GameEngine is split into 12 files** — never edit the monolith. The base file is only ~130 lines of constructor + delegation stubs.
 - **Balance.js** — all magic numbers must go through `window.Balance.*`. Do not add new hardcoded numbers.
 - **CSS-only graphics** — mahjong tile appearance uses layered `box-shadow` sandwich technique. Do not introduce image assets.
 - **Responsive base**: 480×720 container scaled via `transform: scale()`. All coordinate math assumes this base size. `--_fs` CSS variable compensates for scale.

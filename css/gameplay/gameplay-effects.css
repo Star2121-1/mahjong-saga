@@ -39,7 +39,7 @@
 
 .damage-float {
     position: absolute; font-size: calc(18 * var(--_fs) * 1px); font-weight: 800;
-    color: #1e6f42; pointer-events: none; z-index: 20;
+    color: #fefcf6; pointer-events: none; z-index: 20;
     animation: floatUp 0.6s ease-out forwards;
     text-shadow: 0 0 6px rgba(30,111,66,0.5);
 }

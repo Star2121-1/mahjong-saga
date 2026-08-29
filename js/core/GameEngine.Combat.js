@@ -194,7 +194,7 @@ Gp._enterAbyss = function() {
     this._tempCritBonus = 0;
     this._tempShield = 0;
     this._extraEliteCount = 0;
-    this._milestoneShown = false;
+    this._milestonesShown = false;
     /* R30-H-011: 清除打牌/胡牌模式状态，防止深渊轮回后游戏冻结 */
     this._discardMode = false;
     this._huLock = false;
@@ -467,7 +467,10 @@ Gp._settleRun = async function(tokens) {
 };
 
 Gp._gameOver = async function() {
+    /* P2: 确保 Overdrive 结束时重置状态 */
+    if (this._overdriveActive) this._endOverdrive();
     var _seqGO = this._runSeq || 0; /* P0-1: 局序号令牌 */
+    window.audioManager && window.audioManager.play('gameover');
     /* P0-1 修复: 移除恒真布尔守卫（调用方 Loop 已先行置 flags，原守卫使死亡结算永不执行） */
     this.gameOver = true;
     this.running = false;
@@ -503,6 +506,11 @@ Gp._gameOver = async function() {
     this._bossLordWave = false;
     this._bossLordSpawned = false;
 
+    /* P3-NEW: 死亡时清除 Boss Gamble 超时计时器，防止状态泄漏 */
+    if (this._gambleTimeout) {
+        clearTimeout(this._gambleTimeout);
+        this._gambleTimeout = null;
+    }
     /* ── Boss Gamble 失败结算 ── */
     if (this._gambleActive) {
         this._resolveGamble(false);
@@ -896,7 +904,7 @@ Gp._syncUI = function() {
             this._milestoneShown = true;
         } else if (this._waveCount < threshold75) {
             this.waveMilestoneBanner.classList.remove('visible');
-            this._milestoneShown = false;
+            this._milestonesShown = false;
         }
     }
 

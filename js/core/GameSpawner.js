@@ -129,14 +129,18 @@ Ss._spawnEnemy = function(engine, isBoss) {
     var id = this._enemyIdCounter++;
     var enemyType = this._selectEnemyType(isBoss);
     var enemy = new (window.Enemy || window.GameEngine.prototype._enemyConstructor)(id, x, y, level, isBoss === true, enemyType);
+    enemy._eng = engine; /* Inject engine ref for window.gameEngine fallback */
     var diff = 1;
     try {
         var cfg = window.levelConfig[this._currentLevelId];
         if (cfg) diff = cfg.difficultyFactor || 1;
     } catch(e) {}
-    enemy.maxHp = Math.floor(enemy.maxHp * diff);
-    enemy.hp = enemy.maxHp;
-    enemy.atk = Math.floor(enemy.atk * diff);
+    /* Boss Lord HP/ATK 不受难度系数影响（独立设计） */
+    if (enemyType !== 'Boss_Lord') {
+        enemy.maxHp = Math.floor(enemy.maxHp * diff);
+        enemy.hp = enemy.maxHp;
+        enemy.atk = Math.floor(enemy.atk * diff);
+    }
 
     /* H-002: 精英模式 — 敌人获得 50% 属性加成 */
     if (engine._eliteModeActive && engine._eliteMultiplier) {

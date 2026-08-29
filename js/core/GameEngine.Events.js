@@ -40,7 +40,7 @@ Gp._triggerInterWaveEvent = function() {
     if (titleEl) titleEl.textContent = evt.icon + ' ' + evt.name;
 
     var cardsDiv = overlay.querySelector('.reward-cards');
-    if (!cardsDiv) { console.error('[Events] .reward-cards not found in overlay'); return; }
+    if (!cardsDiv) { console.error('[Events] .reward-cards not found in overlay'); this._unfreezeClock(); return; }
     cardsDiv.innerHTML =
         '<div style="text-align:center;padding:20px;">' +
         '<div style="font-size:48px;margin:10px;">' + evt.icon + '</div>' +
@@ -51,11 +51,22 @@ Gp._triggerInterWaveEvent = function() {
 
     overlay.classList.add('active');
     var self = this;
+    /* P3-NEW: 波次间事件自动超时（15秒后自动接受） */
+    if (this._interWaveTimeout) clearTimeout(this._interWaveTimeout);
+    this._interWaveTimeout = setTimeout(function() {
+        if (self._interWaveEvent) {
+            self._spawnCausalityText('⏱ 恩赐已自动接受');
+            evt.apply.call(self);
+            self._continueAfterInterWave();
+        }
+    }, 15000);
     document.getElementById('interevent-accept').addEventListener('click', function() {
+        window.audioManager && window.audioManager.play('reward');
         overlay.classList.remove('active');
         overlay.classList.remove('levelup-mode');
         self._interWaveEvent = null;
         self._interWaveTimer = 0;
+        if (self._interWaveTimeout) { clearTimeout(self._interWaveTimeout); self._interWaveTimeout = null; }
         evt.apply.call(self);
         self._syncUI();
         self._continueAfterInterWave();
@@ -344,11 +355,13 @@ Gp._spawnBossLordFromGamble = function() {
 
     var id = this._enemyIdCounter++;
     var lord = new Enemy(id, x, y, level, true, 'Boss_Lord');
-    var diff = 1;
+    lord._eng = this; /* Inject engine ref */
+    /* Boss Lord HP/ATK 不受难度系数影响（独立设计） */
+    /* var diff = 1;
     try { diff = window.levelConfig[this._currentLevelId].difficultyFactor || 1; } catch(e) {}
     lord.maxHp = Math.floor(lord.maxHp * diff);
     lord.hp = lord.maxHp;
-    lord.atk = Math.floor(lord.atk * diff);
+    lord.atk = Math.floor(lord.atk * diff); */
 
     /* H-002: 精英模式 — 领主获得 50% 属性加成 */
     if (this._eliteModeActive && this._eliteMultiplier) {
@@ -440,6 +453,7 @@ Gp._spawnEnemyType = function(type) {
     var level = Math.floor(this._elapsed / 15) + 1;
     var id = this._enemyIdCounter++;
     var enemy = new Enemy(id, cx, cy, level, false, type);
+    enemy._eng = this; /* Inject engine ref */
     /* Apply level difficulty factor (consistent with SpawnSystem) */
     var diff = 1;
     try {
@@ -531,7 +545,7 @@ Gp._cleanEnemyProjectiles = function() {
    ══════════════════════════════════════════════ */
 
 Gp._triggerKnightDodgeSlam = function() {
-    var radius = 100;
+    var radius = Balance.KNIGHT_DODGE_SLAM_RADIUS;
     var dmg = Math.floor(this.player.atk * Balance.KNIGHT_SLAM_ATK_FACTOR);
     var px = this.player.x;
     var py = this.player.y;
@@ -563,7 +577,7 @@ Gp._triggerKnightDodgeSlam = function() {
         var sy = se.y - py;
         var dist = Math.sqrt(sx * sx + sy * sy);
         if (dist < radius && dist > 0) {
-            var force = 80;
+            var force = Balance.KNIGHT_DODGE_SLAM_FORCE;
             se.x += (sx / dist) * force;
             se.y += (sy / dist) * force;
             se._knockbackVelocity = force;

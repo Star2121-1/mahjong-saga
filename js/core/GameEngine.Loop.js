@@ -226,9 +226,15 @@ Gp._loop = function(timestamp) {
                     if (isLord) {
                         this.triggerShake(3, 500);
                         this._cleanEnemyProjectiles();
+                        /* P1-NEW: 击杀 Boss Lord 后，对剩余活敌发放击杀奖励 */
                         for (var _ldi = this.enemies.length - 1; _ldi >= 0; _ldi--) {
                             var _le = this.enemies[_ldi];
-                            if (_le.alive) { this._removeEnemyDOM(_le); this.enemies.splice(_ldi, 1); }
+                            if (_le.alive) {
+                                this._rewardKill(_le);
+                                this._tryDropEquipment(_le.x, _le.y, _le.isBoss);
+                                this._removeEnemyDOM(_le);
+                                this.enemies.splice(_ldi, 1);
+                            }
                         }
                         for (var _lci = 0; _lci < this._activeCoins.length; _lci++) this._activeCoins[_lci].el.remove();
                         this._activeCoins = [];
@@ -469,6 +475,31 @@ Gp._loop = function(timestamp) {
                     this.player.atk = Math.floor(this.player.atk * 2.5 / (this.player._abyssFrailtyAtk || 1));
                     this.player._abyssFrailtyAtk = 2.5;
                     this.player._frailtyDebuff = true;
+                }
+            } else if (_abyssCombo === 'abyss_bloodmoon') {
+                /* 深渊血月: HP+60%, ATK+80%, 掉落×2 */
+                if (!this.player._abyssBloodmoonApplied) {
+                    this.player._abyssBloodmoonApplied = true;
+                    /* Atk boost applied via _abyssLoopAtkScale in constructor already; additive here for clarity */
+                    this.player.atk = Math.floor(this.player.atk * 0.8); /* Additional 80% atk on top of base scaling */
+                    this.player._abyssBloodmoonAtkBonus = 1.8;
+                }
+            } else if (_abyssCombo === 'abyss_wither') {
+                /* 深渊凋零: 每秒损失2%HP但生成等量护盾 */
+                this._witherAbyssTimer = (this._witherAbyssTimer || 0) + dt;
+                if (this._witherAbyssTimer >= 1) {
+                    this._witherAbyssTimer = 0;
+                    var drainPct = 0.02;
+                    var maxHp = this.player.maxHp;
+                    var drainDmg = Math.floor(maxHp * drainPct);
+                    if (drainDmg > 0) {
+                        this.player.takeDamage(drainDmg, 'wither');
+                        /* Shield: heal back same amount but capped at maxHp */
+                        var shieldHeal = Math.min(drainDmg, maxHp - this.player.hp);
+                        if (shieldHeal > 0) {
+                            this.player.hp = Math.min(maxHp, this.player.hp + shieldHeal);
+                        }
+                    }
                 }
             }
         }

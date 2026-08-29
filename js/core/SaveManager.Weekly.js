@@ -312,7 +312,15 @@
             { id: 'no_hit', type: 'flawless', target: 1, reward: { metaTokens: 60, bossCores: 4 } },
             { id: 'boss_5', type: 'bossKills', target: 5, reward: { metaTokens: 35, bossCores: 2 } },
         ];
-        var shuffled = allChallenges.slice().sort(function() { return Math.random() - 0.5; });
+        /* Deterministic shuffle using weekKey as seed (Linear Congruential Generator) */
+        var seed = 0;
+        for (var _ci = 0; _ci < (weekKey || '').length; _ci++) seed = ((seed << 5) - seed + (weekKey || '').charCodeAt(_ci)) | 0;
+        var shuffled = allChallenges.slice();
+        for (var _i = shuffled.length - 1; _i > 0; _i--) {
+            seed = (seed * 1103515245 + 12345) | 0;
+            var _j = Math.abs(seed) % (_i + 1);
+            var _t = shuffled[_i]; shuffled[_i] = shuffled[_j]; shuffled[_j] = _t;
+        }
         var picked = shuffled.slice(0, 4);
         for (var i = 0; i < picked.length; i++) { picked[i].progress = 0; picked[i].completed = false; }
         meta.currentWeek = weekKey || ('W' + Math.floor((Date.now() - Date.UTC(2025, 0, 1)) / (7 * 24 * 60 * 60 * 1000)));

@@ -13,6 +13,7 @@ window.Weapon = class {
         this._justFired = false; /* Visual Enhancement D: 技能发射标记 */
     }
     update(dt, player, enemies, engine) {
+        if (engine) engine._synNovaLaserActive = false;
         this.cooldownTimer -= dt;
     }
     upgrade() {
@@ -56,6 +57,7 @@ window.TrackingBlade = class extends window.Weapon {
         super('TrackingBlade', '\u8ffd\u8e2a\u98de\u724c', level || 1, 1.0, Balance.TRACKING_BLADE_PROJ_LIFE);
     }
     update(dt, player, enemies, engine) {
+        if (engine) engine._synNovaLaserActive = false;
         this.cooldownTimer -= dt;
         if (this.cooldownTimer > 0) return;
         this.cooldownTimer = this.cd;
@@ -73,7 +75,15 @@ window.TrackingBlade = class extends window.Weapon {
         this._justFired = true;
         var theta = Math.atan2(nearest.y - player.y, nearest.x - player.x);
         var speed = 300 + this.level * 20;
+        /* Syn-BladeOrbit: tracking range +50% */
+        if (engine && engine._synBladeOrbit) {
+            speed = Math.floor(speed * 1.5);
+        }
         var dmg = Math.floor(player.atk * this.atkFactor);
+        /* Syn-BladeLaser: tracking blade hit triggers laser beam extra penetration */
+        if (engine._synBladeLaser) {
+            engine._synBladeLaserHit = true;
+        }
         var proj = new window.Projectile(
             player.x, player.y,
             Math.cos(theta) * speed,
@@ -133,7 +143,12 @@ window.OrbitShield = class extends window.Weapon {
                 var dy = e.y - oy;
                 /* M-015: 碰撞半径使用配置常量 */
                 if (dx * dx + dy * dy < (e.radius + this.orbRadius) * (e.radius + this.orbRadius)) {
-                    e.takeDamage(dmg, 'player');
+                    /* Syn-NovaOrbit: orbit damage x2 when nova pulse active */
+                    var finalDmg = dmg;
+                    if (engine && engine._synNovaOrbit && engine._synNovaLaserActive) {
+                        finalDmg = Math.floor(dmg * 2);
+                    }
+                    e.takeDamage(finalDmg, 'player');
                 }
             }
         }
@@ -165,6 +180,10 @@ window.ShotgunBurst = class extends window.Weapon {
         var speed = 250 + this.level * 10;
         var dmg = Math.floor(player.atk * this.atkFactor);
         var n = this.spreadCount;
+        /* Syn-NovaShotgun: +4 pellets when nova pulse is active */
+        if (engine && engine._synNovaShotgun && engine._synNovaLaserActive) {
+            n += 4;
+        }
         for (var i = 0; i < n; i++) {
             var offset = (i - (n - 1) / 2) * this.spreadAngle / Math.max(n - 1, 1);
             var angle = baseAngle + offset;
@@ -297,6 +316,12 @@ window.LaserBeam = class extends window.Weapon {
         this.cooldownTimer = this.cd;
         this._justFired = true;
         var dmg = Math.floor(player.atk * this.atkFactor);
+        /* Syn-NovaLaser: Nova pulse active doubles laser damage */
+        if (engine && engine._synNovaLaserActive) {
+            dmg = Math.floor(dmg * 2);
+        }
+        var extraPen = engine._synBladeLaser ? 1 : 0;
+        var hitCount = 0;
         for (var i = 0; i < enemies.length; i++) {
             var e = enemies[i];
             if (!e.alive) continue;
@@ -310,7 +335,13 @@ window.LaserBeam = class extends window.Weapon {
             var dist = Math.sqrt((e.x - cx) * (e.x - cx) + (e.y - cy) * (e.y - cy));
             if (dist < e.radius + 4) {
                 e.takeDamage(dmg, 'player');
+                hitCount++;
+                if (hitCount > Balance.LASER_BEAM_MAX_HITS + extraPen) break;
             }
+        }
+        /* Reset synBladeLaser flag after one laser fire */
+        if (engine._synBladeLaserHit) {
+            engine._synBladeLaserHit = false;
         }
     }
     setAngle(angle) {
@@ -329,7 +360,7 @@ window.LaserBeam = class extends window.Weapon {
 
 window.NovaPulse = class extends window.Weapon {
     constructor(level) {
-        super('NovaPulse', '\u6e05\u4e00\u8272', level || 1, 5.0, 7.0);
+        super('NovaPulse', '\u6e05\u4e00\u8272', level || 1, 2.5, 3.5);
         this.activePulses = [];
     }
     update(dt, player, enemies, engine) {
@@ -364,6 +395,10 @@ window.NovaPulse = class extends window.Weapon {
         if (this.cooldownTimer > 0) return;
         this.cooldownTimer = this.cd;
         this._justFired = true;
+        /* Syn-NovaLaser: mark active for LaserBeam damage doubling */
+        if (engine._synNovaLaser) {
+            engine._synNovaLaserActive = true;
+        }
         var maxR = Math.sqrt(engine._mapW * engine._mapW + engine._mapW * engine._mapW);
         var el = document.createElement('div');
         el.className = 'nova-pulse';

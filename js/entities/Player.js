@@ -170,6 +170,7 @@ class Player {
             dmg = Math.floor(dmg * Balance.MUTATOR_FRAILTY_DAMAGE_TAKEN_MULT);
         }
 
+        if (dmg > 0 && window.audioManager) window.audioManager.play('hit');
         this.hp -= dmg;
         this.invulnTimer = Balance.PLAYER_INVULN_ON_HIT;
         this.hitFlashTimer = Balance.PLAYER_HITFLASH_DURATION; /* H-030: 与 Combat.js 归一化分母一致 */

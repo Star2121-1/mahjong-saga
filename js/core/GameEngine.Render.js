@@ -65,6 +65,8 @@ Gp._resetAllWeapons = function() {
 };
 
 Gp._updateWeapons = function(dt) {
+    /* P1: 统一初始化协同标志，避免帧顺序依赖 */
+    this._synNovaLaserActive = false;
     if (this._pendingReward) return;
     /* 雀魂·疾风连打：临时攻速（只加速冷却流转，到期衰减） */
     if (this._tempAspdT > 0) {

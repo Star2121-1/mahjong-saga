@@ -38,6 +38,7 @@ Gp._spawnEliteEnemy = function() {
     var types = ['Tanker', 'Stalker', 'Shaman'];
     var enemyType = types[Math.floor(Math.random() * types.length)];
     var enemy = new Enemy(id, x, y, level, false, enemyType);
+    enemy._eng = this; /* Inject engine ref */
 
     /* Elite boost */
     enemy.maxHp = Math.floor(enemy.maxHp * 1.5);

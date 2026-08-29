@@ -33,6 +33,12 @@ Sys.triggerOverdrive = function(engine) {
         }
     }
 
+    /* Overdrive: 武器伤害倍增 +100% */
+    for (var _wi = 0; _wi < (engine._activeWeapons || []).length; _wi++) {
+        var _w = engine._activeWeapons[_wi];
+        if (_w && !_w._odOrigAtk) _w._odOrigAtk = _w.atkFactor;
+        if (_w) _w.atkFactor = (_w._odOrigAtk || _w.atkFactor) * 2;
+    }
     if (engine.container) engine.container.classList.add('overdrive-active');
 
     /* Overdrive 全屏冲击波白闪 */

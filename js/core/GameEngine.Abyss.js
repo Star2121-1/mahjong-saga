@@ -87,7 +87,8 @@ Gp._unlockAbyssCombos = function() {
 /* ── 应用深渊变体到敌人 ── */
 
 Gp._applyAbyssVariant = function(enemy) {
-    if (!this._abyssVariantEnabled || !enemy || !enemy.isBoss) return enemy.type;
+    /* P3-NEW: 深渊变体应用于所有非 Boss_Lord 敌人 */
+    if (!this._abyssVariantEnabled || !enemy || enemy.type === 'Boss_Lord') return enemy.type;
     /* 15% 概率替换为深渊变体 */
     if (Math.random() > 0.15) return enemy.type;
     var variants = this._abyssVariantDefinitions;
