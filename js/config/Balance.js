@@ -33,6 +33,8 @@ window.Balance = {
     PLAYER_HITFLASH_DURATION: 0.3,   // 受击闪烁时长 + Combat.js 归一化分母 (Player.js + Combat.js)
     HERO_SPEED_BONUS: 1.15,          // 雀灵流转移速加成 (Player.js Hero)
     HERO_ASSASSIN_SPEED_MULT: 1.10,  // 暗影步移速加成 (Player.js Assassin)
+    HERO_ASSASSIN_DODGE_ASPD_MULT: 1.20,  // 暗影步闪避后攻速加成 (Player.js Assassin)
+    HERO_ASSASSIN_DODGE_ASPD_DURATION: 5.0,  // 闪避后攻速加成持续时间 (Player.js)
     HERO_CD_FLOOR_REDUCTION: 0.90,   // 雀灵流转CD降低 (Player.js Hero)
     HERO_CD_REDUCTION_RATE: 0.10,    // 雀灵流转武器CD减免率 (Player.js Hero)
     EVOLVED_SPEED_PER_LEVEL: 0.12,   // 极速图腾每级移速加成 (Player.js)
@@ -174,8 +176,9 @@ window.Balance = {
     ASSASSIN_CRIT_MULT: 1.5,
     KNOCKBACK_DAMAGE_REDUCTION: 0.5,  // 屏障侧向伤害衰减 (Enemy.js)
     KNIGHT_COMBO_CHANCE: 0.15,         // 骑士万子连击触发概率 (Enemy.js)
+    KNIGHT_COMBO_COOLDOWN: 2.0,        // 骑士万子连击单目标冷却 (秒) (Enemy.js)
     VAULT_MUTATION_UNLOCK_CHANCE: 0.2, // 变异保险库解锁概率 (Combat.js)
-    BOSS_CONTACT_COOLDOWN: 0.5,
+    BOSS_CONTACT_COOLDOWN: 1.0,  // 龙王接触伤害CD (Enemy.js) — 从0.5提升到1.0防止P3瞬杀
     FROZEN_DAMAGE_MULT: 1.25,
     FROZEN_HIT_DECAY: 0.25,
     FROZEN_TIMER_ZI_EAST: 1.0,       // 子东冰封时长 (GameEngine.Spawn.js)

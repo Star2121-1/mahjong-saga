@@ -14,7 +14,9 @@ window.Weapon = class {
     }
     update(dt, player, enemies, engine) {
         if (engine) engine._synNovaLaserActive = false;
-        this.cooldownTimer -= dt;
+        /* A-030: 暗影步闪避后攻速加成 — 临时减少CD */
+        var aspdMult = (player && player._dodgeAspdTimer > 0) ? (1.0 / Balance.HERO_ASSASSIN_DODGE_ASPD_MULT) : 1.0;
+        this.cooldownTimer -= dt * aspdMult;
     }
     upgrade() {
         this.level++;

@@ -53,6 +53,7 @@ window.Enemy = class Enemy {
         this._bossWarningEl = null;
         this._bossEnraged = false;
         this._bossContactTimer = 0;
+        this._comboCooldown = 0; /* K-030: 万子连击全局冷却 */
 
         if (this.type === 'Tanker') {
             this.speed = this.baseSpeed * Balance.TANKER_SPEED_MULT;
@@ -129,6 +130,7 @@ window.Enemy = class Enemy {
             this._bossEnraged = false;
             this._bossSummonTimer = 4;
             this._bossContactTimer = 0;
+            this._comboCooldown = 0; /* K-030: 万子连击冷却 */
             /* R29-H-006: Boss_Lord 也需要应用 Abyss 倍增 */
             if (loopCount > 0) {
                 this.maxHp = Math.floor(this.maxHp * Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, loopCount));
@@ -159,12 +161,13 @@ window.Enemy = class Enemy {
             if (this.frozenTimer <= 0) {
                 this.frozen = false;
                 if (this.el) this.el.classList.remove('frozen-crystal');
-            }
-            if (this.type === 'Boss_Lord') {
-                var hpPct = this.hp / this.maxHp;
-                if (hpPct >= Balance.BOSS_PHASE1_THRESHOLD) this._bossPhase = 1;
-                else if (hpPct >= Balance.BOSS_PHASE2_THRESHOLD) this._bossPhase = 2;
-                else this._bossPhase = 3;
+                /* P2: 解冻时修正相位（基于冻结期间发生的伤害），冻结期间不重算 */
+                if (this.type === 'Boss_Lord') {
+                    var hpPct = this.hp / this.maxHp;
+                    if (hpPct >= Balance.BOSS_PHASE1_THRESHOLD) this._bossPhase = 1;
+                    else if (hpPct >= Balance.BOSS_PHASE2_THRESHOLD) this._bossPhase = 2;
+                    else this._bossPhase = 3;
+                }
             }
             return;
         }
@@ -903,10 +906,14 @@ window.Enemy = class Enemy {
                 if (dot > 1e-10) actualDmg = Math.floor(actualDmg * Balance.KNOCKBACK_DAMAGE_REDUCTION);
             }
         }
-        /* K-029: 万子连击 -- 15% 几率造成额外 50% 伤害 */
-        var _pg3 = (this._eng || window.gameEngine) && (this._eng || window.gameEngine).player; if (source === 'player' && _pg3
-            && _pg3.heroId === 'Knight' && Math.random() < Balance.KNIGHT_COMBO_CHANCE) {
-            actualDmg = Math.floor(actualDmg * 1.5);
+        /* K-029: 万子连击 -- 15% 几率造成额外 50% 伤害，有全局冷却防高频触发 */
+        var _pg3 = (this._eng || window.gameEngine) && (this._eng || window.gameEngine).player;
+        if (source === 'player' && _pg3 && _pg3.heroId === 'Knight') {
+            this._comboCooldown -= dt;
+            if (this._comboCooldown <= 0 && Math.random() < Balance.KNIGHT_COMBO_CHANCE) {
+                actualDmg = Math.floor(actualDmg * 1.5);
+                this._comboCooldown = Balance.KNIGHT_COMBO_COOLDOWN;
+            }
         }
         this.hp -= actualDmg;
         this.flashTimer = Balance.FLASH_DURATION;

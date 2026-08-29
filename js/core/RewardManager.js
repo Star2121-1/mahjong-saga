@@ -324,6 +324,7 @@ class RewardManager {
             return;
         }
         if (titleEl) titleEl.textContent = originalTitle;
+        window.audioManager && window.audioManager.play('reward');
         eng._syncUI();
         if (isFree) eng._resumeAfterLevelUp();
         else eng._resumeAfterReward();
@@ -340,6 +341,7 @@ class RewardManager {
             }
         }
         if (titleEl) titleEl.textContent = originalTitle;
+        window.audioManager && window.audioManager.play('reward');
         eng._syncUI();
         if (isFree) eng._resumeAfterLevelUp();
         else eng._resumeAfterReward();
@@ -358,6 +360,7 @@ class RewardManager {
         /* 秘密检测 */
         if (window.rewardManager) window.rewardManager._checkSecrets();
         if (titleEl) titleEl.textContent = originalTitle;
+        window.audioManager && window.audioManager.play('reward');
         window.gameEngine._syncUI();
         if (isFree) window.gameEngine._resumeAfterLevelUp();
         else window.gameEngine._resumeAfterReward();
@@ -661,8 +664,8 @@ class RewardManager {
         if (this.onPurchase) this.onPurchase();
 
         if (titleEl) titleEl.textContent = originalTitle;
+        window.audioManager && window.audioManager.play('reward');
         eng._syncUI();
-        /* R30-M-004: 根据来源面板类型选择恢复路径 */
         if (isFree) eng._resumeAfterLevelUp();
         else eng._resumeAfterReward();
     }

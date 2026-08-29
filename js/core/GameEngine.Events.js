@@ -54,7 +54,8 @@ Gp._triggerInterWaveEvent = function() {
     /* P3-NEW: 波次间事件自动超时（15秒后自动接受） */
     if (this._interWaveTimeout) clearTimeout(this._interWaveTimeout);
     this._interWaveTimeout = setTimeout(function() {
-        if (self._interWaveEvent) {
+        /* P2: 死亡时防止超时触发事件 */
+        if (self._interWaveEvent && !self.gameOver) {
             self._spawnCausalityText('⏱ 恩赐已自动接受');
             evt.apply.call(self);
             self._continueAfterInterWave();
@@ -92,10 +93,15 @@ Gp._continueAfterInterWave = function() {
     this._tempBerserkBonus = false;
     this._tempGoldMult = 1;
     this._tempCritBonus = 0;
-    this._tempShield = 0;
-    this._tempShieldEnd = 0;
-    this._tempBuffEnd = 0;
-    this._tempBuffTimeLeft = 0;
+    /* P2: 不清除仍在生效的护盾 — 只清除已过期的 */
+    if (this._tempShieldEnd > 0 && this._elapsed >= this._tempShieldEnd) {
+        this._tempShield = 0;
+        this._tempShieldEnd = 0;
+    }
+    if (this._tempBuffEnd > 0 && this._elapsed >= this._tempBuffEnd) {
+        this._tempBuffEnd = 0;
+        this._tempBuffTimeLeft = 0;
+    }
 
     /* H-05: 统一通过 _beginLoop 启动，确保 runId guard + _announcingWave 守卫 */
     this._unfreezeClock();

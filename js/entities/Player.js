@@ -38,6 +38,7 @@ class Player {
         this._thornCritY = undefined;
         this._healAmount = 0;
         this._dodgeSignal = false;
+        this._dodgeAspdTimer = 0; /* A-030: 暗影步闪避后攻速加成计时 */
         this.targetX = x;
         this.targetY = y;
         this._movingToTarget = false;
@@ -87,7 +88,6 @@ class Player {
         }
         /* Epoch 42: 雀灵流转 -- 武器CD -10% */
         if (this.heroId === 'Hero') {
-            this._heroCdReduction = Balance.HERO_CD_REDUCTION_RATE;
             this.cdFloor = Math.max(0.05, this.cdFloor * Balance.HERO_CD_FLOOR_REDUCTION);
         }
         /* A-029: 暗影步 -- 10% 移速加成 */
@@ -143,6 +143,12 @@ class Player {
 
         this.x = Math.max(this.radius, Math.min(mapW - this.radius, this.x));
         this.y = Math.max(this.radius, Math.min(mapH - this.radius, this.y));
+
+        /* A-030: 暗影步闪避后攻速加成计时 */
+        if (this._dodgeAspdTimer > 0) {
+            this._dodgeAspdTimer -= dt;
+            if (this._dodgeAspdTimer < 0) this._dodgeAspdTimer = 0;
+        }
     }
 
     takeDamage(dmg, attacker) {
@@ -150,6 +156,10 @@ class Player {
 
         if (this.dodgeRate > 0 && Math.random() < this.dodgeRate) {
             this._dodgeSignal = true;
+            /* A-030: 暗影步 — 闪避后5秒内攻速+20% */
+            if (this.heroId === 'Assassin') {
+                this._dodgeAspdTimer = Balance.HERO_ASSASSIN_DODGE_ASPD_DURATION;
+            }
             if (this.heroId === 'Knight' && window.gameEngine && typeof window.gameEngine._triggerKnightDodgeSlam === 'function') {
                 window.gameEngine._triggerKnightDodgeSlam();
             }
@@ -265,7 +275,7 @@ class Player {
         /* Epoch 42: 九筒筒纹护体 — 基础反伤率 = 5% + 等级 * 5% */
         var lv = this.relicLevels.thorn_armor || 0;
         /* Mage 被动：即使没有 thorn_armor 也有 5% 基础反伤 */
-        this.thornsRate = Math.min(0.5, 0.05 + lv * 0.05);
+        this.thornsRate = Math.min(0.5, 0.10 + lv * 0.05);
     }
 
     addRelic(id) {
@@ -504,6 +514,7 @@ class Player {
         this._thornCritY = undefined;
         this._healAmount = 0;
         this._dodgeSignal = false;
+        this._dodgeAspdTimer = 0; /* A-030: 暗影步闪避后攻速加成计时 */
 
         /* Epoch 23: restore 后重新应用天赋/声望/装备词缀 */
         this._reapplyMetaBonuses();
@@ -708,7 +719,6 @@ class Player {
         }
         /* Epoch 42: 雀灵流转 -- reset 中恢复CD缩减 */
         if (this.heroId === 'Hero') {
-            this._heroCdReduction = Balance.HERO_CD_REDUCTION_RATE;
             this.cdFloor = Math.max(0.05, this.cdFloor * Balance.HERO_CD_FLOOR_REDUCTION);
         }
         /* A-029: 暗影步 -- reset 中恢复速度 */
@@ -723,6 +733,7 @@ class Player {
         this._thornCritY = undefined;
         this._healAmount = 0;
         this._dodgeSignal = false;
+        this._dodgeAspdTimer = 0; /* A-030: 暗影步闪避后攻速加成计时 */
         this._movingToTarget = false;
         this.weaponSlots = [];
         this.magnetRadius = Balance.MAGNET_RADIUS_DEFAULT;
