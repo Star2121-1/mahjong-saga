@@ -858,12 +858,12 @@ window.Enemy = class Enemy {
                     fromSrcY /= fromSrcLen;
                 }
                 var dot = toPlayerX * fromSrcX + toPlayerY * fromSrcY;
-                if (dot > 1e-10) actualDmg = Math.floor(actualDmg * 0.5);
+                if (dot > 1e-10) actualDmg = Math.floor(actualDmg * Balance.KNOCKBACK_DAMAGE_REDUCTION);
             }
         }
         /* K-029: 万子连击 -- 15% 几率造成额外 50% 伤害 */
         if (source === 'player' && window.gameEngine && window.gameEngine.player
-            && window.gameEngine.player.heroId === 'Knight' && Math.random() < 0.15) {
+            && window.gameEngine.player.heroId === 'Knight' && Math.random() < Balance.KNIGHT_COMBO_CHANCE) {
             actualDmg = Math.floor(actualDmg * 1.5);
         }
         this.hp -= actualDmg;

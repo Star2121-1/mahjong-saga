@@ -53,7 +53,7 @@ window.Projectile = class {
 
 window.TrackingBlade = class extends window.Weapon {
     constructor(level) {
-        super('TrackingBlade', '\u8ffd\u8e2a\u98de\u724c', level || 1, 1.0, 0.8);
+        super('TrackingBlade', '\u8ffd\u8e2a\u98de\u724c', level || 1, 1.0, Balance.SHOTGUN_PROJ_LIFE);
     }
     update(dt, player, enemies, engine) {
         this.cooldownTimer -= dt;
@@ -172,7 +172,7 @@ window.ShotgunBurst = class extends window.Weapon {
                 player.x, player.y,
                 Math.cos(angle) * speed,
                 Math.sin(angle) * speed,
-                3, dmg, 0, 0.8
+                3, dmg, 0, Balance.SHOTGUN_PROJ_LIFE
             );
             var el = document.createElement('div');
             el.className = 'projectile shotgun-pellet';

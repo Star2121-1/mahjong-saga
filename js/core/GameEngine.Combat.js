@@ -423,7 +423,7 @@ Gp._settleRun = async function(tokens) {
     if ((meta.maxGoldThisRun || 0) >= 10000) this._checkAchievement('gold_10k');
 
     /* ── 变异保险库：20%概率解锁新突变 ── */
-    if (Math.random() < 0.2) {
+    if (Math.random() < Balance.VAULT_MUTATION_UNLOCK_CHANCE) {
         var _allMuts = ['gravity', 'bloodmoon', 'frenzy', 'frailty', 'wither'];
         var _unlocked = meta.unlockedMutations || [];
         var _avail = [];
