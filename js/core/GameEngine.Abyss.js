@@ -249,7 +249,7 @@ Gp._applyAbyssCombo = function(comboId) {
 /* ── 在波次间事件中显示深渊商店入口 ── */
 
 Gp._showAbyssShopEntrance = function() {
-    if (this._abyssCoins <= 0 && this.loopCount < 3) return;
+    if (this.loopCount < 3) return;
     if (this.loopCount < 3) return; /* 3层后才开放商店 */
 
     var overlay = document.getElementById('reward-overlay');

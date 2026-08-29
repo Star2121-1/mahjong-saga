@@ -54,6 +54,8 @@ Gp._spawnEliteEnemy = function() {
     }
 
     this.enemies.push(enemy);
+    /* Epoch Abyss: 应用深渊变体 */
+    if (this._systems && this._systems.applyAbyssVariant) this._systems.applyAbyssVariant(this, enemy);
     /* R30-H-010: Boss 不计入波次计数，防止提前触发奖励面板 */
     if (!enemy.isBoss) this.currentWaveSpawnedCount++;
 };

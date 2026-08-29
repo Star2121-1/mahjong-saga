@@ -298,3 +298,4 @@
 @media (max-height: 480px) {
     .damage-float { font-size: 10px; }
 }
+.fct-overdrive { color: #ff8c00; text-shadow: 0 0 10px rgba(255,140,0,0.8); } .fct-freeze { color: #00bfff; text-shadow: 0 0 10px rgba(0,191,255,0.8); }
