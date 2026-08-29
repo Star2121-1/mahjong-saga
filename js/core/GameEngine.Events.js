@@ -100,10 +100,7 @@ Gp._continueAfterInterWave = function() {
         this._tempShield = 0;
         this._tempShieldEnd = 0;
     }
-    if (this._tempBuffEnd > 0 && this._elapsed >= this._tempBuffEnd) {
-        this._tempBuffEnd = 0;
-        this._tempBuffTimeLeft = 0;
-    }
+        /* R30-H-025: _tempBuffEnd dead code — never assigned, removed */
 
     /* H-05: 统一通过 _beginLoop 启动，确保 runId guard + _announcingWave 守卫 */
     this._unfreezeClock();
