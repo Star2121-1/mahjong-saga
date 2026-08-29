@@ -7,7 +7,7 @@ window.ExpGem = class {
         this.el = null;
         this.collected = false;
         this.birthTime = Date.now();
-        this.ttl = 30; /* 30秒过期 */
+        this.ttl = Balance.EXP_GEM_TTL_SECONDS; /* 30秒过期 */
     }
     isExpired() {
         return (Date.now() - this.birthTime) / 1000 >= this.ttl;

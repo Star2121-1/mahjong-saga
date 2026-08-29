@@ -226,6 +226,10 @@ window.Balance = {
     BOSS_ABYSS_RING_ANGLE: 0.26,      // 龙王深渊弹幕角度偏移 (Enemy.js)
     BOSS_SLAM_RANGE: 120,           // 龙王 Slam 命中半径 (Enemy.js)
     OVERDRIVE_DURATION: 3.0,         // 超驱动持续时间 (Events.js)
+    EXP_GEM_TTL_SECONDS: 30,         // 经验石过期时间 (ExpGem.js)
+    LEVEL_EXP_BASE: 25,               // 初始升级所需EXP (Player.js)
+    LEVEL_EXP_SCALE: 10,              // 每级EXP增量 (Player.js)
+    LEVEL_EXP_OFFSET: 15              // EXP公式偏移量 (Player.js)
 
     /* ── Timeout/Durations ── */
     TIMEOUT_SHATTER_ANIM_MS: 500,     // 碎裂动画超时 (Enemy.js)

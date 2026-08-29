@@ -42,7 +42,7 @@ class Player {
         this._movingToTarget = false;
         this.currentLvl = 1;
         this.currentExp = 0;
-        this.nextLvlExp = 25;
+        this.nextLvlExp = Balance.LEVEL_EXP_BASE;
         this.weaponSlots = [];
         this.relicLevels = {
             sharp_edge: 0,
@@ -246,7 +246,7 @@ class Player {
         while (this.currentExp >= this.nextLvlExp) {
             this.currentExp -= this.nextLvlExp;
             this.currentLvl++;
-            this.nextLvlExp = 15 + this.currentLvl * 10;
+            this.nextLvlExp = Balance.LEVEL_EXP_OFFSET + this.currentLvl * Balance.LEVEL_EXP_SCALE;
             this.atk += 2;
             this.maxHp += 10;
             this.hp += 10;
@@ -716,7 +716,7 @@ class Player {
         }
         this.currentLvl = 1;
         this.currentExp = 0;
-        this.nextLvlExp = 25;
+        this.nextLvlExp = Balance.LEVEL_EXP_BASE;
         this._thornCritX = undefined;
         this._thornCritY = undefined;
         this._healAmount = 0;
