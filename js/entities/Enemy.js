@@ -164,7 +164,6 @@ window.Enemy = class Enemy {
                 else if (hpPct >= Balance.BOSS_PHASE2_THRESHOLD) this._bossPhase = 2;
                 else this._bossPhase = 3;
             }
-            if (this.type === 'Stalker') this._stalkerCooldown -= dt;
             return;
         }
 
@@ -284,6 +283,7 @@ window.Enemy = class Enemy {
                 spd = this._totemBuffed ? spd * Balance.TOTEM_BUFF_SPEED_MULT : spd;
                 this.x += (dx / dist) * spd * dt;
                 this.y += (dy / dist) * spd * dt;
+            this._clampPosition(engine);
                 this._clampPosition(engine);
             }
             return;
@@ -309,6 +309,7 @@ window.Enemy = class Enemy {
                 var spd = this._totemBuffed ? this.speed * Balance.TOTEM_BUFF_SPEED_MULT : this.speed;
                 this.x += (dx / dist) * spd * dt;
                 this.y += (dy / dist) * spd * dt;
+            this._clampPosition(engine);
                 this._clampPosition(engine);
             }
         }
@@ -361,6 +362,7 @@ window.Enemy = class Enemy {
                 var spd = this._totemBuffed ? this.speed * Balance.TOTEM_BUFF_SPEED_MULT : this.speed;
                 this.x += (dx / dist) * spd * dt;
                 this.y += (dy / dist) * spd * dt;
+            this._clampPosition(engine);
                 this._clampPosition(engine);
             }
             return;
@@ -491,6 +493,7 @@ window.Enemy = class Enemy {
             var spd = this._totemBuffed ? this.speed * Balance.TOTEM_BUFF_SPEED_MULT : this.speed;
             this.x += (dx / dist) * spd * dt;
             this.y += (dy / dist) * spd * dt;
+            this._clampPosition(engine);
         }
 
         /* 到达爆炸半径 → 自爆 */
@@ -557,6 +560,7 @@ window.Enemy = class Enemy {
                 var spd = this._totemBuffed ? this.speed * Balance.TOTEM_BUFF_SPEED_MULT : this.speed;
                 this.x += (dx / dist) * spd * dt;
                 this.y += (dy / dist) * spd * dt;
+            this._clampPosition(engine);
                 this._clampPosition(engine);
             }
         }
