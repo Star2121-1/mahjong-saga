@@ -961,7 +961,7 @@ window.Enemy = class Enemy {
                     var ct = childTypes[Math.floor(Math.random() * childTypes.length)];
                     var cid = ++engRef._enemyIdCounter;
                     var offsetX = (_sp === 0 ? -1 : 1) * 20;
-                    var child = new window.Enemy(cid, this.x + offsetX, this.y + offsetX, this.level, false, ct);
+                    var child = new window.Enemy(cid, this.x + offsetX, this.y, this.level, false, ct);
                     child._clampPosition(engRef);
                     child.maxHp = Math.floor(child.maxHp * 0.5);
                     child.hp = child.maxHp;
