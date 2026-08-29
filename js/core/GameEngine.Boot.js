@@ -648,7 +648,10 @@ Gp._initKeyboard = function() {
         }
         self._pressedKeys[e.code] = true;
     });
-    document.addEventListener('keyup', function(e) { self._pressedKeys[e.code] = false; });
+    document.addEventListener('keyup', function(e) {
+        if (!self.running || self.gameOver || self._paused) return;
+        self._pressedKeys[e.code] = false;
+    });
     /* Epoch 43: 键盘导航 */
     document.addEventListener('keydown', function(e) { self._handleKeyNav(e); });
 };

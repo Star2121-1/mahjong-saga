@@ -400,8 +400,11 @@
    技能特效升级 (Visual Enhancement C)
    ══════════════════════════════════════════════ */
 
-/* Overdrive 全屏色相翻转 */
+/* Overdrive 全屏色相翻转 — 仅作用于战场，隔离HUD */
 #game-container.overdrive-active {
+    isolation: isolate;
+}
+#game-container.overdrive-active #battlefield {
     animation: overdriveHueFlip 3s linear infinite;
 }
 @keyframes overdriveHueFlip {
@@ -509,7 +512,7 @@
 
 /* 受击闪烁 */
 .enemy.flash-hit {
-    animation: flashHit 0.1s;
+    animation: flashHit 0.18s;
 }
 
 @keyframes flashHit {
