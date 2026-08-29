@@ -26,7 +26,7 @@ class Player {
         this.evolvedVamp = false;
         this.maxWeaponSlots = 6;
         this.cdFloor = Balance.DEFAULT_CD_FLOOR;
-        this.magnetRadius = 60;
+        this.magnetRadius = Balance.MAGNET_RADIUS_DEFAULT;
         this.xpGainFactor = 1.0;
         this.iceDurationBonus = 0;
         this.rage = 0;
@@ -381,7 +381,7 @@ class Player {
                 { id: 'vr_atk', name: '强击', apply: function(p) { p.atk += 5; } }
             ],
             explosive_core: [
-                { id: 'ec_range', name: '广域', apply: function(p) { p.magnetRadius = (p.magnetRadius || 60) + 30; } },
+                { id: 'ec_range', name: '广域', apply: function(p) { p.magnetRadius = (p.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT) + 30; } },
                 { id: 'ec_power', name: '强化', apply: function(p) { p.atk += 3; } }
             ],
             frost_core: [
@@ -390,7 +390,7 @@ class Player {
             ],
             gravity_core: [
                 { id: 'gc_xp', name: '慧根', apply: function(p) { p.xpGainFactor = (p.xpGainFactor || 1) + 0.15; } },
-                { id: 'gc_magnet', name: '巨吸', apply: function(p) { p.magnetRadius = (p.magnetRadius || 60) + 50; } }
+                { id: 'gc_magnet', name: '巨吸', apply: function(p) { p.magnetRadius = (p.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT) + 50; } }
             ],
             weapon_amplify: [
                 { id: 'wa_cd', name: '迅捷', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { eng._activeWeapons[i].cd = Math.max(eng.player.cdFloor || Balance.DEFAULT_CD_FLOOR, eng._activeWeapons[i].cd * 0.9); } } } },
@@ -487,7 +487,7 @@ class Player {
         this.cdFloor = data.cdFloor || this.cdFloor;
         this.xpGainFactor = data.xpGainFactor || 1.0;
         this.iceDurationBonus = data.iceDurationBonus || 0;
-        this.magnetRadius = data.magnetRadius || 60;
+        this.magnetRadius = data.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT;
         this.rage = data.rage || 0;
         this.maxRage = data.maxRage || 100;
         this.damageReduction = data.damageReduction || 0;
@@ -607,12 +607,12 @@ class Player {
             { id: 'ww_speed', apply: function(p) { p.speedMultiplier = (p.speedMultiplier || 1) + Balance.RELIC_WW_SPEED_PER_LEVEL; p.speed = p.baseSpeed * p.speedMultiplier; } },
             { id: 'vr_crit', apply: function(p) { p.critRate = Math.min(1, (p.critRate || 0) + 0.1); } },
             { id: 'vr_atk', apply: function(p) { p.atk += 5; } },
-            { id: 'ec_range', apply: function(p) { p.magnetRadius = (p.magnetRadius || 60) + 30; } },
+            { id: 'ec_range', apply: function(p) { p.magnetRadius = (p.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT) + 30; } },
             { id: 'ec_power', apply: function(p) { p.atk += 3; } },
             { id: 'fc_duration', apply: function(p) { p.iceDurationBonus = (p.iceDurationBonus || 0) + Balance.RELIC_FROST_CORE_DURATION_PER_LEVEL; } },
             { id: 'fc_chance', apply: function(p) { p.freezeChance = Math.min(0.8, (p.freezeChance || 0) + 0.1); } },
             { id: 'gc_xp', apply: function(p) { p.xpGainFactor = (p.xpGainFactor || 1) + 0.15; } },
-            { id: 'gc_magnet', apply: function(p) { p.magnetRadius = (p.magnetRadius || 60) + 50; } },
+            { id: 'gc_magnet', apply: function(p) { p.magnetRadius = (p.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT) + 50; } },
             { id: 'wa_cd', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { eng._activeWeapons[i].cd = Math.max(p.cdFloor || Balance.DEFAULT_CD_FLOOR, eng._activeWeapons[i].cd * 0.9); } } } },
             { id: 'wa_atk', apply: function(p) { p.atk += 5; } }
         ];
@@ -723,7 +723,7 @@ class Player {
         this._dodgeSignal = false;
         this._movingToTarget = false;
         this.weaponSlots = [];
-        this.magnetRadius = 60;
+        this.magnetRadius = Balance.MAGNET_RADIUS_DEFAULT;
         this.damageReduction = 0;
         this.rage = 0;
         this.maxRage = 100;

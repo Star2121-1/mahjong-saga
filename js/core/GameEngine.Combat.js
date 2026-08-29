@@ -440,7 +440,7 @@ Gp._settleRun = async function(tokens) {
             _notif.className = 'mutation-unlock-notif';
             _notif.innerHTML = '\u89e3\u9501\u53d8\u5f02: ' + _label;
             document.body.appendChild(_notif);
-            setTimeout(function() { if (_notif.parentNode) _notif.remove(); }, 3000);
+            setTimeout(function() { if (_notif.parentNode) _notif.remove(); }, Balance.TIMEOUT_NOTIF_REMOVE_MS);
         }
     }
 
@@ -769,7 +769,7 @@ Gp._syncEntities = function() {
             trail.style.top = this.player.y + 'px';
             this._worldLayer.appendChild(trail);
             var self = this;
-            setTimeout(function() { if (trail.parentNode) trail.remove(); }, 400);
+            setTimeout(function() { if (trail.parentNode) trail.remove(); }, Balance.TIMEOUT_TRAIL_REMOVE_MS);
         }
     }
     this._lastDt = this._lastDt || 0.016;
@@ -875,7 +875,7 @@ Gp._spawnAchievementText = function(text) {
     el.style.cssText = 'position:absolute;top:15%;left:50%;transform:translate(-50%,-50%);font-size:28px;font-weight:900;color:#ffd700;text-shadow:0 0 24px rgba(255,215,0,0.9),0 0 48px rgba(255,215,0,0.5);z-index:210;pointer-events:none;white-space:nowrap;animation:achievePop 2.5s ease-out forwards;';
     this.battlefield.appendChild(el);
     var self = this;
-    setTimeout(function() { if (el.parentNode) el.remove(); }, 2600);
+    setTimeout(function() { if (el.parentNode) el.remove(); }, Balance.TIMEOUT_FLICKER_REMOVE_MS);
 };
 
 Gp._syncUI = function() {
@@ -960,7 +960,7 @@ Gp._triggerKnightDodgeSlam = function() {
     slamEl.style.border = '2px solid rgba(255,255,255,0.6)';
     slamEl.style.pointerEvents = 'none';
     this._worldLayer.appendChild(slamEl);
-    setTimeout(function() { if (slamEl.parentNode) slamEl.remove(); }, 300);
+    setTimeout(function() { if (slamEl.parentNode) slamEl.remove(); }, Balance.TIMEOUT_SLAM_REMOVE_MS);
     for (var i = 0; i < this.enemies.length; i++) {
         var e = this.enemies[i];
         if (!e.alive) continue;

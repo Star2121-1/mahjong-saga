@@ -113,7 +113,7 @@ window.Enemy = class Enemy {
             /* B4: 深渊变体阶梯（≥1赤鳞 / ≥2影武者 / ≥3灭世巨神） */
             var _lc = (window.gameEngine && window.gameEngine.loopCount) || 0;
             this._abyssTier = _lc >= 3 ? 3 : (_lc >= 2 ? 2 : (_lc >= 1 ? 1 : 0));
-            if (this._abyssTier >= 3) this.radius = 84;
+            if (this._abyssTier >= Balance.BOSS_ABYSS_TIER_3) this.radius = 84;
             this.speed = 20;
             this.baseSpeed = 20;
             this.hue = 0;
@@ -639,11 +639,11 @@ window.Enemy = class Enemy {
                         if (selfB.el) selfB.el.classList.remove('p1-charging');
                         if (!selfB.alive || !engine || !engine._enemyProjectiles) return;
                         selfB._fireRing(engine, 12, spd, 0, baseDmg);
-                        if (selfB._abyssTier >= 1) selfB._fireRing(engine, 6, spd * 0.85, 0.26, baseDmg);
+                        if (selfB._abyssTier >= 1) selfB._fireRing(engine, Balance.BOSS_ABYSS_RING_COUNT, spd * Balance.BOSS_ABYSS_SPEED_MULT, Balance.BOSS_ABYSS_RING_ANGLE, baseDmg);
                     }, 800);
                 } else {
                     this._fireRing(engine, 12, spd, 0, baseDmg);
-                    if (this._abyssTier >= 1) this._fireRing(engine, 6, spd * 0.85, 0.26, baseDmg);
+                    if (this._abyssTier >= Balance.BOSS_ABYSS_TIER_1) this._fireRing(engine, Balance.BOSS_ABYSS_RING_COUNT, spd * Balance.BOSS_ABYSS_SPEED_MULT, Balance.BOSS_ABYSS_RING_ANGLE, baseDmg);
                 }
             }
             var dx = player.x - this.x;
@@ -698,14 +698,14 @@ window.Enemy = class Enemy {
                         self._bossWarningEl = null;
                     }, 800);
                     /* B4: 影武者白板残影诱饵（3s 消散） */
-                    if (this._abyssTier >= 2) {
+                    if (this._abyssTier >= Balance.BOSS_ABYSS_TIER_2) {
                         var dec = document.createElement('div');
                         dec.className = 'boss-decoy';
                         dec.style.left = (player.x + (Math.random() > 0.5 ? 160 : -160)) + 'px';
                         dec.style.top = (player.y + (Math.random() > 0.5 ? 120 : -120)) + 'px';
                         dec.textContent = '白';
                         engine._worldLayer.appendChild(dec);
-                        setTimeout(function () { if (dec.parentNode) dec.remove(); }, 3000);
+                        setTimeout(function () { if (dec.parentNode) dec.remove(); }, Balance.TIMEOUT_DECAY_DRAIN_MS);
                     }
                 }
             }
@@ -730,7 +730,7 @@ window.Enemy = class Enemy {
                     for (var si = 0; si < 4; si++) engine._spawnEnemyType('Stalker');
                     for (var ti = 0; ti < 2; ti++) engine._spawnEnemyType('Tanker');
                     /* B4: 灭世巨神混编召唤 */
-                    if (this._abyssTier >= 3) {
+                    if (this._abyssTier >= Balance.BOSS_ABYSS_TIER_3) {
                         for (var ai = 0; ai < 2; ai++) engine._spawnEnemyType('Archer');
                         engine._spawnEnemyType('Shaman');
                     }

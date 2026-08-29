@@ -207,13 +207,36 @@ window.Balance = {
     COIN_COUNT_NORMAL_BASE: 3,
     COIN_COUNT_NORMAL_PER_LVL: 0.3,
     COIN_SCATTER: 20,
-    COIN_VISUAL_OFFSET: 6,
+    /* ── Coin/Gem 拾取 ── */
+    COIN_VISUAL_OFFSET: 6,            // 金币视觉偏移 (GameEngine.Spawn.js)
+    MAGNET_RADIUS_DEFAULT: 60,        // 默认吸附半径 (Player.js + Spawn.js)
     GEM_LEVEL_SCALE: 0.5,
 
     /* ── 震动 ── */
     SHAKE_INTENSITY_STEP: 8,
     SHAKE_MAX_DISPLACEMENT: 24,
     SHAKE_MAX_DURATION_MS: 3000,
+
+    /* ── Boss 深渊阈值 ── */
+    BOSS_ABYSS_TIER_1: 1,             // 龙王第一阶段深渊阈值 (Enemy.js)
+    BOSS_ABYSS_TIER_2: 2,             // 龙王第二阶段深渊阈值 (Enemy.js)
+    BOSS_ABYSS_TIER_3: 3,             // 龙王第三阶段深渊阈值 (Enemy.js)
+    BOSS_ABYSS_SPEED_MULT: 0.85,      // 龙王深渊速度修正 (Enemy.js)
+    BOSS_ABYSS_RING_COUNT: 6,         // 龙王深渊弹幕数量 (Enemy.js)
+    BOSS_ABYSS_RING_ANGLE: 0.26,      // 龙王深渊弹幕角度偏移 (Enemy.js)
+
+    /* ── Timeout/Durations ── */
+    TIMEOUT_SHATTER_ANIM_MS: 500,     // 碎裂动画超时 (Enemy.js)
+    TIMEOUT_DECAY_DRAIN_MS: 3000,     // 腐蚀效果超时 (Enemy.js)
+    TIMEOUT_BANG_REMOVE_MS: 1600,     // 花牌移除超时 (Spawn.js)
+    TIMEOUT_NOTIF_REMOVE_MS: 3000,    // 通知移除超时 (Combat.js)
+    TIMEOUT_TRAIL_REMOVE_MS: 400,     // 拖尾移除超时 (Combat.js)
+    TIMEOUT_FLICKER_REMOVE_MS: 2600,  // 闪烁移除超时 (Combat.js)
+    TIMEOUT_SLAM_REMOVE_MS: 300,      // 冲击波移除超时 (Combat.js)
+    TIMEOUT_GUIDE_BEGIN_MS: 500,      // 引导开始超时 (Guide.js)
+    TIMEOUT_EVENT_SLAM_MS: 500,       // 事件冲击波超时 (Events.js)
+    TIMEOUT_ENDGAME_VICTORY_MS: 650,  // 胜利动画超时 (Endgame.js)
+    TIMEOUT_ENDGAME_RETREAT_MS: 400,  // 撤退动画超时 (Endgame.js)
 
     /* ── 工具 ── */
     MS_PER_SECOND: 1000,

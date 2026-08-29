@@ -133,7 +133,7 @@ Gp._updateCoins = function(dt) {
         var dx = player.x - coin.x;
         var dy = player.y - coin.y;
         var dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < player.radius + 6 || dist < (player.magnetRadius || 60)) {
+        if (dist < player.radius + 6 || dist < (player.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT)) {
             coin.el.remove();
             this._activeCoins.splice(i, 1);
             collected++;
@@ -142,8 +142,8 @@ Gp._updateCoins = function(dt) {
             var move = speed * dt;
             coin.x += (dx / dist) * move;
             coin.y += (dy / dist) * move;
-            coin.el.style.left = (coin.x - 6) + 'px';
-            coin.el.style.top = (coin.y - 6) + 'px';
+            coin.el.style.left = (coin.x - Balance.COIN_VISUAL_OFFSET) + 'px';
+            coin.el.style.top = (coin.y - Balance.COIN_VISUAL_OFFSET) + 'px';
         }
     }
     if (collected > 0) {
@@ -196,7 +196,7 @@ Gp._updateExpGems = function(dt) {
         var dx = player.x - gem.x;
         var dy = player.y - gem.y;
         var dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < player.radius + gem.radius || dist < (player.magnetRadius || 60)) {
+        if (dist < player.radius + gem.radius || dist < (player.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT)) {
             collected.push(gem);
         } else {
             var speed = 400 + (player.magnetRadius || 0) * 2;
@@ -571,7 +571,7 @@ Gp._triggerHu = function (hu) {
         bang.className = 'hu-bang';
         bang.textContent = '胡！';
         this.battlefield.appendChild(bang);
-        setTimeout(function () { if (bang.parentNode) bang.remove(); }, 1600);
+        setTimeout(function () { if (bang.parentNode) bang.remove(); }, Balance.TIMEOUT_BANG_REMOVE_MS);
     }
     /* 手牌扇形脉冲（MVP 简化，V2 做飞牌展扇） */
     if (this._handTileBar) this._handTileBar.classList.add('hu-flash');
