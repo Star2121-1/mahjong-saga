@@ -401,10 +401,6 @@
    ══════════════════════════════════════════════ */
 
 /* Overdrive 全屏色相翻转 */
-#game-container.overdrive-active #battlefield {
-    filter: saturate(1.6) hue-rotate(-10deg) brightness(1.15);
-    transition: filter 0.15s;
-}
 #game-container.overdrive-active {
     animation: overdriveHueFlip 3s linear infinite;
 }

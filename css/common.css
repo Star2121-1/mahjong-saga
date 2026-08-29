@@ -65,7 +65,6 @@ button { touch-action: manipulation; transition-property: transform, box-shadow,
 @keyframes screenShake { 0%,100% { transform:translate(0); } 20% { transform:translate(-3px,2px); } 40% { transform:translate(2px,-3px); } 60% { transform:translate(-1px,3px); } 80% { transform:translate(3px,-1px); } }
 @keyframes waveAnnounce { 0% { opacity:0; transform:translate(-50%,-50%) scale(0.6); } 20% { opacity:1; transform:translate(-50%,-50%) scale(1.1); } 30% { opacity:1; transform:translate(-50%,-50%) scale(1); } 80% { opacity:1; transform:translate(-50%,-50%) scale(1); } 100% { opacity:0; transform:translate(-50%,-60%) scale(0.9); } }
 @keyframes legendaryGlow { 0% { box-shadow:0 0 20px rgba(255,215,0,0.4); } 100% { box-shadow:0 0 40px rgba(255,215,0,0.8),0 0 60px rgba(255,215,0,0.3); } }
-@keyframes warningPulse { 0% { transform:scale(0.85); opacity:0; } 60% { transform:scale(1.03); } 100% { transform:scale(1); opacity:1; } }
 
 /* ══════════════════════════════════════════════
    麻将江湖 — 全局横版 16:9 容器体系
@@ -109,8 +108,8 @@ button { touch-action: manipulation; transition-property: transform, box-shadow,
 }
 
 /* 减少动画偏好 */
+/* 已修复于第51-58行的 @media (prefers-reduced-motion: reduce) 块 */
 
-}
 * { scrollbar-width: thin; scrollbar-color: #d4af37 #0c0f12; }
 
 /* 屏幕阅读器专用 - 视觉隐藏但可访问 */
