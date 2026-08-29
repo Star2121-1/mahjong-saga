@@ -39,6 +39,7 @@ class Player {
         this._healAmount = 0;
         this._dodgeSignal = false;
         this._dodgeAspdTimer = 0; /* A-030: 暗影步闪避后攻速加成计时 */
+        this._thornsAffixBonus = 0;
         this.targetX = x;
         this.targetY = y;
         this._movingToTarget = false;
@@ -275,7 +276,7 @@ class Player {
         /* Epoch 42: 九筒筒纹护体 — 基础反伤率 = 5% + 等级 * 5% */
         var lv = this.relicLevels.thorn_armor || 0;
         /* Mage 被动：即使没有 thorn_armor 也有 5% 基础反伤 */
-        this.thornsRate = Math.min(0.5, 0.10 + lv * 0.05);
+        this.thornsRate = Math.min(0.5, 0.10 + lv * 0.05 + (this._thornsAffixBonus || 0));
     }
 
     addRelic(id) {
@@ -384,7 +385,7 @@ class Player {
             ],
             golden_finger: [
                 { id: 'gf_lifesteal', name: '吸血', apply: function(p) { p.lifestealRate = Math.min(0.8, (p.lifestealRate || 0) + 0.1); } },
-                { id: 'gf_thorns', name: '反伤', apply: function(p) { p.thornsRate = Math.min(1, (p.thornsRate || 0) + 0.1); } }
+                { id: 'gf_thorns', name: '反伤', apply: function(p) { p._thornsAffixBonus = (p._thornsAffixBonus || 0) + 0.1; p._recalcThornsRate(); } }
             ],
             thorn_armor: [
                 { id: 'ta_hp', name: '坚韧', apply: function(p) { p.maxHp += 30; p.hp = Math.min(p.hp + 30, p.maxHp); } },
@@ -459,7 +460,8 @@ class Player {
             _reviveCount: this._reviveCount || 0,
             _baseMaxHp: this._baseMaxHp || this.maxHp,
             _relicAffixes: this._relicAffixes ? { ...this._relicAffixes } : {},
-            _startsWithRelic: !!this._startsWithRelic
+            _startsWithRelic: !!this._startsWithRelic,
+            mapAffinityLevel: this.mapAffinityLevel || 0
         };
     }
 
@@ -518,11 +520,13 @@ class Player {
         this._hasRevive = this._reviveCount > 0;
         this.setResonanceSpeed = !!data.setResonanceSpeed;
         this.setResonanceIce = !!data.setResonanceIce;
+        this.mapAffinityLevel = data.mapAffinityLevel || 0;
         this._thornCritX = undefined;
         this._thornCritY = undefined;
         this._healAmount = 0;
         this._dodgeSignal = false;
         this._dodgeAspdTimer = 0; /* A-030: 暗影步闪避后攻速加成计时 */
+        this._thornsAffixBonus = 0;
 
         /* Epoch 23: restore 后重新应用天赋/声望/装备词缀 */
         this._reapplyMetaBonuses();
@@ -621,7 +625,7 @@ class Player {
             { id: 'se_pierce', apply: function(p) { p.atk += 5; } },
             { id: 'se_splash', apply: function(p) { p.explosionChance = Math.min(1, (p.explosionChance || 0) + 0.15); } },
             { id: 'gf_lifesteal', apply: function(p) { p.lifestealRate = Math.min(0.8, (p.lifestealRate || 0) + 0.1); } },
-            { id: 'gf_thorns', apply: function(p) { p.thornsRate = Math.min(1, (p.thornsRate || 0) + 0.1); } },
+            { id: 'gf_thorns', apply: function(p) { p._thornsAffixBonus = (p._thornsAffixBonus || 0) + 0.1; p._recalcThornsRate(); } },
             { id: 'ta_hp', apply: function(p) { p.maxHp += 30; p.hp = Math.min(p.hp + 30, p.maxHp); } },
             { id: 'ta_crit', apply: function(p) { p.critRate = Math.min(1, (p.critRate || 0) + 0.1); } },
             { id: 'ww_dodge', apply: function(p) { p.dodgeRate = Math.min(1, (p.dodgeRate || 0) + Balance.RELIC_WW_DODGE_PER_LEVEL); } },
@@ -742,6 +746,7 @@ class Player {
         this._healAmount = 0;
         this._dodgeSignal = false;
         this._dodgeAspdTimer = 0; /* A-030: 暗影步闪避后攻速加成计时 */
+        this._thornsAffixBonus = 0;
         this._movingToTarget = false;
         this.weaponSlots = [];
         this.magnetRadius = Balance.MAGNET_RADIUS_DEFAULT;
