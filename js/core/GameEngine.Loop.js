@@ -467,8 +467,9 @@ Gp._loop = function(timestamp) {
                     /* 击杀回血通过 _rewardKill 中的额外逻辑处理 */
                 }
             } else if (_abyssCombo === 'abyss_gravity') {
-                /* 深渊引力: 吸附×3 */
-                this.player.magnetRadius = (this.player._baseMagnetRadius || this.player.magnetRadius) * 3;
+                /* 深渊引力: 吸附×3（使用基准值，避免每帧累积） */
+                var _baseMag = this.player._baseMagnetRadius || Balance.MAGNET_RADIUS_DEFAULT;
+                this.player.magnetRadius = _baseMag * 3;
             } else if (_abyssCombo === 'abyss_frailty') {
                 /* 深渊脆弱: 玩家攻击+150%，受伤+50% */
                 if (this.player._abyssFrailtyAtk !== 2.5) {
@@ -481,7 +482,7 @@ Gp._loop = function(timestamp) {
                 if (!this.player._abyssBloodmoonApplied) {
                     this.player._abyssBloodmoonApplied = true;
                     /* Atk boost applied via _abyssLoopAtkScale in constructor already; additive here for clarity */
-                    this.player.atk = Math.floor(this.player.atk * 0.8); /* Additional 80% atk on top of base scaling */
+                    this.player.atk = Math.floor(this.player.atk * 1.8); /* Additional 80% atk on top of base scaling */
                     this.player._abyssBloodmoonAtkBonus = 1.8;
                 }
             } else if (_abyssCombo === 'abyss_wither') {

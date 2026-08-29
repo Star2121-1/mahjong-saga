@@ -27,6 +27,7 @@ class Player {
         this.maxWeaponSlots = 6;
         this.cdFloor = Balance.DEFAULT_CD_FLOOR;
         this.magnetRadius = Balance.MAGNET_RADIUS_DEFAULT;
+        this._baseMagnetRadius = this.magnetRadius; /* P1: 保存基准值用于深渊引力combo */
         this.xpGainFactor = 1.0;
         this.iceDurationBonus = 0;
         this.rage = 0;
@@ -725,6 +726,7 @@ class Player {
         this._movingToTarget = false;
         this.weaponSlots = [];
         this.magnetRadius = Balance.MAGNET_RADIUS_DEFAULT;
+        this._baseMagnetRadius = this.magnetRadius; /* P1: 保存基准值用于深渊引力combo */
         this.damageReduction = 0;
         this.rage = 0;
         this.maxRage = 100;

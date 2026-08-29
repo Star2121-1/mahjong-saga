@@ -31,31 +31,43 @@
 
 /* 追踪飞刃 — 朱砂红骨牌碎片（C1 去金化） */
 .tracking-blade {
-    width: 14px; height: 14px;
-    background: linear-gradient(135deg, #ff8a80 0%, #b62929 100%);
+    width: 16px; height: 16px;
+    background: linear-gradient(135deg, #ffcdd2 0%, #b62929 60%, #7f0000 100%);
     border-radius: 2px;
     transform: rotate(45deg);
     box-shadow:
-        0 0 12px rgba(182,41,41,0.8),
-        0 0 24px rgba(182,41,41,0.4),
-        inset 0 0 4px rgba(255,255,255,0.5);
-    animation: bladeSpin 0.3s linear infinite;
+        0 0 14px rgba(182,41,41,0.9),
+        0 0 28px rgba(182,41,41,0.5),
+        inset 0 0 5px rgba(255,255,255,0.5),
+        0 0 6px rgba(255,100,100,0.3);
+    animation: bladeSpin 0.25s linear infinite;
+}
+.tracking-blade::before {
+    content: '';
+    position: absolute; inset: -3px;
+    background: conic-gradient(from 0deg, transparent 0deg, rgba(255,100,100,0.25) 60deg, transparent 120deg);
+    border-radius: 3px;
+    animation: bladeTrail 0.35s linear infinite;
 }
 .tracking-blade::after {
     content: '';
-    position: absolute;
-    inset: -4px;
-    background: linear-gradient(90deg, transparent, rgba(255,138,128,0.35), transparent);
-    border-radius: 4px;
-    animation: bladeTrail 0.4s linear infinite;
+    position: absolute; inset: -6px;
+    border: 1.5px solid rgba(255,100,100,0.25);
+    border-radius: 3px;
+    animation: bladeRing 0.5s linear infinite;
 }
 @keyframes bladeSpin {
     0% { transform: rotate(45deg); }
     100% { transform: rotate(405deg); }
 }
 @keyframes bladeTrail {
-    0% { transform: translateX(-6px) scaleX(0.5); opacity: 0.6; }
-    100% { transform: translateX(6px) scaleX(1.5); opacity: 0; }
+    0% { transform: rotate(0deg) scaleX(0.6); opacity: 0.7; }
+    100% { transform: rotate(360deg) scaleX(1.4); opacity: 0; }
+}
+@keyframes bladeRing {
+    0% { transform: scale(0.9); opacity: 0.5; }
+    50% { transform: scale(1.15); opacity: 0.15; }
+    100% { transform: scale(0.9); opacity: 0.5; }
 }
 
 /* 扇形散射弹丸 — 麻将筒子（圆形带点） */
@@ -111,13 +123,16 @@
     position: absolute;
     border-radius: 50%;
     background:
-        radial-gradient(circle, rgba(251,251,247,0.14) 0%, transparent 60%),
-        repeating-conic-gradient(from 0deg, rgba(112,214,255,0.10) 0deg 10deg, transparent 10deg 20deg);
+        radial-gradient(circle, rgba(255,255,255,0.22) 0%, transparent 55%),
+        repeating-conic-gradient(from 0deg, rgba(112,214,255,0.15) 0deg 10deg, transparent 10deg 20deg);
     pointer-events: none;
     z-index: 8;
     transform: translate(-50%, -50%);
-    border: 2px solid rgba(251,251,247,0.45);
-    box-shadow: 0 0 20px rgba(112,214,255,0.35);
+    border: 3px solid rgba(255, 255, 255, 0.7);
+    box-shadow:
+        0 0 24px rgba(112,214,255,0.5),
+        0 0 48px rgba(255,255,255,0.2),
+        inset 0 0 18px rgba(255,255,255,0.12);
 }
 
 /* 全屏脉冲 — 红中爆裂 */
