@@ -131,7 +131,8 @@ window.OrbitShield = class extends window.Weapon {
     }
     update(dt, player, enemies, engine) {
         this._init(engine);
-        var dmg = Math.floor(player.atk * this.atkFactor);
+        var atkMult = 1 + (player._tempAtkBoost || 0);
+        var dmg = Math.floor(player.atk * this.atkFactor * atkMult);
         for (var i = 0; i < 3; i++) {
             this.orbAngles[i] += this.rotationSpeed * dt;
             var ox = player.x + Math.cos(this.orbAngles[i]) * this.orbitRadius;
@@ -190,7 +191,8 @@ window.ShotgunBurst = class extends window.Weapon {
         this._justFired = true;
         var baseAngle = Math.atan2(targetY - player.y, targetX - player.x);
         var speed = 250 + this.level * 10;
-        var dmg = Math.floor(player.atk * this.atkFactor);
+        var atkMult = 1 + (player._tempAtkBoost || 0);
+        var dmg = Math.floor(player.atk * this.atkFactor * atkMult);
         var n = this.spreadCount;
         /* Syn-NovaShotgun: +4 pellets when nova pulse is active */
         if (engine && engine._synNovaShotgun && engine._synNovaLaserActive) {
@@ -231,7 +233,8 @@ window.GroundSlammer = class extends window.Weapon {
     }
     update(dt, player, enemies, engine) {
         this.cooldownTimer -= dt;
-        var dmg = Math.floor(player.atk * this.atkFactor);
+        var atkMult = 1 + (player._tempAtkBoost || 0);
+        var dmg = Math.floor(player.atk * this.atkFactor * atkMult);
         for (var i = this.activeShockwaves.length - 1; i >= 0; i--) {
             var sw = this.activeShockwaves[i];
             sw.elapsed += dt;
@@ -327,7 +330,8 @@ window.LaserBeam = class extends window.Weapon {
         if (this.cooldownTimer > 0) return;
         this.cooldownTimer = this.cd;
         this._justFired = true;
-        var dmg = Math.floor(player.atk * this.atkFactor);
+        var atkMult = 1 + (player._tempAtkBoost || 0);
+        var dmg = Math.floor(player.atk * this.atkFactor * atkMult);
         /* Syn-NovaLaser: Nova pulse active doubles laser damage */
         if (engine && engine._synNovaLaserActive) {
             dmg = Math.floor(dmg * 2);
@@ -377,7 +381,8 @@ window.NovaPulse = class extends window.Weapon {
     }
     update(dt, player, enemies, engine) {
         this.cooldownTimer -= dt;
-        var dmg = Math.floor(player.atk * this.atkFactor);
+        var atkMult = 1 + (player._tempAtkBoost || 0);
+        var dmg = Math.floor(player.atk * this.atkFactor * atkMult);
         for (var i = this.activePulses.length - 1; i >= 0; i--) {
             var p = this.activePulses[i];
             p.elapsed += dt;

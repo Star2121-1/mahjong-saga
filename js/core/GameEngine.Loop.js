@@ -78,7 +78,7 @@ Gp._loop = function(timestamp) {
                         }
                         withDist.sort(function(a,b) { if (a.d !== b.d) return a.d - b.d; return a.e.id - b.e.id; });
                         var targets = withDist.slice(0, 3);
-                        for (var _ti = 0; _ti < targets.length; _ti++) targets[_ti].e.takeDamage(Math.max(1, Math.floor(this.player.atk * 0.6)));
+                        for (var _ti = 0; _ti < targets.length; _ti++) targets[_ti].e.takeDamage(Math.max(1, Math.floor(this.player.atk * 0.6 * (1 + (this.player._tempAtkBoost || 0)))));
                     } else {
                         var nearest = null;
                         var nearestDist = Infinity;
@@ -90,7 +90,7 @@ Gp._loop = function(timestamp) {
                             var _nd = _ndx * _ndx + _ndy * _ndy;
                             if (_nd < nearestDist) { nearestDist = _nd; nearest = _ne; }
                         }
-                        if (nearest) nearest.takeDamage(Math.max(1, Math.floor(this.player.atk * 0.4)));
+                        if (nearest) nearest.takeDamage(Math.max(1, Math.floor(this.player.atk * 0.4 * (1 + (this.player._tempAtkBoost || 0)))));
                     }
                 }
             }
