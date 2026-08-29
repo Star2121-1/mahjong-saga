@@ -21,8 +21,9 @@ window.Weapon = class {
     upgrade() {
         this.level++;
         this.atkFactor = Math.min(10.0, this.atkFactor + Balance.WEAPON_UPGRADE_ATK_INC);
-        var floor = (window.gameEngine && window.gameEngine.player && window.gameEngine.player.cdFloor != null) ? window.gameEngine.player.cdFloor : Balance.DEFAULT_CD_FLOOR;
-        this.cd = Math.max(floor || Balance.DEFAULT_CD_FLOOR, this.cd * Balance.WEAPON_UPGRADE_CD_MULT);
+        var playerCdFloor = (window.gameEngine && window.gameEngine.player) ? window.gameEngine.player.cdFloor : null;
+        var floor = (playerCdFloor != null) ? playerCdFloor : Balance.DEFAULT_CD_FLOOR;
+        this.cd = Math.max(floor, this.cd * Balance.WEAPON_UPGRADE_CD_MULT);
     }
 };
 
@@ -112,7 +113,8 @@ window.OrbitShield = class extends window.Weapon {
         this.rotationSpeed = Balance.ORBIT_ROTATION_SPEED;
         this.orbAngles = [0, Math.PI * 2 / 3, Math.PI * 4 / 3];
         this.orbitEls = [];
-        this.orbitTickTimers = [0, this.cd * 0.33, this.cd * 0.66]; /* R30-H-013: 错开3 orb冷却，轮流攻击 */
+        this.orbitTickTimers = [0, 0.165, 0.33]; /* R30-H-013: 错开3 orb冷却，轮流攻击；硬编码初始偏移，避免this.cd未初始化时为NaN */
+        this.orbitHitSets = [new Set(), new Set(), new Set()]; /* M-016: 每个orb独立去重集合，防止同tick重复伤害 */
         this.initialized = false;
     }
     _init(engine) {
@@ -145,12 +147,16 @@ window.OrbitShield = class extends window.Weapon {
                 var dy = e.y - oy;
                 /* M-015: 碰撞半径使用配置常量 */
                 if (dx * dx + dy * dy < (e.radius + this.orbRadius) * (e.radius + this.orbRadius)) {
-                    /* Syn-NovaOrbit: orbit damage x2 when nova pulse active */
-                    var finalDmg = dmg;
-                    if (engine && engine._synNovaOrbit && engine._synNovaLaserActive) {
-                        finalDmg = Math.floor(dmg * 2);
+                    /* M-016: 每个orb独立去重，防止同一tick内重复命中 */
+                    if (!this.orbitHitSets[i].has(e.id)) {
+                        this.orbitHitSets[i].add(e.id);
+                        /* Syn-NovaOrbit: orbit damage x2 when nova pulse active */
+                        var finalDmg = dmg;
+                        if (engine && engine._synNovaOrbit && engine._synNovaLaserActive) {
+                            finalDmg = Math.floor(dmg * 2);
+                        }
+                        e.takeDamage(finalDmg, 'player');
                     }
-                    e.takeDamage(finalDmg, 'player');
                 }
             }
         }
@@ -160,6 +166,7 @@ window.OrbitShield = class extends window.Weapon {
             if (this.orbitEls[i].parentNode) this.orbitEls[i].remove();
         }
         this.orbitEls = [];
+        this.orbitHitSets = [new Set(), new Set(), new Set()];
         this.initialized = false;
     }
 };
@@ -401,7 +408,7 @@ window.NovaPulse = class extends window.Weapon {
         if (engine._synNovaLaser) {
             engine._synNovaLaserActive = true;
         }
-        var maxR = Math.sqrt(engine._mapW * engine._mapW + engine._mapW * engine._mapW);
+        var maxR = Balance.NOVA_PULSE_MAX_RADIUS;
         var el = document.createElement('div');
         el.className = 'nova-pulse';
         el.style.left = player.x + 'px';

@@ -73,7 +73,7 @@ window.Balance = {
     ENEMY_SPAWN_RADIUS: 200,
     ENEMY_SPAWN_RADIUS_JITTER: 50,
     ENEMY_SPAWN_MARGIN: 20,
-    DEFAULT_ENEMY_WEIGHTS: { Normal: 0.24, Tanker: 0.14, Stalker: 0.17, Archer: 0.14, Shaman: 0.09, Barrier: 0.12, Bomber: 0.10 },
+    DEFAULT_ENEMY_WEIGHTS: { Normal: 0.24, Tanker: 0.14, Stalker: 0.17, Archer: 0.14, Shaman: 0.09, Barrier: 0.12, Bomber: 0.10, Splitter: 0.04 },
 
     /* ── 玩家系统 ── */
     PLAYER_MAX_RAGE: 100,
@@ -206,6 +206,7 @@ window.Balance = {
     KNIGHT_DODGE_SLAM_RADIUS: 100,
     KNIGHT_DODGE_SLAM_FORCE: 200,
     KNIGHT_DODGE_SLAM_TIMEOUT_MS: 300,
+    NOVA_PULSE_MAX_RADIUS: 350,     // NovaPulse清一色最大半径(px) (Weapon.js)
 
     /* ── 经验石/金币 ── */
     BOSS_MIN_GEM_COUNT: 5,
