@@ -516,19 +516,19 @@
 .enemy.flash-hit {
     animation: flashHit 0.18s;
 }
-/* 白色叠加层：确保浅色牌面也能感知到闪白 */
+/* 受击红色闪光：亮度提升 + 饱和度降低产生朱砂红效果 */
 .enemy.flash-hit::before {
     content: '';
     position: absolute; inset: 0;
-    background: rgba(255, 255, 255, 0.75);
+    background: rgba(182, 41, 41, 0.6); /* 朱砂红叠加层 */
     border-radius: inherit;
     z-index: 2;
     pointer-events: none;
     animation: flashOverlay 0.18s ease-out forwards;
 }
 @keyframes flashHit {
-    0% { filter: brightness(2.5) saturate(0); }
-    100% { filter: brightness(1); }
+    0% { filter: brightness(1.4) saturate(0.3) hue-rotate(-10deg); }
+    100% { filter: brightness(1) saturate(1); }
 }
 @keyframes flashOverlay {
     0% { opacity: 1; }
