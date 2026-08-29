@@ -85,11 +85,6 @@ Gp._goToSaveSelect = function() {
     if (window.saveManager) window.saveManager.clearActiveRun();
     window.location.href = 's2_main_hub.html';
 };
-    if (this.bossHpBar) this.bossHpBar.classList.remove('active');
-    /* Clear stale active run to prevent "继续游戏" from appearing incorrectly */
-    if (window.saveManager) window.saveManager.clearActiveRun();
-    window.location.href = 's2_main_hub.html';
-};
 
 Gp._formatTime = function(sec) {
     var m = Math.floor(sec / 60);
