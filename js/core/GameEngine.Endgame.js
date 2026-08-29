@@ -182,6 +182,11 @@ Gp.restart = function() {
     /* R30-H-017: 清理Boss Phase 3红色雾霭DOM */
     if (this._bossMistEl && this._bossMistEl.parentNode) this._bossMistEl.remove();
     this._bossMistEl = null;
+    /* R30-H-023: 清理共振光环DOM防止重启泄漏 */
+    if (this._flameAuraEl && this._flameAuraEl.parentNode) this._flameAuraEl.remove();
+    this._flameAuraEl = null;
+    if (this._iceAuraEl && this._iceAuraEl.parentNode) this._iceAuraEl.remove();
+    this._iceAuraEl = null;
     var bc = document.getElementById('active-buffs-container');
     if (bc) bc.remove();
     for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }

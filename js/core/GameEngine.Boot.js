@@ -400,6 +400,7 @@ Gp._startNewRun = function(heroId, levelId) {
     this._overdriveActive = false;
     this._overdriveTimer = 0;
     this._overdriveCount = 0;
+    this._origCdFloor = null; /* R30-H-024: 重置过驱动残留CD基准 */
     this._resonanceAuraTimer = 0;
 
     this.player.reset(heroId);
