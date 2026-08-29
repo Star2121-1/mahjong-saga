@@ -54,7 +54,8 @@ Gp._spawnEliteEnemy = function() {
     }
 
     this.enemies.push(enemy);
-    this.currentWaveSpawnedCount++;
+    /* R30-H-010: Boss 不计入波次计数，防止提前触发奖励面板 */
+    if (!enemy.isBoss) this.currentWaveSpawnedCount++;
 };
 
 /* ── Boss 装备掉落 ── */

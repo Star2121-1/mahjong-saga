@@ -260,6 +260,19 @@ Lv3/Lv5 有 20% 概率掷随机词条（存 `player._relicAffixes`，支持 rest
 2. **打击感全面改造**（排队中）：用户确认现状"全都弱"——命中反馈、击杀反馈、震屏、飘字层级、音效层次全部需要加强；胡牌演出将复用同一套冻结/震颤管线。升级面板 "NEW WEAPON UNLOCKED!" 横幅与卡片文字重叠问题在此轮一并处理。
 3. **UI 美术精致化**（第一轮已完成 2026-08-22，见第九节修复记录）：s1/index/s2/s3 四页主题统一为雀坛绿金；下一轮候选：s3 HUD 经验/怒气条文字排版、引导面板步骤指示器美化、大本营其余 8 个面板的视觉体检。
 
+### 🔧 2026-08-29 flash/waves 问题排查（feat/fix-flash-and-waves）
+
+**发现的 Bug**：
+1. **R30-H-010: 波次计数错误** — Spawn.js:57 Boss 被计入 `currentWaveSpawnedCount`，导致提前触发奖励面板。已修复：添加 `!enemy.isBoss` 判断。
+2. **H-030: 玩家受击闪烁参数不一致** — Player.js 设置 `hitFlashTimer = 0.35`，但 Combat.js 归一化分母使用 `0.3`，导致闪烁曲线计算有误。已修复：统一为 `0.3`。
+
+**验证通过**：
+- flash-hit animationend 处理器清理逻辑正确，元素移除时自动解绑事件
+- enemyElements Map 在 _removeEnemyDOM 中正确清理
+- 波次间事件概率 60% 正常
+
+**遗留问题**：无重大遗留，两个 Bug 均已修复。
+
 ## 十一、文档索引
 
 **根目录常驻**：本文件、`README.md`（快速上手）、`CLAUDE.md`（AI 协作规范）、`HUPAI_DESIGN.md`（胡牌策划案）

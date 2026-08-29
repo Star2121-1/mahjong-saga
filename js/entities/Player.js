@@ -172,7 +172,7 @@ class Player {
 
         this.hp -= dmg;
         this.invulnTimer = Balance.PLAYER_INVULN_ON_HIT;
-        this.hitFlashTimer = 0.35; /* 独立受击闪烁计时器 */
+        this.hitFlashTimer = 0.3; /* H-030: 与 Combat.js 归一化分母一致 */
         if (dmg > 0 && window.gameEngine && window.gameEngine._currentLevelId === 'level_1') {
             window.gameEngine.playerHitCountInLevel1++;
         }
