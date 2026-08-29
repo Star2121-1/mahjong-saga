@@ -136,7 +136,7 @@ Gp._showAbyssPanel = function() {
         '<div class="abyss-title">\u6df1\u6e0a\u4e4b\u95e8\u5df2\u542f</div>' +
         '<div class="abyss-label">' + loopLabel + '</div>' +
         '<div class="abyss-subtitle">\u662f\u5426\u732e\u796d\u5f53\u524d\u901a\u5173\u6210\u679c\uff0c\u8e0f\u5165\u65e0\u5c3d\u88c2\u9699\u7b2c ' + (this.loopCount + 1) + ' \u5c42\uff1f</div>' +
-        '<div class="abyss-warning">\u602a\u7269\u5c5e\u6027\u4e58\u4ee5 ' + (Math.pow(1.15, this.loopCount + 1)).toFixed(2) + 'x</div>' +
+        '<div class="abyss-warning">\u602a\u7269\u5c5e\u6027\u4e58\u4ee5 ' + (Math.pow(Balance.ABYSS_SCALE_BASE, this.loopCount + 1)).toFixed(2) + 'x</div>' +
         '<div class="abyss-buttons">' +
             '<button class="abyss-btn abyss-btn-retreat">\u64a4\u9000\u5927\u672c\u8425</button>' +
             '<button class="abyss-btn abyss-btn-enter">\u8e0f\u5165\u6df1\u6e0a</button>' +
@@ -261,7 +261,7 @@ Gp._buildVictoryTips = function() {
     if (this.loopCount === 0) {
         parts.push('<span class="tip-first">🏆 首次通关！再次击败最终BOSS可进入无尽深渊轮回</span>');
     } else {
-        var mult = Math.pow(1.15, this.loopCount + 1).toFixed(2);
+        var mult = Math.pow(Balance.ABYSS_SCALE_BASE, this.loopCount + 1).toFixed(2);
         parts.push('<span class="tip-abyss">🌀 无尽深渊第 ' + this.loopCount + ' 层 — 怪物属性 ×' + mult + '</span>');
     }
 
