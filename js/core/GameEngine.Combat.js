@@ -963,38 +963,5 @@ Gp._moveTo = function(wx, wy) {
     this.player._movingToTarget = true;
 };
 
-Gp._triggerKnightDodgeSlam = function() {
-    /* 移除震动 */
-    var px = this.player.x;
-    var py = this.player.y;
-    var slamRadius = 100;
-    var slamEl = document.createElement('div');
-    slamEl.className = 'knight-dodge-slam';
-    slamEl.style.left = (px - slamRadius) + 'px';
-    slamEl.style.top = (py - slamRadius) + 'px';
-    slamEl.style.width = (slamRadius * 2) + 'px';
-    slamEl.style.height = (slamRadius * 2) + 'px';
-    slamEl.style.borderRadius = '50%';
-    slamEl.style.position = 'absolute';
-    slamEl.style.border = '2px solid rgba(255,255,255,0.6)';
-    slamEl.style.pointerEvents = 'none';
-    this._worldLayer.appendChild(slamEl);
-    setTimeout(function() { if (slamEl.parentNode) slamEl.remove(); }, Balance.TIMEOUT_SLAM_REMOVE_MS);
-    for (var i = 0; i < this.enemies.length; i++) {
-        var e = this.enemies[i];
-        if (!e.alive) continue;
-        var dx = e.x - px;
-        var dy = e.y - py;
-        if (dx * dx + dy * dy <= slamRadius * slamRadius) {
-            var dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            var force = 200;
-            e.x += (dx / dist) * force;
-            e.y += (dy / dist) * force;
-            e._knockbackVelocity = 200;
-            if (typeof e._clampPosition === 'function') e._clampPosition(this);
-        }
-    }
-};
-
 
 })();
