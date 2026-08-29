@@ -26,7 +26,7 @@ window.heroRegistry = {
                 passiveDesc: h.passiveDesc || null,
                 cost: h.unlockCost || 0,
                 weaponSlots: h.weaponSlots || 6,
-                cdFloor: h.cdFloor != null ? h.cdFloor : 0.2,
+                cdFloor: h.cdFloor != null ? h.cdFloor : Balance.DEFAULT_CD_FLOOR,
                 shapeClass: h.shapeClass || 'shape-circle'
             };
         }
