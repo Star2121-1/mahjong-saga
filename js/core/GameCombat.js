@@ -38,7 +38,7 @@ Cs.spawnExpGemsAt = function(engine, x, y, isBoss, level) {
     } catch(e) {}
     var _vaultBloodGem = engine._vaultMutations && engine._vaultMutations.indexOf('bloodmoon') !== -1;
     var bloodMul = (engine._activeMutator === 'bloodmoon' || _vaultBloodGem) ? 2 : 1;
-    var arr = window.expGems = window.expGems || [];
+    var arr = engine._pendingExpGems = engine._pendingExpGems || [];
     if (isBoss) {
         var cnt = 5 + Math.floor(Math.random() * 4);
         var avg = Math.floor(25 * bloodMul / cnt);

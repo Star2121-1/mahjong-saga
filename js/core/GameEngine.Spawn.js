@@ -107,7 +107,7 @@ Gp._spawnExpGemsAt = function(x, y, isBoss, level) {
     try { diff = window.levelConfig[this._currentLevelId].difficultyFactor || 1; } catch(e) { console.warn('diff config read error', e); }
     var _vaultBloodGem = this._vaultMutations && this._vaultMutations.indexOf('bloodmoon') !== -1;
     var bloodMul = (this._activeMutator === 'bloodmoon' || _vaultBloodGem) ? 2 : 1;
-    var arr = window.expGems = window.expGems || [];
+    var arr = this._pendingExpGems = this._pendingExpGems || [];
     if (isBoss) {
         var cnt = 5 + Math.floor(Math.random() * 4);
         var avg = Math.floor(25 * bloodMul / cnt);
@@ -165,12 +165,12 @@ Gp._updateCoins = function(dt) {
 };
 
 Gp._updateExpGems = function(dt) {
-    if (this._expGems.length === 0 && (!window.expGems || window.expGems.length === 0)) return;
-    if (window.expGems && window.expGems.length > 0) {
-        for (var gi = 0; gi < window.expGems.length; gi++) {
-            this._expGems.push(window.expGems[gi]);
+    if (this._expGems.length === 0 && (!this._pendingExpGems || this._pendingExpGems.length === 0)) return;
+    if (this._pendingExpGems && this._pendingExpGems.length > 0) {
+        for (var gi = 0; gi < this._pendingExpGems.length; gi++) {
+            this._expGems.push(this._pendingExpGems[gi]);
         }
-        window.expGems = [];
+        this._pendingExpGems = [];
     }
     if (this._expGems.length === 0) return;
     var player = this.player;

@@ -176,7 +176,7 @@ Gp.restart = function() {
     this._activeCoins = [];
     for (var _g = 0; _g < this._expGems.length; _g++) { if (this._expGems[_g].el) this._expGems[_g].el.remove(); }
     this._expGems = [];
-    window.expGems = [];
+    this._pendingExpGems = [];
     this._cleanAllProjectiles();
     this._cleanEnemyProjectiles();
     this._resetAllWeapons();
@@ -213,7 +213,7 @@ Gp._goToSaveSelect = function() {
     if (window.rewardManager) window.rewardManager.hidePanel();
     for (var _g = 0; _g < this._expGems.length; _g++) { if (this._expGems[_g].el) this._expGems[_g].el.remove(); }
     this._expGems = [];
-    window.expGems = [];
+    this._pendingExpGems = [];
     this._cleanAllProjectiles();
     this._cleanEnemyProjectiles();
     this._resetAllWeapons();

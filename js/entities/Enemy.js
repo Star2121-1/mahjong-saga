@@ -939,7 +939,8 @@ window.Enemy = class Enemy {
             }
 
             /* ── 掉落经验石 ── */
-            var arr = window.expGems = window.expGems || [];
+            var _engRef = window.gameEngine;
+            var arr = _engRef._pendingExpGems = _engRef._pendingExpGems || [];
             var diff = 1;
             try { diff = window.levelConfig[window.gameEngine._currentLevelId].difficultyFactor || 1; } catch(e) { console.warn('diff config read error', e); }
             var _engRef = window.gameEngine;
