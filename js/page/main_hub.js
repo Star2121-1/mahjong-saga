@@ -59,7 +59,7 @@
             if (oldPanel) {
                 oldPanel.classList.add('flip-out');
                 oldPanel.classList.remove('active');
-                setTimeout(() => { {
+                setTimeout(() => {
                     oldPanel.style.display = 'none';
                     oldPanel.classList.remove('flip-out');
                 }, 400);

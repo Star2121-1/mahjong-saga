@@ -16,7 +16,7 @@
     }
 
     /** 按 ID 查询 */
-    functionById(id) { return document.getElementById(id); }
+    var functionById = function(id) { return document.getElementById(id); };
 
     /** 安全获取元素，不存在则返回 null */
     function safeById(id) {
