@@ -637,6 +637,7 @@ Gp._initKeyboard = function() {
         /* Escape 暂停/继续，任何状态下均可触发 */
         if (e.code === 'Escape') {
             self._togglePause();
+            e.preventDefault(); /* P1-1: 防止浏览器后退 */
             return;
         }
         if (!self.running || self.gameOver) return;

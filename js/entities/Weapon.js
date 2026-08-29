@@ -13,7 +13,7 @@ window.Weapon = class {
         this._justFired = false; /* Visual Enhancement D: 技能发射标记 */
     }
     update(dt, player, enemies, engine) {
-        if (engine) engine._synNovaLaserActive = false;
+        /* P1: _synNovaLaserActive由Render.js统一初始化，此处不再重置 */
         /* A-030: 暗影步闪避后攻速加成 — 临时减少CD */
         var aspdMult = (player && player._dodgeAspdTimer > 0) ? (1.0 / Balance.HERO_ASSASSIN_DODGE_ASPD_MULT) : 1.0;
         this.cooldownTimer -= dt * aspdMult;
@@ -57,10 +57,9 @@ window.Projectile = class {
 
 window.TrackingBlade = class extends window.Weapon {
     constructor(level) {
-        super('TrackingBlade', '\u8ffd\u8e2a\u98de\u724c', level || 1, 1.0, Balance.TRACKING_BLADE_PROJ_LIFE);
+        super('TrackingBlade', '\u8ffd\u8e2a\u98de\u724c', level || 1, 1.0, Balance.TRACKING_BLADE_CD);
     }
     update(dt, player, enemies, engine) {
-        if (engine) engine._synNovaLaserActive = false;
         this.cooldownTimer -= dt;
         if (this.cooldownTimer > 0) return;
         this.cooldownTimer = this.cd;

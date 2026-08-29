@@ -790,6 +790,7 @@ class Player {
             evolved_speed: 0,
             evolved_vamp: 0
         };
+        this.critDamageBonus = 0; /* C2: 暴击伤害加成初始化为0 */
         if (this.heroId === 'Mage') this._recalcThornsRate();
         /* 从 HeroConfig 重置英雄特有参数 */
         const cfg = window.heroConfig[this.heroId];
