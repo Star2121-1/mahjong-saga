@@ -754,7 +754,8 @@ window.Enemy = class Enemy {
                     if (this._abyssTier >= Balance.BOSS_ABYSS_TIER_3) {
                         var abyssLeft = Math.max(0, maxSummon - this._summonCount - stalkerLeft - tankLeft);
                         for (var ai = 0; ai < abyssLeft; ai++) engine._spawnEnemyType('Archer');
-                        if (this._summonCount < maxSummon - 1) engine._spawnEnemyType('Shaman');
+                        /* P0: 检查剩余召唤空间再召唤Shaman */
+                        if (this._summonCount + 1 < maxSummon && abyssLeft > 0) engine._spawnEnemyType('Shaman');
                     }
                     this._summonCount += stalkerLeft + tankLeft + (this._abyssTier >= Balance.BOSS_ABYSS_TIER_3 ? Math.min(2, maxSummon - this._summonCount - stalkerLeft - tankLeft) : 0);
                 }
@@ -918,9 +919,8 @@ window.Enemy = class Enemy {
                 }
                 var dot = toPlayerX * fromSrcX + toPlayerY * fromSrcY;
                 /* R30-H-016: Tanker正面不受减伤，侧面/背面用TANKER_SIDESHOT_REDUCTION */
-                if (dot < -Balance.TANKER_SIDESHOT_REDUCTION * 2 - 0.1) {
-                    /* 背面攻击：全额减伤 */
-                    actualDmg = Math.floor(actualDmg * Balance.TANKER_SIDESHOT_REDUCTION);
+                if (dot < -Balance.TANKER_SIDESHOT_REDUCTION) {
+                    /* 背面攻击：全额伤害（不减伤） */
                 } else if (dot < 0.7) {
                     /* 侧面攻击：减半伤害 */
                     actualDmg = Math.floor(actualDmg * Balance.TANKER_SIDESHOT_REDUCTION);

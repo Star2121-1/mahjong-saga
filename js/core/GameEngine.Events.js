@@ -240,6 +240,16 @@ Gp._endOverdrive = function() {
     this._overdriveTimer = 0;
 
     if (this.player) this.player.cdFloor = this._origCdFloor || Balance.DEFAULT_CD_FLOOR;
+    this._origCdFloor = null; /* P1: 清除跨局残留 */
+
+    /* P0: 恢复武器原始伤害（Sys.endOverdrive已实现，此处补齐） */
+    for (var _wi = 0; _wi < (this._activeWeapons || []).length; _wi++) {
+        var _w = this._activeWeapons[_wi];
+        if (_w && _w._odOrigAtk) {
+            _w.atkFactor = _w._odOrigAtk;
+            _w._odOrigAtk = undefined;
+        }
+    }
 
     for (var _oi = 0; _oi < this.enemies.length; _oi++) {
         var _oe = this.enemies[_oi];
