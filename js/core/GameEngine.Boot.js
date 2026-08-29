@@ -44,6 +44,12 @@ Gp.init = async function() {
             this._enemyIdCounter = 0;
             for (var _c = 0; _c < this._activeCoins.length; _c++) this._activeCoins[_c].el.remove();
             this._activeCoins = [];
+            /* R30-H-018: 清理残留弹道防止幽灵弹道 */
+            for (var _p = 0; _p < (this._projectiles || []).length; _p++) {
+                if (this._projectiles[_p] && this._projectiles[_p].el && this._projectiles[_p].el.parentNode) this._projectiles[_p].el.remove();
+            }
+            this._projectiles = [];
+            this._enemyProjectiles = [];
             this._lastMoveX = 0;
 
             var vpW = this.battlefield.clientWidth;
