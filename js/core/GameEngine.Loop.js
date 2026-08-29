@@ -220,7 +220,7 @@ Gp._loop = function(timestamp) {
                 if (!_re.alive) {
                     var isLord = _re.type === 'Boss_Lord';
                     this._rewardKill(_re); // 掉落金币+经验石+怒气
-                    this._tryDropEquipment(_re.x, _re.y, _re.isBoss);
+                    this._tryDropEquipment(_re.x, _re.y, _re.type === 'Boss_Lord');
                     this._removeEnemyDOM(_re);
                     this.enemies.splice(_ri, 1);
                     if (isLord) {
@@ -231,7 +231,7 @@ Gp._loop = function(timestamp) {
                             var _le = this.enemies[_ldi];
                             if (_le.alive) {
                                 this._rewardKill(_le);
-                                this._tryDropEquipment(_le.x, _le.y, _le.isBoss);
+                                this._tryDropEquipment(_le.x, _le.y, _le.type === 'Boss_Lord');
                                 this._removeEnemyDOM(_le);
                                 this.enemies.splice(_ldi, 1);
                             }

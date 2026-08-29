@@ -39,8 +39,16 @@ Gp._spawnEliteEnemy = function() {
     var y = this.player.y + Math.sin(angle) * dist;
 
     var id = ++this._enemyIdCounter;
-    var types = ['Tanker', 'Stalker', 'Shaman'];
-    var enemyType = types[Math.floor(Math.random() * types.length)];
+    /* P0: 精英怪类型池与主刷怪权重表同步，避免硬编码缺失类型 */
+    var weights = this._enemyTypeWeights || window.Balance.DEFAULT_ENEMY_WEIGHTS;
+    var typeKeys = Object.keys(weights);
+    var roll = Math.random();
+    var cumulative = 0;
+    var enemyType = 'Normal';
+    for (var _ti = 0; _ti < typeKeys.length; _ti++) {
+        cumulative += weights[typeKeys[_ti]];
+        if (roll < cumulative) { enemyType = typeKeys[_ti]; break; }
+    }
     var enemy = new Enemy(id, x, y, level, false, enemyType);
     enemy._eng = this; /* Inject engine ref */
 
