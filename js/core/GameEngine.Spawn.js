@@ -103,7 +103,7 @@ Gp._tryDropEquipment = function(x, y, isBossLord) {
     meta.equipments.push(item);
     /* 限制装备仓库最近 100 件，防止无限增长 */
     if (meta.equipments.length > 100) meta.equipments = meta.equipments.slice(-100);
-    window.saveManager._saveMetaToStorage();
+    window.saveManager._saveMetaToStorage().catch(function(e){ console.warn('[Spawn] saveMeta failed:', e); });
     var qualityLabel = { rare: '稀有', epic: '史诗', legendary: '传说' }[quality] || quality;
     this._spawnCausalityText('🎁 获得装备：' + item.name + ' (' + qualityLabel + ')');
     /* Epoch 16: Abyss Gamble + 怪物潮双倍掉落 */
@@ -111,7 +111,7 @@ Gp._tryDropEquipment = function(x, y, isBossLord) {
         var dropItem = (_di === 0) ? item : window.equipmentRegistry.createItem(protoId, quality);
         if (dropItem) {
             meta.equipments.push(dropItem);
-            window.saveManager._saveMetaToStorage();
+            window.saveManager._saveMetaToStorage().catch(function(e){ console.warn('[Spawn] saveMeta failed:', e); });
             var qLabel = { rare: '稀有', epic: '史诗', legendary: '传说' }[quality] || quality;
             this._spawnCausalityText('🎁 获得装备：' + dropItem.name + ' (' + qLabel + ')' + (_di > 0 ? ' x' + (_di + 1) : ''));
         }

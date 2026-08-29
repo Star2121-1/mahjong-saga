@@ -21,7 +21,9 @@
     SaveManager.prototype._rotateChallenges = async function(meta) {
         var now = Date.now();
         var last = meta.challenges && meta.challenges.lastRotation ? meta.challenges.lastRotation : 0;
-        if (now - last < 6 * 60 * 60 * 1000) return false;
+        /* P0: 按周粒度旋转，而非6小时窗口 */
+        var nowWeek = 'W' + Math.floor(now / (7 * 24 * 60 * 60 * 1000));
+        if (meta.challenges && meta.challenges.weekKey === nowWeek) return false;
         var rng = Math.floor(now / 1000) % SaveManager.CHALLENGE_POOL.length;
         var active = [];
         for (var i = 0; i < 3; i++) {
@@ -30,6 +32,7 @@
         }
         meta.challenges.active = active;
         meta.challenges.lastRotation = now;
+        meta.challenges.weekKey = nowWeek;
         await this.saveMeta(meta);
         return true;
     };
@@ -125,7 +128,7 @@
 
     SaveManager.prototype._todayKey = function() {
         var d = new Date();
-        return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+        return d.getUTCFullYear() + '-' + (d.getUTCMonth()+1) + '-' + d.getUTCDate();
     };
 
     SaveManager.prototype.checkDailyLogin = async function() {
@@ -140,7 +143,7 @@
                 return { streak: streak, claimed: !!claimed[today], reward: null, makeupTokens: makeup };
             }
             var yesterday = new Date(Date.now() - 86400000);
-            var yKey = yesterday.getFullYear() + '-' + (yesterday.getMonth()+1) + '-' + yesterday.getDate();
+            var yKey = yesterday.getUTCFullYear() + '-' + (yesterday.getUTCMonth()+1) + '-' + yesterday.getUTCDate();
             var isNewStreak = lastLogin === yKey || lastLogin === '';
             if (isNewStreak) { streak++; }
             else {
@@ -189,7 +192,7 @@
             if (makeup <= 0) return { ok: false, reason: '没有补签 token' };
             if (meta.lastLoginDate === self._todayKey()) return { ok: false, reason: '今日已登录' };
             var yesterday = new Date(Date.now() - 86400000);
-            var yKey = yesterday.getFullYear() + '-' + (yesterday.getMonth()+1) + '-' + yesterday.getDate();
+            var yKey = yesterday.getUTCFullYear() + '-' + (yesterday.getUTCMonth()+1) + '-' + yesterday.getUTCDate();
             if (meta.lastLoginDate !== yKey && meta.lastLoginDate !== '') {
                 return { ok: false, reason: '无法补签' };
             }

@@ -166,6 +166,10 @@ Gp.triggerShake = function(intensity, duration) {
 };
 
 Gp.restart = function() {
+    /* Clear all pending timers to prevent stale callbacks after restart */
+    if (this._gambleTimeout) clearTimeout(this._gambleTimeout);
+    if (this._interWaveTimeout) clearTimeout(this._interWaveTimeout);
+    if (this._qqueenShieldTimer) clearTimeout(this._qqueenShieldTimer);
     var bc = document.getElementById('active-buffs-container');
     if (bc) bc.remove();
     for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }

@@ -885,8 +885,8 @@ window.Enemy = class Enemy {
                 srcY = source.y;
             }
             var _pg2 = (this._eng || window.gameEngine) && (this._eng || window.gameEngine).player; if (srcX != null && srcY != null && _pg2) {
-                var toPlayerX = window.gameEngine.player.x - this.x;
-                var toPlayerY = window.gameEngine.player.y - this.y;
+                var toPlayerX = _pg2.x - this.x;
+                var toPlayerY = _pg2.y - this.y;
                 var toPlayerLen = Math.sqrt(toPlayerX * toPlayerX + toPlayerY * toPlayerY);
                 if (toPlayerLen > 0.01) {
                     toPlayerX /= toPlayerLen;

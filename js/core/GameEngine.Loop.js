@@ -615,6 +615,10 @@ Gp._renderActiveBuffs = function() {
         container.style.cssText = 'position:absolute;top:30px;right:10px;display:flex;flex-direction:column;gap:2px;z-index:50;pointer-events:none;';
         this.battlefield.appendChild(container);
     }
+    /* P1: 脏检查 — 仅在buff内容变化时重建DOM，避免每帧innerHTML全量重建 */
+    var buffStr = JSON.stringify(buffs);
+    if (this._lastBuffStr === buffStr) return;
+    this._lastBuffStr = buffStr;
     container.innerHTML = '';
     for (var i = 0; i < buffs.length; i++) {
         var b = buffs[i];

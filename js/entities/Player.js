@@ -276,7 +276,7 @@ class Player {
         /* Epoch 42: 九筒筒纹护体 — 基础反伤率 = 5% + 等级 * 5% */
         var lv = this.relicLevels.thorn_armor || 0;
         /* Mage 被动：即使没有 thorn_armor 也有 5% 基础反伤 */
-        this.thornsRate = Math.min(0.5, 0.10 + lv * 0.05 + (this._thornsAffixBonus || 0));
+        this.thornsRate = Math.min(0.5, 0.05 + lv * 0.05 + (this._thornsAffixBonus || 0));
     }
 
     addRelic(id) {

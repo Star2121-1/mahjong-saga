@@ -67,7 +67,7 @@ Gp._checkQqueenShield = function() {
     if (this._shieldActive) return; /* 已在冷却中 */
     this._shieldActive = true;
     this._shieldTimer = 5 + shieldLv * 2; /* 基础5秒 + 每级2秒 */
-    this.player.invulnTimer = this._shieldTimer;
+    if (this.player) this.player.invulnTimer = this._shieldTimer;
     this._spawnCausalityText('🀄 雀魂护盾激活！持续 ' + this._shieldTimer + 's');
     if (this.container) {
         this.container.style.boxShadow = '0 0 60px rgba(30,111,66,0.6)';
@@ -200,7 +200,7 @@ Gp._enterAbyss = function() {
     this._huLock = false;
 
     /* ── 深渊轮回保留保险库变异 ── */
-    if (this._vaultMutations && this._vaultMutations.indexOf('gravity') !== -1) {
+    if (this._vaultMutations && this._vaultMutations.indexOf('gravity') !== -1 && this.player) {
         this.player.magnetRadius = 0;
     }
 
