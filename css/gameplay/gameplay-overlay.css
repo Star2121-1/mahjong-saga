@@ -403,7 +403,7 @@
    ══════════════════════════════════════════════ */
 
 .abyss-panel {
-    position: absolute; inset: 0; z-index: 120;
+    position: fixed; inset: 0; z-index: 120;
     background: rgba(13,26,18,0.9) !important;
     display: flex; flex-direction: column; align-items: center;
     justify-content: center; gap: 12px;

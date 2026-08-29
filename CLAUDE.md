@@ -36,7 +36,7 @@ JS:  SaveManager → SaveManager.Core → SaveManager.Season → SaveManager.Wee
      → AchievementConfig → main.js → responsive.js
 ```
 
-> **Note:** `GameEngine.Abyss.js` and `MahjongHand.js` exist on disk but are **not loaded in s3_gameplay.html**. They are WIP code for the 无尽深渊 and 雀魂 systems — add them to s3 when ready to activate.
+> **Note:** `GameEngine.Abyss.js` and `MahjongHand.js` are loaded in s3_gameplay.html (lines 57, 47 respectively). Both systems are Active and fully wired into gameplay.
 
 ### Module Map
 
@@ -54,8 +54,8 @@ JS:  SaveManager → SaveManager.Core → SaveManager.Season → SaveManager.Wee
 | `core/` | `GameEngine.Events.js` | Inter-wave events, mutator panel, overdrive, boss gamble, pause |
 | `core/` | `GameEngine.Guide.js` | Tutorial overlay, step tracking |
 | `core/` | `GameEngine.Navigate.js` | Page transitions, save/load navigation |
-| `core/` | `GameEngine.Abyss.js` | 无尽深渊 system — WIP, not yet loaded in s3_gameplay.html |
-| `core/` | `MahjongHand.js` | 雀魂牌库 + 牌型检测 — WIP, not yet loaded in s3_gameplay.html |
+| `core/` | `GameEngine.Abyss.js` | 无尽深渊 system — Active, loaded in s3_gameplay.html |
+| `core/` | `MahjongHand.js` | 雀魂牌库 + 牌型检测 — Active, loaded in s3_gameplay.html |
 | `core/` | `ToastSystem.js` | Global toast notifications (5 types, DOM pool) — loaded in s2 only, WIP for s3 |
 | `core/` | `GameSpawner.js` | Enemy spawn logic, wave management, difficulty scaling |
 | `core/` | `GameCombat.js` | Floating text, drops, explosions, screen shake |
@@ -97,7 +97,7 @@ JS:  SaveManager → SaveManager.Core → SaveManager.Season → SaveManager.Wee
 - `window.audioManager` — Web Audio synthesis
 - `window.toastSystem` — toast notifications (s2 hub only; not yet active in s3)
 - `window.SpawnSystem`, `window.CombatSystem`, `window.Systems` — delegation proxies
-- `window.MahjongHand` — 雀魂牌库+检测（WIP: loaded only if MahjongHand.js added to s3 HTML）
+- `window.MahjongHand` — 雀魂牌库+检测（Active: loaded in s3_gameplay.html）
 
 ### Data Persistence
 
@@ -131,7 +131,7 @@ Two localStorage keys:
 - **Responsive base**: 480×720 container scaled via `transform: scale()`. All coordinate math assumes this base size. `--_fs` CSS variable compensates for scale.
 - **Primary doc**: `GAME_BIBLE.md` is the single consolidated reference (architecture, data tables, iron laws, known issues, active workstream). Historical docs are archived in `_archive/` when they exist.
 - **Epoch tracking**: history in `_archive/docs/mahjong_saga_evolution.md` (read-only). Current branch: `feat/fix-flash-and-waves`.
-- **Active design**: 胡牌系统 spec lives in `HUPAI_DESIGN.md` — read before touching collection/reward systems. The 雀魂 system (MahjongHand.js) is WIP and not yet wired into s3_gameplay.html.
+- **Active design**: 胡牌系统 spec lives in `HUPAI_DESIGN.md` — read before touching collection/reward systems. The 雀魂 system (MahjongHand.js) is Active and fully wired into s3_gameplay.html.
 
 ### Common Patterns
 
