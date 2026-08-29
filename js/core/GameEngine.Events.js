@@ -203,7 +203,7 @@ Gp._triggerOverdrive = function() {
     /* Fallback: Systems 不可用时直接初始化标志 — 成就计数在 Systems 中处理 */
     if (this._overdriveActive) return;
     this._overdriveActive = true;
-    this._overdriveTimer = 3.0;
+    this._overdriveTimer = Balance.OVERDRIVE_DURATION;
     this.player.rage = 0;
 };
 

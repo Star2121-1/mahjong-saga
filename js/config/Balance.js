@@ -225,6 +225,7 @@ window.Balance = {
     BOSS_ABYSS_RING_COUNT: 6,         // 龙王深渊弹幕数量 (Enemy.js)
     BOSS_ABYSS_RING_ANGLE: 0.26,      // 龙王深渊弹幕角度偏移 (Enemy.js)
     BOSS_SLAM_RANGE: 120,           // 龙王 Slam 命中半径 (Enemy.js)
+    OVERDRIVE_DURATION: 3.0,         // 超驱动持续时间 (Events.js)
 
     /* ── Timeout/Durations ── */
     TIMEOUT_SHATTER_ANIM_MS: 500,     // 碎裂动画超时 (Enemy.js)
