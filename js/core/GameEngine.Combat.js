@@ -515,10 +515,10 @@ Gp._gameOver = async function() {
     this._pendingBossGamble = false;
     this._gambleAbyssBonus = false;
 
-    this.resultTime.textContent = this._formatTime(this._elapsed);
-    this.resultKills.textContent = this.kills;
-    this.resultWave.textContent = (this._waveCount || 0) + ' / ' + (this._totalWaves || 0);
-    this.gameOverOverlay.classList.add('active');
+    if (this.resultTime) this.resultTime.textContent = this._formatTime(this._elapsed);
+    if (this.resultKills) this.resultKills.textContent = this.kills;
+    if (this.resultWave) this.resultWave.textContent = (this._waveCount || 0) + ' /' + (this._totalWaves || 0);
+    if (this.gameOverOverlay) this.gameOverOverlay.classList.add('active');
 
     /* 死亡提示 */
     var deathTips = document.getElementById('death-tips');
