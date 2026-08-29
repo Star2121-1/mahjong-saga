@@ -324,8 +324,14 @@ class Player {
                 break;
             case 'evolved_armor':
                 this.evolvedArmor = true;
-                this.thornsRate = 1.0;
-                if (this.heroId === 'Mage') this._recalcThornsRate();
+                /* P2: 太阳神巨像提供50%固定反伤，Mage被动在此基础上叠加 */
+                var _baseThorns = 0.50;
+                if (this.heroId === 'Mage') {
+                    /* Mage被动在基础反伤之上增加 */
+                    this.thornsRate = Math.min(1.0, _baseThorns + (this.relicLevels.thorn_armor || 0) * 0.05);
+                } else {
+                    this.thornsRate = _baseThorns;
+                }
                 break;
             case 'evolved_speed':
                 this.evolvedSpeed = true;

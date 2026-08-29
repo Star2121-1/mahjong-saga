@@ -40,10 +40,17 @@ Gp._spawnEliteEnemy = function() {
     var enemy = new Enemy(id, x, y, level, false, enemyType);
     enemy._eng = this; /* Inject engine ref */
 
-    /* Elite boost */
-    enemy.maxHp = Math.floor(enemy.maxHp * 1.5);
+    /* P2: 应用关卡难度系数，与_spawnEnemy保持一致 */
+    var diff = 1;
+    try {
+        var cfg = window.levelConfig[this._currentLevelId];
+        if (cfg) diff = cfg.difficultyFactor || 1;
+    } catch(e) {}
+
+    /* Elite boost — 复合应用难度系数 */
+    enemy.maxHp = Math.floor(enemy.maxHp * diff * 1.5);
     enemy.hp = enemy.maxHp;
-    enemy.atk = Math.floor(enemy.atk * 1.3);
+    enemy.atk = Math.floor(enemy.atk * diff * 1.3);
     enemy.el && enemy.el.classList.add('elite-marker');
 
     /* R30-M-005: 精英怪也应用临时debuff */
