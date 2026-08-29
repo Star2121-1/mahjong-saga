@@ -600,8 +600,8 @@ class Player {
         }
         if (perks.token_relic_start) this._startsWithRelic = true;
         this.mapAffinityLevel = perks.token_map_affinity || 0;
-        /* Epoch 33: 应用圣物词条 */
-        this._applyRelicAffixes();
+        /* Epoch 33: 应用圣物词条 — restore时跳过，snapshot已含最终值 */
+        if (!this._skipRelicAffixes) this._applyRelicAffixes();
         /* 声望 */
         if (window.saveManager && window.saveManager.applyPrestigeBonus) {
             window.saveManager.applyPrestigeBonus(this);
