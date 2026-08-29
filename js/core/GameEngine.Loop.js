@@ -503,7 +503,7 @@ Gp._loop = function(timestamp) {
                 this._showVictory();
             } else {
                 /* Epoch 32: 波次间事件 */
-                if (this._waveCount >= 1 && Math.random() < 0.6) {
+                if (this._waveCount >= 1 && Math.random() < Balance.WAVE_INTER_EVENT_CHANCE) {
                     this._triggerInterWaveEvent();
                     this.running = false;
                     return;
