@@ -18,7 +18,7 @@ var Cs = window.CombatSystem;
 Sys.triggerOverdrive = function(engine) {
     if (engine._overdriveActive) return;
     engine._overdriveActive = true;
-    engine._overdriveTimer = 3.0;
+    engine._overdriveTimer = Balance.OVERDRIVE_DURATION;
     engine.player.rage = 0;
     if (engine._syncUI) engine._syncUI();
     engine._origCdFloor = engine.player.cdFloor;
