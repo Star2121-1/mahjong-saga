@@ -219,6 +219,7 @@ window.Balance = {
     MS_PER_SECOND: 1000,
     PI_OVER_3: Math.PI * 2 / 3,
     PI_OVER_4: Math.PI * 4 / 3,
+    BARRIER_ANGLE_HALF_WIDTH: Math.PI / 3,  // 屏障怪正面无敌扇区半角 60° (Enemy.js)
 
     /* ── HUPAI / MahjongHand.js + GameEngine.Spawn.js + Player.js ── */
     HUPAI_DROP_CHANCE: 0.06,

@@ -448,7 +448,7 @@ window.Enemy = class Enemy {
         /* 判断是否从正面（面对玩家的方向无敌） */
         var facingAngle = Math.atan2(-(player.y - this.y), -(player.x - this.x));
         var angleDiff = Math.abs(((facingAngle - this._barrierAngle) + Math.PI) % (Math.PI * 2) - Math.PI);
-        this._barrierFront = angleDiff < Math.PI / 3; // 正面 60° 扇区无敌
+        this._barrierFront = angleDiff < Balance.BARRIER_ANGLE_HALF_WIDTH; // 正面 60° 扇区无敌
 
         if (this.reachedPlayer) {
             this.attackTimer -= dt;
