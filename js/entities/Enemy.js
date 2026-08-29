@@ -962,7 +962,7 @@ window.Enemy = class Enemy {
             var _engRef_check = this._eng || window.gameEngine; if (this.type === 'Splitter' && !this._splitDone && _engRef_check && _engRef_check.enemies) {
                 this._splitDone = true;
                 var engRef = this._eng || window.gameEngine;
-                var childTypes = ['Normal', 'Normal', 'Tanker', 'Stalker'];
+                var childTypes = ['Normal', 'Normal', 'Normal', 'Tanker', 'Stalker', 'Archer', 'Barrier'];
                 for (var _sp = 0; _sp < 2; _sp++) {
                     var ct = childTypes[Math.floor(Math.random() * childTypes.length)];
                     var cid = ++engRef._enemyIdCounter;
@@ -979,7 +979,7 @@ window.Enemy = class Enemy {
                     cel.className = 'enemy';
                     cel.dataset.id = cid;
                     cel.dataset.enemyType = ct;
-                    var suitMap = { 'Normal': '萬', 'Tanker': '條', 'Stalker': '筒', 'Shaman': '風' };
+                    var suitMap = { 'Normal': '萬', 'Tanker': '條', 'Stalker': '筒', 'Archer': '索', 'Barrier': '白', 'Shaman': '風' };
                     cel.setAttribute('data-suit', suitMap[ct] || '萬');
                     cel.style.opacity = '1';
                     var chpBar = document.createElement('div');
