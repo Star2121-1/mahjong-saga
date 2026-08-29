@@ -313,7 +313,7 @@ class Player {
             case 'evolved_armor':
                 this.evolvedArmor = true;
                 this.thornsRate = 1.0;
-                if (this.heroId === 'Mage') this._recalcThornsRate();
+                if (this.heroId === 'Mage' && !this.evolvedArmor) this._recalcThornsRate();
                 break;
             case 'evolved_speed':
                 this.evolvedSpeed = true;
