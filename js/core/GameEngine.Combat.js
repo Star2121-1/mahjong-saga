@@ -173,6 +173,8 @@ Gp._enterAbyss = function() {
     this._bossLordWave = false;
     this._bossLordSpawned = false;
     this._gambleActive = false;
+    this._discardMode = false;
+    this._huLock = false;
     this._gambleType = null;
     this._gambleStaked = 0;
     this._pendingBossGamble = false;
@@ -506,6 +508,8 @@ Gp._gameOver = async function() {
         this._resolveGamble(false);
     }
     this._gambleActive = false;
+    this._discardMode = false;
+    this._huLock = false;
     this._gambleType = null;
     this._gambleStaked = 0;
     this._pendingBossGamble = false;

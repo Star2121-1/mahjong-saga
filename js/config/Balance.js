@@ -145,6 +145,7 @@ window.Balance = {
     BARRIER_HP_MULT: 1.5,            // 屏障怪HP倍率 (Enemy.js)
     BARRIER_ATK_MULT: 0.7,           // 屏障怪ATK倍率 (Enemy.js)
     BARRIER_SPEED_MULT: 0.8,         // 屏障怪速度倍率 (Enemy.js)
+    BARRIER_FRONT_DAMAGE_MULT: 0.0,  // 屏障正面伤害倍率 (Enemy.js)
     BOMBER_HP_MULT: 0.6,             // 自爆怪HP倍率 (Enemy.js)
     BOMBER_ATK_MULT: 2,              // 自爆怪ATK倍率 (Enemy.js)
     BOMBER_SPEED_MULT: 1.8,          // 自爆怪速度倍率 (Enemy.js)

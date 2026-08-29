@@ -815,6 +815,20 @@ window.Enemy = class Enemy {
     takeDamage(dmg, source, sourceX, sourceY, _fctTypeOverride) {
         if (!this.alive) return false;
         var actualDmg = dmg;
+        /* Barrier 正面无敌: 检查攻击方向 */
+        if (this.type === 'Barrier' && this._barrierFront !== undefined) {
+            var toPlayerX = player.x - this.x;
+            var toPlayerY = player.y - this.y;
+            var toPlayerLen = Math.sqrt(toPlayerX * toPlayerX + toPlayerY * toPlayerY);
+            if (toPlayerLen > 0.01) {
+                toPlayerX /= toPlayerLen;
+                toPlayerY /= toPlayerLen;
+            } else {
+                toPlayerX = 1; toPlayerY = 0;
+            }
+            var dot = toPlayerX * Math.cos(this._barrierAngle) + toPlayerY * Math.sin(this._barrierAngle);
+            if (dot > 0) actualDmg = Math.floor(actualDmg * Balance.BARRIER_FRONT_DAMAGE_MULT);
+        }
         var isAssassinCrit = false;
         if (this.frozen) {
             actualDmg = Math.floor(dmg * 1.25);
@@ -913,6 +927,7 @@ window.Enemy = class Enemy {
                     var cid = ++engRef._enemyIdCounter;
                     var offsetX = (_sp === 0 ? -1 : 1) * 20;
                     var child = new window.Enemy(cid, this.x + offsetX, this.y + offsetX, this.level, false, ct);
+                    child._clampPosition(engRef);
                     child.maxHp = Math.floor(child.maxHp * 0.5);
                     child.hp = child.maxHp;
                     child.atk = Math.floor(child.atk * 0.5);
