@@ -57,6 +57,8 @@ Gp._triggerInterWaveEvent = function() {
         /* P2: 死亡时防止超时触发事件 */
         if (self._interWaveEvent && !self.gameOver) {
             self._spawnCausalityText('⏱ 恩赐已自动接受');
+            /* P0: 清除事件引用防止双重应用竞态 */
+            self._interWaveEvent = null;
             evt.apply.call(self);
             self._continueAfterInterWave();
         }
@@ -139,6 +141,15 @@ Gp._clearMutatorEffects = function() {
     if (this._activeMutator === 'bloodmoon') {
         for (var i = 0; i < this.enemies.length; i++) {
             var e = this.enemies[i];
+            if (e._bloodmoonStored) {
+                e.atk = e._bloodmoonOrigAtk;
+                e.maxHp = e._bloodmoonOrigMaxHp;
+                e.hp = e._bloodmoonOrigHp;
+                e._bloodmoonStored = false;
+                e._bloodmoonOrigAtk = undefined;
+                e._bloodmoonOrigMaxHp = undefined;
+                e._bloodmoonOrigHp = undefined;
+            }
             var el = this._enemyElements.get(e.id);
             if (el) el.style.transform = '';
         }
@@ -155,10 +166,11 @@ Gp._clearMutatorEffects = function() {
     }
     if (this._activeMutator === 'frailty') {
         if (this._frailtyOrigPlayerAtk != null) this.player.atk = this._frailtyOrigPlayerAtk;
+        this.player._frailtyDebuff = false; /* P0: 清除脆弱debuff状态 */
         for (var i = 0; i < this.enemies.length; i++) {
             var e = this.enemies[i];
             if (e._frailtyStored) {
-                e.atk = e._frailtyOrigAtk || e.baseAtk;
+                e.atk = e._frailtyOrigAtk;
                 e._frailtyStored = false;
                 e._frailtyOrigAtk = undefined;
             }
