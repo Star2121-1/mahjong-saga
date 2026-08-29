@@ -932,7 +932,7 @@ window.Enemy = class Enemy {
                 /* 生成碎裂粒子 */
                 var engRef2 = this._eng || window.gameEngine;
                 if (engRef2 && engRef2._worldLayer) {
-                    for (var _sp2 = 0; _sp2 < 4; _sp2++) {
+                    for (var _sp2 = 0; _sp2 < 7; _sp2++) {
                         var shard = document.createElement('div');
                         shard.className = 'enemy-shard';
                         shard.style.left = this.x + 'px';
@@ -940,7 +940,7 @@ window.Enemy = class Enemy {
                         shard.style.setProperty('--sx', ((Math.random() - 0.5) * 60) + 'px');
                         shard.style.setProperty('--sy', ((Math.random() - 0.5) * 60) + 'px');
                         engRef2._worldLayer.appendChild(shard);
-                        setTimeout(function(el) { if (el && el.parentNode) el.remove(); }, 500, shard);
+                        setTimeout(function(el) { if (el && el.parentNode) el.remove(); }, 650, shard);
                     }
                 }
             }

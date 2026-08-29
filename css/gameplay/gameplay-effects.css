@@ -94,13 +94,16 @@
 .fct-normal {
     font-size: clamp(22px, 2.5vw, 45px);
     color: #ffffff;
-    text-shadow: 0 0 6px rgba(0,0,0,0.8), 1px 1px 0 #000, -1px -1px 0 #000;
+    text-shadow:
+        0 0 6px rgba(0,0,0,0.8),
+        1px 0 0 #000, -1px 0 0 #000,
+        0 1px 0 #000, 0 -1px 0 #000;
     animation: fctFloatUp 0.5s ease-out forwards;
 }
 .fct-crit {
     font-size: clamp(28px, 3.2vw, 52px);
     color: #ff4444;
-    text-shadow: 0 0 10px rgba(255,68,68,0.8), 0 0 20px rgba(255,0,0,0.4), 2px 2px 0 #000, -1px -1px 0 #000;
+    text-shadow: 0 0 10px rgba(255,68,68,0.8), 0 0 20px rgba(255,0,0,0.4), 1px 0 0 #000, -1px 0 0 #000, 0 1px 0 #000, 0 -1px 0 #000;
     animation: fctCritPop 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 .fct-heal {
@@ -298,4 +301,4 @@
 @media (max-height: 480px) {
     .damage-float { font-size: 10px; }
 }
-.fct-overdrive { color: #ff8c00; text-shadow: 0 0 10px rgba(255,140,0,0.8); animation: fctFloatUp 0.5s ease-out forwards; } .fct-freeze { color: #00bfff; text-shadow: 0 0 10px rgba(0,191,255,0.8); animation: fctFloatUp 0.5s ease-out forwards; }
+.fct-overdrive { color: #ff8c00; text-shadow: 0 0 10px rgba(255,140,0,0.8), 1px 0 0 #000, -1px 0 0 #000, 0 1px 0 #000, 0 -1px 0 #000; animation: fctFloatUp 0.5s ease-out forwards; } .fct-freeze { color: #00bfff; text-shadow: 0 0 10px rgba(0,191,255,0.8), 1px 0 0 #000, -1px 0 0 #000, 0 1px 0 #000, 0 -1px 0 #000; animation: fctFloatUp 0.5s ease-out forwards; }

@@ -258,16 +258,18 @@
 /* 敌人碎裂粒子 */
 .enemy-shard {
     position: absolute;
-    width: 6px; height: 6px;
-    background: #f8f4e8;
-    border: 1px solid #c8c0a8;
+    width: 7px; height: 7px;
+    background: radial-gradient(circle at 35% 35%, #ffe082, #ffd54f 50%, #c8a415 100%);
+    border: 1px solid #b8960b;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.9), 0 0 16px rgba(255, 193, 7, 0.5);
     pointer-events: none;
     z-index: 6;
-    animation: shardFly 0.4s ease-out forwards;
+    animation: shardFly 0.6s ease-out forwards;
 }
 @keyframes shardFly {
     0% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
-    100% { opacity: 0; transform: translate(var(--sx, 20px), var(--sy, -30px)) rotate(var(--rot, 180deg)) scale(0.3); }
+    60% { opacity: 0.8; }
+    100% { opacity: 0; transform: translate(var(--sx, 20px), var(--sy, -30px)) rotate(var(--rot, 360deg)) scale(0.2); }
 }
 
 /* Boss Lord 三阶段牌面颜色渐变 */
@@ -514,10 +516,23 @@
 .enemy.flash-hit {
     animation: flashHit 0.18s;
 }
-
+/* 白色叠加层：确保浅色牌面也能感知到闪白 */
+.enemy.flash-hit::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(255, 255, 255, 0.75);
+    border-radius: inherit;
+    z-index: 2;
+    pointer-events: none;
+    animation: flashOverlay 0.18s ease-out forwards;
+}
 @keyframes flashHit {
     0% { filter: brightness(2.5) saturate(0); }
     100% { filter: brightness(1); }
+}
+@keyframes flashOverlay {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
 }
 
 /* Boss 暴怒 — JS 使用 .boss-enraged (不带 .enemy 前缀) */
