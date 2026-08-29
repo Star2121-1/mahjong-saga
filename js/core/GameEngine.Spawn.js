@@ -28,6 +28,10 @@ if (this._activeMutator === 'bloodmoon' || _vaultBlood) count *= 2;
 /* ── Epoch 32: 精英怪生成 ── */
 
 Gp._spawnEliteEnemy = function() {
+    /* P1-2: 检查波次上限，防止怪物潮溢出 */
+    var cap = this._getWaveEnemyMax ? this._getWaveEnemyMax() : 999;
+    if (this.currentWaveSpawnedCount >= cap) return;
+
     var level = Math.floor(this._elapsed / 15) + 1;
     var angle = Math.random() * Math.PI * 2;
     var dist = 200 + Math.random() * 50;

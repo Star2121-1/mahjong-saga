@@ -528,7 +528,7 @@ window.Enemy = class Enemy {
                     /* P1: 使用平方距离比较避免 sqrt */
                     var explodeR2 = this._explodeRadius * this._explodeRadius;
                     if (exdx * exdx + exdy * exdy <= explodeR2) {
-                        e.takeDamage(Math.floor(this.atk * 0.5));
+                        e.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * 0.5), engine), this, this.x, this.y);
                     }
                 }
                 player.takeDamage(this._applyMapAffinityDmg(this.atk, engine), this);
@@ -858,7 +858,7 @@ window.Enemy = class Enemy {
                 toPlayerX = 1; toPlayerY = 0;
             }
             var dot = toPlayerX * Math.cos(this._barrierAngle) + toPlayerY * Math.sin(this._barrierAngle);
-            if (dot > 1e-6) actualDmg = Math.floor(actualDmg * Balance.BARRIER_FRONT_DAMAGE_MULT);
+            if (dot > Balance.BARRIER_FRONT_COS_ANGLE) actualDmg = Math.floor(actualDmg * Balance.BARRIER_FRONT_DAMAGE_MULT);
         }
         var isAssassinCrit = false;
         if (this.frozen) {
@@ -909,7 +909,6 @@ window.Enemy = class Enemy {
         /* K-029: 万子连击 -- 15% 几率造成额外 50% 伤害，有全局冷却防高频触发 */
         var _pg3 = (this._eng || window.gameEngine) && (this._eng || window.gameEngine).player;
         if (source === 'player' && _pg3 && _pg3.heroId === 'Knight') {
-            this._comboCooldown -= dt;
             if (this._comboCooldown <= 0 && Math.random() < Balance.KNIGHT_COMBO_CHANCE) {
                 actualDmg = Math.floor(actualDmg * 1.5);
                 this._comboCooldown = Balance.KNIGHT_COMBO_COOLDOWN;

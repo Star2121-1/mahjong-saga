@@ -7,7 +7,7 @@
    ══════════════════════════════════════════════ */
 
 Gp._interWaveEvents = [
-    { id: 'coin_rush', name: '金币雨', icon: '🪙', desc: '场上立即掉落 20 金币！', weight: 40, apply: function() { this.player.addGold(20); this._spawnCoinBurst(20); } },
+    { id: 'coin_rush', name: '金币雨', icon: '🪙', desc: '场上立即掉落 20 金币！', weight: 40, apply: function() { this._spawnCoinBurst(20); } },
     { id: 'meditation', name: '冥想泉源', icon: '🧘', desc: '恢复 30% HP，下波怪物 -20% 攻击力', weight: 25, apply: function() { this.player.hp = Math.min(this.player.maxHp, this.player.hp + Math.floor(this.player.maxHp * Balance.WAVE_MEDITATION_HP_RESTORE)); this._tempEnemyAtkDebuff = Balance.WAVE_MEDITATION_ATK_DEBUFF; } },
     { id: 'monster_surge', name: '怪物潮', icon: '👹', desc: '额外生成 5 个精英怪！但掉落翻倍', weight: 20, apply: function() { this._extraEliteCount = 5; this._monsterSurgeDoubleDrops = true; } },
     { id: 'time_dilation', name: '时光缓流', icon: '⏳', desc: '下波怪物移速 -30%', weight: 20, apply: function() { this._tempEnemySpeedDebuff = Balance.WAVE_TIME_DILATION_SPEED_DEBUFF; } },
@@ -267,6 +267,8 @@ Gp._showBossGamble = function() {
             self._gambleType = null;
             self._gambleStaked = 0;
             panel.remove();
+            /* P0-2: 超时路径必须生成领主，与手动选择路径一致 */
+            self._spawnBossLordFromGamble();
             self._unfreezeClock();
             self._beginLoop();
         }
