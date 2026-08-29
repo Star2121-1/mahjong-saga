@@ -527,8 +527,8 @@ Gp._triggerHonorMeld = function (meld) {
                     var e1 = this.enemies[i];
                     if (!e1.alive) continue;
                     var dx = e1.x - p.x, dy = e1.y - p.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
-                    e1.x += (dx / d) * B.HUPAI_ZI_EAST_KNOCKBACK || 250;
-                    e1.y += (dy / d) * B.HUPAI_ZI_EAST_KNOCKBACK || 250;
+                    e1.x += (dx / d) * B.HUPAI_ZI_EAST_KNOCKBACK;
+                    e1.y += (dy / d) * B.HUPAI_ZI_EAST_KNOCKBACK;
                     e1.frozen = true; e1.frozenTimer = B.FROZEN_TIMER_ZI_EAST;
                 }
                 break;
