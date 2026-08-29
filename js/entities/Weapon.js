@@ -139,6 +139,7 @@ window.OrbitShield = class extends window.Weapon {
             this.orbitTickTimers[i] -= dt;
             if (this.orbitTickTimers[i] > 0) continue;
             this.orbitTickTimers[i] = this.cd;
+            this.orbitHitSets[i].clear(); /* R30-H-014: 每tick清空去重集合，防止run中永久跳过敌人 */
             for (var j = 0; j < enemies.length; j++) {
                 var e = enemies[j];
                 if (!e.alive) continue;
