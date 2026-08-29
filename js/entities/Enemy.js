@@ -531,7 +531,7 @@ window.Enemy = class Enemy {
                         e.takeDamage(Math.floor(this.atk * 0.5));
                     }
                 }
-                player.takeDamage(this.atk, this);
+                player.takeDamage(this._applyMapAffinityDmg(this.atk, engine), this);
             }
             if (this.el && this.el.parentNode) this.el.remove();
         }

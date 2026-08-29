@@ -438,6 +438,7 @@ class Player {
             evolvedArmor: this.evolvedArmor,
             evolvedSpeed: this.evolvedSpeed,
             evolvedVamp: this.evolvedVamp,
+            thornsLifesteal: !!this.thornsLifesteal,
             invulnTimer: this.invulnTimer,
             hitFlashTimer: this.hitFlashTimer,
             currentLvl: this.currentLvl,
@@ -481,6 +482,7 @@ class Player {
         this.evolvedArmor = !!data.evolvedArmor;
         this.evolvedSpeed = !!data.evolvedSpeed;
         this.evolvedVamp = !!data.evolvedVamp;
+        this.thornsLifesteal = !!data.thornsLifesteal;
         this.invulnTimer = data.invulnTimer || 0;
         this.hitFlashTimer = data.hitFlashTimer || 0;
         this.currentLvl = data.currentLvl || 1;
