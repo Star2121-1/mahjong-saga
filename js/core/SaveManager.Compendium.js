@@ -44,11 +44,14 @@
         total += enemyIds.length; total += equipIds.length;
         var mutatorIds = ['gravity','bloodmoon','frenzy','frailty','wither'];
         total += mutatorIds.length;
+        // hupai compendium: huTypes recorded via game enginespawn (see Spawn.js:625)
+        total += 8; /* 胡牌类型数: 平糊/清一色/碰碰/七对/全带幺/混一色/断幺/对对胡 */
         seen += (c.relics || []).length;
         seen += (c.weapons || []).length;
         seen += (c.enemies || []).length;
         seen += (c.equips || []).length;
         seen += (c.mutations || []).length;
+        seen += (c.hupai || []).length;
         return {
             relics: (c.relics || []).length, relicsTotal: relicIds.length,
             weapons: (c.weapons || []).length, weaponsTotal: weaponIds.length,
