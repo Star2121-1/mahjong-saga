@@ -75,6 +75,7 @@ Sys.endOverdrive = function(engine) {
     engine._overdriveTimer = 0;
 
     if (engine.player) engine.player.cdFloor = engine._origCdFloor || 0.2;
+    engine._origCdFloor = null; /* P0: 清除跨局残留 */
 
     /* P2: 恢复武器原始伤害（triggerOverdrive 曾将其×2） */
     for (var _wi = 0; _wi < (engine._activeWeapons || []).length; _wi++) {
@@ -222,7 +223,7 @@ Sys.clearMutatorEffects = function(engine) {
         for (var i = 0; i < engine.enemies.length; i++) {
             var e = engine.enemies[i];
             if (e._frailtyStored) {
-                e.atk = e._frailtyOrigAtk || e.baseAtk;
+                e.atk = e._frailtyOrigAtk;
                 e._frailtyStored = false;
                 e._frailtyOrigAtk = undefined;
             }
@@ -273,6 +274,8 @@ Sys.updateResonanceAuras = function(engine, dt) {
             flameEl.style.width = (auraR * 2) + 'px';
             flameEl.style.height = (auraR * 2) + 'px';
             flameEl.style.visibility = 'visible';
+            /* P1: 清除前一个timer防止泄漏 */
+            clearTimeout(engine._flameHideTimer);
             var _flameHideTimer = setTimeout(function() { if (flameEl) flameEl.style.visibility = 'hidden'; }, 400);
             engine._flameHideTimer = _flameHideTimer;
         }
@@ -322,6 +325,8 @@ Sys.updateResonanceAuras = function(engine, dt) {
             iceEl.style.width = (iceR * 2) + 'px';
             iceEl.style.height = (iceR * 2) + 'px';
             iceEl.style.visibility = 'visible';
+            /* P1: 清除前一个timer防止泄漏 */
+            clearTimeout(engine._iceHideTimer);
             var _iceHideTimer = setTimeout(function() { if (iceEl) iceEl.style.visibility = 'hidden'; }, 500);
             engine._iceHideTimer = _iceHideTimer;
         }

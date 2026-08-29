@@ -3,6 +3,10 @@
     var Gp = window.GameEngine.prototype;
 
 Gp.restart = function() {
+    /* P1-1: 清除残留定时器，防止导航后回调在旧引擎上执行 */
+    if (this._gambleTimeout) { clearTimeout(this._gambleTimeout); this._gambleTimeout = null; }
+    if (this._interWaveTimeout) { clearTimeout(this._interWaveTimeout); this._interWaveTimeout = null; }
+    if (this._qqueenShieldTimer) { clearTimeout(this._qqueenShieldTimer); this._qqueenShieldTimer = null; }
     for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
     this._enemyElements.clear();
     this.enemies = [];

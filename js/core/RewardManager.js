@@ -666,6 +666,8 @@ class RewardManager {
         if (titleEl) titleEl.textContent = originalTitle;
         window.audioManager && window.audioManager.play('reward');
         eng._syncUI();
+        /* P1-3: 献祭后检查秘密发现状态 */
+        if (eng._checkSecrets) eng._checkSecrets();
         if (isFree) eng._resumeAfterLevelUp();
         else eng._resumeAfterReward();
     }
