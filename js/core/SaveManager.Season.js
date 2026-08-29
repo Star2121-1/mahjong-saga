@@ -283,4 +283,14 @@
         return !!meta.eliteMode;
     };
 
+    /* ── Epoch 33: 声望加成应用 ── */
+    SaveManager.prototype.applyPrestigeBonus = function(player) {
+        var meta = this._metaCache || {};
+        var level = meta.prestigeLevel || 0;
+        if (level <= 0) return;
+        /* 每级声望: ATK +0.5, HP +2 */
+        player.atkBonus = (player.atkBonus || 0) + level * 0.5;
+        player.hpBonus = (player.hpBonus || 0) + level * 2;
+    };
+
 })();

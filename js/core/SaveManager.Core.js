@@ -123,7 +123,7 @@
             loginStreak: 0, lastLoginDate: '', dailyRewardsClaimed: {},
             makeupTokens: 0, runHistory: [],
             /* Epoch 32 */
-            compendium: { relics: [], weapons: [], enemies: [], equips: [], mutations: [] },
+            compendium: { relics: [], weapons: [], enemies: [], equips: [], mutations: [], hupai: [] },
             discoveredSecrets: [],
             /* Epoch 36 */
             weeklyVault: { active: false, challenge: null, bet: 0, completed: false, reward: null },
@@ -249,7 +249,7 @@
         if (!data.dailyRewardsClaimed) data.dailyRewardsClaimed = {};
         if (data.makeupTokens == null) data.makeupTokens = 0;
         if (!data.runHistory) data.runHistory = [];
-        if (!data.compendium) data.compendium = { relics: [], weapons: [], enemies: [], equips: [], mutations: [] };
+        if (!data.compendium) data.compendium = { relics: [], weapons: [], enemies: [], equips: [], mutations: [], hupai: [] };
         if (!data.weeklyVault) data.weeklyVault = { active: false, challenge: null, bet: 0, completed: false, reward: null };
         if (!data.discoveredSecrets) data.discoveredSecrets = [];
         /* Epoch 37: 赛季/声望/每日挑战迁移 */

@@ -109,9 +109,10 @@ Gp._showGuideStep = function(stepIndex) {
     /* Epoch 43: 交互式步骤 — 自动推进 */
     if (step.interactive && step.checkFn) {
         var self = this;
-        var checkTimer = setInterval(function() {
+        this._guideCheckTimer = setInterval(function() {
             if (step.checkFn.call(self)) {
-                clearInterval(checkTimer);
+                clearInterval(this._guideCheckTimer);
+                this._guideCheckTimer = null;
                 /* 自动前进到下一步 */
                 if (stepIndex < steps.length - 1) {
                     self._currentGuideStep = stepIndex + 1;

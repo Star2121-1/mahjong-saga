@@ -333,9 +333,9 @@ Gp._settleRun = async function(tokens) {
     }
     meta.bossCores = (meta.bossCores || 0) + bonusCores;
 
-    /* ── Epoch 15: 精英模式核心加成 ── */
+    /* ── Epoch 15: 精英模式核心加成 (Balance.ELITE_CORE_MULT) ── */
     if (this._eliteModeActive) {
-        meta.bossCores = Math.floor(meta.bossCores * 1.5);
+        meta.bossCores = Math.floor(meta.bossCores * Balance.ELITE_CORE_MULT);
     }
 
     /* ── 因果账本落盘 ── */

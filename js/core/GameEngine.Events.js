@@ -383,7 +383,7 @@ Gp._spawnBossLordFromGamble = function() {
     lord.hp = lord.maxHp;
     lord.atk = Math.floor(lord.atk * diff); */
 
-    /* H-002: 精英模式 — 领主获得 50% 属性加成 */
+    /* H-002: 精英模式 — 领主获得属性加成 (Balance.ELITE_HP_MULT / ELITE_ATK_MULT) */
     if (this._eliteModeActive && this._eliteMultiplier) {
         lord.maxHp = Math.floor(lord.maxHp * this._eliteMultiplier);
         lord.hp = lord.maxHp;

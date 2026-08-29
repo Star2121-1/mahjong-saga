@@ -166,6 +166,10 @@ window.Balance = {
     BOSS_P3_RADIATION_LIFE: 3,      // P3辐射弹幕生命(s) (Enemy.js)
     BOSS_PHASE3_SUMMON_STALKER: 4,
     BOSS_PHASE3_SUMMON_TANKER: 2,
+    BOSS_PHASE3_SUMMON_MAX: 10,          // P3单次召唤上限 (Enemy.js)
+    ELITE_HP_MULT: 1.5,                  // 精英模式HP倍率 (GameSpawner.js / Events.js)
+    ELITE_ATK_MULT: 1.5,                 // 精英模式ATK倍率 (GameSpawner.js / Events.js)
+    ELITE_CORE_MULT: 1.5,                // 精英模式核心收益倍率 (Boot.js)
     BOSS_PROJECTILE_SPEED_NORMAL: 100,
     BOSS_PROJECTILE_SPEED_BLOOD: 120,
 

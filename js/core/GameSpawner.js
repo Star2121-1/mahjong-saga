@@ -142,7 +142,7 @@ Ss._spawnEnemy = function(engine, isBoss) {
         enemy.atk = Math.floor(enemy.atk * diff);
     }
 
-    /* H-002: 精英模式 — 敌人获得 50% 属性加成 */
+    /* H-002: 精英模式 — 敌人获得属性加成 (Balance.ELITE_HP_MULT / ELITE_ATK_MULT) */
     if (engine._eliteModeActive && engine._eliteMultiplier) {
         enemy.maxHp = Math.floor(enemy.maxHp * engine._eliteMultiplier);
         enemy.hp = enemy.maxHp;

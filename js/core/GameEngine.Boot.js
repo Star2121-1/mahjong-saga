@@ -443,8 +443,8 @@ Gp._startNewRun = function(heroId, levelId) {
     /* ── Epoch 15: 精英模式全局加成 ── */
     if (window.saveManager && window.saveManager.isEliteMode && window.saveManager.isEliteMode()) {
         this._eliteModeActive = true;
-        this._eliteMultiplier = 1.5;
-        this._spawnCausalityText('⚠️ 精英模式——所有敌人 +50% 属性，核心收益×1.5');
+        this._eliteMultiplier = Balance.ELITE_HP_MULT;
+        this._spawnCausalityText('⚠️ 精英模式——所有敌人 +' + Math.floor((Balance.ELITE_HP_MULT - 1) * 100) + '% 属性，核心收益×' + Balance.ELITE_CORE_MULT);
     }
 
     /* ── world-layer 尺寸匹配地图，防止非全屏时 overflow:hidden 剪裁 ── */

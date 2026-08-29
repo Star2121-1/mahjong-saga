@@ -129,6 +129,7 @@ window.Enemy = class Enemy {
             this._bossWarningEl = null;
             this._bossEnraged = false;
             this._bossSummonTimer = 4;
+            this._summonCount = 0; /* Boss P3召唤计数，防止无限召唤 */
             this._bossContactTimer = 0;
             this._comboCooldown = 0; /* K-030: 万子连击冷却 */
             /* R29-H-006: Boss_Lord 也需要应用 Abyss 倍增 */
@@ -155,6 +156,7 @@ window.Enemy = class Enemy {
         this._freezeHitDecayed = false;
         this._knockbackVelocity = Math.max(0, this._knockbackVelocity - dt * 200);
         this.flashTimer = Math.max(0, this.flashTimer - dt);
+        this._comboCooldown = Math.max(0, (this._comboCooldown || 0) - dt); /* K-030: 冷却倒计时 */
 
         if (this.frozen) {
             this.frozenTimer -= dt;
@@ -734,15 +736,20 @@ window.Enemy = class Enemy {
             }
             this._bossSummonTimer -= dt;
             if (this._bossSummonTimer <= 0) {
-                this._bossSummonTimer = 4 * (this._abyssTier >= 3 ? 0.85 : 1);
-                if (engine && typeof engine._spawnEnemyType === 'function') {
-                    for (var si = 0; si < 4; si++) engine._spawnEnemyType('Stalker');
-                    for (var ti = 0; ti < 2; ti++) engine._spawnEnemyType('Tanker');
+                this._bossSummonTimer = Balance.BOSS_PHASE3_SUMMON_INTERVAL * (this._abyssTier >= 3 ? 0.85 : 1);
+                var maxSummon = Balance.BOSS_PHASE3_SUMMON_MAX;
+                if (engine && typeof engine._spawnEnemyType === 'function' && this._summonCount < maxSummon) {
+                    var stalkerLeft = Math.max(0, 4 - this._summonCount);
+                    for (var si = 0; si < stalkerLeft; si++) engine._spawnEnemyType('Stalker');
+                    var tankLeft = Math.max(0, 2 - this._summonCount - stalkerLeft);
+                    for (var ti = 0; ti < tankLeft; ti++) engine._spawnEnemyType('Tanker');
                     /* B4: 灭世巨神混编召唤 */
                     if (this._abyssTier >= Balance.BOSS_ABYSS_TIER_3) {
-                        for (var ai = 0; ai < 2; ai++) engine._spawnEnemyType('Archer');
-                        engine._spawnEnemyType('Shaman');
+                        var abyssLeft = Math.max(0, maxSummon - this._summonCount - stalkerLeft - tankLeft);
+                        for (var ai = 0; ai < abyssLeft; ai++) engine._spawnEnemyType('Archer');
+                        if (this._summonCount < maxSummon - 1) engine._spawnEnemyType('Shaman');
                     }
+                    this._summonCount += stalkerLeft + tankLeft + (this._abyssTier >= Balance.BOSS_ABYSS_TIER_3 ? Math.min(2, maxSummon - this._summonCount - stalkerLeft - tankLeft) : 0);
                 }
             }
             /* P3: 全屏辐射弹幕 — 每隔1.5秒向8方向发射 */
