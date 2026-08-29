@@ -78,7 +78,7 @@ window.TrackingBlade = class extends window.Weapon {
             player.x, player.y,
             Math.cos(theta) * speed,
             Math.sin(theta) * speed,
-            4, dmg, 3, 2.0
+            4, dmg, 3, Balance.TRACKING_BLADE_PROJ_LIFE
         );
         var el = document.createElement('div');
         el.className = 'projectile tracking-blade';
@@ -97,7 +97,7 @@ window.OrbitShield = class extends window.Weapon {
         super('OrbitShield', '\u73af\u5f62\u62a4\u4f53', level || 1, 0.3, 0.5);
         this.orbitRadius = 50;
         this.orbRadius = 8; /* M-015: 碰撞半径配置常量，与视觉 16x16 匹配 */
-        this.rotationSpeed = 2.0;
+        this.rotationSpeed = Balance.ORBIT_ROTATION_SPEED;
         this.orbAngles = [0, Math.PI * 2 / 3, Math.PI * 4 / 3];
         this.orbitEls = [];
         this.orbitTickTimers = [0, this.cd * 0.33, this.cd * 0.66]; /* R30-H-013: 错开3 orb冷却，轮流攻击 */
