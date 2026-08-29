@@ -68,7 +68,7 @@ window.Enemy = class Enemy {
             this._stalkerCooldown = 0;
             this.hue = 280;
         } else if (this.type === 'Shaman') {
-            this._totemTimer = 5;
+            this._totemTimer = Balance.TOTEM_SPAWN_INTERVAL;
             this.hue = 160;
         } else if (this.type === 'Barrier') {
             /* 屏障怪 — 正面无敌，需要绕后 */
@@ -326,7 +326,7 @@ window.Enemy = class Enemy {
 
         this._totemTimer -= dt;
         if (this._totemTimer <= 0) {
-            this._totemTimer = 5;
+            this._totemTimer = Balance.TOTEM_SPAWN_INTERVAL;
             if (engine) {
                 /* B3: 图腾二相化 — 风灵(增益)/北冥(减速领域)交替 */
                 this._totemKind = (this._totemKind === 'frost') ? 'wind' : 'frost';
