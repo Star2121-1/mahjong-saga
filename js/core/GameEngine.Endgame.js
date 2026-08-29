@@ -12,8 +12,16 @@ Gp._onClick = function(e) {
     if (!enemy || !enemy.alive) return;
 
     var bfRect = this.battlefield.getBoundingClientRect();
-    var vx = e.clientX - bfRect.left;
-    var vy = e.clientY - bfRect.top;
+    /* P1: 补偿 responsive.js transform:scale()，与 Boot.js 坐标变换一致 */
+    var containerEl = this.container || document.getElementById('game-container');
+    var containerRect = containerEl ? containerEl.getBoundingClientRect() : null;
+    var scaleX = 1, scaleY = 1;
+    if (containerRect && containerRect.width > 0) {
+        scaleX = 1920 / containerRect.width;
+        scaleY = 1080 / containerRect.height;
+    }
+    var vx = (e.clientX - bfRect.left) * scaleX;
+    var vy = (e.clientY - bfRect.top) * scaleY;
     var wx = vx + this.cameraX;
     var wy = vy + this.cameraY;
 

@@ -56,6 +56,12 @@
             if (bak) {
                 var data = JSON.parse(bak);
                 if (data) {
+                    /* P0: 验证备份checksum，防止回滚到损坏数据 */
+                    var expected = this._computeChecksum(data);
+                    if (data._checksum && data._checksum !== expected) {
+                        console.warn('SaveManager backup checksum mismatch for', fileName, 'skipping rollback');
+                        return null;
+                    }
                     /* 恢复备份到主文件 */
                     localStorage.setItem('cr_' + fileName, JSON.stringify(data));
                     if (window.toastSystem) window.toastSystem.success('已从备份恢复存档 "' + fileName + '"');
@@ -305,8 +311,10 @@
             if (!ok) {
                 console.warn('SaveManager _saveMetaToStorage via _writeJSON failed');
             }
+            return ok; /* P1: 返回结果以便caller可await检测失败 */
         } catch (e) {
             console.warn('SaveManager _saveMetaToStorage error:', e);
+            return false;
         }
     };
 

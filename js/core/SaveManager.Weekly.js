@@ -21,7 +21,7 @@
     SaveManager.prototype._rotateChallenges = async function(meta) {
         var now = Date.now();
         var last = meta.challenges && meta.challenges.lastRotation ? meta.challenges.lastRotation : 0;
-        /* P0: 按周粒度旋转，而非6小时窗口 */
+        /* P0: 按周粒度旋转，统一使用 Unix epoch 基准与 getWeeklyChallenges 一致 */
         var nowWeek = 'W' + Math.floor(now / (7 * 24 * 60 * 60 * 1000));
         if (meta.challenges && meta.challenges.weekKey === nowWeek) return false;
         var rng = Math.floor(now / 1000) % SaveManager.CHALLENGE_POOL.length;
@@ -326,7 +326,7 @@
         }
         var picked = shuffled.slice(0, 4);
         for (var i = 0; i < picked.length; i++) { picked[i].progress = 0; picked[i].completed = false; }
-        meta.currentWeek = weekKey || ('W' + Math.floor((Date.now() - Date.UTC(2025, 0, 1)) / (7 * 24 * 60 * 60 * 1000)));
+        meta.currentWeek = weekKey || ('W' + Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000))); /* P0: 统一使用Unix epoch基准 */
         meta.weeklyChallenges = { week: meta.currentWeek, challenges: picked };
         this.saveMeta(meta);
         return picked;

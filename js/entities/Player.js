@@ -283,7 +283,8 @@ class Player {
 
     addRelic(id) {
         this.relicLevels[id] = (this.relicLevels[id] || 0) + 1;
-        const lv = this.relicLevels[id];
+        const lv = Math.min(5, this.relicLevels[id]); /* P1: 圣物等级上限5级，防止无限叠加 */
+        this.relicLevels[id] = lv;
 
         /* Epoch 33: 圣物随机词条 — 3级和5级时可能获得 */
         if (lv === 3 || lv === 5) {
@@ -531,7 +532,9 @@ class Player {
         this._thornsAffixBonus = 0;
 
         /* Epoch 23: restore 后重新应用天赋/声望/装备词缀 */
+        this._skipRelicAffixes = true; /* P0: snapshot已含最终词条值，避免二次应用导致数值翻倍 */
         this._reapplyMetaBonuses();
+        this._skipRelicAffixes = false;
         if (this.heroId === 'Mage') this._recalcThornsRate();
     }
 
@@ -569,7 +572,7 @@ class Player {
                     var affix = item.affixes[ai];
                     if (affix.id === 'xp_gain') this.xpGainFactor += affix.val;
                     if (affix.id === 'ice_bonus') this.iceDurationBonus += affix.val;
-                    if (affix.id === 'speed_pct') this.speed *= (1 + affix.val);
+                    if (affix.id === 'speed_pct') this.speed += this.baseSpeed * affix.val; /* P0: 避免跨局累积，相对baseSpeed增量 */
                 }
             }
         }
@@ -684,7 +687,7 @@ class Player {
                     var affix = item.affixes[ai];
                     if (affix.id === 'xp_gain') this.xpGainFactor += affix.val;
                     if (affix.id === 'ice_bonus') this.iceDurationBonus += affix.val;
-                    if (affix.id === 'speed_pct') this.speed *= (1 + affix.val);
+                    if (affix.id === 'speed_pct') this.speed += this.baseSpeed * affix.val; /* P0: 避免跨局累积，相对baseSpeed增量 */
                 }
             }
         }
@@ -792,6 +795,7 @@ class Player {
             evolved_speed: 0,
             evolved_vamp: 0
         };
+        this._relicAffixes = {}; /* P3: 跨局清除词条残留 */
         this.critDamageBonus = 0; /* C2: 暴击伤害加成初始化为0 */
         if (this.heroId === 'Mage') this._recalcThornsRate();
         /* 从 HeroConfig 重置英雄特有参数 */

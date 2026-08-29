@@ -349,7 +349,7 @@
     0% { transform: translateY(-20px); opacity: 0; }
     10% { opacity: 1; }
     90% { opacity: 1; }
-    100% { transform: translateY(calc(100vh + 20px)); opacity: 0; }
+    100% { transform: translateY(calc(1200px + 20px)); opacity: 0; } /* P2: 使用固定px替代100vh以适配fixed缩放容器 */
 }
 
 /* 天气效果 — 雾效遮罩 */

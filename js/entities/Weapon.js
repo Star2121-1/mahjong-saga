@@ -25,6 +25,7 @@ window.Weapon = class {
         var playerCdFloor = (window.gameEngine && window.gameEngine.player) ? window.gameEngine.player.cdFloor : null;
         var floor = (playerCdFloor != null) ? playerCdFloor : Balance.DEFAULT_CD_FLOOR;
         this.cd = Math.max(floor, this.cd * Balance.WEAPON_UPGRADE_CD_MULT);
+        this._baseCd = Math.max(floor, (this._baseCd || this.cd) * Balance.WEAPON_UPGRADE_CD_MULT); /* P0: 同步更新_baseCd */
     }
 };
 

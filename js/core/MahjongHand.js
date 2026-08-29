@@ -202,9 +202,12 @@
         var t = tally(hand);
         var effective = t.total + t.jokers;
         if (effective < B.HUPAI_HAND_MAX) return null;
-        /* 清一色：非癞子全部同花色（癞子视为该花色任意） */
+        /* 清一色：非癞子全部同花色（癞子视为该花色任意），字牌不计入花色 */
         var suitsPresent = {};
-        for (var id in t.count) { suitsPresent[FACE_MAP[id].suit] = true; }
+        for (var id in t.count) {
+            var suit = FACE_MAP[id].suit;
+            if (suit !== 'zi') suitsPresent[suit] = true; /* P0: 排除字牌，避免纯字牌+癞子误判为清一色 */
+        }
         var suitKeys = Object.keys(suitsPresent);
         if (t.jokers > 0 ? suitKeys.length <= 1 : suitKeys.length === 1) {
             return { huType: 'qingyise', suit: suitKeys[0] || 'wan' };
