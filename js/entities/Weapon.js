@@ -53,7 +53,7 @@ window.Projectile = class {
 
 window.TrackingBlade = class extends window.Weapon {
     constructor(level) {
-        super('TrackingBlade', '\u8ffd\u8e2a\u98de\u724c', level || 1, 1.0, Balance.SHOTGUN_PROJ_LIFE);
+        super('TrackingBlade', '\u8ffd\u8e2a\u98de\u724c', level || 1, 1.0, Balance.TRACKING_BLADE_PROJ_LIFE);
     }
     update(dt, player, enemies, engine) {
         this.cooldownTimer -= dt;
@@ -96,7 +96,7 @@ window.OrbitShield = class extends window.Weapon {
     constructor(level) {
         super('OrbitShield', '\u73af\u5f62\u62a4\u4f53', level || 1, 0.3, 0.5);
         this.orbitRadius = 50;
-        this.orbRadius = 8; /* M-015: 碰撞半径配置常量，与视觉 16x16 匹配 */
+        this.orbRadius = Balance.ORBIT_ORB_RADIUS;
         this.rotationSpeed = Balance.ORBIT_ROTATION_SPEED;
         this.orbAngles = [0, Math.PI * 2 / 3, Math.PI * 4 / 3];
         this.orbitEls = [];
@@ -154,8 +154,8 @@ window.OrbitShield = class extends window.Weapon {
 window.ShotgunBurst = class extends window.Weapon {
     constructor(level) {
         super('ShotgunBurst', '\u4e03\u5bf9\u6563\u724c', level || 1, 0.6, 0.4);
-        this.spreadCount = 5;
-        this.spreadAngle = 0.3;
+        this.spreadCount = Balance.SHOTGUN_SPREAD_COUNT;
+        this.spreadAngle = Balance.SHOTGUN_SPREAD_ANGLE;
     }
     fireAt(targetX, targetY, player, engine) {
         if (this.cooldownTimer > 0) return;
@@ -364,9 +364,7 @@ window.NovaPulse = class extends window.Weapon {
         if (this.cooldownTimer > 0) return;
         this.cooldownTimer = this.cd;
         this._justFired = true;
-        var viewW = engine.battlefield.clientWidth;
-        var viewH = engine.battlefield.clientHeight;
-        var maxR = Math.sqrt(viewW * viewW + viewH * viewH);
+        var maxR = Math.sqrt(engine._mapW * engine._mapW + engine._mapW * engine._mapW);
         var el = document.createElement('div');
         el.className = 'nova-pulse';
         el.style.left = player.x + 'px';

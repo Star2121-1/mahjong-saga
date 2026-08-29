@@ -413,7 +413,7 @@ Gp._loop = function(timestamp) {
                 var wl = this._worldLayer || document.getElementById('world-layer');
                 if (wl) {
                     wl.classList.remove('shake-active');
-                    wl.style.transform = '';
+                    
                     wl.style.animationDuration = '';
                 }
             }

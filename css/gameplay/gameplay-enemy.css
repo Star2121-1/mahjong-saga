@@ -567,7 +567,6 @@
     50% { opacity: 0.8; }
     100% { transform: scale(1); opacity: 0.5; }
 }
-.boss-enraged { animation: bossEnrageGlow 0.4s ease-in-out infinite alternate; }
 @keyframes bossEnrageGlow {
     0% { box-shadow: 0 0 80px rgba(182,41,41,0.7), 0 0 20px rgba(200,0,0,0.3); }
     100% { box-shadow: 0 0 120px rgba(182,41,41,1), 0 0 40px rgba(200,0,0,0.5); }

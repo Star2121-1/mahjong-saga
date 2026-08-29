@@ -260,6 +260,12 @@
     transition-property: all !important;
 }
 
+/* Whitelist HP fills so they transition smoothly even during clock freeze */
+.game-clock-frozen #player-hp-fill,
+.game-clock-frozen .enemy-hp-fill {
+    transition-property: width !important;
+}
+
 /* ══════════════════════════════════════════════
    引导面板步骤导航 (Epoch 1)
    ══════════════════════════════════════════════ */

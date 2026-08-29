@@ -279,12 +279,11 @@ window.Enemy = class Enemy {
                 if (dist > attackRange + Balance.ENEMY_ATTACK_PADDING) this.reachedPlayer = false;
             }
             if (!this.reachedPlayer && dist > 0.01) {
-                var spd = this.baseSpeed * Balance.TANKER_SPEED_MULT;
+                var spd = this.baseSpeed;
                 spd = this._totemBuffed ? spd * Balance.TOTEM_BUFF_SPEED_MULT : spd;
                 this.x += (dx / dist) * spd * dt;
                 this.y += (dy / dist) * spd * dt;
             this._clampPosition(engine);
-                this._clampPosition(engine);
             }
             return;
         }
@@ -309,7 +308,6 @@ window.Enemy = class Enemy {
                 var spd = this._totemBuffed ? this.speed * Balance.TOTEM_BUFF_SPEED_MULT : this.speed;
                 this.x += (dx / dist) * spd * dt;
                 this.y += (dy / dist) * spd * dt;
-            this._clampPosition(engine);
                 this._clampPosition(engine);
             }
         }
@@ -361,9 +359,7 @@ window.Enemy = class Enemy {
             if (dist > 0.01) {
                 var spd = this._totemBuffed ? this.speed * Balance.TOTEM_BUFF_SPEED_MULT : this.speed;
                 this.x += (dx / dist) * spd * dt;
-                this.y += (dy / dist) * spd * dt;
             this._clampPosition(engine);
-                this._clampPosition(engine);
             }
             return;
         }
@@ -558,9 +554,7 @@ window.Enemy = class Enemy {
                 this.attackTimer = this.attackCooldown;
             } else if (dist > 0.01) {
                 var spd = this._totemBuffed ? this.speed * Balance.TOTEM_BUFF_SPEED_MULT : this.speed;
-                this.x += (dx / dist) * spd * dt;
                 this.y += (dy / dist) * spd * dt;
-            this._clampPosition(engine);
                 this._clampPosition(engine);
             }
         }
@@ -821,8 +815,10 @@ window.Enemy = class Enemy {
         var actualDmg = dmg;
         /* Barrier 正面无敌: 检查攻击方向 */
         if (this.type === 'Barrier' && this._barrierFront !== undefined) {
-            var toPlayerX = player.x - this.x;
-            var toPlayerY = player.y - this.y;
+            var engine = window.gameEngine;
+            var player = engine && engine.player;
+            var toPlayerX = (player ? player.x : this.x) - this.x;
+            var toPlayerY = (player ? player.y : this.y) - this.y;
             var toPlayerLen = Math.sqrt(toPlayerX * toPlayerX + toPlayerY * toPlayerY);
             if (toPlayerLen > 0.01) {
                 toPlayerX /= toPlayerLen;
