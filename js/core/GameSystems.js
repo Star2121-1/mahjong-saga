@@ -76,6 +76,15 @@ Sys.endOverdrive = function(engine) {
 
     if (engine.player) engine.player.cdFloor = engine._origCdFloor || 0.2;
 
+    /* P2: 恢复武器原始伤害（triggerOverdrive 曾将其×2） */
+    for (var _wi = 0; _wi < (engine._activeWeapons || []).length; _wi++) {
+        var _w = engine._activeWeapons[_wi];
+        if (_w && _w._odOrigAtk) {
+            _w.atkFactor = _w._odOrigAtk;
+            _w._odOrigAtk = undefined;
+        }
+    }
+
     for (var oi = 0; oi < engine.enemies.length; oi++) {
         var oe = engine.enemies[oi];
         if (oe._overdriveStored) {

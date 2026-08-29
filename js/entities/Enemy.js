@@ -862,7 +862,7 @@ window.Enemy = class Enemy {
         }
         var isAssassinCrit = false;
         if (this.frozen) {
-            actualDmg = Math.floor(dmg * 1.25);
+            actualDmg = Math.floor(dmg * Balance.FROZEN_DAMAGE_MULT);
             if (!this._freezeHitDecayed) {
                 this.frozenTimer -= 0.25;
                 this._freezeHitDecayed = true;
