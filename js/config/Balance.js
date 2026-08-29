@@ -293,3 +293,4 @@ window.Balance = {
     ENEMY_ARCHER_KITE_MIN: 170,
     ENEMY_ARCHER_KITE_MAX: 240,
 };
+};
