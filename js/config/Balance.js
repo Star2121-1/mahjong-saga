@@ -29,6 +29,7 @@ window.Balance = {
 
     /* ── Player (玩家机制) ── */
     PLAYER_INVULN_ON_HIT: 0.35,      // 受击无敌帧时长 (Player.js)
+    PLAYER_HITFLASH_DURATION: 0.3,   // 受击闪烁时长 + Combat.js 归一化分母 (Player.js + Combat.js)
     HERO_SPEED_BONUS: 1.15,          // 雀灵流转移速加成 (Player.js Hero)
     HERO_ASSASSIN_SPEED_MULT: 1.10,  // 暗影步移速加成 (Player.js Assassin)
     HERO_CD_FLOOR_REDUCTION: 0.90,   // 雀灵流转CD降低 (Player.js Hero)

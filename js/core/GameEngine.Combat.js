@@ -776,7 +776,7 @@ Gp._syncEntities = function() {
 
     /* ── Step A: 受击平滑闪烁 — 使用独立 hitFlashTimer，不依赖 invulnTimer ── */
     if (this.player.hitFlashTimer > 0) {
-        var t = 1 - Math.min(this.player.hitFlashTimer / 0.3, 1);
+        var t = 1 - Math.min(this.player.hitFlashTimer / Balance.PLAYER_HITFLASH_DURATION, 1);
         var alpha = 0.4 * Math.exp(-t * 4);
         this.playerEl.style.opacity = (1 - alpha).toFixed(3);
         this.playerEl.style.filter = 'drop-shadow(0 0 ' + (8 * (1 - alpha)).toFixed(1) + 'px rgba(182,41,41,0.8))';
