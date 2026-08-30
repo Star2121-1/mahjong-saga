@@ -219,6 +219,11 @@ Gp.restart = function() {
     this._cleanAllProjectiles();
     this._cleanEnemyProjectiles();
     this._resetAllWeapons();
+    /* P1: 清理雀魂手牌动画定时器，防止跨局残留触发 */
+    if (this._handTileDeliverTimers) {
+        this._handTileDeliverTimers.forEach(function(t) { clearTimeout(t); });
+        this._handTileDeliverTimers = [];
+    }
     this._pendingReward = false;
     this._bossTimer = 0;
     this._waveCount = 0;
