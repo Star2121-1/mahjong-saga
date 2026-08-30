@@ -970,7 +970,7 @@ Gp._syncUI = function() {
     if (this.timeDisplay) this.timeDisplay.textContent = '\u23F1 ' + this._formatTime(this._elapsed);
 
     /* \u6210\u5C31\uFF1A\u91D1\u5E01\u68C0\u6D4B */
-    if (this.player.gold > (this._maxGoldThisRun || 0)) {
+    if (this.player && this.player.gold > (this._maxGoldThisRun || 0)) {
         this._maxGoldThisRun = this.player.gold;
         if (this._maxGoldThisRun >= 1000) this._checkAchievement('get_rich');
     }

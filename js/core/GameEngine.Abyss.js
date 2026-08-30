@@ -49,6 +49,14 @@ Gp._initAbyssState = function() {
     this._abyssShopVisible = false;
     this._abyssLoopHpScale = 1;      // 深渊层额外HP缩放
     this._abyssLoopAtkScale = 1;     // 深渊层额外ATK缩放
+    /* R46-P1: 清除玩家身上的深渊状态字段，防止导航重启时残留 */
+    if (this.player) {
+        this.player._abyssFrailtyOrigAtk = undefined;
+        this.player._abyssFrailtyAtk = undefined;
+        this.player._abyssBloodmoonApplied = false;
+        this.player._abyssBloodmoonAtkBonus = undefined;
+        this.player._frailtyDebuff = false;
+    }
 };
 
 /* ── 深渊层属性缩放 ── */
@@ -61,9 +69,9 @@ Gp._updateAbyssScaling = function() {
         this._abyssVariantEnabled = false;
         return;
     }
-    /* 每层额外5%属性（叠加基础1.08） */
-    this._abyssLoopHpScale = 1 + loop * 0.05;
-    this._abyssLoopAtkScale = 1 + loop * 0.05;
+    /* R46: 统一为指数公式与Enemy.js一致（1.08^loop vs 旧线性1+loop*0.05） */
+    this._abyssLoopHpScale = Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, loop);
+    this._abyssLoopAtkScale = Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, loop);
     /* 第3层起启用深渊变体 */
     this._abyssVariantEnabled = loop >= 3;
     /* 自动解锁已满足条件的组合 */
@@ -283,11 +291,11 @@ Gp._enterAbyss = function() {
     /* 保留深渊币和已解锁组合 */
     var savedCoins = this._abyssCoins;
     var savedCombos = this._abyssUnlockedCombos.slice();
-    var savedActiveCombo = this._abyssActiveCombo;
+    /* R46-P1: 重置active combo，防止跨层继承上一轮状态 */
+    this._abyssActiveCombo = null;
     _origEnterAbyss.call(this);
     this._abyssCoins = savedCoins;
     this._abyssUnlockedCombos = savedCombos;
-    this._abyssActiveCombo = savedActiveCombo;
     this._updateAbyssScaling();
 };
 

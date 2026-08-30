@@ -5,6 +5,8 @@
 Gp._onClick = function(e) {
     var enemyEl = e.target.closest('.enemy');
     if (!enemyEl) return;
+    /* R46-P1: 防止overlay打开时误触攻击 */
+    if (!this.running || this._paused || this._levelUpPending || this._pendingReward) return;
 
     var id = parseInt(enemyEl.dataset.id, 10);
     var enemy = null;
@@ -174,6 +176,8 @@ Gp.triggerShake = function(intensity, duration) {
 };
 
 Gp.restart = function() {
+    /* R46-P1: 清理Overdrive状态，防止重启后伤害倍率残留 */
+    if (this._overdriveActive) this._endOverdrive();
     /* P0: 清理深渊变异组合状态，防止跨局残留 buff */
     if (this._abyssActiveCombo) {
         this._abyssActiveCombo = null;
@@ -217,7 +221,7 @@ Gp.restart = function() {
     if (this._abyssMistEl && this._abyssMistEl.parentNode) this._abyssMistEl.remove();
     this._abyssMistEl = null;
     var bc = document.getElementById('active-buffs-container');
-    if (bc) bc.remove();
+    if (bc) { bc.remove(); this._buffsContainerEl = null; }
     for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
     this._enemyElements.clear();
     this.enemies = [];
@@ -276,6 +280,8 @@ Gp.restart = function() {
     this.gameOverOverlay.classList.remove('active');
     this.gameOver = false;
     this.running = false;
+    /* R46-P0: 解除clock冻结，防止重启前overlay/guide导致新游戏永久冻结 */
+    if (this.container) this.container.classList.remove('game-clock-frozen');
     this._elapsed = 0;
     this.kills = 0;
     this._spawnTimer = 0;

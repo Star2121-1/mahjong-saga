@@ -126,6 +126,8 @@ Gp._showGuideStep = function(stepIndex) {
 };
 
 Gp._completeGuide = function() {
+    /* R46-P2: 清除检查timer，防止guide完成后interval泄漏 */
+    if (this._guideCheckTimer) { clearInterval(this._guideCheckTimer); this._guideCheckTimer = null; }
     this._restoreOpacity();
     this._clearHighlightTimers();
     this.guideOverlay.classList.remove('active');

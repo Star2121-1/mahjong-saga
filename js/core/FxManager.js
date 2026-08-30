@@ -31,6 +31,13 @@ Fp.spawnText = function(x, y, text, typeOrColor, size) { /* P1: 移除未使用�
     if (!this._layer) this.init();
     var node = this._borrowNode();
     if (!node) return;
+    /* R46-P0: 边界钳制，防止文字溢出容器后永久不可见 */
+    if (this._layer) {
+        var w = this._layer.clientWidth || 480;
+        var h = this._layer.clientHeight || 720;
+        x = Math.max(0, Math.min(x, w - 40));
+        y = Math.max(0, Math.min(y, h - 20));
+    }
     node._lastUsed = Date.now();
     var type = (typeof typeOrColor === 'string' && typeOrColor.startsWith('#')) ? 'normal' : typeOrColor;
     var color = typeOrColor;
@@ -83,6 +90,8 @@ Fp._borrowNode = function() {
 };
 
 Fp._returnNode = function(node) {
+    /* R46-P1: idempotent guard防止animationend和timeout双触发 */
+    if (!node || !node._fctActive) return;
     node.style.display = 'none';
     node.textContent = '';
     node.className = 'fct-node';

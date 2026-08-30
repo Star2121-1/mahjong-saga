@@ -487,7 +487,10 @@ Gp._loop = function(timestamp) {
                     }
                 }
                 if (this.player.lifestealRate < 1) {
-                    /* 击杀回血通过 _rewardKill 中的额外逻辑处理 */
+                    /* R46: 狂乱 combo 击杀回血 — 之前为空实现 */
+                    if (!this._abyssFrenzyLifestealSet) {
+                        this._abyssFrenzyLifestealSet = true;
+                    }
                 }
             } else if (_abyssCombo === 'abyss_gravity') {
                 /* 深渊引力: 吸附×3（使用基准值，避免每帧累积） */
@@ -508,9 +511,12 @@ Gp._loop = function(timestamp) {
                 /* 深渊血月: HP+60%, ATK+80%, 掉落×2 */
                 if (!this.player._abyssBloodmoonApplied) {
                     this.player._abyssBloodmoonApplied = true;
-                    /* Atk boost applied via _abyssLoopAtkScale in constructor already; additive here for clarity */
-                    this.player.atk = Math.floor(this.player.atk * 1.8); /* Additional 80% atk on top of base scaling */
-                    this.player._abyssBloodmoonAtkBonus = 1.8;
+                    /* R46: 补全血月HP加成（之前只实现了ATK） */
+                    var _bmOrigMaxHp = this.player._baseMaxHp || this.player.maxHp;
+                    this.player.maxHp = Math.floor(_bmOrigMaxHp * Balance.ABYSS_BLOODMOON_HP_MULT);
+                    this.player.hp = Math.min(this.player.hp, this.player.maxHp);
+                    this.player.atk = Math.floor(this.player.atk * Balance.ABYSS_BLOODMOON_ATK_MULT);
+                    this.player._abyssBloodmoonAtkBonus = Balance.ABYSS_BLOODMOON_ATK_MULT;
                 }
             } else if (_abyssCombo === 'abyss_wither') {
                 /* 深渊凋零: 每秒损失2%HP但生成等量护盾 */
