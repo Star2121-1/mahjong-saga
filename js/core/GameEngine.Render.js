@@ -149,8 +149,9 @@ Gp._updateProjectiles = function(dt) {
                 if (grid[ck]) {
                     for (var ci = 0; ci < grid[ck].length; ci++) {
                         var ce = grid[ck][ci];
-                        if (ce.alive && !p.hitEnemies.has(ce.id) && candidates.indexOf(ce) === -1) {
+                        if (ce.alive && !p.hitEnemies.has(ce.id) && !candidatesSet.has(ce.id)) {
                             candidates.push(ce);
+                            candidatesSet.add(ce.id);
                         }
                     }
                 }

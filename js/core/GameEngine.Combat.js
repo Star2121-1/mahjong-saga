@@ -831,7 +831,7 @@ Gp._syncEntities = function() {
             trail.className = 'player-trail ' + heroId.toLowerCase() + '-trail';
             trail.style.left = this.player.x + 'px';
             trail.style.top = this.player.y + 'px';
-            this._worldLayer.appendChild(trail);
+            if (this._worldLayer) this._worldLayer.appendChild(trail); /* R61-P1: null guard防止渲染失败 */
             var self = this;
             setTimeout(function() { if (trail.parentNode) trail.remove(); }, Balance.TIMEOUT_TRAIL_REMOVE_MS);
         }

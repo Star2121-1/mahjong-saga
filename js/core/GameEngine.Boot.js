@@ -530,7 +530,7 @@ Gp._announceWave = function(waveIdx) {
         setTimeout(function() {
             self._announcingWave = false; /* M-030: 公告链结束，解除守卫 */
             self._unfreezeClock();
-            self._beginLoop();
+            if (!self._paused) self._beginLoop(); /* R61-P1: 暂停状态下不恢复循环 */
         }, 300);
     }, 1200);
 };
