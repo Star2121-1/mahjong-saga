@@ -603,6 +603,8 @@ window.Enemy = class Enemy {
             if (this._bossPhase === 3 && !this._bossEnraged) {
                 this._bossEnraged = true;
                 this.speed = this.baseSpeed * Balance.BOMBER_SPEED_MULT;
+                /* R33-E-001: 重置接触伤害CD，防止首帧接触秒杀 */
+                this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
                 if (this.el) this.el.classList.add('boss-enraged');
                 /* B4: 血海沸腾 — 全场红雾 12s + Boss 血渍滴落 */
                 if (engine && engine._battlefield && !engine._bossMistEl) {
@@ -754,10 +756,10 @@ window.Enemy = class Enemy {
                     if (this._abyssTier >= Balance.BOSS_ABYSS_TIER_3) {
                         var abyssLeft = Math.max(0, maxSummon - this._summonCount - stalkerLeft - tankLeft);
                         for (var ai = 0; ai < abyssLeft; ai++) engine._spawnEnemyType('Archer');
-                        /* P0: 检查剩余召唤空间再召唤Shaman */
-                        if (this._summonCount + 1 < maxSummon && abyssLeft > 0) engine._spawnEnemyType('Shaman');
+                        var _shamanSpawned = (this._summonCount + 1 < maxSummon && abyssLeft > 0) ? 1 : 0;
+                        if (_shamanSpawned) engine._spawnEnemyType('Shaman');
+                        this._summonCount += stalkerLeft + tankLeft + (this._abyssTier >= Balance.BOSS_ABYSS_TIER_3 ? Math.min(2, maxSummon - this._summonCount - stalkerLeft - tankLeft) + _shamanSpawned : _shamanSpawned);
                     }
-                    this._summonCount += stalkerLeft + tankLeft + (this._abyssTier >= Balance.BOSS_ABYSS_TIER_3 ? Math.min(2, maxSummon - this._summonCount - stalkerLeft - tankLeft) : 0);
                 }
             }
             /* P3: 全屏辐射弹幕 — 每隔1.5秒向8方向发射 */
