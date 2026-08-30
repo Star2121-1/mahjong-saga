@@ -31,10 +31,10 @@ Fp.spawnText = function(x, y, text, typeOrColor) {
     if (!this._layer) this.init();
     var node = this._borrowNode();
     if (!node) return;
-    /* R46-P0: 边界钳制，防止文字溢出容器后永久不可见 */
+    /* R72-P1: 使用固定设计分辨率钳制，避免responsive.js scale后clientWidth偏移导致飘字截断 */
     if (this._layer) {
-        var w = this._layer.clientWidth || 480;
-        var h = this._layer.clientHeight || 720;
+        var w = 480; /* design width */
+        var h = 720; /* design height */
         x = Math.max(0, Math.min(x, w - 40));
         y = Math.max(0, Math.min(y, h - 20));
     }
