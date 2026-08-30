@@ -884,7 +884,7 @@
                                 self.showAltar(id);
                                 self.renderForge();
                                 var cEl = document.getElementById('talent-cores-count');
-                                if (cEl) cEl.textContent = (result.newItem && window.saveManager._metaCache) ? window.saveManager._metaCache.bossCores || 0 : cores - 1;
+                                if (cEl) cEl.textContent = (window.saveManager._metaCache && window.saveManager._metaCache.bossCores != null) ? window.saveManager._metaCache.bossCores : cores;
                             } else {
                                 window.TavernManager._flashReason(result.reason);
                             }
