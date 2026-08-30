@@ -232,7 +232,8 @@ window.Balance = {
     KNIGHT_DODGE_SLAM_RADIUS: 100,
     KNIGHT_DODGE_SLAM_FORCE: 200,
     KNIGHT_DODGE_SLAM_TIMEOUT_MS: 300,
-    NOVA_PULSE_MAX_RADIUS: 350,     // NovaPulse清一色最大半径(px) (Weapon.js)
+    NOVA_PULSE_MAX_RADIUS: 350,      // NovaPulse清一色最大半径(px) (Weapon.js)
+    NOVA_PULSE_EXPAND_DURATION: 0.5,  // NovaPulse扩展时长(s) (Weapon.js)
 
     /* ── 经验石/金币 ── */
     BOSS_MIN_GEM_COUNT: 5,

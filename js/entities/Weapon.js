@@ -117,7 +117,7 @@ window.TrackingBlade = class extends window.Weapon {
 window.OrbitShield = class extends window.Weapon {
     constructor(level) {
         super('OrbitShield', '\u73af\u5f62\u62a4\u4f53', level || 1, 0.3, 0.5);
-        this.orbitRadius = 50;
+        this.orbitRadius = Balance.ORBIT_SHIELD_RADIUS;
         this.orbRadius = Balance.ORBIT_ORB_RADIUS;
         this.rotationSpeed = Balance.ORBIT_ROTATION_SPEED;
         this.orbAngles = [0, Math.PI * 2 / 3, Math.PI * 4 / 3];
@@ -245,7 +245,7 @@ window.GroundSlammer = class extends window.Weapon {
         for (var i = this.activeShockwaves.length - 1; i >= 0; i--) {
             var sw = this.activeShockwaves[i];
             sw.elapsed += dt;
-            var progress = sw.elapsed / 0.2;
+            var progress = sw.elapsed / Balance.GROUND_SLAMMER_WAVE_DURATION;
             if (progress >= 1) {
                 if (sw.el.parentNode) sw.el.remove();
                 this.activeShockwaves.splice(i, 1);
@@ -268,7 +268,7 @@ window.GroundSlammer = class extends window.Weapon {
                     sw.hitEnemies.add(e.id);
                     e.takeDamage(dmg, 'player', sw.x, sw.y);
                     var knockAngle = Math.atan2(swdy, swdx);
-                    var force = 200;
+                    var force = Balance.GROUND_SLAMMER_KNOCKBACK_FORCE;
                     e.x += Math.cos(knockAngle) * force;
                     e.y += Math.sin(knockAngle) * force;
                     e._knockbackVelocity = 200;
@@ -310,7 +310,7 @@ window.GroundSlammer = class extends window.Weapon {
 window.LaserBeam = class extends window.Weapon {
     constructor(level) {
         super('LaserBeam', '\u4e00\u6c14\u8d2f\u901a', level || 1, 1.2, 0.3);
-        this.beamLength = 300;
+        this.beamLength = Balance.LASER_BEAM_LENGTH;
         this.beamAngle = 0;
         this.laserEl = null;
         this.initialized = false;
@@ -357,7 +357,7 @@ window.LaserBeam = class extends window.Weapon {
             var cx = player.x + t * len * cosA;
             var cy = player.y + t * len * sinA;
             var dist = Math.sqrt((e.x - cx) * (e.x - cx) + (e.y - cy) * (e.y - cy));
-            if (dist < e.radius + 4) {
+            if (dist < e.radius + Balance.LASER_HIT_RADIUS) {
                 e.takeDamage(dmg, 'player', player.x, player.y);
                 hitCount++;
                 if (hitCount > Balance.LASER_BEAM_MAX_HITS + extraPen) break;
@@ -394,7 +394,7 @@ window.NovaPulse = class extends window.Weapon {
         for (var i = this.activePulses.length - 1; i >= 0; i--) {
             var p = this.activePulses[i];
             p.elapsed += dt;
-            var progress = p.elapsed / 0.5;
+            var progress = p.elapsed / Balance.NOVA_PULSE_EXPAND_DURATION;
             var radius = progress * p.maxRadius;
             p.el.style.width = (radius * 2) + 'px';
             p.el.style.height = (radius * 2) + 'px';
