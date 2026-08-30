@@ -449,6 +449,13 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
 
         /* 屏障朝向玩家 */
         this._barrierAngle = Math.atan2(dy, dx);
+        /* R37-P0: 更新屏障独立朝向 — 仅在移动方向显著变化时更新 */
+        var moveAngle = Math.atan2(dy, dx);
+        var angleDiff = Math.abs(moveAngle - this._barrierFacing);
+        if (angleDiff > Math.PI / 4 || angleDiff < Math.PI * 3 / 4) {
+            /* 玩家在新方向扇区内，更新朝向 */
+            this._barrierFacing = moveAngle;
+        }
         /* P1: 使用点积替代冗余的atan2，计算方向向量余弦值 */
         var cosA = Math.cos(this._barrierAngle);
         var sinA = Math.sin(this._barrierAngle);
@@ -874,7 +881,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
             } else {
                 toPlayerX = 1; toPlayerY = 0;
             }
-            var dot = toPlayerX * Math.cos(this._barrierAngle) + toPlayerY * Math.sin(this._barrierAngle);
+            var dot = toPlayerX * Math.cos(this._barrierFacing) + toPlayerY * Math.sin(this._barrierFacing); /* R37-P0: 使用独立朝向 */
             if (dot > Balance.BARRIER_FRONT_COS_ANGLE) actualDmg = Math.floor(actualDmg * Balance.BARRIER_FRONT_DAMAGE_MULT);
             else if (dot < -Balance.BARRIER_FRONT_COS_ANGLE) actualDmg = Math.floor(actualDmg * Balance.KNOCKBACK_DAMAGE_REDUCTION); /* P1: 背面减伤 */
         }
