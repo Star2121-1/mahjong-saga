@@ -246,9 +246,21 @@ Gp._applyAbyssCombo = function(comboId) {
     }
     if (!combo) return;
     if (this._abyssActiveCombo === comboId) {
-        /* 切换关闭 */
+        /* 切换关闭 — 还原属性 */
         this._abyssActiveCombo = null;
         this._spawnCausalityText('关闭深渊变异: ' + combo.name);
+        /* R52-P0: 关闭时还原受组合影响的玩家属性 */
+        if (combo.id === 'abyss_frailty' && this.player && this.player._abyssFrailtyOrigAtk !== undefined) {
+            this.player.atk = this.player._abyssFrailtyOrigAtk;
+            this.player._abyssFrailtyOrigAtk = undefined;
+            this.player._abyssFrailtyAtk = undefined;
+            this.player._frailtyDebuff = false;
+        }
+        if (combo.id === 'abyss_bloodmoon' && this.player) {
+            this.player._abyssBloodmoonApplied = false;
+            this.player._abyssBloodmoonAtkBonus = undefined;
+            /* maxHp恢复由下次_loop循环重新应用，此处不清除以免打断当前帧 */
+        }
         return;
     }
     this._abyssActiveCombo = comboId;

@@ -1016,6 +1016,12 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
             /* R30-L-006: 敌人死亡触发碎裂动画 */
             if (this.el && !this.isBoss) {
                 this.el.classList.add('shatter-anim');
+                /* R52-P0: 动画结束后移除class，防止DOM残留与后续class冲突 */
+                var _elRef = this.el;
+                _elRef.addEventListener('animationend', function onShatterEnd() {
+                    _elRef.removeEventListener('animationend', onShatterEnd);
+                    _elRef.classList.remove('shatter-anim');
+                });
                 /* 生成碎裂粒子 */
                 var engRef2 = this._eng || window.gameEngine;
                 if (engRef2 && engRef2._worldLayer) {

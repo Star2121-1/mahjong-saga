@@ -636,7 +636,6 @@ Gp._triggerHu = function (hu) {
     this._handTiles = [];
     this._formedMelds = {};
     this._renderHandTiles();
-    if (this.player && typeof this.player.recalc === 'function') { /* 预留 */ }
 
     setTimeout(function () {
         self._unfreezeClock();

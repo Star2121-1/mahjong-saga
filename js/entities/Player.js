@@ -827,6 +827,7 @@ class Player {
         };
         this._relicAffixes = {}; /* P3: 跨局清除词条残留 */
         this.critDamageBonus = 0; /* C2: 暴击伤害加成初始化为0 */
+        this.huQingyise = false; /* R52-P1: 胡清一色状态重置 */
         if (this.heroId === 'Mage') this._recalcThornsRate();
         /* 从 HeroConfig 重置英雄特有参数 */
         const cfg = window.heroConfig[this.heroId];
