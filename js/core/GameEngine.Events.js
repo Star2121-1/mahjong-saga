@@ -593,7 +593,7 @@ Gp._triggerKnightDodgeSlam = function() {
         var dx = e.x - px;
         var dy = e.y - py;
         if (dx * dx + dy * dy < radius * radius) {
-            e.takeDamage(dmg, 'knight_slam');
+            e.takeDamage(dmg, 'knight_slam', px, py);
         }
     }
     /* 击退 */
