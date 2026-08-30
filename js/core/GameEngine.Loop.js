@@ -493,7 +493,11 @@ Gp._loop = function(timestamp) {
             } else if (_abyssCombo === 'abyss_frailty') {
                 /* 深渊脆弱: 玩家攻击+150%，受伤+50% */
                 if (this.player._abyssFrailtyAtk !== 2.5) {
-                    this.player.atk = Math.floor(this.player.atk * 2.5 / (this.player._abyssFrailtyAtk || 1));
+                    /* R32-E-001: 备份原始ATK用于组合移除时还原 */
+                    if (!this.player._abyssFrailtyOrigAtk) {
+                        this.player._abyssFrailtyOrigAtk = this.player.atk;
+                    }
+                    this.player.atk = Math.floor(this.player._abyssFrailtyOrigAtk * 2.5);
                     this.player._abyssFrailtyAtk = 2.5;
                     this.player._frailtyDebuff = true;
                 }

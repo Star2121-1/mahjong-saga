@@ -8,7 +8,13 @@ Gp.restart = function() {
     /* P0: 清理深渊变异组合状态，防止跨局残留 buff */
     if (this._abyssActiveCombo) {
         this._abyssActiveCombo = null;
+        /* R32-E-002: 还原frailty原始ATK，防止永久残留 */
+        if (this.player._abyssFrailtyOrigAtk !== undefined) {
+            this.player.atk = this.player._abyssFrailtyOrigAtk;
+            this.player._abyssFrailtyOrigAtk = undefined;
+        }
         this.player._abyssFrailtyAtk = undefined;
+        this.player._frailtyDebuff = false;
         this.player._abyssBloodmoonApplied = false;
         this.player._abyssBloodmoonAtkBonus = undefined;
     }

@@ -605,10 +605,11 @@ class Player {
         this.mapAffinityLevel = perks.token_map_affinity || 0;
         /* Epoch 33: 应用圣物词条 — restore时跳过，snapshot已含最终值 */
         if (!this._skipRelicAffixes) this._applyRelicAffixes();
-        /* 声望 */
-        if (window.saveManager && window.saveManager.applyPrestigeBonus) {
-            window.saveManager.applyPrestigeBonus(this);
-        }
+        /* R32-E-001: restore路径中跳过声望 — snapshot已含最终聚合值，避免双重应用 */
+        /* 声望仅在reset()新游戏中应用，restore时by design不重复加 */
+        // if (window.saveManager && window.saveManager.applyPrestigeBonus) {
+        //     window.saveManager.applyPrestigeBonus(this);
+        // }
     }
 
     /* ── Epoch 33: 应用圣物词条 ── */
