@@ -394,7 +394,7 @@ Gp._settleRun = async function(tokens) {
 
     /* Epoch 47: 赛季通行证XP */
     if (typeof window.saveManager.addBattlePassXP === 'function') {
-        window.saveManager.addBattlePassXP(10 + Math.floor(this.kills / 10)).catch(function() {});
+        window.saveManager.addBattlePassXP(10 + Math.floor(this.kills / 10)).catch(function(e) { console.warn('[BattlePass] XP save failed:', e); });
     }
 
     /* Epoch 47: Boss掉落事件 — 宝石雨 */

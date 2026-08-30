@@ -778,7 +778,7 @@ Gp._bindAudioButton = function() {
         /* 持久化到 meta */
         try {
             var meta = window.saveManager && window.saveManager._metaCache;
-            if (meta) { meta.audioMuted = muted; window.saveManager._saveMetaToStorage().catch(function(e) {}); }
+            if (meta) { meta.audioMuted = muted; window.saveManager._saveMetaToStorage().catch(function(e) { console.warn("[Audio] mute save failed:", e); }); }
         } catch(e) {}
     });
     /* 恢复上次状态 */
