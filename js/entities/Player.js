@@ -617,7 +617,7 @@ class Player {
         this.cdFloor = Math.max(0.05, (this.cdFloor || Balance.DEFAULT_CD_FLOOR) - (talents.mo_pa_cd || 0) * 0.01);
         /* perk */
         var perks = (meta.purchasedPerks || {});
-        if (perks.token_revive > 0) {
+        if (perks.token_revive > 0 && perks.token_revive > (this._reviveCount || 0)) {
             this._hasRevive = true;
             this._reviveCount = perks.token_revive;
         }
@@ -721,7 +721,7 @@ class Player {
 
         /* 保存基础maxHp用于临时增益恢复（装备聚合完成后） */
         this._baseMaxHp = this.maxHp;
-        this.baseSpeed = this.speed;
+        // REMOVED: redundant baseSpeed assignment (already set at line 716)
 
         /* ── 套装共鸣检测 ── */
         var affixCounts = {};
@@ -797,7 +797,7 @@ class Player {
 
         /* Epoch 14: 元货币购买加成 */
         var perks = (meta.purchasedPerks || {});
-        if (perks.token_revive > 0) {
+        if (perks.token_revive > 0 && perks.token_revive > (this._reviveCount || 0)) {
             this._hasRevive = true;
             this._reviveCount = perks.token_revive;
         }
