@@ -144,13 +144,7 @@ Gp._upgradeWeapon = function(index) {
     return true;
 };
 
-/* ── 在快照中包含武器数据 ── */
-
-var _origSnapshot = window.saveManager.snapshotForRun;
-window.saveManager.snapshotForRun = function(engine) {
-    var snap = _origSnapshot.call(this, engine);
-    snap.weapons = engine._activeWeapons.map(function(w) { return { id: w.id, level: w.level, cooldownTimer: w.cooldownTimer, baseCd: w._baseCd, cd: w.cd, atkFactor: w.atkFactor }; });
-    return snap;
-};
+/* Weapon synergy and slot rendering live above.
+   snapshotForRun weapon serialization is handled by GameEngine.Spawn.js (applied later in load order). */
 
 })();

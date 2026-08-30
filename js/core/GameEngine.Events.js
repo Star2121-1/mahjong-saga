@@ -463,7 +463,7 @@ Gp._resolveGamble = function(won) {
     this._gambleStaked = 0;
 };
 
-/* Gp._spawnBossLord 已废弃 — 使用 _spawnBossLordFromGamble */
+/* DEPRECATED: Gp._spawnBossLord 已在RXX移除，使用 _spawnBossLordFromGamble 替代；保留此注释防止重复添加 */
 
 Gp._spawnEnemyType = function(type) {
     var angle = Math.random() * Math.PI * 2;

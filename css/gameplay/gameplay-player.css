@@ -13,6 +13,7 @@
     color: #b8860b;
     text-shadow: 0 0 8px rgba(212,175,55,0.6);
     filter: drop-shadow(0 0 12px #d4af37) drop-shadow(0 0 4px #d4af37);
+    will-change: filter;
 }
 
 /* 一万（骑士）— 蓝色边框 */
@@ -26,6 +27,7 @@
     color: #1565c0;
     text-shadow: 0 0 8px rgba(21,101,192,0.6);
     filter: drop-shadow(0 0 12px #1565c0) drop-shadow(0 0 4px #1565c0);
+    will-change: filter;
 }
 
 /* 九筒（法师）— 绿色边框 */
@@ -39,6 +41,7 @@
     color: #2e7d32;
     text-shadow: 0 0 8px rgba(46,125,50,0.6);
     filter: drop-shadow(0 0 12px #2e7d32) drop-shadow(0 0 4px #2e7d32);
+    will-change: filter;
 }
 
 /* 一条（刺客）— 紫色边框 */
@@ -52,6 +55,7 @@
     color: #7b1fa2;
     text-shadow: 0 0 8px rgba(123,31,162,0.6);
     filter: drop-shadow(0 0 12px #7b1fa2) drop-shadow(0 0 4px #7b1fa2);
+    will-change: filter;
 }
 
 /* 默认（无 data-hero 属性）— 红色雀 */
@@ -74,6 +78,7 @@
         0 0 14px rgba(182,41,41,0.4);
     text-shadow: 0 0 8px rgba(182,41,41,0.6);
     filter: drop-shadow(0 0 12px #b62929) drop-shadow(0 0 4px #b62929);
+    will-change: filter;
 }
 /* 牌面文字由 JS 动态设置 */
 #player::before {
@@ -99,12 +104,12 @@
 /* 受击冻结特效 — 冰蓝色统一 */
 .frozen-crystal {
     background: linear-gradient(135deg, #70d6ff, #0077b6) !important;
-    filter: drop-shadow(0 0 10px #70d6ff) !important;
+    box-shadow: 0 0 10px #70d6ff, 0 0 4px rgba(112,214,255,0.5) !important;
     animation: iceShimmer 1s infinite alternate;
 }
 @keyframes iceShimmer {
-    0% { filter: drop-shadow(0 0 6px #70d6ff); }
-    100% { filter: drop-shadow(0 0 16px #b3e5fc); }
+    0% { box-shadow: 0 0 10px #70d6ff, 0 0 4px rgba(112,214,255,0.5); }
+    100% { box-shadow: 0 0 10px #70d6ff, 0 0 16px rgba(179,229,252,0.6); }
 }
 
 /* ══════════════════════════════════════════════

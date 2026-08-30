@@ -191,6 +191,7 @@
 #game-container.overdrive-active #battlefield {
     filter: saturate(1.6) hue-rotate(-10deg) brightness(1.15);
     transition: filter 0.15s;
+    will-change: filter;
 }
 /* Epoch 38: Mutator screen tinting */
 #game-container.mutator-bloodmoon #battlefield { filter: sepia(0.3) saturate(1.5) hue-rotate(-20deg); }
@@ -205,6 +206,7 @@
 #game-container.overdrive-active .enemy {
     filter: grayscale(0.7) brightness(0.5);
     transition: filter 0.3s;
+    will-change: filter;
 }
 #game-container.overdrive-active #top-bar,
 #game-container.overdrive-active #rage-bar-container {

@@ -95,6 +95,7 @@ Cs.spawnHealText = function(engine, x, y, amount) {
     setTimeout(function() { el.remove(); }, Balance.FLOAT_TEXT_TIMEOUT_MS);
 };
 
+/* Cs.spawnExpText 已废弃 — Gp._spawnExpText 在 Endgame.js 中作为独立方法使用，此版本从未被外部调用 */
 Cs.spawnExpText = function(engine, x, y, amount) {
     if (window.fxManager) {
         window.fxManager.spawnText(x - 10, y - 40, '+' + amount + 'EXP', 'exp');

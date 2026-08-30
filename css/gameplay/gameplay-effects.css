@@ -17,8 +17,8 @@
     animation: huBangIn 1.6s cubic-bezier(0.2, 1.6, 0.4, 1) forwards;
 }
 @keyframes huBangIn {
-    0%   { opacity: 0; transform: translate(-50%,-50%) scale(3) rotate(-8deg); filter: blur(8px); }
-    18%  { opacity: 1; transform: translate(-50%,-50%) scale(1) rotate(0deg); filter: blur(0); }
+    0%   { opacity: 0; transform: translate(-50%,-50%) scale(4.5) rotate(-8deg); }
+    18%  { opacity: 1; transform: translate(-50%,-50%) scale(1) rotate(0deg); }
     75%  { opacity: 1; }
     100% { opacity: 0; transform: translate(-50%,-56%) scale(1.05); }
 }

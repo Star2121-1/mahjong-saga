@@ -561,6 +561,7 @@ class Player {
         var equipments = (sm && sm._metaCache && sm._metaCache.equipments) || [];
         var eqMap = {};
         for (var eqi = 0; eqi < equipments.length; eqi++) eqMap[equipments[eqi].instanceId] = equipments[eqi];
+        var _eqBaseSpeed = this.baseSpeed; /* 保存基础速度，用于speed_pct上限钳制 */
         for (var slot in equipped) {
             var instanceId = equipped[slot];
             if (!instanceId) continue;
@@ -576,11 +577,15 @@ class Player {
                     var affix = item.affixes[ai];
                     if (affix.id === 'xp_gain') this.xpGainFactor += affix.val;
                     if (affix.id === 'ice_bonus') this.iceDurationBonus += affix.val;
-                    if (affix.id === 'speed_pct') this.speed += this.baseSpeed * affix.val; /* P0: 避免跨局累积，相对baseSpeed增量 */
+                    if (affix.id === 'speed_pct') this.speed += _eqBaseSpeed * affix.val;
                 }
             }
         }
         this.baseSpeed = this.speed;
+        /* 装备词条汇总上限校验 */
+        this.xpGainFactor = 1.0 + Math.min(Balance.MAX_XP_GAIN_PCT, this.xpGainFactor - 1.0);
+        this.iceDurationBonus = Math.min(Balance.MAX_FREEZE_DURATION_BONUS, this.iceDurationBonus);
+        this.speed = _eqBaseSpeed * Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, this.speed / _eqBaseSpeed);
         /* 套装共鸣 */
         var affixCounts = {};
         for (var _asi = 0; _asi < equipments.length; _asi++) {
@@ -677,6 +682,7 @@ class Player {
         var equipments = (sm && sm._metaCache && sm._metaCache.equipments) || [];
         var eqMap = {};
         for (var eqi = 0; eqi < equipments.length; eqi++) eqMap[equipments[eqi].instanceId] = equipments[eqi];
+        var _eqBaseSpeed = this.baseSpeed; /* 保存基础速度，用于speed_pct上限钳制 */
         for (var slot in equipped) {
             var instanceId = equipped[slot];
             if (!instanceId) continue;
@@ -692,11 +698,15 @@ class Player {
                     var affix = item.affixes[ai];
                     if (affix.id === 'xp_gain') this.xpGainFactor += affix.val;
                     if (affix.id === 'ice_bonus') this.iceDurationBonus += affix.val;
-                    if (affix.id === 'speed_pct') this.speed += this.baseSpeed * affix.val; /* P0: 避免跨局累积，相对baseSpeed增量 */
+                    if (affix.id === 'speed_pct') this.speed += _eqBaseSpeed * affix.val;
                 }
             }
         }
         this.baseSpeed = this.speed;
+        /* 装备词条汇总上限校验 */
+        this.xpGainFactor = 1.0 + Math.min(Balance.MAX_XP_GAIN_PCT, this.xpGainFactor - 1.0);
+        this.iceDurationBonus = Math.min(Balance.MAX_FREEZE_DURATION_BONUS, this.iceDurationBonus);
+        this.speed = _eqBaseSpeed * Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, this.speed / _eqBaseSpeed);
 
         /* 保存基础maxHp用于临时增益恢复（装备聚合完成后） */
         this._baseMaxHp = this.maxHp;

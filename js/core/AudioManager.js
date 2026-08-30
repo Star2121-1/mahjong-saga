@@ -42,9 +42,20 @@ Ap._ensureContext = function() {
     }
 };
 
+/**
+ * 公开的重试方法：外部调用以尝试重新初始化 AudioContext
+ * 用于 setMuted(false) 或页面恢复可见时主动触发
+ */
+Ap.tryReinit = function() {
+    if (!this._ctx && !this._initialized) {
+        this._ensureContext();
+    }
+};
+
 /* 统一播放入口 */
 Ap.play = function(sound, opts) {
-    if (this._muted || !this._ctx) return;
+    if (!this._ctx && !this._ensureContext()) return;
+    if (this._muted) return;
     opts = opts || {};
     /* P1: 应用分类音量 */
     var catKey = (sound === 'victory' || sound === 'gameover' || sound === 'levelup') ? 'music' : 'sfx';
@@ -162,6 +173,8 @@ Ap._wall = function(vol) {
 
 Ap.setMuted = function(muted) {
     this._muted = !!muted;
+    /* 取消静音时尝试重新初始化 context */
+    if (!this._muted) this.tryReinit();
     /* P1: 持久化静音状态到 meta */
     try {
         var m = window.saveManager && window.saveManager._metaCache;

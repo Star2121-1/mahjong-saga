@@ -8,6 +8,8 @@
 /* 以下 4 个方法已被 GameEngine.Combat.js 覆盖（后者加载顺序在后） */
 /* Gp._initHandTiles / _placeHandTile / _clearHandTile / _renderPlayerTile — 保留在 NewRun.js 作为文档参考，实际使用 Combat.js 版本 */
 
+/* DEPRECATED: _deliverHandTile / _saveHandState / _restoreHandState 已在R12移除对外调用，保留此注释防止重复添加 */
+/* 手牌槽管理已由 GameEngine.Combat.js _initHandTiles / _placeHandTile 接管 */
 Gp._deliverHandTile = function(tileData) {
     /* tileData: { text, cssClass, slotIndex } */
     var self = this;
@@ -46,6 +48,7 @@ Gp._deliverHandTile = function(tileData) {
     this._handTileDeliverTimers.push(animTimer);
 };
 
+/* DEPRECATED: 已在R12移除，保留此注释防止重复添加 */
 Gp._saveHandState = function() {
     if (!this._handTileSlots) return;
     var meta = window.saveManager._metaCache || {};
@@ -74,6 +77,7 @@ Gp._saveHandState = function() {
     window.saveManager._saveMetaToStorage();
 };
 
+/* DEPRECATED: 已在R12移除，保留此注释防止重复添加 */
 Gp._restoreHandState = function() {
     if (!this._handTileSlots) return;
     var meta = window.saveManager._metaCache || {};
