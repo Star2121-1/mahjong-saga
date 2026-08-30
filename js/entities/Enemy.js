@@ -262,7 +262,7 @@ window.Enemy = class Enemy {
                 if (this.el) { this.el.style.opacity = '1'; this.el.classList.remove('stalker-charging'); }
                 if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
                     this.flashTimer = Balance.FLASH_DURATION;
-                    player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * 1.5), engine), this);
+player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKER_ATTACK_MULT), engine), this);
                 }
             }
             return;

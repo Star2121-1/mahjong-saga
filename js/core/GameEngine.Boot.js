@@ -306,7 +306,8 @@ Gp._initBeforeUnload = function() {
     window.addEventListener('beforeunload', function(e) {
         if (self.running) {
             var snap = window.saveManager.snapshotForRun(self);
-            window.saveManager.saveActiveRun(snap);
+            /* R37-P2: 使用同步写入避免beforeunload异步竞态 */
+            window.saveManager._writeJSON('active_run.json', snap);
             e.preventDefault();
             e.returnValue = '';
         }
@@ -557,9 +558,17 @@ Gp._togglePause = function() {
         this.running = false;
         this._freezeClock();
         if (this.pauseOverlay) this.pauseOverlay.classList.add('active');
+        /* R37-P1: 暂停时挂起 AudioContext，防止后台音效 */
+        if (window.audioManager && window.audioManager._ctx && window.audioManager._ctx.state === 'running') {
+            window.audioManager._ctx.suspend();
+        }
     } else {
         this._paused = false;
         if (this.pauseOverlay) this.pauseOverlay.classList.remove('active');
+        /* R37-P1: 恢复时恢复 AudioContext */
+        if (window.audioManager && window.audioManager._ctx && window.audioManager._ctx.state === 'suspended') {
+            window.audioManager._ctx.resume().catch(function(e) { console.warn('[Audio] resume failed:', e); });
+        }
         this._beginLoop();
     }
 };

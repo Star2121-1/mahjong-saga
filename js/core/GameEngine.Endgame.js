@@ -268,6 +268,9 @@ Gp.restart = function() {
     this._guidePrevGemCount = undefined;
     this._guidePrevEnemyCount = undefined;
     this._tempShieldEnd = 0;
+    /* R37-P1: 重置局内增益状态，防止跨局残留 */
+    this._vaultMutations = [];
+    this._eliteModeActive = false;
     this.victoryOverlay.classList.remove('active');
     this.gameOverOverlay.classList.remove('active');
     this.gameOver = false;

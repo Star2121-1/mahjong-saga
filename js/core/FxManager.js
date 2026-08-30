@@ -71,7 +71,7 @@ Fp._borrowNode = function() {
             return this._pool[i];
         }
     }
-    if (this._pool.length < 200) {
+    if (this._pool.length < window.Balance.FCT_POOL_MAX_GROWTH) {
         var el = document.createElement('div');
         el.className = 'fct-node';
         el.style.display = 'none';

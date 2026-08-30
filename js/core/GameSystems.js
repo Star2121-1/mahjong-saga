@@ -150,9 +150,9 @@ Sys.applyMutator = function(engine, mutatorId) {
                 e._bloodmoonOrigMaxHp = e.maxHp;
                 e._bloodmoonOrigHp = e.hp;
             }
-            e.atk = Math.floor(e.atk * 1.4);
-            e.maxHp = Math.floor(e.maxHp * 1.3);
-            e.hp = Math.floor(e.hp * 1.3);
+            e.atk = Math.floor(e.atk * Balance.MUTATOR_BLOODMOON_ATK_MULT);
+            e.maxHp = Math.floor(e.maxHp * Balance.MUTATOR_BLOODMOON_HP_MULT);
+            e.hp = Math.floor(e.hp * Balance.MUTATOR_BLOODMOON_HP_MULT);
             var el = engine._enemyElements.get(e.id);
             if (el) el.style.transform = 'scale(1.3)';
         }
@@ -163,7 +163,7 @@ Sys.applyMutator = function(engine, mutatorId) {
             if (!e._frenzyStored) {
                 e._frenzyStored = true;
                 e._frenzyOrigSpeed = e.speed;
-                e.speed = Math.round(e.speed * 1.5);
+                e.speed = Math.round(e.speed * Balance.MUTATOR_FRENZY_SPEED_MULT);
             }
         }
     } else if (mutatorId === 'frailty') {

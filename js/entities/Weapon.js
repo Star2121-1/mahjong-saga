@@ -166,7 +166,7 @@ window.OrbitShield = class extends window.Weapon {
                         if (engine && engine._synNovaOrbit && engine._synNovaLaserActive) {
                             finalDmg = Math.floor(dmg * 2);
                         }
-                        e.takeDamage(finalDmg, 'player');
+                        e.takeDamage(finalDmg, 'player', player.x, player.y);
                     }
                 }
             }
@@ -266,7 +266,7 @@ window.GroundSlammer = class extends window.Weapon {
                 var swdist = Math.sqrt(swdx * swdx + swdy * swdy);
                 if (swdist < e.radius + radius) {
                     sw.hitEnemies.add(e.id);
-                    e.takeDamage(dmg, 'player');
+                    e.takeDamage(dmg, 'player', sw.x, sw.y);
                     var knockAngle = Math.atan2(swdy, swdx);
                     var force = 200;
                     e.x += Math.cos(knockAngle) * force;
@@ -358,7 +358,7 @@ window.LaserBeam = class extends window.Weapon {
             var cy = player.y + t * len * sinA;
             var dist = Math.sqrt((e.x - cx) * (e.x - cx) + (e.y - cy) * (e.y - cy));
             if (dist < e.radius + 4) {
-                e.takeDamage(dmg, 'player');
+                e.takeDamage(dmg, 'player', player.x, player.y);
                 hitCount++;
                 if (hitCount > Balance.LASER_BEAM_MAX_HITS + extraPen) break;
             }
@@ -408,7 +408,7 @@ window.NovaPulse = class extends window.Weapon {
                 if (dx * dx + dy * dy < (e.radius + radius) * (e.radius + radius)) {
                     if (!p.hitEnemies.has(e.id)) {
                         p.hitEnemies.add(e.id);
-                        e.takeDamage(dmg, 'player');
+                        e.takeDamage(dmg, 'player', p.x, p.y);
                     }
                 }
             }

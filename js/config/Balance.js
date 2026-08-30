@@ -67,7 +67,6 @@ window.Balance = {
     /* ── 突变系统 ── */
     MUTATOR_BLOODMOON_ATK_MULT: 1.4,
     MUTATOR_BLOODMOON_HP_MULT: 1.3,
-    MUTATOR_BLOODMOON_SCALE: 1.3,
     MUTATOR_FRENZY_SPEED_MULT: 1.5,
     MUTATOR_FRENZY_GOLD_MULT: 1.5,
     MUTATOR_FRAILTY_PLAYER_ATK_MULT: 1.8,
@@ -131,6 +130,8 @@ window.Balance = {
     TOTEM_BUFF_SPEED_MULT: 1.3,              // 图腾增益速度倍率 (Enemy.js)
 
     /* ── Stalker ── */
+    STALKER_ATTACK_MULT: 1.5,            // 猎杀者蓄力攻击加成 (Enemy.js)
+    THORN_CRIT_MULT: 1.8,                // 刺藤甲暴击加成 (Player.js)
     STALKER_TRIGGER_DIST: 150,
     STALKER_CHARGE_SPEED_MULT: 2.5,
     STALKER_FATIGUE_DURATION: 3.0,
@@ -145,10 +146,11 @@ window.Balance = {
     BOSS_LORD_BASE_ATK: 50,
     BOSS_LORD_BASE_SPEED: 20,
     BOSS_LORD_BASE_RADIUS: 70,
-    BOSS_HP_MULT: 6,
-    BOSS_ATK_MULT: 2,
-    BOSS_SPEED_MULT: 0.7,
     BOSS_PHASE3_SPEED_MULT: 1.8,
+    BOSS_GAMBLE_HP_MULT: 1.5,            // 深渊试炼Boss HP加成 (GameEngine.Events.js)
+    VAULT_BLOODMOON_ATK_MULT: 1.4,         // 变异保险库血月Boss ATK加成 (GameEngine.Events.js)
+    VAULT_BLOODMOON_HP_MULT: 1.3,          // 变异保险库血月Boss HP加成 (GameEngine.Events.js)
+    BOSS_BLOOD_RAGE_SPEED_MULT: 1.2,       // 龙王狂暴速度加成 (GameEngine.Events.js)
     BOSS_PHASE1_THRESHOLD: 0.7,    // 龙王第一阶段HP阈值 (Enemy.js)
     BOSS_PHASE1_ABILITY_INTERVAL: 1.8,  // 龙王P1技能间隔 (Enemy.js)
     BOSS_P1_MIN_DIST: 200,          // 龙王P1保持最小距离(px) (Enemy.js)
@@ -184,8 +186,8 @@ window.Balance = {
     ELITE_HP_MULT: 1.5,                  // 精英模式HP倍率 (GameSpawner.js / Events.js)
     ELITE_ATK_MULT: 1.5,                 // 精英模式ATK倍率 (GameSpawner.js / Events.js)
     ELITE_CORE_MULT: 1.5,                // 精英模式核心收益倍率 (Boot.js)
-    BOSS_PROJECTILE_SPEED_NORMAL: 100,
-    BOSS_PROJECTILE_SPEED_BLOOD: 120,
+    ELITE_ENEMY_HP_MULT: 1.5,             // 精英怪HP加成 (GameEngine.Spawn.js)
+    ELITE_ENEMY_ATK_MULT: 1.3,             // 精英怪ATK加成 (GameEngine.Spawn.js)
 
     /* ── 敌人 ── */
     TANKER_HP_MULT: 2,

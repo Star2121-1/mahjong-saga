@@ -402,16 +402,16 @@ Gp._spawnBossLordFromGamble = function() {
 
     /* Gamble: 深渊试炼增加领主HP */
     if (this._gambleType === 'abyss' && this._gambleActive) {
-        lord.maxHp = Math.floor(lord.maxHp * 1.5);
+        lord.maxHp = Math.floor(lord.maxHp * Balance.BOSS_GAMBLE_HP_MULT);
         lord.hp = lord.maxHp;
         this._spawnCausalityText('⚠️ 深渊试炼激活：领主 +50% HP');
     }
 
     /* ── 变异保险库：血月对Boss Lord生效 ── */
     if (this._vaultMutations && this._vaultMutations.indexOf('bloodmoon') !== -1) {
-        lord.atk = Math.floor(lord.atk * 1.4);
-        lord.maxHp = Math.floor(lord.maxHp * 1.3);
-        lord.hp = Math.floor(lord.hp * 1.3);
+        lord.atk = Math.floor(lord.atk * Balance.VAULT_BLOODMOON_ATK_MULT);
+        lord.maxHp = Math.floor(lord.maxHp * Balance.VAULT_BLOODMOON_HP_MULT);
+        lord.hp = Math.floor(lord.hp * Balance.VAULT_BLOODMOON_HP_MULT);
     }
 
     var el = document.createElement('div');
@@ -431,7 +431,7 @@ Gp._spawnBossLordFromGamble = function() {
     lord.el = el;
 
     if (this._bloodRageActive) {
-        lord.speed = Math.floor(lord.speed * 1.2);
+        lord.speed = Math.floor(lord.speed * Balance.BOSS_BLOOD_RAGE_SPEED_MULT);
         lord.baseSpeed = lord.speed;
         if (lord.el) lord.el.classList.add('boss-blood-rage');
     }
@@ -491,6 +491,8 @@ Gp._spawnEnemyType = function(type) {
     enemy.hp = enemy.maxHp;
     enemy.atk = Math.floor(enemy.atk * diff);
     this.enemies.push(enemy);
+    /* R37-P0: 深渊变体 — 与 _spawnEliteEnemy 保持一致 */
+    if (this._applyAbyssVariant) this._applyAbyssVariant(enemy);
 
     var el = document.createElement('div');
     el.className = 'enemy';
@@ -548,6 +550,24 @@ Gp._updateEnemyProjectiles = function(dt) {
                     this.player.takeDamage(dmg, this._bossLord || this);
                 }
                 p.alive = false;
+            }
+        }
+
+        /* R37-P1: 弹道穿敌检测 — 击中其他敌人则销毁 */
+        if (p.alive && this.enemies) {
+            for (var _pj = 0; _pj < this.enemies.length; _pj++) {
+                var _pe = this.enemies[_pj];
+                if (!_pe.alive || _pe.id === p._ownerId) continue;
+                var edx = _pe.x - p.x;
+                var edy = _pe.y - p.y;
+                if (edx * edx + edy * edy < (_pe.radius + p.radius) * (_pe.radius + p.radius)) {
+                    if (!p._hitEnemy) {
+                        p._hitEnemy = true;
+                        if (_pe.takeDamage) _pe.takeDamage(p.damage, p._owner || this);
+                    }
+                    p.alive = false;
+                    break;
+                }
             }
         }
 

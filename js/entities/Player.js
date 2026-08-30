@@ -215,7 +215,7 @@ class Player {
             if (this.evolvedArmor) {
                 const isCrit = Math.random() < this.critRate;
                 if (isCrit) {
-                    thornDmg = Math.floor(thornDmg * 1.8);
+                    thornDmg = Math.floor(thornDmg * Balance.THORN_CRIT_MULT);
                     this._thornCritX = attacker.x;
                     this._thornCritY = attacker.y;
                 }

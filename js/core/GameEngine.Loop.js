@@ -439,8 +439,10 @@ Gp._loop = function(timestamp) {
                 var wl = this._worldLayer || document.getElementById('world-layer');
                 if (wl) {
                     wl.classList.remove('shake-active');
-                    
                     wl.style.animationDuration = '';
+                    wl.style.setProperty('--sx', '');
+                    wl.style.setProperty('--sy', '');
+                    wl.style.animation = '';
                 }
             }
         }
@@ -465,7 +467,7 @@ Gp._loop = function(timestamp) {
                         var _we = this.enemies[_wi];
                         if (!_we.alive) continue;
                         var dmg = Math.max(1, Math.floor(_we.maxHp * 0.05));
-                        _we.takeDamage(dmg, 'wither');
+                        _we.takeDamage(dmg, 'wither', this.player.x, this.player.y);
                     }
                 }
             }

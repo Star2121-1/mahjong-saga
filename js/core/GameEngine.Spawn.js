@@ -12,7 +12,7 @@ Gp._spawnCoinsAt = function(x, y, isBoss, level) {
     var count = isBoss ? Math.floor(5 + level * 0.5 + Math.random() * 4) : Math.floor(3 + level * 0.3 + Math.random() * 3);
     var _vaultBlood = this._vaultMutations && this._vaultMutations.indexOf('bloodmoon') !== -1;
 if (this._activeMutator === 'bloodmoon' || _vaultBlood) count *= 2;
-    if (this._activeMutator === 'frenzy') count = Math.floor(count * 1.5);
+    if (this._activeMutator === 'frenzy') count = Math.floor(count * Balance.MUTATOR_FRENZY_GOLD_MULT);
     for (var i = 0; i < count; i++) {
         var cx = x + (Math.random() - 0.5) * 20;
         var cy = y + (Math.random() - 0.5) * 20;
@@ -60,9 +60,9 @@ Gp._spawnEliteEnemy = function() {
     } catch(e) {}
 
     /* Elite boost — 复合应用难度系数 */
-    enemy.maxHp = Math.floor(enemy.maxHp * diff * 1.5);
+    enemy.maxHp = Math.floor(enemy.maxHp * diff * Balance.ELITE_ENEMY_HP_MULT);
     enemy.hp = enemy.maxHp;
-    enemy.atk = Math.floor(enemy.atk * diff * 1.3);
+    enemy.atk = Math.floor(enemy.atk * diff * Balance.ELITE_ENEMY_ATK_MULT);
     enemy.el && enemy.el.classList.add('elite-marker');
 
     /* R30-M-005: 精英怪也应用临时debuff */

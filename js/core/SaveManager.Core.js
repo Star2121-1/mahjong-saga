@@ -390,8 +390,15 @@
             overdriveCount: engine._overdriveCount || 0,
             vaultMutations: engine._vaultMutations || [],
             gambleActive: engine._gambleActive || false,
+            gambleType: engine._gambleType || null,
+            gambleStaked: engine._gambleStaked || 0,
             shieldActive: engine._shieldActive || false,
+            shieldTimer: engine._shieldTimer || 0,
             eliteModeActive: engine._eliteModeActive || false,
+            eliteMultiplier: engine._eliteMultiplier || null,
+            activeMutator: engine._activeMutator || null,
+            tempEnemyAtkDebuff: engine._tempEnemyAtkDebuff !== undefined ? engine._tempEnemyAtkDebuff : null,
+            tempEnemySpeedDebuff: engine._tempEnemySpeedDebuff !== undefined ? engine._tempEnemySpeedDebuff : null,
             godModeApplied: engine._godModeApplied || false,
             bloodRageActive: engine._bloodRageActive || false,
             currentWaveSpawnedCount: engine.currentWaveSpawnedCount || 0,
@@ -427,8 +434,15 @@
         engine._abyssUnlockedCombos = data.abyssUnlockedCombos || [];
         engine._abyssActiveCombo = data.abyssActiveCombo || null;
         engine._gambleActive = data.gambleActive || false;
+        engine._gambleType = data.gambleType || null;
+        engine._gambleStaked = data.gambleStaked || 0;
         engine._shieldActive = data.shieldActive || false;
+        engine._shieldTimer = data.shieldTimer || 0;
         engine._eliteModeActive = data.eliteModeActive || false;
+        engine._eliteMultiplier = data.eliteMultiplier || null;
+        engine._activeMutator = data.activeMutator || null;
+        engine._tempEnemyAtkDebuff = data.tempEnemyAtkDebuff !== null && data.tempEnemyAtkDebuff !== undefined ? data.tempEnemyAtkDebuff : 0;
+        engine._tempEnemySpeedDebuff = data.tempEnemySpeedDebuff !== null && data.tempEnemySpeedDebuff !== undefined ? data.tempEnemySpeedDebuff : 0;
         engine._godModeApplied = data.godModeApplied || false;
         engine._bloodRageActive = data.bloodRageActive || false;
         engine.currentWaveSpawnedCount = data.currentWaveSpawnedCount || 0;
