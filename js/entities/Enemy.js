@@ -798,7 +798,7 @@ window.Enemy = class Enemy {
             }
             if (this._bossContactTimer <= 0) {
                 this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
-                var contactDmg = this._bossEnraged ? Math.floor(this.atk * 2) : this.atk;
+                var contactDmg = this._bossEnraged ? Math.floor(this.atk * Balance.BOSS_P3_CONTACT_DMG_MULT) : this.atk;
                 player.takeDamage(this._applyMapAffinityDmg(contactDmg, engine), this);
             }
         }
