@@ -695,7 +695,7 @@ window.Enemy = class Enemy {
                     if (this._bossWarningEl && this._bossWarningEl.parentNode) this._bossWarningEl.remove();
                     this._bossWarningEl = null;
                     this._bossWarningActive = false;
-                    this._bossAbilityTimer = 3.0 * (this._abyssTier >= 3 ? 0.85 : 1);
+                    this._bossAbilityTimer = Balance.BOSS_PHASE2_ABILITY_INTERVAL * (this._abyssTier >= 3 ? 0.85 : 1);
                 }
             } else {
                 this._bossAbilityTimer -= dt;
