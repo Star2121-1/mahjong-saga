@@ -294,7 +294,19 @@
 .game-clock-frozen .card-front.quality-legendary::after,
 .game-clock-frozen .relic-btn.legendary-btn,
 .game-clock-frozen .relic-btn.legendary-btn::before,
-.game-clock-frozen .relic-btn.legendary-btn::after {
+.game-clock-frozen .relic-btn.legendary-btn::after,
+/* R82-P1: 冰冻敌人冰霜呼吸在面板打开时不应暂停 */
+.game-clock-frozen .frozen-crystal,
+.game-clock-frozen .frozen-crystal::before,
+.game-clock-frozen .frozen-crystal::after,
+/* R82-P1: 特效动画在面板打开时不应暂停 */
+.game-clock-frozen .explosion-effect,
+.game-clock-frozen .explosion-effect::before,
+.game-clock-frozen .explosion-effect::after,
+.game-clock-frozen .knight-dodge-slam,
+.game-clock-frozen .knight-dodge-slam::before,
+.game-clock-frozen .knight-dodge-slam::after,
+.game-clock-frozen #overdrive-flash {
     animation-play-state: running !important;
     transition-property: all !important;
 }

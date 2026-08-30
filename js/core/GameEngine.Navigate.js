@@ -111,6 +111,14 @@ Gp.restart = function() {
     this._dayNightEl = null;
     if (this._abyssMistEl && this._abyssMistEl.parentNode) this._abyssMistEl.remove();
     this._abyssMistEl = null;
+    /* R82-P1: 清理Boss Phase 3雾霭DOM，Endgame.js有但Navigate.js遗漏 */
+    if (this._bossMistEl && this._bossMistEl.parentNode) this._bossMistEl.remove();
+    this._bossMistEl = null;
+    /* R82-P1: 清理共振光环DOM，Endgame.js有但Navigate.js遗漏 */
+    if (this._flameAuraEl && this._flameAuraEl.parentNode) this._flameAuraEl.remove();
+    this._flameAuraEl = null;
+    if (this._iceAuraEl && this._iceAuraEl.parentNode) this._iceAuraEl.remove();
+    this._iceAuraEl = null;
     if (this._battlefield) this._battlefield.classList.remove('abyss-depth-1', 'abyss-depth-2', 'abyss-depth-3', 'abyss-depth-n');
 
     var heroId = this.player ? this.player.heroId : 'Hero';

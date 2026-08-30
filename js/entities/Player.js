@@ -774,6 +774,7 @@ class Player {
         this.evolvedArmor = false;
         this.evolvedSpeed = false;
         this.evolvedVamp = false;
+        this.thornsLifesteal = false; /* R82-P1: 清除花缠枝状态，防止跨局残留 */
         this.speedMultiplier = 1.0;
         this.speed = this.baseSpeed;
         /* H-029: 雀灵流转 -- reset 中恢复速度 */
