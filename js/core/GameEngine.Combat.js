@@ -385,7 +385,9 @@ Gp._settleRun = async function(tokens) {
         };
         var vaultResult = window.saveManager.evaluateWeeklyVault(runStats);
         if (vaultResult.evaluated && vaultResult.completed) {
-            /* [Vault] 金库挑战完成 */
+            meta.metaTokens = (meta.metaTokens || 0) + (vaultResult.reward.metaTokens || 0);
+            meta.bossCores = (meta.bossCores || 0) + (vaultResult.reward.bossCores || 0);
+            this._spawnCausalityText('🏆 金库挑战完成: +' + (vaultResult.reward.metaTokens || 0) + '代币 +' + (vaultResult.reward.bossCores || 0) + '核心');
         }
     }
 
@@ -603,7 +605,7 @@ Gp._gameOver = async function() {
     /* Epoch 18: 每周超级挑战 */
     var weeklyCompleted = [];
     try {
-        var weeklyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: this._maxGoldThisRun || 0, hitsTaken: this._playerHitCountThisRun || 0, bossKills: this._bossKillsThisRun || 0, abyssDepth: this.loopCount || 0, dodges: this._totalDodgesThisRun || 0, crits: this._totalCritsThisRun || 0, won: false };
+        var weeklyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: this._maxGoldThisRun || 0, hitsTaken: this._playerHitCountThisRun || 0, bossKills: this._bossKillsThisRun || 0, abyssDepth: this.loopCount || 0, dodges: this._totalDodgesThisRun || 0, crits: this._totalCritsThisRun || 0, won: !this.gameOver };
         if (typeof window.saveManager.checkWeeklyCompletion === 'function') {
             var wc = window.saveManager.checkWeeklyCompletion(weeklyStats);
             weeklyCompleted = wc.completed || [];
