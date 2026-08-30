@@ -440,7 +440,7 @@ Gp._settleRun = async function(tokens) {
     if ((meta.bossKills || 0) >= 10) this._checkAchievement('boss_slayer');
     if ((meta.finalBossKills || 0) >= 5) this._checkAchievement('final_boss_down');
     /* 英雄解锁 */
-    if ((meta.unlockedHeroes || []).length >= 3) this._checkAchievement('all_heroes');
+    if ((meta.unlockedHeroes || []).length >= 4) this._checkAchievement('all_heroes');
     /* 套装共鸣 */
     if (meta.fullSetActivated) this._checkAchievement('full_set');
     /* 金币 */

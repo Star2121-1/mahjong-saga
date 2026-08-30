@@ -29,7 +29,7 @@ window.achievementConfig = [
     { id: 'get_rich',       name: '财源番涨',  desc: '单局积累 1000 金币',     icon: '💰', category: 'special', thresholds: [1000] },
     { id: 'gold_10k',       name: '富可敌国',  desc: '单局积累 10000 金币',    icon: '🪙', category: 'special', thresholds: [10000] },
     { id: 'speed_demon',    name: '极速通关',  desc: '单局 3 分钟内胡牌通关',      icon: '⏱️', category: 'special', thresholds: [180] },
-    { id: 'all_heroes',     name: '群雄汇聚',  desc: '解锁全部 3 名付费雀士',      icon: '🎭', category: 'special', thresholds: [3] },
+    { id: 'all_heroes',     name: '群雄汇聚',  desc: '解锁全部 4 名雀士',         icon: '🎭', category: 'special', thresholds: [4] },
     { id: 'full_set',       name: '番牌共鸣',  desc: '同时激活炎痕+永冻番印',  icon: '🔥❄️', category: 'special', thresholds: [1] },
 ];
 
@@ -60,7 +60,7 @@ window.achievementCheck = {
         overdrive_1:    function(meta) { return (meta.overdriveCount || 0) >= 1; },
         boss_slayer:    function(meta) { return (meta.bossKills || 0) >= 10; },
         final_boss_down:function(meta) { return (meta.finalBossKills || 0) >= 5; },
-        all_heroes:     function(meta) { return (meta.unlockedHeroes || []).length >= 3; },
+        all_heroes:     function(meta) { return (meta.unlockedHeroes || []).length >= 4; },
         full_set:       function(meta) { return (meta.fullSetActivated || false) === true; }
     }
 };
