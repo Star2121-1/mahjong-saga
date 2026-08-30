@@ -63,6 +63,8 @@ Gp.init = async function() {
             this.gameOver = false;
 
             if (window.rewardManager) window.rewardManager.hidePanel();
+            /* R73-P1: 断点恢复路径必须初始化SpawnSystem，否则Update循环中SpawnSystem.update会因engine未设置而崩溃 */
+            if (window.SpawnSystem) window.SpawnSystem.init(this);
             this._syncEntities();
             this._syncPlayerHP();
             this._renderWeaponSlots();

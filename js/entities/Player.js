@@ -559,8 +559,9 @@ class Player {
 
         /* Epoch 23: restore 后重新应用天赋/声望/装备词缀 */
         this._skipRelicAffixes = true; /* P0: snapshot已含最终词条值，避免二次应用导致数值翻倍 */
+        this._skipTalentBonus = true; /* R73-P0: 跳过天赋加成重算 — snapshot已含最终值，避免talent HP/speed/magnet暴击/减伤翻倍 */
         this._reapplyMetaBonuses(true); /* R51-P0: skip equip affixes — snapshot已含最终值 */
-        this._skipRelicAffixes = false;
+        this._skipTalentBonus = false;
         if (this.heroId === 'Mage') this._recalcThornsRate();
     }
 
@@ -568,15 +569,17 @@ class Player {
     _reapplyMetaBonuses(_skipEquipAffixes) {
         var meta = (window.saveManager && window.saveManager._metaCache) || {};
         var talents = meta.talents || {};
-        /* 天赋加成 */
-        var hpBoost = (talents.hu_patro || 0) * 20;
-        var spdBoost = (talents.zimo_speed || 0) * 15;
-        var magBoost = (talents.lian_magnet || 0) * 30;
-        this.maxHp += hpBoost;
-        this.hp = Math.min(this.hp + hpBoost, this.maxHp);
-        this.speed += spdBoost;
-        this.baseSpeed = this.speed;
-        this.magnetRadius += magBoost;
+        /* 天赋加成 — R73-P0: restore时若_skipTalentBonus为true则跳过，防止talent值从snapshot的最终值再次叠加 */
+        if (!this._skipTalentBonus) {
+            var hpBoost = (talents.hu_patro || 0) * 20;
+            var spdBoost = (talents.zimo_speed || 0) * 15;
+            var magBoost = (talents.lian_magnet || 0) * 30;
+            this.maxHp += hpBoost;
+            this.hp = Math.min(this.hp + hpBoost, this.maxHp);
+            this.speed += spdBoost;
+            this.baseSpeed = this.speed;
+            this.magnetRadius += magBoost;
+        }
         /* 装备词缀 */
         var sm = window.saveManager;
         var equipped = (sm && sm._metaCache && sm._metaCache.equipped) || { weapon: null, armor: null, talisman: null };
@@ -622,10 +625,12 @@ class Player {
         }
         this.setResonanceSpeed = (affixCounts.speed_pct || 0) >= 3;
         this.setResonanceIce = (affixCounts.ice_bonus || 0) >= 3;
-        /* 天赋额外加成 */
-        this.critRate += (talents.ting_intuition || 0) * 0.02;
-        this.damageReduction += (talents.gang_hardiness || 0) * 0.03;
-        this.cdFloor = Math.max(0.05, (this.cdFloor || Balance.DEFAULT_CD_FLOOR) - (talents.mo_pa_cd || 0) * 0.01);
+        /* 天赋额外加成 — R73-P0: restore时跳过，snapshot已含最终值 */
+        if (!this._skipTalentBonus) {
+            this.critRate += (talents.ting_intuition || 0) * 0.02;
+            this.damageReduction += (talents.gang_hardiness || 0) * 0.03;
+            this.cdFloor = Math.max(0.05, (this.cdFloor || Balance.DEFAULT_CD_FLOOR) - (talents.mo_pa_cd || 0) * 0.01);
+        }
         /* perk */
         var perks = (meta.purchasedPerks || {});
         if (perks.token_revive > 0 && perks.token_revive > (this._reviveCount || 0)) {
