@@ -79,7 +79,6 @@ window.Enemy = class Enemy {
             this.baseSpeed = this.speed;
             this.hue = 200;
             this._barrierAngle = 0;
-            this._barrierFront = true;
             this._barrierFacing = 0; /* R47-P0: 初始化朝向，防止首次受击时NaN */
         } else if (this.type === 'Bomber') {
             /* 自爆怪 — 接近玩家后爆炸 */
@@ -462,8 +461,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
         var sinA = Math.sin(this._barrierAngle);
         var len = Math.sqrt(dx * dx + dy * dy) || 1;
         var nx = dx / len, ny = dy / len;
-        /* 玩家相对于屏障法线的点积，正值表示在正面 */
-        this._barrierFront = (nx * cosA + ny * sinA) > Balance.BARRIER_FRONT_COS_ANGLE; // 正面60°扇区
+        /* R55-P1: _barrierFront is a dead variable (always true due to同义反复), removed */
 
         if (this.reachedPlayer) {
             this.attackTimer -= dt;
@@ -873,7 +871,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
         if (!this.alive) return false;
         var actualDmg = dmg;
         /* Barrier 正面无敌: 检查攻击方向 */
-        if (this.type === 'Barrier' && this._barrierFront !== undefined) {
+        if (this.type === 'Barrier') {
             var engine = this._eng || window.gameEngine;
             var player = engine && engine.player;
             /* R50-P1: 使用攻击源位置而非玩家位置，防止投射物从背后命中时误判为正面 */
@@ -938,7 +936,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                 /* R30-H-016: Tanker正面不受减伤，侧面/背面用TANKER_SIDESHOT_REDUCTION */
                 if (dot < -Balance.TANKER_SIDESHOT_REDUCTION) {
                     /* 背面攻击：全额伤害（不减伤） */
-                } else if (dot < 0.7) {
+                } else if (dot < Balance.TANKER_SIDE_THRESHOLD) {
                     /* 侧面攻击：减半伤害 */
                     actualDmg = Math.floor(actualDmg * Balance.TANKER_SIDESHOT_REDUCTION);
                 }

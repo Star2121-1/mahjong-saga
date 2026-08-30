@@ -198,6 +198,7 @@ window.Balance = {
     TANKER_SPEED_MULT: 0.5,
     TANKER_CRACK_HP_THRESHOLD: 0.5,  // 坦克龟裂纹HP阈值 (Enemy.js)
     TANKER_SIDESHOT_REDUCTION: 0.5,
+    TANKER_SIDE_THRESHOLD: 0.7,     // Tanker侧面减伤cos阈值 (Enemy.js)
     ASSASSIN_CRIT_MULT: 1.5,
     KNOCKBACK_DAMAGE_REDUCTION: 0.5,  // 屏障侧向伤害衰减 (Enemy.js)
     KNIGHT_COMBO_CHANCE: 0.15,         // 骑士万子连击触发概率 (Enemy.js)
