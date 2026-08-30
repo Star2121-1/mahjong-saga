@@ -127,7 +127,7 @@ Gp._spawnExpGemsAt = function(x, y, isBoss, level) {
         return this._combat.spawnExpGemsAt(this, x, y, isBoss, level);
     }
     var diff = 1;
-    try { diff = window.levelConfig[this._currentLevelId].difficultyFactor || 1; } catch(e) { console.warn('diff config read error', e); }
+    try { diff = (window.levelConfig[this._currentLevelId].difficultyFactor || 1) * (window.difficultyScale || 1); } catch(e) { console.warn('diff config read error', e); }
     var _vaultBloodGem = this._vaultMutations && this._vaultMutations.indexOf('bloodmoon') !== -1;
     var bloodMul = (this._activeMutator === 'bloodmoon' || _vaultBloodGem) ? 2 : 1;
     var arr = this._pendingExpGems = this._pendingExpGems || [];
@@ -416,7 +416,7 @@ Gp._triggerFlowerEvent = function (id) {
                 for (var i = 0; i < this.enemies.length; i++) { this.enemies[i].frozen = true; this.enemies[i].frozenTimer = B.FROZEN_TIMER_BONUS_BASE; }
                 break;
             case 'hua_mei': {
-                var ws = this.weapons || [];
+                var ws = this._activeWeapons || [];
                 if (ws.length > 0) ws[Math.floor(Math.random() * ws.length)].upgrade();
                 break;
             }

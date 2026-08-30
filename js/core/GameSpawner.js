@@ -132,7 +132,7 @@ Ss._spawnEnemy = function(engine, isBoss) {
     var diff = 1;
     try {
         var cfg = window.levelConfig[this._currentLevelId];
-        if (cfg) diff = cfg.difficultyFactor || 1;
+        if (cfg) diff = (cfg.difficultyFactor || 1) * (window.difficultyScale || 1);
     } catch(e) {}
     /* Boss Lord HP/ATK 不受难度系数影响（独立设计） */
     if (enemyType !== 'Boss_Lord') {

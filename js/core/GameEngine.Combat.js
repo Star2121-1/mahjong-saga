@@ -51,7 +51,9 @@ Gp._resumeAfterReward = function() {
 
 Gp._resumeAfterLevelUp = function() {
     if (window.rewardManager) window.rewardManager.hidePanel();
-    /* M-001: 升级期间如果波次已清除(_pendingReward=true)，恢复以显示奖励面板 */
+    /* R69-P0: 清除 _pendingReward 避免波次结算状态跨升级面板残留，防止奖励面板重复弹出 */
+    this._pendingReward = false;
+    /* M-001: 升级期间如果波次已清除，恢复以显示奖励面板 */
     if (this.enemies.length === 0 && this._activeCoins.length === 0 && this._expGems.length === 0
         && this.currentWaveSpawnedCount >= this._getWaveEnemyMax() && this._waveCount < this._getMaxWaves() - 1) {
         this._pendingReward = true;
@@ -490,6 +492,8 @@ Gp._settleRun = async function(tokens) {
 Gp._gameOver = async function() {
     /* P1: 防御性清除 victoryOverlay，防止叠加残留 */
     if (this.victoryOverlay) this.victoryOverlay.classList.remove('active');
+    /* R69-P1: 清除奖励面板防止游戏结束画面叠加 */
+    if (window.rewardManager) window.rewardManager.hidePanel();
     /* R30-H-017: 清理Boss Phase 3红色雾霭 */
     if (this._bossMistEl && this._bossMistEl.parentNode) this._bossMistEl.remove();
     this._bossMistEl = null;
@@ -716,6 +720,8 @@ Gp._initHandTiles = function() {
     if (!this._handTileGrid) return;
     this._handTileGrid.innerHTML = '';
     this._handTileSlots = [];
+    /* R69-P1: 重置手牌点击绑定标志，确保重启后雀魂手牌可正常交互 */
+    this._handClicksBound = false;
     for (var i = 0; i < 14; i++) {
         var slot = document.createElement('div');
         slot.className = 'hand-tile-slot';

@@ -687,7 +687,7 @@
             if (!nodesEl) return;
             var meta = window.saveManager._metaCache || {};
             var unlocked = meta.unlockedHeroes || ['Hero'];
-            var currentHero = meta.currentHero || 'Knight';
+            var currentHero = meta.currentSelectedHero || meta.currentHero || 'Knight';
             var cores = meta.bossCores || 0;
             var heroes = window.heroRegistry.getAllHeroes();
             nodesEl.innerHTML = '';

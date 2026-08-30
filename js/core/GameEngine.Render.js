@@ -143,6 +143,7 @@ Gp._updateProjectiles = function(dt) {
         var pgx = Math.floor(p.x / GRID_SIZE);
         var pgy = Math.floor(p.y / GRID_SIZE);
         var candidates = [];
+        var candidatesSet = new Set();
         for (var dgx = -1; dgx <= 1; dgx++) {
             for (var dgy = -1; dgy <= 1; dgy++) {
                 var ck = (pgx + dgx) + ',' + (pgy + dgy);
