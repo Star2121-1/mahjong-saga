@@ -26,13 +26,16 @@ Ap._ensureContext = function() {
         if (this._ctx.state === 'suspended') {
             this._ctx.resume().catch(function(e) { console.warn('[Audio] resume failed:', e); });
         }
-        /* P0: 页面可见性恢复机制 */
+        /* P0: 页面可见性恢复机制 — R62-P2: 添加guard防止重复监听 */
         var self = this;
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden && self._ctx && self._ctx.state === 'suspended') {
-                self._ctx.resume().catch(function(e) { console.warn('[Audio] visibility resume failed:', e); });
-            }
-        });
+        if (!this._visibilityListenerAdded) {
+            this._visibilityListenerAdded = true;
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden && self._ctx && self._ctx.state === 'suspended') {
+                    self._ctx.resume().catch(function(e) { console.warn('[Audio] visibility resume failed:', e); });
+                }
+            });
+        }
         this._initialized = true;
         return true;
     } catch (e) {
