@@ -881,7 +881,7 @@ window.Enemy = class Enemy {
         if (this.frozen) {
             actualDmg = Math.floor(dmg * Balance.FROZEN_DAMAGE_MULT);
             if (!this._freezeHitDecayed) {
-                this.frozenTimer -= 0.25;
+                this.frozenTimer -= Balance.FROZEN_HIT_DECAY;
                 this._freezeHitDecayed = true;
             }
             if (this.frozenTimer <= 0) {
@@ -930,8 +930,8 @@ window.Enemy = class Enemy {
             }
         }
         /* K-029: 万子连击 -- 15% 几率造成额外 50% 伤害，有全局冷却防高频触发 */
-        var _pg3 = (this._eng || window.gameEngine) && (this._eng || window.gameEngine).player;
-        if (source === 'player' && _pg3 && _pg3.heroId === 'Knight') {
+        var _eng3 = this._eng || window.gameEngine;
+        if (_eng3 && _eng3.player && _eng3.player.heroId === 'Knight') {
             if (this._comboCooldown <= 0 && Math.random() < Balance.KNIGHT_COMBO_CHANCE) {
                 actualDmg = Math.floor(actualDmg * 1.5);
                 this._comboCooldown = Balance.KNIGHT_COMBO_COOLDOWN;

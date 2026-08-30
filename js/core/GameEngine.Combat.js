@@ -722,6 +722,7 @@ Gp._clearHandTile = function(index) {
 };
 
 Gp._syncPlayerHP = function() {
+    if (!this.player || !this.playerHpFill || !this.playerHpText) return;
     var pct = (this.player.hp / this.player.maxHp) * 100;
     this.playerHpFill.style.width = Math.max(0, pct) + '%';
     this.playerHpText.textContent = Math.max(0, Math.floor(this.player.hp)) + '/' + this.player.maxHp;
@@ -941,7 +942,7 @@ Gp._syncUI = function() {
             this._milestoneShown = true;
         } else if (this._waveCount < threshold75) {
             this.waveMilestoneBanner.classList.remove('visible');
-            this._milestonesShown = false;
+            this._milestoneShown = false;
         }
     }
 

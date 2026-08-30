@@ -44,7 +44,7 @@ Gp._onClick = function(e) {
     /* Epoch 36: 攻击音效 */
     if (isCrit) window.audioManager && window.audioManager.play('crit');
     else window.audioManager && window.audioManager.play('attack');
-    if (p.freezeChance > 0 && Math.random() < p.freezeChance) {
+    if (!enemy.frozen && p.freezeChance > 0 && Math.random() < p.freezeChance) {
         window.audioManager && window.audioManager.play('freeze');
     }
 
