@@ -141,7 +141,7 @@ Gp._spawnExpGemsAt = function(x, y, isBoss, level) {
         }
     } else {
         level = level || 1;
-        var gemVal = Math.floor((1 + level * 0.5) * diff * bloodMul);
+        var gemVal = Math.floor((1 + level * Balance.GEM_LEVEL_SCALE) * diff * bloodMul);
         if (gemVal < 1) gemVal = 1;
         arr.push(new window.ExpGem(x, y, gemVal));
     }

@@ -67,6 +67,7 @@ window.Balance = {
     FLOAT_TEXT_TIMEOUT_MS: 650,      // 飘字消失延迟 (GameCombat.js)
     EXPLOSION_EFFECT_TIMEOUT: 400,   // 爆炸特效消失延迟 (GameCombat.js)
     CAUSALITY_TIMEOUT_MS: 2000,      // 因果文本消失延迟 (GameCombat.js)
+    SPLASH_DAMAGE_MULT: 0.5,         // 爆炸溅射伤害系数 (Endgame.js + Enemy.js)
 
     /* ── 突变系统 ── */
     MUTATOR_BLOODMOON_ATK_MULT: 1.4,

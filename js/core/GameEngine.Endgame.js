@@ -72,7 +72,7 @@ Gp._onClick = function(e) {
 
     if (p.explosionChance > 0 && Math.random() < p.explosionChance) {
         window.audioManager && window.audioManager.play('explode');
-        var splashDmg = Math.floor(damage * 0.5);
+        var splashDmg = Math.floor(damage * Balance.SPLASH_DAMAGE_MULT);
         this._spawnExplosion(wx, wy, 50, splashDmg, enemy.id);
     }
 };
@@ -285,7 +285,7 @@ Gp.restart = function() {
     this._elapsed = 0;
     this.kills = 0;
     this._spawnTimer = 0;
-    this._spawnInterval = 1.5;
+    this._spawnInterval = Balance.DEFAULT_SPAWN_INTERVAL;
     this._difficultyTimer = 0;
 
     var heroId = this.player ? this.player.heroId : 'Hero';

@@ -134,10 +134,10 @@ window.Enemy = class Enemy {
             this._bossContactTimer = 0;
             this._comboCooldown = 0; /* K-030: 万子连击冷却 */
             /* R29-H-006: Boss_Lord 也需要应用 Abyss 倍增 */
-            if (loopCount > 0) {
-                this.maxHp = Math.floor(this.maxHp * Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, loopCount));
+            if (_lc > 0) {
+                this.maxHp = Math.floor(this.maxHp * Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, _lc));
                 this.hp = this.maxHp;
-                this.atk = Math.floor(this.atk * Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, loopCount));
+                this.atk = Math.floor(this.atk * Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, _lc));
             }
         }
 
@@ -809,7 +809,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
             }
             if (this._bossContactTimer <= 0) {
                 this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
-                var contactDmg = this._bossEnraged ? Math.floor(this.atk * Balance.BOSS_P3_CONTACT_DMG_MULT) : this.atk;
+                var contactDmg = this._bossPhase === 3 ? Math.floor(this.atk * Balance.BOSS_P3_CONTACT_DMG_MULT) : this.atk;
                 player.takeDamage(this._applyMapAffinityDmg(contactDmg, engine), this);
             }
         }
@@ -990,7 +990,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                 if (!_fctTypeOverride && _pg.explosionChance > 0 && Math.random() < _pg.explosionChance) {
                     var _exX = sourceX != null ? sourceX : (_pg.x || this.x);
                     var _exY = sourceY != null ? sourceY : (_pg.y || this.y);
-                    var _splashDmg = Math.floor(actualDmg * 0.5);
+                    var _splashDmg = Math.floor(actualDmg * Balance.SPLASH_DAMAGE_MULT);
                     if (_eng && _eng._combat && _eng._combat.spawnExplosion) {
                         _eng._combat.spawnExplosion(_eng, _exX, _exY, 50, _splashDmg, this.id);
                     }
@@ -1100,7 +1100,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                 }
             } else {
                 /* R38-P1: 普通敌人EXP随等级/难度缩放 */
-                var gemVal = Math.floor((1 + level * 0.5) * diff * gemMul);
+                var gemVal = Math.floor((1 + level * Balance.GEM_LEVEL_SCALE) * diff * gemMul);
                 if (gemVal < 1) gemVal = 1;
                 arr.push(new window.ExpGem(this.x, this.y, gemVal));
             }

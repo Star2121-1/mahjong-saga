@@ -189,7 +189,7 @@ Gp._buyAbyssItem = function(item) {
         case 'cdReduce':
             if (this._activeWeapons) {
                 for (var i = 0; i < this._activeWeapons.length; i++) {
-                    this._activeWeapons[i].cd = Math.max(p.cdFloor || 0.2, this._activeWeapons[i].cd * 0.8);
+                    this._activeWeapons[i].cd = Math.max(p.cdFloor || Balance.DEFAULT_CD_FLOOR, this._activeWeapons[i].cd * 0.8);
                 }
             }
             this._spawnCausalityText('⏱️ 武器CD-20%');

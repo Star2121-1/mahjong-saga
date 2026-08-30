@@ -468,6 +468,11 @@ class Player {
             _baseMaxHp: this._baseMaxHp || this.maxHp,
             _relicAffixes: this._relicAffixes ? { ...this._relicAffixes } : {},
             _startsWithRelic: !!this._startsWithRelic,
+            /* R51-P0: 补充缺失的持久化字段 — 避免断点续玩后暴击/复活/秘密丢失 */
+            critDamageBonus: this.critDamageBonus || 0,
+            _hasRevive: !!this._hasRevive,
+            _discoveredSecrets: this._discoveredSecrets ? [...this._discoveredSecrets] : [],
+            _tempBuffTimeLeft: this._tempBuffTimeLeft || 0,
             mapAffinityLevel: this.mapAffinityLevel || 0
         };
     }
@@ -525,6 +530,12 @@ class Player {
         this._relicAffixes = data._relicAffixes ? { ...data._relicAffixes } : {};
         this._startsWithRelic = !!data._startsWithRelic;
         this._hasRevive = this._reviveCount > 0;
+        /* R51-P0: 恢复缺失的持久化字段 */
+        this.critDamageBonus = data.critDamageBonus || 0;
+        this._discoveredSecrets = data._discoveredSecrets ? [...data._discoveredSecrets] : [];
+        this._tempBuffTimeLeft = data._tempBuffTimeLeft || 0;
+        /* _hasRevive 由 meta perks 在 _reapplyMetaBonuses 中重新设置，此处仅初始化快照值 */
+        if (!data._hasRevive && this._reviveCount <= 0) this._hasRevive = false;
         this.setResonanceSpeed = !!data.setResonanceSpeed;
         this.setResonanceIce = !!data.setResonanceIce;
         this.mapAffinityLevel = data.mapAffinityLevel || 0;
@@ -537,13 +548,13 @@ class Player {
 
         /* Epoch 23: restore 后重新应用天赋/声望/装备词缀 */
         this._skipRelicAffixes = true; /* P0: snapshot已含最终词条值，避免二次应用导致数值翻倍 */
-        this._reapplyMetaBonuses();
+        this._reapplyMetaBonuses(true); /* R51-P0: skip equip affixes — snapshot已含最终值 */
         this._skipRelicAffixes = false;
         if (this.heroId === 'Mage') this._recalcThornsRate();
     }
 
     /** 重新应用 meta 天赋/声望/perk 加成 (用于 restore 后) */
-    _reapplyMetaBonuses() {
+    _reapplyMetaBonuses(_skipEquipAffixes) {
         var meta = (window.saveManager && window.saveManager._metaCache) || {};
         var talents = meta.talents || {};
         /* 天赋加成 */
@@ -572,7 +583,7 @@ class Player {
             this.hp = Math.min(this.hp, this.maxHp);
             this.magnetRadius += base.magnet_boost || 0;
             if (base.atk_factor) this.atk = Math.floor(this.atk * (1 + base.atk_factor));
-            if (item.affixes) {
+            if (!_skipEquipAffixes && item.affixes) {
                 for (var ai = 0; ai < item.affixes.length; ai++) {
                     var affix = item.affixes[ai];
                     if (affix.id === 'xp_gain') this.xpGainFactor += affix.val;

@@ -74,7 +74,7 @@ Sys.endOverdrive = function(engine) {
     engine._overdriveActive = false;
     engine._overdriveTimer = 0;
 
-    if (engine.player) engine.player.cdFloor = engine._origCdFloor || 0.2;
+    if (engine.player) engine.player.cdFloor = engine._origCdFloor || Balance.DEFAULT_CD_FLOOR;
     engine._origCdFloor = null; /* P0: 清除跨局残留 */
 
     /* P2: 恢复武器原始伤害（triggerOverdrive 曾将其×2） */
