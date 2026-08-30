@@ -10,7 +10,6 @@ window.Balance = {
     ABYSS_LOOP_SPEED_MULT: 1.05,    // 深渊轮回 Speed 倍率 (Enemy.js)
     ABYSS_SHOP_PRICE_MULT: 1.5,     // 深渊商店价格倍率
     ABYSS_COMBO_UNLOCK_INTERVAL: 5, // 每 N 层解锁一个新深渊变异组合
-    ABYSS_ENEMY_VARIANT_MULT: 1.2,  // 深渊变体属性倍率
     ABYSS_BLOODMOON_HP_MULT: 1.6,   // 深渊血月HP加成 (Abyss.js)
     ABYSS_BLOODMOON_ATK_MULT: 1.8,  // 深渊血月ATK加成 (Abyss.js)
     ABYSS_BLOODMOON_DROP_MULT: 2,   // 深渊血月掉落加成 (Abyss.js)
@@ -126,8 +125,6 @@ window.Balance = {
 
     /* ── 图腾 ── */
     TOTEM_SPAWN_INTERVAL: 5,
-    MAX_TOTEMS: 10,
-    TOTEM_RADIUS: 100,
     TOTEM_BUFF_SPEED_MULT: 1.3,              // 图腾增益速度倍率 (Enemy.js)
 
     /* ── Stalker ── */
@@ -146,7 +143,6 @@ window.Balance = {
     BOSS_LORD_BASE_HP: 250,
     BOSS_LORD_BASE_ATK: 50,
     BOSS_LORD_BASE_SPEED: 20,
-    BOSS_LORD_BASE_RADIUS: 70,
     BOSS_PHASE3_SPEED_MULT: 1.8,
     BOSS_GAMBLE_HP_MULT: 1.5,            // 深渊试炼Boss HP加成 (GameEngine.Events.js)
     VAULT_BLOODMOON_ATK_MULT: 1.4,         // 变异保险库血月Boss ATK加成 (GameEngine.Events.js)
@@ -175,7 +171,6 @@ window.Balance = {
     STALKER_CHARGE_DURATION: 1.5,    // 猎杀者蓄力时长 (Enemy.js)
     STALKER_CHARGE_OPACITY: 0.4,     // 猎杀者蓄力透明度 (Enemy.js)
     ENEMY_DEAD_OPACITY: 0,           // 敌人死亡透明度 (Enemy.js)
-    BOSS_PHASE1_BULLET_COUNT: 12,
     BOSS_WARNING_DURATION: 0.8,
     BOSS_PHASE3_SUMMON_INTERVAL: 4,
     BOSS_P3_RADIATION_COUNT: 6,     // P3辐射弹幕数量 (Enemy.js)
@@ -270,17 +265,12 @@ window.Balance = {
     LEVEL_EXP_OFFSET: 15,             // EXP公式偏移量 (Player.js)
 
     /* ── Timeout/Durations ── */
-    TIMEOUT_SHATTER_ANIM_MS: 500,     // 碎裂动画超时 (Enemy.js)
     TIMEOUT_DECAY_DRAIN_MS: 3000,     // 腐蚀效果超时 (Enemy.js)
     TIMEOUT_BANG_REMOVE_MS: 1600,     // 花牌移除超时 (Spawn.js)
     TIMEOUT_NOTIF_REMOVE_MS: 3000,    // 通知移除超时 (Combat.js)
     TIMEOUT_TRAIL_REMOVE_MS: 400,     // 拖尾移除超时 (Combat.js)
     TIMEOUT_FLICKER_REMOVE_MS: 2600,  // 闪烁移除超时 (Combat.js)
-    TIMEOUT_SLAM_REMOVE_MS: 300,      // 冲击波移除超时 (Combat.js)
-    TIMEOUT_GUIDE_BEGIN_MS: 500,      // 引导开始超时 (Guide.js)
-    TIMEOUT_EVENT_SLAM_MS: 500,       // 事件冲击波超时 (Events.js)
-    TIMEOUT_ENDGAME_VICTORY_MS: 650,  // 胜利动画超时 (Endgame.js)
-    TIMEOUT_ENDGAME_RETREAT_MS: 400,  // 撤退动画超时 (Endgame.js)
+};
 
     /* ── 工具 ── */
     MS_PER_SECOND: 1000,
