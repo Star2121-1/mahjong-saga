@@ -197,6 +197,16 @@ Gp._enterAbyss = function() {
     this._tempCritBonus = 0;
     this._tempShield = 0;
     this._extraEliteCount = 0;
+    /* P0: 应用深渊轮回属性缩放 — _abyssLoopHpScale/_abyssLoopAtkScale 在 Abyss.js 中已计算 */
+    if (this._abyssLoopHpScale && this._abyssLoopHpScale > 1 && this.player) {
+        this.player._baseMaxHp = this.player.maxHp;
+        this.player.maxHp = Math.floor(this.player.maxHp * this._abyssLoopHpScale);
+        this.player.hp = Math.floor(this.player.hp * this._abyssLoopHpScale);
+    }
+    if (this._abyssLoopAtkScale && this._abyssLoopAtkScale > 1 && this.player) {
+        this.player._abyssLoopBaseAtk = this.player.atk;
+        this.player.atk = Math.floor(this.player.atk * this._abyssLoopAtkScale);
+    }
     this._milestonesShown = false;
     /* R30-H-011: 清除打牌/胡牌模式状态，防止深渊轮回后游戏冻结 */
     this._discardMode = false;
