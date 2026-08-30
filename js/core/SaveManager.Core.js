@@ -455,6 +455,39 @@
         var levelCfg = window.levelConfig[levelId];
         if (levelCfg) { engine._mapW = levelCfg.mapW; engine._mapH = levelCfg.mapH; }
         engine.player.restore(data.player);
+        /* R30-H-022: 武器断点恢复（含降级保护，避免旧存档或加载顺序导致崩溃） */
+        try {
+            var _wData = data.weapons;
+            if (_wData && _wData.length > 0) {
+                engine._resetAllWeapons();
+                var _wValidIds = (window.rewardManager && window.rewardManager.weaponInfos) ? Object.keys(window.rewardManager.weaponInfos) : ['TrackingBlade','OrbitShield','ShotgunBurst','GroundSlammer','LaserBeam','NovaPulse'];
+                for (var _wi = 0; _wi < _wData.length; _wi++) {
+                    var _wd = _wData[_wi];
+                    if (!_wd || typeof _wd.id !== 'string') continue;
+                    if (_wValidIds.indexOf(_wd.id) === -1) continue;
+                    var _WCtor = window[_wd.id];
+                    if (!_WCtor) continue;
+                    var _wInst = new _WCtor(_wd.level || 1);
+                    _wInst.cooldownTimer = _wd.cooldownTimer || 0;
+                    if (_wd.atkFactor != null) _wInst.atkFactor = _wd.atkFactor;
+                    if (_wd.baseCd != null) _wInst._baseCd = _wd.baseCd;
+                    else if (_wInst._baseCd == null) _wInst._baseCd = _wInst.cd;
+                    if (_wd.cd != null) _wInst.cd = _wd.cd;
+                    else if (_wInst.cd == null) _wInst.cd = _wInst._baseCd || _wInst.cd;
+                    engine._activeWeapons.push(_wInst);
+                }
+                if (engine._activeWeapons.length === 0) {
+                    engine._resetAllWeapons();
+                    if (typeof engine._initDefaultWeapons === 'function') engine._initDefaultWeapons();
+                } else {
+                    if (typeof engine._syncWeaponSlots === 'function') engine._syncWeaponSlots();
+                    if (typeof engine._renderWeaponSlots === 'function') engine._renderWeaponSlots();
+                    if (typeof engine._checkWeaponSynergies === 'function') engine._checkWeaponSynergies();
+                }
+            }
+        } catch (_wErr) {
+            console.warn('[Save] 武器断点恢复失败:', _wErr);
+        }
     };
 
     /* ── 格式化 ── */

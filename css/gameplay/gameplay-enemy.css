@@ -8,6 +8,7 @@
     width: 36px; height: 48px;
     z-index: 5; cursor: pointer;
     transform: translate(-50%, -50%);
+    will-change: transform; /* GPU合成：敌人每帧transform位置更新 */
     display: flex; align-items: center; justify-content: center;
     font-weight: 700;
     /* 2.5D 牌体：多层 box-shadow 堆叠厚度 */

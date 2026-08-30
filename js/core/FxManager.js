@@ -27,7 +27,7 @@ Fp.init = function() {
     }
 };
 
-Fp.spawnText = function(x, y, text, typeOrColor, size) { /* P1: 移除未使用的duration参数 */
+Fp.spawnText = function(x, y, text, typeOrColor) {
     if (!this._layer) this.init();
     var node = this._borrowNode();
     if (!node) return;
@@ -46,7 +46,6 @@ Fp.spawnText = function(x, y, text, typeOrColor, size) { /* P1: 移除未使用�
     node.textContent = text;
     node.className = 'fct-node fct-' + type;
     if (color) node.style.color = color;
-    if (size) node.style.fontSize = size + 'px';
     node.style.left = x + 'px';
     node.style.top = y + 'px';
     node._fctActive = true;
@@ -106,12 +105,29 @@ Fp._healthCheck = function() {
     var now = Date.now();
     for (var i = 0; i < this._pool.length; i++) {
         var n = this._pool[i];
-        if (n._fctActive && now - n._lastUsed > 10000) {
+        if (n._fctActive && now - n._lastUsed > 6000) {
+            /* R46-P0-fix: 超时节点放回池底（而非移出DOM），确保池容量可恢复 */
+            if (n._fctTimeout) { clearTimeout(n._fctTimeout); n._fctTimeout = null; }
             n.style.display = 'none';
             n._fctActive = false;
-            if (n.parentNode) n.parentNode.removeChild(n);
-            this._pool.splice(i, 1);
-            i--;
+            n._fctOnEnd = null;
+            /* 节点保留在 fct-layer 的末尾，等待下次 _borrowNode 循环复用 */
+        }
+    }
+};
+
+/* ── 主动清理：游戏重置时回收所有活跃节点 ── */
+Fp.cleanup = function() {
+    for (var i = 0; i < this._pool.length; i++) {
+        var n = this._pool[i];
+        if (n._fctActive) {
+            if (n._fctTimeout) { clearTimeout(n._fctTimeout); n._fctTimeout = null; }
+            n.removeEventListener('animationend', n._fctOnEnd);
+            n.style.display = 'none';
+            n.textContent = '';
+            n.className = 'fct-node';
+            n._fctActive = false;
+            n._fctOnEnd = null;
         }
     }
 };
