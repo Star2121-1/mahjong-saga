@@ -288,9 +288,11 @@
         var meta = this._metaCache || {};
         var level = meta.prestigeLevel || 0;
         if (level <= 0) return;
-        /* 每级声望: ATK +0.5, HP +2 */
-        player.atkBonus = (player.atkBonus || 0) + level * 0.5;
-        player.hpBonus = (player.hpBonus || 0) + level * 2;
+        /* P0: 直接修改实际战斗属性，而非写入死字段 atkBonus/hpBonus */
+        player.atk += level * 0.5;
+        var hpGain = level * 2;
+        player.maxHp += hpGain;
+        player.hp += hpGain;
     };
 
 })();

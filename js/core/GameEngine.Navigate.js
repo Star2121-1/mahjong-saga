@@ -3,6 +3,8 @@
     var Gp = window.GameEngine.prototype;
 
 Gp.restart = function() {
+    /* P0: 确保Overdrive状态在所有路径都正确清理，防止伤害残留 */
+    if (this._overdriveActive) this._endOverdrive();
     /* P1-1: 清除残留定时器，防止导航后回调在旧引擎上执行 */
     if (this._gambleTimeout) { clearTimeout(this._gambleTimeout); this._gambleTimeout = null; }
     if (this._interWaveTimeout) { clearTimeout(this._interWaveTimeout); this._interWaveTimeout = null; }
