@@ -343,6 +343,9 @@ Gp._startNewRun = function(heroId, levelId) {
         var meta = window.saveManager._metaCache || {};
         var abyssLevel = meta.highestEndlessLoop || 0;
         levelCfg = window.proceduralLevelGenerator.generate(abyssLevel);
+        /* R65-P0: 注册生成的关卡配置，确保 _getMaxWaves/_getWaveEnemyMax 能正确查询 */
+        window.levelConfig[levelCfg.id] = levelCfg;
+        this._currentLevelId = levelCfg.id;
     }
     this._mapW = levelCfg.mapW;
     this._mapH = levelCfg.mapH;
