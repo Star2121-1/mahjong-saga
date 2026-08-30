@@ -982,10 +982,8 @@ Gp._syncUI = function() {
         var ragePct = this.player.maxRage > 0 ? (this.player.rage / this.player.maxRage * 100) : 0;
         this.rageDisplay.style.width = Math.min(100, Math.max(0, ragePct)) + '%';
         /* 怒气全满 → 呼吸金光提示可触发 Overdrive（纯视觉 class 钩子，不影响逻辑） */
-        var rageContainer = this.rageDisplay.parentNode;
-        if (rageContainer) rageContainer.classList.toggle('rage-full', ragePct >= 100);
-        var rtxt = document.getElementById('rage-bar-text');
-        if (rtxt) rtxt.textContent = '怒气 ' + this.player.rage + ' / ' + this.player.maxRage;
+        if (this.rageContainer) this.rageContainer.classList.toggle('rage-full', ragePct >= 100);
+        if (this.rageText) this.rageText.textContent = '怒气 ' + this.player.rage + ' / ' + this.player.maxRage;
     }
 
     /* ── Boss Lord 血条同步 ── */

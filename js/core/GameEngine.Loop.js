@@ -252,6 +252,7 @@ Gp._loop = function(timestamp) {
                         for (var _lci = 0; _lci < this._activeCoins.length; _lci++) this._activeCoins[_lci].el.remove();
                         this._activeCoins = [];
                         if (this.bossHpBar) this.bossHpBar.classList.remove('active');
+                        if (this.bossHpFill) this.bossHpFill.style.width = '0%';
                         if (this._expGems.length > 0) {
                             this._pendingBossLordSettle = true;
                         } else {
