@@ -460,6 +460,7 @@ class Player {
             xpGainFactor: this.xpGainFactor,
             iceDurationBonus: this.iceDurationBonus,
             magnetRadius: this.magnetRadius,
+            _baseMagnetRadius: this._baseMagnetRadius || this.magnetRadius, /* R57-P1: 序列化基准磁铁半径 */
             rage: this.rage,
             maxRage: this.maxRage,
             setResonanceSpeed: this.setResonanceSpeed,
@@ -523,6 +524,7 @@ class Player {
         this.xpGainFactor = data.xpGainFactor || 1.0;
         this.iceDurationBonus = data.iceDurationBonus || 0;
         this.magnetRadius = data.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT;
+        this._baseMagnetRadius = data._baseMagnetRadius || this.magnetRadius; /* R57-P1: 恢复基准磁铁半径 */
         this.rage = data.rage || 0;
         this.maxRage = data.maxRage || 100;
         this.damageReduction = data.damageReduction || 0;

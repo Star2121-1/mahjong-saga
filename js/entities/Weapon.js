@@ -34,6 +34,7 @@ window.Weapon = class {
         this._odOrigAtk = undefined;
         this.atkFactor = this._baseAtkFactor || 1.0; /* 从初始值恢复，而非从构造参数计算 */
         this._justFired = false;
+        this.cooldownTimer = 0; /* R57-P1: 重置冷却计时器，防止跨局残留进度 */
     }
 };
 
