@@ -19,7 +19,7 @@ window.Balance = {
     ENEMY_BASE_HP: 20,               // 普通敌人基础 HP (Enemy.js)
     ENEMY_BASE_ATK: 5,
     MAP_AFFINITY_REDUCTION_PER_LEVEL: 0.1,   // 每级关卡亲和减伤比例 (Boot.js)
-    MAP_AFFINITY_MAX_LEVEL: 3,                // 关卡亲和最高等级               // 普通敌人基础 ATK (Enemy.js)
+    MAP_AFFINITY_MAX_LEVEL: 3,                // 关卡亲和最高等级
     ENEMY_LEVEL_SPEED_SCALE: 3,      // 每级速度增量 (Enemy.js)
     ENEMY_RADIUS: 18,                // 普通敌人碰撞半径 (Enemy.js)
     ENEMY_ATTACK_COOLDOWN: 1.5,      // 敌人攻击冷却 (Enemy.js)
@@ -92,7 +92,7 @@ window.Balance = {
 
     /* ── 玩家系统 ── */
     PLAYER_MAX_RAGE: 100,
-    PLAYER_DEFAULT_MAGNET_RADIUS: 60,
+    
     PLAYER_RADIUS: 28,
     REVIVE_HP_PERCENT: 0.3,
     REVIVE_INVULN_DURATION: 1.5,
@@ -283,7 +283,7 @@ window.Balance = {
     /* ── 工具 ── */
     MS_PER_SECOND: 1000,
     PI_OVER_3: Math.PI * 2 / 3,
-    PI_OVER_4: Math.PI * 4 / 3,
+    PI_OVER_4: Math.PI * 4 / 3,              // Note: value is 4π/3 (240°), name is misleading; use PI_4OVER3 if clarity needed
     BARRIER_ANGLE_HALF_WIDTH: Math.PI / 3,  // 屏障怪正面无敌扇区半角 60° (Enemy.js)
 
     /* ── HUPAI / MahjongHand.js + GameEngine.Spawn.js + Player.js ── */
