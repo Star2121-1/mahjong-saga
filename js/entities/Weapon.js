@@ -251,7 +251,8 @@ window.GroundSlammer = class extends window.Weapon {
                 this.activeShockwaves.splice(i, 1);
                 continue;
             }
-            var radius = 10 + progress * 70;
+            /* R32-W-001: 使用Balance常量替代硬编码值 */
+            var radius = Balance.GROUND_SLAMMER_MIN_RADIUS + progress * Balance.GROUND_SLAMMER_RADIUS_GROWTH;
             sw.el.style.width = (radius * 2) + 'px';
             sw.el.style.height = (radius * 2) + 'px';
             sw.el.style.left = (sw.x - radius) + 'px';
