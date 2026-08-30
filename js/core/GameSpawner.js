@@ -12,7 +12,6 @@ var Ss = window.SpawnSystem;
 
 Ss.init = function(engine) {
     this.engine = engine;
-    this._enemyIdCounter = 0;
     this._spawnTimer = 0;
     this._difficultyTimer = 0;
     this._bossTimer = 0;
@@ -35,7 +34,6 @@ Ss.init = function(engine) {
 /* ── 重置 ── */
 
 Ss.reset = function(engine) {
-    this._enemyIdCounter = 0;
     this._spawnTimer = 0;
     this._difficultyTimer = 0;
     this._bossTimer = 0;
@@ -127,7 +125,7 @@ Ss._spawnEnemy = function(engine, isBoss) {
     x = Math.max(margin, Math.min(this._mapW - margin, x));
     y = Math.max(margin, Math.min(this._mapH - margin, y));
 
-    var id = this._enemyIdCounter++;
+    var id = ++engine._enemyIdCounter;
     var enemyType = this._selectEnemyType(isBoss);
     var enemy = new (window.Enemy || window.GameEngine.prototype._enemyConstructor)(id, x, y, level, isBoss === true, enemyType);
     enemy._eng = engine; /* Inject engine ref for window.gameEngine fallback */
