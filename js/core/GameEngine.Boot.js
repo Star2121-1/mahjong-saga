@@ -327,6 +327,8 @@ Gp._startNewRun = function(heroId, levelId) {
     this._huCountThisRun = 0;
     this._tempAspd = 0;
     this._tempAspdT = 0;
+    /* R38-P1: 重置满手牌Toast计时器，防止新游戏误触发 */
+    this._handFullToastAt = 0;
     /* R30-H-017: 重置深渊combo状态，防止跨局污染 */
     if (typeof this._initAbyssState === 'function') this._initAbyssState();
     this._zoomLevel = 1;

@@ -169,7 +169,7 @@ Sys.applyMutator = function(engine, mutatorId) {
     } else if (mutatorId === 'frailty') {
         /* L-008: 脆弱突变不再双向增益 — 玩家 +80% ATK 但受击伤害 +30% */
         engine._frailtyOrigPlayerAtk = engine.player.atk;
-        engine._frailtyOrigPlayerDmgTaken = engine._frailtyOrigPlayerDmgTaken || 0;
+        /* R38-P1: 移除未使用的变量，防止未来混淆 */
         engine.player.atk = Math.floor(engine.player.atk * Balance.MUTATOR_FRAILTY_PLAYER_ATK_MULT);
         engine.player._frailtyDebuff = true;
         for (var i = 0; i < engine.enemies.length; i++) {
@@ -384,15 +384,6 @@ Sys.updateShake = function(engine, dt) {
                 wl.style.transform = '';
             }
         }
-    }
-};
-
-/* ── Overdrive 计时 ── */
-
-Sys.updateOverdrive = function(engine, dt) {
-    if (engine._overdriveActive) {
-        engine._overdriveTimer -= dt;
-        if (engine._overdriveTimer <= 0) Sys.endOverdrive(engine);
     }
 };
 

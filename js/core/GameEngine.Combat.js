@@ -706,6 +706,7 @@ Gp._removeEnemyDOM = function(enemy) {
     var el = this._enemyElements.get(enemy.id);
     if (el && el.parentNode) el.remove();
     this._enemyElements.delete(enemy.id);
+    enemy._hpFill = null; /* R38-P2: 清除stale DOM引用 */
 };
 
 Gp._initHandTiles = function() {
@@ -893,6 +894,8 @@ Gp._syncEntities = function() {
         var fill = enemy._hpFill || el.querySelector('.enemy-hp-fill');
         if (fill) {
             if (!enemy._hpFill) enemy._hpFill = fill;
+            /* R38-P2: 防止stale指针 — 检测el是否仍包含该节点 */
+            if (fill.parentNode !== el) enemy._hpFill = null;
             var pct = (enemy.hp / enemy.maxHp) * 100;
             fill.style.width = Math.max(0, pct) + '%';
         }
@@ -943,7 +946,8 @@ Gp._spawnAchievementText = function(text) {
 };
 
 Gp._syncUI = function() {
-    this.waveDisplay.textContent = '\uD83C\uDF0A \u7b2c ' + (this._waveCount + 1) + ' \u6ce2';
+    /* R38-P1: null guard \u9632\u6B62HUD\u5143\u7D20\u7F3A\u5931\u65F6\u62A5\u9519 */
+    if (this.waveDisplay) this.waveDisplay.textContent = '\uD83C\uDF0A \u7b2c ' + (this._waveCount + 1) + ' \u6ce2';
 
     /* Epoch 46: \u6b7b\u4ea1\u65f6\u6e05\u7406\u6ce2\u6b21\u6a2a\u5e45 */
     if (this.waveMilestoneBanner) this.waveMilestoneBanner.classList.remove('visible');
@@ -960,10 +964,10 @@ Gp._syncUI = function() {
         }
     }
 
-    this.goldDisplay.textContent = '\uD83D\uDCB0 ' + this.player.gold;
-    this.atkDisplay.textContent = '\u2694\uFE0F ' + this.player.atk;
-    this.killsDisplay.textContent = '\u2620\uFE0F ' + this.kills;
-    this.timeDisplay.textContent = '\u23F1 ' + this._formatTime(this._elapsed);
+    if (this.goldDisplay && this.player) this.goldDisplay.textContent = '\uD83D\uDCB0 ' + this.player.gold;
+    if (this.atkDisplay && this.player) this.atkDisplay.textContent = '\u2694\uFE0F ' + this.player.atk;
+    if (this.killsDisplay) this.killsDisplay.textContent = '\u2620\uFE0F ' + this.kills;
+    if (this.timeDisplay) this.timeDisplay.textContent = '\u23F1 ' + this._formatTime(this._elapsed);
 
     /* \u6210\u5C31\uFF1A\u91D1\u5E01\u68C0\u6D4B */
     if (this.player.gold > (this._maxGoldThisRun || 0)) {

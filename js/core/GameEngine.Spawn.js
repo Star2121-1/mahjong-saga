@@ -100,7 +100,6 @@ Gp._tryDropEquipment = function(x, y, isBossLord) {
     var meta = window.saveManager._metaCache;
     if (!meta) return;
     meta.equipments = meta.equipments || [];
-    meta.equipments.push(item);
     /* 限制装备仓库最近 100 件，防止无限增长 */
     if (meta.equipments.length > 100) meta.equipments = meta.equipments.slice(-100);
     window.saveManager._saveMetaToStorage().catch(function(e){ console.warn('[Spawn] saveMeta failed:', e); });
@@ -288,17 +287,7 @@ Gp._rewardKill = function(enemy) {
     this.player.addGold(goldAmt);
     this.player.rage = Math.min(this.player.maxRage, this.player.rage + 5 + (this._tempBerserkBonus ? 10 : 0));
     if (this._tempBerserkBonus) this._tempBerserkBonus = false;
-    /* 经验直接给（自动吸取，不创建 DOM） */
-    if (!enemy.isBoss) {
-        var gemVal = Math.floor(1 + (enemy.level || 1) * 0.5);
-        var leveled = this.player.gainExp(gemVal);
-        this._spawnExpText(this.player.x, this.player.y, gemVal);
-        if (leveled) {
-            this._levelUpPending = true;
-            window.audioManager && window.audioManager.play('levelup');
-            this._syncExpBar();
-        }
-    }
+    /* R38-P0: EXP仅通过gem路径给予（Enemy.js onDeath已生成gem），避免双计数 */
     /* 雀魂系统：击杀掉牌（HUPAI_DESIGN.md v2.0） */
     this._tryTileDrop(enemy);
 };
@@ -501,13 +490,18 @@ Gp._applyRunBonus = function (suit, tierMult) {
         p.atk += inc;
         if (this._spawnFloatText) this._spawnFloatText(p.x, p.y - 40, '万顺 攻+' + inc, false);
     } else if (suit === 'tong') {
-        var floor = p.cdFloor || window.Balance.DEFAULT_CD_FLOOR;
+        var floor = p.cdFloor || Balance.DEFAULT_CD_FLOOR;
         var red = B.HUPAI_RUN_TONG_CD_INC * (tierIdx + 1);
         for (var i = 0; i < this._activeWeapons.length; i++) {
             var w = this._activeWeapons[i];
             /* P1-3: 改 _baseCd 记账，避免被 Render 每帧 _weaponCdReduction 强写回滚 */
             if (!w._baseCd) w._baseCd = w.cd;
-            w._baseCd = Math.max(floor, w._baseCd * (1 - red));
+            /* R38-P0: 累计筒顺减CD上限 HUPAI_RUN_TONG_CD_CAP，防止复利累积超限 */
+            if (!w._tongCdReduction) w._tongCdReduction = 0;
+            var newReduction = Math.min(B.HUPAI_RUN_TONG_CD_CAP, w._tongCdReduction + red);
+            var deltaRed = newReduction - w._tongCdReduction;
+            w._tongCdReduction = newReduction;
+            w._baseCd = Math.max(floor, w._baseCd * (1 - deltaRed));
             w.cd = w._baseCd;
         }
         if (this._spawnFloatText) this._spawnFloatText(p.x, p.y - 40, '筒顺 冷却−', false);

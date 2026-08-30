@@ -609,7 +609,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
             }
             if (this._bossPhase === 3 && !this._bossEnraged) {
                 this._bossEnraged = true;
-                this.speed = this.baseSpeed * Balance.BOMBER_SPEED_MULT;
+                this.speed = this.baseSpeed * Balance.BOSS_PHASE3_SPEED_MULT;
                 /* R33-E-001: 重置接触伤害CD，防止首帧接触秒杀 */
                 this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
                 if (this.el) this.el.classList.add('boss-enraged');
@@ -755,17 +755,20 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                 this._bossSummonTimer = Balance.BOSS_PHASE3_SUMMON_INTERVAL * (this._abyssTier >= 3 ? 0.85 : 1);
                 var maxSummon = Balance.BOSS_PHASE3_SUMMON_MAX;
                 if (engine && typeof engine._spawnEnemyType === 'function' && this._summonCount < maxSummon) {
-                    var stalkerLeft = Math.max(0, 4 - this._summonCount);
+                    var stalkerLeft = Math.max(0, Balance.BOSS_PHASE3_SUMMON_STALKER - this._summonCount);
                     for (var si = 0; si < stalkerLeft; si++) engine._spawnEnemyType('Stalker');
-                    var tankLeft = Math.max(0, 2 - this._summonCount - stalkerLeft);
+                    var tankLeft = Math.max(0, Balance.BOSS_PHASE3_SUMMON_TANKER - this._summonCount - stalkerLeft);
                     for (var ti = 0; ti < tankLeft; ti++) engine._spawnEnemyType('Tanker');
                     /* B4: 灭世巨神混编召唤 */
                     if (this._abyssTier >= Balance.BOSS_ABYSS_TIER_3) {
                         var abyssLeft = Math.max(0, maxSummon - this._summonCount - stalkerLeft - tankLeft);
-                        for (var ai = 0; ai < abyssLeft; ai++) engine._spawnEnemyType('Archer');
-                        var _shamanSpawned = (this._summonCount + 1 < maxSummon && abyssLeft > 0) ? 1 : 0;
+                        var abyssCount = Math.min(2, abyssLeft);
+                        for (var ai = 0; ai < abyssCount; ai++) engine._spawnEnemyType('Archer');
+                        var _shamanSpawned = (this._summonCount + 1 + abyssCount < maxSummon && abyssLeft > 0) ? 1 : 0;
                         if (_shamanSpawned) engine._spawnEnemyType('Shaman');
-                        this._summonCount += stalkerLeft + tankLeft + (this._abyssTier >= Balance.BOSS_ABYSS_TIER_3 ? Math.min(2, maxSummon - this._summonCount - stalkerLeft - tankLeft) + _shamanSpawned : _shamanSpawned);
+                        this._summonCount += stalkerLeft + tankLeft + abyssCount + _shamanSpawned;
+                    } else {
+                        this._summonCount += stalkerLeft + tankLeft;
                     }
                 }
             }
@@ -1069,9 +1072,11 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
             var _engRef = this._eng || window.gameEngine;
             var _vaultBlood = _engRef && _engRef._vaultMutations && _engRef._vaultMutations.indexOf('bloodmoon') !== -1;
             var gemMul = (_engRef && _engRef._activeMutator === 'bloodmoon' || _vaultBlood) ? 2 : 1;
+            var level = this.level || 1;
             if (this.isBoss) {
                 var cnt = 5 + Math.floor(Math.random() * 4);
-                var totalExp = 25 * gemMul;
+                /* R38-P1: Boss EXP 随等级/难度缩放，使用BOSS_TOTAL_EXP_GEMS常量 */
+                var totalExp = Math.floor(Balance.BOSS_TOTAL_EXP_GEMS * (1 + (level - 1) * 0.1) * diff * gemMul);
                 var avg = Math.floor(totalExp / cnt);
                 var rem = totalExp - avg * cnt;
                 for (var gi = 0; gi < cnt; gi++) {
@@ -1079,7 +1084,8 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                     arr.push(new window.ExpGem(this.x, this.y, v));
                 }
             } else {
-                var gemVal = Math.floor(1 * diff * gemMul);
+                /* R38-P1: 普通敌人EXP随等级/难度缩放 */
+                var gemVal = Math.floor((1 + level * 0.5) * diff * gemMul);
                 if (gemVal < 1) gemVal = 1;
                 arr.push(new window.ExpGem(this.x, this.y, gemVal));
             }

@@ -335,8 +335,8 @@ class Player {
                 /* P2: 太阳神巨像提供50%固定反伤，Mage被动在此基础上叠加 */
                 var _baseThorns = 0.50;
                 if (this.heroId === 'Mage') {
-                    /* Mage被动在基础反伤之上增加 */
-                    this.thornsRate = Math.min(1.0, _baseThorns + (this.relicLevels.thorn_armor || 0) * 0.05);
+                    /* Mage被动在基础反伤之上增加，R38-P0: 包含affix加成防止丢失 */
+                    this.thornsRate = Math.min(1.0, _baseThorns + (this.relicLevels.thorn_armor || 0) * 0.05 + (this._thornsAffixBonus || 0));
                 } else {
                     this.thornsRate = _baseThorns;
                 }
