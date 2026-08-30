@@ -876,6 +876,7 @@ window.Enemy = class Enemy {
             }
             var dot = toPlayerX * Math.cos(this._barrierAngle) + toPlayerY * Math.sin(this._barrierAngle);
             if (dot > Balance.BARRIER_FRONT_COS_ANGLE) actualDmg = Math.floor(actualDmg * Balance.BARRIER_FRONT_DAMAGE_MULT);
+            else if (dot < -Balance.BARRIER_FRONT_COS_ANGLE) actualDmg = Math.floor(actualDmg * Balance.KNOCKBACK_DAMAGE_REDUCTION); /* P1: 背面减伤 */
         }
         var isAssassinCrit = false;
         if (this.frozen) {

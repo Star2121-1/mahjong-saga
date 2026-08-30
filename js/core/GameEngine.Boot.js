@@ -608,7 +608,6 @@ Gp._beginLoop = function() {
     /* H-028: run ID counter 防止过时调用重入循环 */
     this._loopRunId = (this._loopRunId || 0) + 1;
     var myRunId = this._loopRunId;
-    this._currentLoopRunId = myRunId;
     var self = this;
     /* 惰性绑定 — 确保 _loop 已存在 */
     if (!this._boundLoop || typeof this._boundLoop !== 'function') {
