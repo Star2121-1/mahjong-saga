@@ -1015,7 +1015,7 @@
             } else if (c.id === 'speed_demon') {
                 currentVal = (meta.runStats && meta.runStats.fastestRun != null && meta.runStats.fastestRun < 9999) ? Math.round(meta.runStats.fastestRun) : 9999;
             } else if (c.id === 'first_kill') {
-                currentVal = meta.totalKills || 0;
+                currentVal = (meta.totalKills || 0) >= 1 ? 1 : 0;
             }
             progress = Math.min(100, Math.round((currentVal / threshold) * 100));
             html +=
@@ -1499,6 +1499,21 @@
             });
         }
 
+        /* R54-P0: 赛季奖励按钮绑定 */
+        var seasonRewardBtn = document.getElementById('season-reward-btn');
+        if (seasonRewardBtn) {
+            seasonRewardBtn.addEventListener('click', function() {
+                window.saveManager.claimSeasonReward().then(function(res) {
+                    if (res.ok) {
+                        refreshStatsPanel();
+                        refreshMainHub();
+                    } else {
+                        alert(res.reason || '领取失败');
+                    }
+                }).catch(function(err) { alert('领取失败: ' + err.message); });
+            });
+        }
+
         /* Epoch 36: 金库按钮 */
         var claimBtn = document.getElementById('vault-claim-btn');
         if (claimBtn) {
@@ -1593,6 +1608,11 @@
         if (result.ok) {
             refreshStatsPanel();
             refreshMainHub();
+        } else {
+            /* R54-P0: 精英模式切换失败时给用户反馈 */
+            btn.textContent = result.reason || '操作失败';
+            btn.disabled = true;
+            setTimeout(function() { refreshStatsPanel(); }, 1200);
         }
     }
 
