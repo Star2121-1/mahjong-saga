@@ -395,6 +395,7 @@ Gp._renderHandTiles = function () {
 
 /* ════ 雀魂系统 · 花牌拾取即触发（MVP 简化版，V2 接入 GameSystems 分发器） ════ */
 Gp._triggerFlowerEvent = function (id) {
+    var B = window.Balance; /* R58-P0: 补充Balance引用，防止ReferenceError */
     if (!window.MahjongHand || !this.player) return;
     var info = window.MahjongHand.faceInfo(id);
     var label = info ? info.label : '?';

@@ -489,13 +489,9 @@ Gp._loop = function(timestamp) {
                 }
                 if (this.player.lifestealRate < 1) {
                     /* R46: 狂乱 combo 击杀回血 — 之前为空实现 */
+                    /* R58-P0: 移除每帧回血，改为击杀时触发（见Spawn.js _rewardKill） */
                     if (!this._abyssFrenzyLifestealSet) {
                         this._abyssFrenzyLifestealSet = true;
-                    }
-                    /* R57-P0: 补全狂乱combo吸血逻辑，击杀时按比例回血 */
-                    var frenzyHeal = Math.floor(this.player.atk * 0.10);
-                    if (frenzyHeal > 0) {
-                        this.player.hp = Math.min(this.player.maxHp, this.player.hp + frenzyHeal);
                     }
                 }
             } else if (_abyssCombo === 'abyss_gravity') {

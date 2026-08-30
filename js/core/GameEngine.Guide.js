@@ -28,7 +28,7 @@ Gp._dimExcept = function(selectorArray) {
     var battlefield = this.battlefield;
     if (!battlefield) return;
     battlefield.querySelectorAll(':scope > *:not(#guide-overlay):not(#pause-overlay):not(#reward-overlay):not(#mutator-overlay):not(#victory-overlay):not(#game-over-overlay):not(#boss-hp-bar)').forEach(function(child) {
-        var id = child.id || child.className.baseVal;
+        var id = child.id || (child.className || "").baseVal || child.className || "";
         if (selectorArray.some(function(s) { return child.matches(s); })) {
             self._originalOpacities.set(child, child.style.opacity || '1');
             child.style.opacity = '1';
