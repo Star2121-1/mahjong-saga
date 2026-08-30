@@ -270,7 +270,6 @@ window.Balance = {
     TIMEOUT_NOTIF_REMOVE_MS: 3000,    // 通知移除超时 (Combat.js)
     TIMEOUT_TRAIL_REMOVE_MS: 400,     // 拖尾移除超时 (Combat.js)
     TIMEOUT_FLICKER_REMOVE_MS: 2600,  // 闪烁移除超时 (Combat.js)
-};
 
     /* ── 工具 ── */
     MS_PER_SECOND: 1000,
