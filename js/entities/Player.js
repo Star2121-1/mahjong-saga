@@ -13,6 +13,7 @@ class Player {
         this.critRate = 0;
         this._weaponCdReduction = 0; /* P1-3: 跨局冷却缩减清零 */
         this._tempBuffTimeLeft = undefined;
+        this.mapAffinityLevel = 0; /* R56-P1: 关卡亲和等级初始化，防止未定义 */
         this._tempAtkBoost = 0;
         this._tempHpBonus = 0;
         this._doubleCoinNextWave = false;

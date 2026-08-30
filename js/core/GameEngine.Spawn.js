@@ -606,6 +606,7 @@ Gp._triggerHu = function (hu) {
                 break;
             case 'qingyise':
                 p.atk += Math.ceil(p.atk * B.HU_QINGYISE_DMG);
+                p.atk = Math.min(p.atk, B.ATK_MAX_CAP); /* R56-P1: 单色攻击上限保护，防止无限叠加 */
                 p.huQingyise = true;
                 if (this.playerEl) this.playerEl.classList.add('hu-qingyise');
                 break;

@@ -631,6 +631,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
             }
             if (this._bossPhase === 2) {
                 this._bossAbilityTimer = Balance.BOSS_PHASE2_ABILITY_INTERVAL;
+                this._bossContactTimer = 0; /* R56-P1: 进入P2时重置接触冷却 */
                 if (this._bossWarningEl && this._bossWarningEl.parentNode) this._bossWarningEl.remove();
                 this._bossWarningEl = null;
                 this._bossWarningActive = false;

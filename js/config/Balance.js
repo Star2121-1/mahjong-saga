@@ -313,6 +313,7 @@ window.Balance = {
     HU_QIDUI_DODGE: 0.15,
     HU_QIDUI_SPD: 0.15,
     HU_QIDUI_MAGNET: 0.80,
+    ATK_MAX_CAP: 9999, /* R56-P1: 玩家攻击力上限保护，防止胡牌增益无限叠加 */
     HUPAI_ZI_EAST_KNOCKBACK: 250,
 
     /* ── Archer 一索箭妖 ── */
