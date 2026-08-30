@@ -5,6 +5,7 @@ window.AudioManager = function() {
     this._muted = false;
     this._volume = 0.6;
     this._initialized = false;
+    this._lastRetryTime = 0; /* R54-P1: 节流重试计时器 */
     /* Epoch 47: 分类音量控制 */
     this._categoryVolumes = {
         sfx: 1.0,    /* 攻击/暴击/受击等效果音 */
@@ -47,14 +48,21 @@ Ap._ensureContext = function() {
  * 用于 setMuted(false) 或页面恢复可见时主动触发
  */
 Ap.tryReinit = function() {
-    if (!this._ctx && !this._initialized) {
+    /* R54-P1: 检查ctx状态而非仅initialized标志，防止浏览器回收后永久失效 */
+    if (!this._ctx || this._ctx.state === 'closed' || this._ctx.state === 'suspended') {
+        this._initialized = false;
         this._ensureContext();
     }
 };
 
 /* 统一播放入口 */
 Ap.play = function(sound, opts) {
-    if (!this._ctx && !this._ensureContext()) return;
+    /* R54-P1: 节流重试避免高频调用时的控制台污染 */
+    if (!this._ctx) {
+        var now = Date.now();
+        if (now - (this._lastRetryTime || 0) < 2000) return;
+        if (!this._ensureContext()) return;
+    }
     if (this._muted) return;
     opts = opts || {};
     /* P1: 应用分类音量 */
@@ -74,6 +82,7 @@ Ap.play = function(sound, opts) {
         case 'gameover': this._sine(300, 0.4, vol * 0.5, -0.8); break;
         case 'freeze':   this._sine(1000, 0.1, vol * 0.3, 0.1); break;
         case 'explode':  this._noise(0.2, vol * 0.6); break;
+        default: console.warn('[AudioManager] unknown sound:', sound); break;
     }
 };
 
