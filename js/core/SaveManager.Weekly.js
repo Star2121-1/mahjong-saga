@@ -90,7 +90,7 @@
         });
     };
 
-    SaveManager.prototype.evaluateWeeklyVault = function(runStats) {
+    SaveManager.prototype.evaluateWeeklyVault = async function(runStats) {
         var self = this;
         var meta = this._metaCache || {};
         var vault = meta.weeklyVault || {};
@@ -101,8 +101,8 @@
             vault.reward = vault.challenge.reward;
             meta.weeklyVault = vault;
             this._metaCache = meta;
-            /* 持久化完成状态 */
-            this.saveMeta(meta).then(function() {}).catch(function(e) { console.warn('evaluateWeeklyVault save failed:', e); });
+            /* R54-P0: 同步持久化完成状态，防止fire-and-forget丢失 */
+            try { await self.saveMeta(meta); } catch(e) { console.warn('evaluateWeeklyVault save failed:', e); }
             return { evaluated: true, completed: true, reward: vault.reward };
         }
         return { evaluated: true, completed: false };
