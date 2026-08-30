@@ -650,7 +650,7 @@ Gp._triggerHu = function (hu) {
         self._unfreezeClock();
         self._huLock = false;
         if (self._handTileBar) self._handTileBar.classList.remove('hu-flash');
-    }, 900);
+    }, Balance.TIMEOUT_BANG_REMOVE_MS); /* R70-P2: 使用统一常量1600ms，与hu-bang动画时长1.6s对齐 */
 };
 
 /* ════ 雀魂系统 · A5 打牌模式（满14未胡：冻结+点选打出） ════ */
@@ -698,7 +698,12 @@ Gp._bindHandTileClicks = function () {
         var slot = e.target.closest('.hand-tile-slot');
         if (!slot) { if (self._discardMode) self._exitDiscardMode(); return; }
         var idx = Array.prototype.indexOf.call(self._handTileSlots, slot);
-        if (idx < 0 || idx >= self._handTiles.length) { if (self._discardMode) self._exitDiscardMode(); return; }
+        if (idx < 0 || idx >= self._handTiles.length) {
+            /* R70-P1: 手牌满14张时点击空槽不退出弃牌模式，防止玩家误触导致打牌流程中断 */
+            if (self._discardMode && self._handTiles.length >= window.Balance.HUPAI_HAND_MAX) return;
+            if (self._discardMode) self._exitDiscardMode();
+            return;
+        }
         if (!self._discardMode) {
             if (self._handTiles.length >= window.Balance.HUPAI_HAND_MAX) self._enterDiscardMode(idx);
             return;

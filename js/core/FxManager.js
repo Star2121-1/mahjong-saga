@@ -100,12 +100,12 @@ Fp._returnNode = function(node) {
     if (++this._returnCount % 50 === 0) this._healthCheck();
 };
 
-/* ── 健康检查：强制回收僵死的节点 ── */
+/* R70-P1: 缩短健康检查阈值从6000ms到3500ms，减少僵死节点占用池容量的时间 */
 Fp._healthCheck = function() {
     var now = Date.now();
     for (var i = 0; i < this._pool.length; i++) {
         var n = this._pool[i];
-        if (n._fctActive && now - n._lastUsed > 6000) {
+        if (n._fctActive && now - n._lastUsed > 3500) {
             /* R46-P0-fix: 超时节点放回池底（而非移出DOM），确保池容量可恢复 */
             if (n._fctTimeout) { clearTimeout(n._fctTimeout); n._fctTimeout = null; }
             n.style.display = 'none';
