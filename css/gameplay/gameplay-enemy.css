@@ -183,6 +183,7 @@
 
 /* Boss 精英 — 金边牌 */
 .enemy.boss {
+    will-change: transform; /* R40-P1: GPU合成加速Boss动画 */
     width: 64px; height: 80px;
     background: linear-gradient(135deg, #fff8e1, #ffe0b2);
     border: 2px solid #ffb300;
