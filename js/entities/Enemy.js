@@ -518,7 +518,7 @@ window.Enemy = class Enemy {
                 boom.style.width = '60px';
                 boom.style.height = '60px';
                 engine._worldLayer.appendChild(boom);
-                setTimeout(function(el) { if (el && el.parentNode) el.remove(); }, 350, boom);
+                setTimeout(function(el) { if (el && el.parentNode) el.remove(); }, Balance.EXPLOSION_EFFECT_TIMEOUT, boom);
             }
             /* 对范围内所有敌人造成伤害（不包括自己） */
             if (engine) {

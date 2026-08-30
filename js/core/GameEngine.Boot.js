@@ -789,6 +789,16 @@ Gp._bindAudioButton = function() {
             btn.textContent = '🔇';
             btn.title = '点击开启声音';
         }
+        /* P1: 恢复上次音量设置 */
+        if (meta && meta.audioVolume != null && window.audioManager) {
+            window.audioManager.setVolume(meta.audioVolume);
+        }
+        if (meta && meta.audioCategoryVolumes && window.audioManager) {
+            var _cvKeys = Object.keys(meta.audioCategoryVolumes);
+            for (var _ci = 0; _ci < _cvKeys.length; _ci++) {
+                window.audioManager.setCategoryVolume(_cvKeys[_ci], meta.audioCategoryVolumes[_cvKeys[_ci]]);
+            }
+        }
     } catch(e) {}
 };
 

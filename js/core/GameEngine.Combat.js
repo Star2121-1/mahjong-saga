@@ -480,6 +480,8 @@ Gp._settleRun = async function(tokens) {
 };
 
 Gp._gameOver = async function() {
+    /* P1: 防御性清除 victoryOverlay，防止叠加残留 */
+    if (this.victoryOverlay) this.victoryOverlay.classList.remove('active');
     /* R30-H-017: 清理Boss Phase 3红色雾霭 */
     if (this._bossMistEl && this._bossMistEl.parentNode) this._bossMistEl.remove();
     this._bossMistEl = null;

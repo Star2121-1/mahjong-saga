@@ -69,6 +69,15 @@ Ap.play = function(sound, opts) {
 /* Epoch 47: 分类音量设置 */
 Ap.setCategoryVolume = function(category, vol) {
     this._categoryVolumes[category] = Math.max(0, Math.min(1, vol));
+    /* P1: 持久化分类音量到 meta */
+    try {
+        var m = window.saveManager && window.saveManager._metaCache;
+        if (m) {
+            if (!m.audioCategoryVolumes) m.audioCategoryVolumes = {};
+            m.audioCategoryVolumes[category] = this._categoryVolumes[category];
+            window.saveManager._saveMetaToStorage().catch(function(e) { console.warn('[Audio] category volume save failed:', e); });
+        }
+    } catch(e) {}
 };
 
 Ap.getCategoryVolume = function(category) {
@@ -157,6 +166,11 @@ Ap.setMuted = function(muted) {
 
 Ap.setVolume = function(v) {
     this._volume = Math.max(0, Math.min(1, v));
+    /* P1: 持久化音量到 meta，刷新后恢复 */
+    try {
+        var m = window.saveManager && window.saveManager._metaCache;
+        if (m) { m.audioVolume = this._volume; window.saveManager._saveMetaToStorage().catch(function(e) { console.warn('[Audio] volume save failed:', e); }); }
+    } catch(e) {}
 };
 
 window.audioManager = new window.AudioManager();
