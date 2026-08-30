@@ -83,7 +83,7 @@ Ss.update = function(dt, engine) {
         for (var bi = 0; bi < engine.enemies.length; bi++) {
             if (engine.enemies[bi].alive && engine.enemies[bi].isBoss) bossCount++;
         }
-        if (bossCount < 1) this._spawnEnemy(engine, true);
+        if (bossCount < 1 && engine._bossLordWave) this._spawnEnemy(engine, true); /* R47-P0: 仅在Boss波次生成领主 */
     }
 };
 

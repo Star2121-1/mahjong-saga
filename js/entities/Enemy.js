@@ -80,6 +80,7 @@ window.Enemy = class Enemy {
             this.hue = 200;
             this._barrierAngle = 0;
             this._barrierFront = true;
+            this._barrierFacing = 0; /* R47-P0: 初始化朝向，防止首次受击时NaN */
         } else if (this.type === 'Bomber') {
             /* 自爆怪 — 接近玩家后爆炸 */
             this.maxHp = Math.floor(this.maxHp * Balance.BOMBER_HP_MULT);
@@ -452,8 +453,8 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
         /* R37-P0: 更新屏障独立朝向 — 仅在移动方向显著变化时更新 */
         var moveAngle = Math.atan2(dy, dx);
         var angleDiff = Math.abs(moveAngle - this._barrierFacing);
-        if (angleDiff > Math.PI / 4 || angleDiff < Math.PI * 3 / 4) {
-            /* 玩家在新方向扇区内，更新朝向 */
+        if (angleDiff <= Math.PI / 4) {
+            /* 玩家角度变化在±45°扇区内，更新朝向 */
             this._barrierFacing = moveAngle;
         }
         /* P1: 使用点积替代冗余的atan2，计算方向向量余弦值 */
@@ -537,7 +538,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                     /* P1: 使用平方距离比较避免 sqrt */
                     var explodeR2 = this._explodeRadius * this._explodeRadius;
                     if (exdx * exdx + exdy * exdy <= explodeR2) {
-                        e.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * 0.5), engine), this, this.x, this.y);
+                        e.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.BOMBER_EXPLODE_DAMAGE_MULT), engine), this, this.x, this.y);
                     }
                 }
                 player.takeDamage(this._applyMapAffinityDmg(this.atk, engine), this);
