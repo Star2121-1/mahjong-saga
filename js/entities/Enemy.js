@@ -892,7 +892,7 @@ window.Enemy = class Enemy {
         }
         var _pg = (this._eng || window.gameEngine) && (this._eng || window.gameEngine).player; if (_pg && _pg.heroId === 'Assassin') {
             if (this.frozen || this._knockbackVelocity > 0) {
-                actualDmg = Math.floor(actualDmg * 1.5);
+                actualDmg = Math.floor(actualDmg * Balance.ASSASSIN_CRIT_MULT);
                 isAssassinCrit = true;
             }
         }
@@ -934,7 +934,7 @@ window.Enemy = class Enemy {
         var _eng3 = this._eng || window.gameEngine;
         if (_eng3 && _eng3.player && _eng3.player.heroId === 'Knight') {
             if (this._comboCooldown <= 0 && Math.random() < Balance.KNIGHT_COMBO_CHANCE) {
-                actualDmg = Math.floor(actualDmg * 1.5);
+                actualDmg = Math.floor(actualDmg * Balance.KNIGHT_COMBO_DAMAGE_MULT);
                 this._comboCooldown = Balance.KNIGHT_COMBO_COOLDOWN;
             }
         }
@@ -954,7 +954,7 @@ window.Enemy = class Enemy {
                 if (!_fctTypeOverride && _pg.critRate > 0) {
                     var _wc = Math.random() < (_pg.critRate + (_eng._tempCritBonus || 0));
                     if (_wc) {
-                        actualDmg = Math.floor(actualDmg * (2.5 + (_pg.critDamageBonus || 0)));
+                        actualDmg = Math.floor(actualDmg * (Balance.CRIT_BASE_MULT + (_pg.critDamageBonus || 0)));
                         /* R32-D-001: 不重复扣血 — hp已在line 938扣减，此处仅重算实际伤害值 */
                     }
                 }

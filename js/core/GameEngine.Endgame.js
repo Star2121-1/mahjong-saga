@@ -37,7 +37,7 @@ Gp._onClick = function(e) {
     if (this._tempCritBonus) this._tempCritBonus = 0;
     /* Epoch 32: 临时攻击增益 */
     var atkMult = 1 + (p._tempAtkBoost || 0);
-    var damage = isCrit ? Math.floor(p.atk * atkMult * (2.5 + (p.critDamageBonus || 0))) : Math.floor(p.atk * atkMult);
+    var damage = isCrit ? Math.floor(p.atk * atkMult * (Balance.CRIT_BASE_MULT + (p.critDamageBonus || 0))) : Math.floor(p.atk * atkMult);
     if (damage === 0) return;
 
     enemy.takeDamage(damage, this.player, undefined, undefined, isCrit ? 'crit' : undefined);

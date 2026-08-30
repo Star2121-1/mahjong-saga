@@ -220,7 +220,7 @@ class Player {
                     this._thornCritY = attacker.y;
                 }
                 /* 反伤伤害上限：不超过玩家 ATK 的 2 倍 */
-                const thornCap = Math.floor(this.atk * 2);
+                const thornCap = Math.floor(this.atk * Balance.THORNS_DAMAGE_CAP_MULT);
                 if (thornDmg > thornCap) thornDmg = thornCap;
             }
             if ((this.evolvedVamp || this.thornsLifesteal) && this.lifestealRate > 0) {

@@ -195,6 +195,9 @@ window.Balance = {
     KNOCKBACK_DAMAGE_REDUCTION: 0.5,  // 屏障侧向伤害衰减 (Enemy.js)
     KNIGHT_COMBO_CHANCE: 0.15,         // 骑士万子连击触发概率 (Enemy.js)
     KNIGHT_COMBO_COOLDOWN: 2.0,        // 骑士万子连击单目标冷却 (秒) (Enemy.js)
+    KNIGHT_COMBO_DAMAGE_MULT: 1.5,     // 骑士万子连击伤害倍率 (Enemy.js)
+    CRIT_BASE_MULT: 2.5,               // 暴击基础倍率 (Enemy.js + Endgame.js)
+    THORNS_DAMAGE_CAP_MULT: 2,         // 荆棘伤害上限倍数（玩家ATK×N）(Player.js)
     VAULT_MUTATION_UNLOCK_CHANCE: 0.2, // 变异保险库解锁概率 (Combat.js)
     BOSS_CONTACT_COOLDOWN: 1.0,  // 龙王接触伤害CD (Enemy.js) — 从0.5提升到1.0防止P3瞬杀
     FROZEN_DAMAGE_MULT: 1.25,
