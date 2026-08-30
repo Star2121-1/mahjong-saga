@@ -66,6 +66,9 @@ class RewardManager {
     /* ── 波次宝箱 ── */
 
     showRewardPanel() {
+        /* R71-P2: 增加面板锁保护，防止动画中途重入导致UI闪烁 */
+        if (this._panelLocked) return;
+        this._panelLocked = true;
         var pool = this._buildPool();
         var selected = pool.length > 0 ? this._pickFrom(pool) : [];
         this._renderCards(selected, false);

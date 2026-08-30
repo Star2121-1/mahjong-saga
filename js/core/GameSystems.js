@@ -149,6 +149,9 @@ Sys.applyMutator = function(engine, mutatorId) {
                 e._bloodmoonOrigAtk = e.atk;
                 e._bloodmoonOrigMaxHp = e.maxHp;
                 e._bloodmoonOrigHp = e.hp;
+            } else {
+                /* R71-P0: 已存储的敌人跳过乘算，防止跨波重复突变导致属性二次叠乘 */
+                continue;
             }
             e.atk = Math.floor(e.atk * Balance.MUTATOR_BLOODMOON_ATK_MULT);
             e.maxHp = Math.floor(e.maxHp * Balance.MUTATOR_BLOODMOON_HP_MULT);
@@ -164,14 +167,20 @@ Sys.applyMutator = function(engine, mutatorId) {
                 e._frenzyStored = true;
                 e._frenzyOrigSpeed = e.speed;
                 e.speed = Math.round(e.speed * Balance.MUTATOR_FRENZY_SPEED_MULT);
+            } else {
+                /* R71-P0: 防止跨波重复狂乱突变导致速度二次叠乘 */
+                continue;
             }
         }
     } else if (mutatorId === 'frailty') {
         /* L-008: 脆弱突变不再双向增益 — 玩家 +80% ATK 但受击伤害 +30% */
         engine._frailtyOrigPlayerAtk = engine.player.atk;
-        /* R38-P1: 移除未使用的变量，防止未来混淆 */
-        engine.player.atk = Math.floor(engine.player.atk * Balance.MUTATOR_FRAILTY_PLAYER_ATK_MULT);
-        engine.player._frailtyDebuff = true;
+        /* R71-P0: 防止跨波脆弱突变玩家ATK二次叠乘 */
+        if (!engine._frailtyStored) {
+            engine._frailtyStored = true;
+            engine.player.atk = Math.floor(engine.player.atk * Balance.MUTATOR_FRAILTY_PLAYER_ATK_MULT);
+            engine.player._frailtyDebuff = true;
+        }
         for (var i = 0; i < engine.enemies.length; i++) {
             var e = engine.enemies[i];
             if (!e.alive) continue;

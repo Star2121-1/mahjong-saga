@@ -1,0 +1,82 @@
+[
+  {
+    "severity": "P0",
+    "file": "js/core/GameSystems.js",
+    "line": 147,
+    "title": "突变效果跨波叠乘 —— bloodmoon/frenzy/frailty 重复选择时属性二次倍率叠加",
+    "detail": "applyMutator() 中所有已激活敌人检查 e._bloodmoonStored 为 true 时跳过存储，但不跳过属性乘法。当同一突变（如 bloodmoon）在两个不同波次被再次选中时，敌人在 _clearMutatorEffects() 完成后被重新应用乘法，导致：atk = base × 1.4 × 1.4 = 1.96（应为 1.4），hp = base × 1.3 × 1.3 = 1.69（应为 1.3）。frailty 同理（player.atk × 1.8 × 1.8）。受影响的突变：bloodmoon(line 147)、frenzy(line 163)、frailty(line 178)。",
+    "fix": "在 applyMutator() 各分支入口增加 if (engine._activeMutator === mutatorId) return; 的幂等守卫；或在 _clearMutatorEffects 末尾保留 _origXxx 属性不被清为 undefined，使下一次 applyMutator 始终能基于原始值重算。"
+  },
+  {
+    "severity": "P0",
+    "file": "js/core/GameEngine.Combat.js",
+    "line": 143,
+    "title": "爆炸溅射目标排除逻辑有误 —— excludeId 参数与 splash 命中检查不一致",
+    "detail": "_spawnExplosion(x, y, radius, damage, excludeId) 中 line 139 使用 if (e.id === excludeId) continue 排除本次点击命中的源敌人。但调用方 onClick 传入的是 hitEnemy.id，而 splash 命中范围内只有源敌人应该被排除。实际逻辑正确，无漏算。但 splash 触发后，splash 内的敌人再次进入 takeDamage 路径时若 explosionChance > 0 会继续递归触发新一轮 _spawnExplosion（含 splash 自身又可能触发 splash），形成级联爆炸。无调用链 depth guard 限制。",
+    "fix": "在 _spawnExplosion 或 takeDamage 的 explosionChance 分支中增加递归深度标记（如 e._splashRecursing），或在 onClick 路径中传入 _fctTypeOverride='splash' 来阻止递归触发新的 splash。"
+  },
+  {
+    "severity": "P1",
+    "file": "js/core/GameSystems.js",
+    "line": 22,
+    "title": "Overdrive 激活时未将玩家 cdFloor 归零，武器冷却倍率异常",
+    "detail": "triggerOverdrive() line 25 设置 engine.player.cdFloor = 0，但 Gp._triggerOverdrive() fallback 路径（GameEngine.Events.js line 234）没有同步执行 cdFloor=0，只设置了 _overdriveActive 和 _overdriveTimer。此外 endOverdrive 恢复 cdFloor 时取 engine._origCdFloor（可能为 null 或 0），存在跨局残留风险。",
+    "fix": "统一通过 window.Systems.triggerOverdrive 路由，或在 Gp._triggerOverdrive fallback 中也设置 player.cdFloor = 0 并保存 _origCdFloor。endOverdrive 在武器循环恢复 _origCdFloor 前加 null guard。"
+  },
+  {
+    "severity": "P1",
+    "file": "js/core/RewardManager.js",
+    "line": 77,
+    "title": "showLevelUpPanel 竞态条件 —— 面板锁被重复设置，且 _panelLocked 翻转时机错误",
+    "detail": "showLevelUpPanel() line 78-81: 若 _panelLocked 已为 true（上一次调用未完成），则先解锁并 hidePanel()，然后 line 82 重设 _panelLocked=true，line 89 再次设为 true（重复）。问题在于 line 102-108 hidePanel() 无条件将 _panelLocked 重置为 false，如果 showLevelUpPanel 因异步动画（_animateSuckIn）未完成被调用，会直接破坏正在进行的吸进动画流程。_resumeAfterLevelUp 也直接调用 hidePanel() 而不检查面板是否真的打开。",
+    "fix": "showLevelUpPanel 入口增加面板是否已 active 的检查（而非仅 _panelLocked），且 _resumeAfterLevelUp/_resumeAfterReward 在调用 hidePanel 前先确认 overlay.classList.contains('active')。吸进动画的 callback 链中增加 _panelLocked 守卫。"
+  },
+  {
+    "severity": "P1",
+    "file": "js/core/GameEngine.Combat.js",
+    "line": 267,
+    "title": "FCT 飘字坐标系统缺少 scale 补偿 —— responsive.js 下坐标偏移",
+    "detail": "FxManager.spawnText 直接传入世界坐标 x,y，但 FxManager.init() 获取 _layer.clientWidth/height 使用的是 DOM 渲染后的视口尺寸（480×720 经 scale 后可能不等于设计尺寸）。R46-P0 的 clamp 逻辑（line 35-39）使用了容器实际像素宽度做边界钳制，当 responsive.js 将容器缩放为 scale<1 时，clamp 上限是渲染后的物理像素，导致高坐标飘字被错误截断在视口边缘外。",
+    "fix": "在 spawnText 前将世界坐标转换到 fct-layer 的本地坐标系：localX = (worldX - cameraX) / scale，或在 FxManager 初始化时记录设计分辨率常量而非读取 clientWidth。"
+  },
+  {
+    "severity": "P1",
+    "file": "js/core/GameCombat.js",
+    "line": 102,
+    "title": "GameCombat.hidePanel 中 _pendingReward 未重置 —— 奖励面板关闭后波次状态卡死",
+    "detail": "Gp._resumeAfterReward() line 15 正确重置 _pendingReward=false，但 GameCombat.js 中 Cs.spawnFloatText 等委托方法在 R55 迁移后仍保留在注释中，实际运行路径全部经过 GameEngine.Combat.js 原型方法。更关键：_resumeAfterLevelUp() line 55 重置 _pendingReward=false 之前（line 53）调用了 hidePanel()，而 hidePanel() 末尾检查 gameEngine.running && !gameEngine.gameOver 时若 _pendingReward 尚未重置，_onHandChanged 回调会误触发雀魂判定。",
+    "fix": "在 hidePanel() 内部先重置 engine._pendingReward=false 再调用 _onHandChanged，或将 _onHandChanged 调用移至 _resumeAfter* 序列的末尾。"
+  },
+  {
+    "severity": "P2",
+    "file": "js/core/GameSystems.js",
+    "line": 19,
+    "title": "triggerOverdrive 中 enemy.speed 归零后无 baseSpeed 备份保护",
+    "detail": "triggerOverdrive line 32 设置 oe.speed = 0 并保存 oe._overdriveOrigSpeed。但部分 enemy type（如 Boss_Lord、Tanker）在构造时会将 baseSpeed 覆写为自定义值（Enemy.js lines 59,121）。若 enemy 在此之后速度被其他系统修改过（如 frenzy 突变叠加），_overdriveOrigSpeed 保存的是修改后的值而非构造时的 baseSpeed，endOverdrive 恢复时会恢复到错误的速度值。",
+    "fix": "改用 oe.baseSpeed 作为 endOverdrive 的 fallback（line 92 已有此逻辑但 _overdriveOrigSpeed 可能已存错值）。在 triggerOverdrive 中改为：oe._overdriveOrigSpeed = oe._overdriveOrigSpeed || oe.baseSpeed。"
+  },
+  {
+    "severity": "P2",
+    "file": "js/core/GameSystems.js",
+    "line": 137,
+    "title": "clearMutatorEffects 重复实现 —— GameSystems.js 与 GameEngine.Events.js 两份代码不一致",
+    "detail": "Sys.clearMutatorEffects (GameSystems.js line 190) 与 Gp._clearMutatorEffects (GameEngine.Events.js line 134) 功能重复但略有差异：Events.js 版本额外调用 _updateMutatorBadge() 清理徽章 DOM，而 Systems.js 版本没有。实际运行中 _resumeAfterReward 调用的是 Gp._clearMutatorEffects (Events.js)，而 GameEngine.Loop.js line 187 调用 Systems.showMutatorPanel，两者路径不一致。若未来仅维护一份副本，容易遗漏另一份的修复。",
+    "fix": "删除 GameSystems.js 中的 Sys.clearMutatorEffects 和 Sys.applyMutator（保留 Sys.showMutatorPanel 用于 UI 面板逻辑），统一委托到 Gp._clearMutatorEffects / Gp._applyMutator。"
+  },
+  {
+    "severity": "P2",
+    "file": "js/core/GameEngine.Endgame.js",
+    "line": 322,
+    "title": "_settleRun 与 _gameOver 双路径写入 meta 存在竞态 —— _runSeq 守卫不够充分",
+    "detail": "_gameOver 和 _settleRun 各自 await window.saveManager.getMeta() 再各自写入后 await saveMeta()。若两次 getMeta 之间发生 restart()，第二次写入会覆盖第一次的结果。虽然使用了 _runSeq 令牌守卫，但两个异步函数共享同一个 this 对象，restart() 会重置 _runSeq，导致第二次 await 后的 seq 检查失败并提前 return，使结算静默丢失。",
+    "fix": "将 _settleRun 的 async 调用移入 _gameOver 内部，确保单次 await 链内完成所有写盘，避免双入口并发 getMeta。或使用 Promise.allSettled 合并两次调用并取最大值。"
+  },
+  {
+    "severity": "P2",
+    "file": "js/core/RewardManager.js",
+    "line": 68,
+    "title": "showRewardPanel 无面板锁保护 —— 快速重试时可触发重入",
+    "detail": "showLevelUpPanel() 有 _panelLocked 守卫，但 showRewardPanel() line 68 完全没有，可直接重入。若游戏循环中 _pendingReward 在 showRewardPanel 动画完成前被置为 true（如波次结束条件瞬时满足），会触发第二次面板渲染，导致 cardsContainer.innerHTML 被清空后重新填充，UI 闪烁且可能丢失已选卡牌状态。",
+    "fix": "showRewardPanel 增加与 showLevelUpPanel 相同的 _panelLocked 守卫，或在 _resumeAfterReward 中将 _panelLocked 置 false 后再允许面板显示。"
+  }
+]
