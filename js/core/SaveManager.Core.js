@@ -398,6 +398,10 @@
             abyssCoins: engine._abyssCoins || 0,
             abyssUnlockedCombos: engine._abyssUnlockedCombos || [],
             abyssActiveCombo: engine._abyssActiveCombo || null,
+            handTiles: (engine._handTiles && engine._handTiles.length > 0) ? engine._handTiles.slice() : [],
+            formedMelds: (engine._formedMelds && Object.keys(engine._formedMelds).length > 0) ? engine._formedMelds : {},
+            jokersDropped: engine._jokersDropped || 0,
+            mainSuit: engine._mainSuit || 'wan',
             player: engine.player.snapshot()
         };
     };
@@ -428,6 +432,10 @@
         engine._godModeApplied = data.godModeApplied || false;
         engine._bloodRageActive = data.bloodRageActive || false;
         engine.currentWaveSpawnedCount = data.currentWaveSpawnedCount || 0;
+        engine._handTiles = data.handTiles ? data.handTiles.slice() : [];
+        engine._formedMelds = data.formedMelds || {};
+        engine._jokersDropped = data.jokersDropped || 0;
+        engine._mainSuit = data.mainSuit || 'wan';
         var levelId = data.levelId || 'level_1';
         engine._currentLevelId = levelId;
         var levelCfg = window.levelConfig[levelId];
