@@ -89,7 +89,7 @@ window.Balance = {
     ENEMY_SPAWN_RADIUS: 200,
     ENEMY_SPAWN_RADIUS_JITTER: 50,
     ENEMY_SPAWN_MARGIN: 20,
-    DEFAULT_ENEMY_WEIGHTS: { Normal: 0.24, Tanker: 0.14, Stalker: 0.17, Archer: 0.14, Shaman: 0.09, Barrier: 0.12, Bomber: 0.10, Splitter: 0.04 },
+    DEFAULT_ENEMY_WEIGHTS: { Normal: 0.20, Tanker: 0.14, Stalker: 0.17, Archer: 0.14, Shaman: 0.09, Barrier: 0.12, Bomber: 0.10, Splitter: 0.04 },
 
     /* ── 玩家系统 ── */
     PLAYER_MAX_RAGE: 100,

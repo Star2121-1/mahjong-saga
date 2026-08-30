@@ -537,7 +537,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                     /* P1: 使用平方距离比较避免 sqrt */
                     var explodeR2 = this._explodeRadius * this._explodeRadius;
                     if (exdx * exdx + exdy * exdy <= explodeR2) {
-                        e.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.BOMBER_EXPLODE_DAMAGE_MULT), engine), this, this.x, this.y);
+                        e.takeDamage(Math.floor(this.atk * Balance.BOMBER_EXPLODE_DAMAGE_MULT), this, this.x, this.y);
                     }
                 }
                 player.takeDamage(this._applyMapAffinityDmg(this.atk, engine), this);
