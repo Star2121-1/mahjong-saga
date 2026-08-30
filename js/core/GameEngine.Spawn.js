@@ -268,6 +268,13 @@ Gp._updateExpGems = function(dt) {
 
 Gp._rewardKill = function(enemy) {
     this.kills++;
+    /* R58-P0: 深渊狂乱combo击杀回血 — 从Loop每帧移到击杀时触发 */
+    if (this._abyssFrenzyLifestealSet) {
+        var frenzyHeal = Math.floor(this.player.atk * 0.10);
+        if (frenzyHeal > 0) {
+            this.player.hp = Math.min(this.player.maxHp, this.player.hp + frenzyHeal);
+        }
+    }
     /* Epoch 32: 图鉴记录敌人类型 */
     if (window.saveManager && enemy.type) window.saveManager.recordCompendiumEntry('enemies', enemy.type);
     /* Epoch 47: 深渊币掉落 */
