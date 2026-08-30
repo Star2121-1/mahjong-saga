@@ -50,10 +50,10 @@ Gp._loop = function(timestamp) {
         this.player.speed = _spdSave;
 
         /* ── Step 5: 视差背景随玩家位置微移 ── */
-        if (this.battlefieldBg) {
+        if (this._battlefieldBg) {
             var px = -(this.player.x / this._mapW - 0.5) * 40;
             var py = -(this.player.y / this._mapH - 0.5) * 30;
-            this.battlefieldBg.style.transform = 'translate(' + px + 'px,' + py + 'px)';
+            this._battlefieldBg.style.transform = 'translate(' + px + 'px,' + py + 'px)';
         }
 
         if (!this._pendingReward) {

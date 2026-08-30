@@ -36,6 +36,9 @@ Gp.restart = function() {
     if (this._handTileSlots) this._renderHandTiles();
     if (this._qqueenShieldTimer) { clearTimeout(this._qqueenShieldTimer); this._qqueenShieldTimer = null; }
     this._shieldActive = false;
+    this._tempShield = 0; /* P0: 重置跨局护盾状态 */
+    this._tempShieldEnd = 0; /* P0: 重置护盾过期时间 */
+    this._witherTimer = 0; /* P1: 重置枯萎计时器防止跨局残留 */
     if (window.rewardManager) window.rewardManager.hidePanel();
     this.victoryOverlay.classList.remove('active');
     this.gameOverOverlay.classList.remove('active');
