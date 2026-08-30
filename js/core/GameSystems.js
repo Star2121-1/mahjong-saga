@@ -382,6 +382,8 @@ Sys.updateShake = function(engine, dt) {
                 wl.classList.remove('shake-active');
                 wl.style.animationDuration = '';
                 wl.style.transform = '';
+                wl.style.removeProperty('--sx');
+                wl.style.removeProperty('--sy');
             }
         }
     }
