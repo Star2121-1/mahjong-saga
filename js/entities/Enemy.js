@@ -89,7 +89,7 @@ window.Enemy = class Enemy {
             this.baseSpeed = this.speed;
             this.hue = 30;
             this._exploded = false;
-            this._explodeRadius = 60;
+            this._explodeRadius = Balance.BOMBER_EXPLODE_RADIUS;
         } else if (this.type === 'Splitter') {
             /* 分身怪 — 死亡分裂成 2 个小怪 */
             this.maxHp = Math.floor(this.maxHp * Balance.SPLITTER_HP_MULT);

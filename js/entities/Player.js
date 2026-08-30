@@ -5,7 +5,7 @@ class Player {
         this.y = y;
         this._initFromConfig();
 
-        this.radius = 28; // M-023: 匹配 CSS 48x64px 视觉边界
+        this.radius = Balance.PLAYER_RADIUS; // M-023: 匹配 CSS 48x64px 视觉边界
         this.speedMultiplier = 1.0;
         this.gold = 0;
         this.invulnTimer = 0;

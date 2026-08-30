@@ -163,6 +163,7 @@ window.Balance = {
     BOMBER_HP_MULT: 0.6,             // 自爆怪HP倍率 (Enemy.js)
     BOMBER_ATK_MULT: 2,              // 自爆怪ATK倍率 (Enemy.js)
     BOMBER_SPEED_MULT: 1.8,          // 自爆怪速度倍率 (Enemy.js)
+    BOMBER_EXPLODE_RADIUS: 60,       // 自爆怪爆炸半径 (Enemy.js)
     SPLITTER_HP_MULT: 1.2,           // 分身怪HP倍率 (Enemy.js)
     SPLITTER_CHILD_HP_MULT: 0.5,     // 分身怪子体HP倍率 (Enemy.js)
     SPLITTER_CHILD_ATK_MULT: 0.5,    // 分身怪子体ATK倍率 (Enemy.js)
