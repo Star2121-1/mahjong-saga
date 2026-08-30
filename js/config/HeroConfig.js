@@ -38,7 +38,7 @@ window.heroConfig = {
         backstory: '九筒乃筒子之尊，九枚筒纹叠印成甲。远古雀神以万年岩晶所铸，牌桌上无人能撼其分毫。虽行动迟缓，但每一下都震天动地。',
         ability: '【筒纹护体】每点亮一级荆棘反伤甲圣物，额外提供 5% 反伤率。',
         baseDodge: 0,
-        hp: 160, atk: 6, speed: 140,
+        hp: 160, atk: 8, speed: 140,
         hue: 120,
         unlockCost: 50,
         shapeClass: 'shape-square',

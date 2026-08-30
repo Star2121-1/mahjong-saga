@@ -34,3 +34,16 @@
         max-width: 1600px;
     }
 }
+
+/* ── 摇杆响应式尺寸 ── */
+@media (max-height: 600px) {
+    #joystick-container { bottom: 12px; right: 12px; }
+    #joystick-base { width: 80px; height: 80px; }
+    #joystick-knob { width: 32px; height: 32px; }
+}
+
+@media (max-height: 480px) {
+    #joystick-container { bottom: 8px; right: 8px; }
+    #joystick-base { width: 64px; height: 64px; }
+    #joystick-knob { width: 26px; height: 26px; }
+}
