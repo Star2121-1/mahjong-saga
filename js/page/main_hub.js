@@ -1170,7 +1170,7 @@
                     var q = dq.quests[i];
                     var def = poolMap[q.id];
                     if (!def) continue;
-                    var claimBtn = (q.completed && !dq.claimed && !dq.claimed[q.id])
+                    var claimBtn = (q.completed && (!dq.claimed || !dq.claimed[q.id]))
                         ? '<button class="btn-perk-buy" data-quest="' + q.id +
                           '" style="margin-top:4px;width:100%;font-size:11px;">领取 (' +
                           (def.reward.metaTokens || 0) + '代币' +
