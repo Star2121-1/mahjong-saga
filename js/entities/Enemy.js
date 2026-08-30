@@ -53,6 +53,7 @@ window.Enemy = class Enemy {
         this._bossWarningEl = null;
         this._bossEnraged = false;
         this._bossContactTimer = 0;
+        this._bossContactThisFrame = false; /* R75-P1: 防止接触伤害单帧内重复触发 */
         this._comboCooldown = 0; /* K-030: 万子连击全局冷却 */
 
         if (this.type === 'Tanker') {
@@ -614,10 +615,10 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                 this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
                 if (this.el) this.el.classList.add('boss-enraged');
                 /* B4: 血海沸腾 — 全场红雾 12s + Boss 血渍滴落 */
-                if (engine && engine._battlefield && !engine._bossMistEl) {
+                if (engine && engine.battlefield && !engine._bossMistEl) {
                     var bMist = document.createElement('div');
                     bMist.className = 'abyss-red-mist boss-mist';
-                    engine._battlefield.appendChild(bMist);
+                    engine.battlefield.appendChild(bMist);
                     engine._bossMistEl = bMist;
                     setTimeout(function () {
                         if (bMist.parentNode) bMist.remove();
@@ -697,8 +698,8 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                     this._clampPosition(engine);
                     var pdx = player.x - this.x;
                     var pdy = player.y - this.y;
-                    /* P1: Slam 伤害范围叠加玩家半径 */
-                    var slamReach = Balance.BOSS_SLAM_RANGE + player.radius;
+                    /* P1: Slam 伤害范围叠加玩家半径和Boss自身半径 */
+                    var slamReach = Balance.BOSS_SLAM_RANGE + this.radius + player.radius;
                     if (pdx * pdx + pdy * pdy <= slamReach * slamReach) {
                         player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.BOSS_P2_SLAM_DMG_MULT), engine), this);
                     }
@@ -804,7 +805,8 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
         var pdy = player.y - this.y;
         var pDist = Math.sqrt(pdx * pdx + pdy * pdy);
         var totalR = player.radius + this.radius;
-        if (pDist < totalR) {
+        if (pDist < totalR && !this._bossContactThisFrame) {
+            this._bossContactThisFrame = true;
             if (pDist > 0.01) {
                 /* M-029: 推挤与 dt 成比例，不再 FPS 依赖 */
                 this.x -= (pdx / pDist) * this.speed * dt;
@@ -816,6 +818,8 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                 var contactDmg = this._bossPhase === 3 ? Math.floor(this.atk * Balance.BOSS_P3_CONTACT_DMG_MULT) : this.atk;
                 player.takeDamage(this._applyMapAffinityDmg(contactDmg, engine), this);
             }
+        } else {
+            this._bossContactThisFrame = false;
         }
     }
 
@@ -856,7 +860,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
         wl.appendChild(ring);
         var flash = document.createElement('div');
         flash.className = 'slam-flash';
-        if (engine._battlefield) engine._battlefield.appendChild(flash);
+        if (engine.battlefield) engine.battlefield.appendChild(flash);
         if (engine.triggerShake) engine.triggerShake(2, 300);
         setTimeout(function () {
             if (crack.parentNode) crack.remove();
