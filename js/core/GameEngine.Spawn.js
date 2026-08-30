@@ -516,7 +516,7 @@ Gp._applyRunBonus = function (suit, tierMult) {
     } else if (suit === 'tiao') {
         var dodgeInc = B.HUPAI_RUN_TIAO_DODGE_INC * (tierIdx + 1);
         p.dodgeRate = Math.min(B.MAX_LIFESTEAL_RATE, (p.dodgeRate || 0) + dodgeInc);
-        p.speed = (p.speed || 100) * (1 + Math.min(B.HUPAI_RUN_TIAO_CAP, B.HUPAI_RUN_TIAO_SPD_INC * (tierIdx + 1)));
+        p.speed = Math.min(p.speed || 100, B.PLAYER_MAX_SPEED) * (1 + Math.min(B.HUPAI_RUN_TIAO_CAP, B.HUPAI_RUN_TIAO_SPD_INC * (tierIdx + 1)));
         if (this._spawnFloatText) this._spawnFloatText(p.x, p.y - 40, '条顺 敏捷↑', false);
     }
 };
