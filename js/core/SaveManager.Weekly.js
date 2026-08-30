@@ -238,6 +238,8 @@
         var poolMap = {};
         for (var i = 0; i < pool.length; i++) poolMap[pool[i].id] = pool[i];
         var completed = [];
+        var bonusTokens = 0;
+        var bonusCores = 0;
         for (var i = 0; i < dq.quests.length; i++) {
             var q = dq.quests[i];
             if (q.completed) continue;
@@ -245,13 +247,15 @@
             if (def && def.check(stats)) {
                 dq.quests[i].completed = true;
                 completed.push(q.id);
+                bonusTokens += (def.reward.metaTokens || 0);
+                bonusCores += (def.reward.bossCores || 0);
             }
         }
         /* P0: 持久化每日任务完成状态到存档 */
         if (completed.length > 0) {
             this.saveMeta(this._metaCache).catch(function(e) { console.warn('daily quest save failed:', e); });
         }
-        return completed;
+        return { ids: completed, bonusTokens: bonusTokens, bonusCores: bonusCores };
     };
 
     SaveManager.prototype.claimDailyQuestReward = async function(questId) {

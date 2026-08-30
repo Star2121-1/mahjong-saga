@@ -621,9 +621,11 @@ Gp._gameOver = async function() {
     try {
         var dailyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: this._maxGoldThisRun || 0, hitsTaken: this._playerHitCountThisRun || 0, won: !this.gameOver, waves: this._waveCount || 0, crits: this._totalCritsThisRun || 0, dodges: this._totalDodgesThisRun || 0, abyssDepth: this.loopCount || 0 };
         if (typeof window.saveManager.checkDailyQuestCompletion === 'function') {
-            var completedQuests = window.saveManager.checkDailyQuestCompletion(dailyStats);
-            if (completedQuests.length > 0) {
-                this._spawnCausalityText('✅ 每日任务完成: ' + completedQuests.join(', '));
+            var dqr = window.saveManager.checkDailyQuestCompletion(dailyStats);
+            if (dqr.ids && dqr.ids.length > 0) {
+                meta.metaTokens = (meta.metaTokens || 0) + (dqr.bonusTokens || 0);
+                meta.bossCores = (meta.bossCores || 0) + (dqr.bonusCores || 0);
+                this._spawnCausalityText('✅ 每日任务完成: ' + dqr.ids.join(', ') + (dqr.bonusTokens ? ' +' + dqr.bonusTokens + '代币' : '') + (dqr.bonusCores ? ' +' + dqr.bonusCores + '核心' : ''));
             }
         }
     } catch(e) { window.toastSystem && window.toastSystem.error('结算错误: ' + e.message); }
