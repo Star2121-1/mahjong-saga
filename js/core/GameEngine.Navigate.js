@@ -22,6 +22,11 @@ Gp.restart = function() {
     if (this._gambleTimeout) { clearTimeout(this._gambleTimeout); this._gambleTimeout = null; }
     if (this._interWaveTimeout) { clearTimeout(this._interWaveTimeout); this._interWaveTimeout = null; }
     if (this._qqueenShieldTimer) { clearTimeout(this._qqueenShieldTimer); this._qqueenShieldTimer = null; }
+    if (this._highlightTimers) {
+        this._highlightTimers.forEach(function(t) { clearTimeout(t); });
+        this._highlightTimers = [];
+    }
+    if (this._guideCheckTimer) { clearInterval(this._guideCheckTimer); this._guideCheckTimer = null; }
     for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
     this._enemyElements.clear();
     this.enemies = [];
@@ -59,7 +64,32 @@ Gp.restart = function() {
         this._handTileDeliverTimers.forEach(function(t) { clearTimeout(t); });
         this._handTileDeliverTimers = [];
     }
+    /* R31-E-001: 局内成就计数器重置 */
+    this._totalCritsThisRun = 0;
+    this._totalDodgesThisRun = 0;
+    this._bossKillsThisRun = 0;
+    this._finalBossKillsThisRun = 0;
+    this._maxGoldThisRun = 0;
+    /* R31-E-002: 临时增益字段重置 */
+    this._tempEnemyAtkDebuff = 0;
+    this._tempEnemySpeedDebuff = 0;
+    this._tempBerserkBonus = false;
+    this._tempGoldMult = 1;
+    this._tempCritBonus = 0;
+    this._extraEliteCount = 0;
     if (window.rewardManager) window.rewardManager.hidePanel();
+    /* R32-G-004: 重置引导状态，防止跨局残留 */
+    this._guideDismissed = false;
+    this._currentGuideStep = 0;
+    this._guideSteps = null;
+    this._guideMoveDirs = {};
+    this._guideGemsPicked = 0;
+    this._guideHits = 0;
+    this._guidePrevGemCount = undefined;
+    this._guidePrevEnemyCount = undefined;
+    this._abyssPanelVisible = false;
+    /* P1: 移除游戏时钟冻结 */
+    if (this.container) this.container.classList.remove('game-clock-frozen');
     this.victoryOverlay.classList.remove('active');
     this.gameOverOverlay.classList.remove('active');
     this.gameOver = false;
