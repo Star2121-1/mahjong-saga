@@ -32,12 +32,9 @@ class RewardManager {
         /* ── 武器间协同效果 ── */
         this.weaponSynergies = [
             { id: 'blade_laser', name: '飞牌 + 一气', desc: '飞牌每次攻击时 LaserBeam 额外穿透1个敌人', weapons: ['TrackingBlade', 'LaserBeam'], apply: function(engine) { engine._synBladeLaser = true; } },
-            { id: 'blade_shotgun', name: '飞牌 + 七对子', desc: '飞牌击杀时 ShotgunBurst 额外发射 2 发弹丸', weapons: ['TrackingBlade', 'ShotgunBurst'], apply: function(engine) { engine._synBladeShotgun = true; } },
             { id: 'blade_orbit', name: '飞牌 + 三面', desc: '飞牌追踪范围扩大50%', weapons: ['TrackingBlade', 'OrbitShield'], apply: function(engine) { engine._synBladeOrbit = true; } },
-            { id: 'orbit_slammer', name: '三面 + 碰碰胡', desc: '轨道盾击中时 GroundSlammer 震波范围+30%', weapons: ['OrbitShield', 'GroundSlammer'], apply: function(engine) { engine._synOrbitSlammer = true; } },
             { id: 'nova_laser', name: '大四喜 + 一气', desc: 'Nova蓄力期间 LaserBeam 伤害翻倍', weapons: ['NovaPulse', 'LaserBeam'], apply: function(engine) { engine._synNovaLaser = true; } },
             { id: 'nova_shotgun', name: '大四喜 + 七对子', desc: 'Nova爆发时 ShotgunBurst 弹丸数+4', weapons: ['NovaPulse', 'ShotgunBurst'], apply: function(engine) { engine._synNovaShotgun = true; } },
-            { id: 'slammer_laser', name: '碰碰胡 + 一气', desc: 'GroundSlammer 击退时 LaserBeam 附带额外伤害', weapons: ['GroundSlammer', 'LaserBeam'], apply: function(engine) { engine._synSlammerLaser = true; } },
             { id: 'nova_orbit', name: '大四喜 + 三面', desc: 'Nova爆发时 OrbitShield 旋转加速+伤害翻倍', weapons: ['NovaPulse', 'OrbitShield'], apply: function(engine) { engine._synNovaOrbit = true; } }
         ];
 
