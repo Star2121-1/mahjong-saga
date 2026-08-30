@@ -162,6 +162,11 @@ Ap._wall = function(vol) {
 
 Ap.setMuted = function(muted) {
     this._muted = !!muted;
+    /* P1: 持久化静音状态到 meta */
+    try {
+        var m = window.saveManager && window.saveManager._metaCache;
+        if (m) { m.audioMuted = this._muted; window.saveManager._saveMetaToStorage().catch(function(e) { console.warn('[Audio] muted save failed:', e); }); }
+    } catch(e) {}
 };
 
 Ap.setVolume = function(v) {
