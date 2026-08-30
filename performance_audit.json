@@ -1,0 +1,177 @@
+[
+  {
+    "severity": "P0",
+    "file": "core/GameEngine.Loop.js",
+    "line": 101,
+    "description": "敌人碰撞分离双重循环 O(N^2) — 50个敌人 = 1225次每帧距离计算，深渊后期更严重。未使用空间分割",
+    "fix": "将 _enemyCollisionSeparation 移入 grid spatial partitioning 逻辑中，仅检查相邻格内的敌对碰撞。GRID_SIZE=80 已在 _updateProjectiles 中复用。"
+  },
+  {
+    "severity": "P0",
+    "file": "core/FxManager.js",
+    "line": 46,
+    "description": "每次 spawnText 调用都设置 node.className 触发样式重计算（reflow）。50个活跃 FCT 时每帧多次 classList 操作累积显著开销",
+    "fix": "缓存 className 判断：如果 node 已有正确 class，跳过赋值。使用 classList.add/remove 替代完整 className 字符串重写。"
+  },
+  {
+    "severity": "P0",
+    "file": "entities/Enemy.js",
+    "line": 876,
+    "description": "takeDamage 每帧高频率调用，内部反复执行 (this._eng || window.gameEngine) 三目表达式和 typeof 检查。在密集战斗中每秒数千次调用，累积 CPU 负担",
+    "fix": "将 this._eng 在构造函数时强引用，避免每帧 fallback 检查。提取为局部变量 in takeDamage path: var eng = this._eng || window.gameEngine;"
+  },
+  {
+    "severity": "P1",
+    "file": "core/GameEngine.Render.js",
+    "line": 129,
+    "description": "candidatesSet 变量在 _updateProjectiles 循环中未定义（line 152 引用 candidatesSet.has 但未声明）。会导致 ReferenceError 或静默使用全局变量，造成内存泄漏",
+    "fix": "在函数顶部声明 var candidatesSet = new Set(); 而非让 JS 引擎隐式查找。确认 candidatesSet 的初始化位置。"
+  },
+  {
+    "severity": "P1",
+    "file": "core/GameEngine.Loop.js",
+    "line": 276,
+    "description": "昼夜背景 DOM 操作每帧执行: if(this.battlefield) 内嵌套 Math.random * 0.05 触发 rain drops 创建。30 个雨滴/帧累积到 _rainDrops 数组但 setTimeout 清理可能延迟",
+    "fix": "将 rainTimer 检查改为固定间隔 (>=0.05s)，并确保 rainDrops 有容量上限（当前已有 <30 限制，但移除逻辑依赖 setTimeout 而非帧清理）"
+  },
+  {
+    "severity": "P1",
+    "file": "core/GameEngine.Render.js",
+    "line": 856,
+    "description": "_syncEntities 每帧遍历所有敌人，对每个敌人执行 querySelector('.enemy-hp-fill') + 多重条件检查。Boss 战多敌人时每帧大量 DOM query",
+    "fix": "使用 enemy._hpFill 缓存引用（已有部分实现但需确保在 enemy 生命周期内不被 stale），避免每帧 querySelector"
+  },
+  {
+    "severity": "P1",
+    "file": "core/GameEngine.Spawn.js",
+    "line": 365,
+    "description": "_renderHandTiles 每手牌变化调用，内部使用 JSON.stringify(buffs) 做脏检查。buffStr 序列化每帧比较，高配环境下可省略",
+    "fix": "改用独立的 dirty flag 而非 JSON.stringify 全量序列化比较。维护各 buff 状态独立的布尔/数值字段"
+  },
+  {
+    "severity": "P1",
+    "file": "core/GameSystems.js",
+    "line": 238,
+    "description": "updateResonanceAuras 每帧被调用（即使 aura 未激活也检查条件）。焰痕/永冻 aura 循环内再次遍历所有敌人进行范围检测",
+    "fix": "改为仅在需要时（setResonanceSpeed/setResonanceIce 标志变化时）注册 per-timer callback，而非每帧无条件遍历"
+  },
+  {
+    "severity": "P1",
+    "file": "entities/Weapon.js",
+    "line": 146,
+    "description": "OrbitShield.update 每帧对 3 个 orb 都执行 enemies.length 全量遍历（O(3*N)）。高敌数量时武器更新成本线性增长",
+    "fix": "使用 GRID_SIZE 空间分割，orb 仅检测周围格子敌人（复用 _updateProjectiles 的 grid 逻辑）。或将近身敌人集合缓存"
+  },
+  {
+    "severity": "P1",
+    "file": "entities/Enemy.js",
+    "line": 154,
+    "description": "Enemy.update 每帧对每种类型都做 type === 'X' 链式 if 判断。Boss_Lord 路径尤其复杂（3阶段状态机），每帧多次 Math.sqrt 计算距离",
+    "fix": "将 update 方法绑定到 constructor 类型初始化时（this._update = this._updateBossLord 等），避免每帧 switch/if 分发。缓存 Math.sqrt 结果或改用平方距离比较"
+  },
+  {
+    "severity": "P2",
+    "file": "core/GameEngine.Loop.js",
+    "line": 601,
+    "description": "Camera lerp 每帧执行 Math.exp(-10*dt)，exp 函数在每帧计算有微小开销。vpW/vpH 懒加载在浏览器 resize 时需重新获取 clientWidth",
+    "fix": "预计算 lerpFactor = 1 - Math.exp(-10*dt) 时改为查表或用近似公式（如 dt/(dt+0.1)）。将 vpW/vpH 缓存并仅在 resize 事件时更新"
+  },
+  {
+    "severity": "P2",
+    "file": "core/GameEngine.Loop.js",
+    "line": 10,
+    "description": "ToastSystem.init() 在 s3_gameplay.html 中无保护地自动调用（ToastSystem.js line 127），但 s3 页面没有 #toast-container 的 CSS 对应。同时每次 toastSystem.show 都检查 init()",
+    "fix": "在 ToastSystem.init 中添加存在性检查：if(document.getElementById('toast-container')) return; 或在 s3 页面加载前延迟初始化"
+  },
+  {
+    "severity": "P2",
+    "file": "core/FxManager.js",
+    "line": 74,
+    "description": "_borrowNode 遍历 pool 时同时检查 style.display 和 _fctActive，但若 pool 中多个节点都被回收为 display:none 但 _fctActive 因异常未清除，会产生孤儿节点累积",
+    "fix": "健康检查已在 line 100-117 实现，但触发频率低（每50次归还）。提高健康检查频率或添加主动清理接口在波次切换时调用"
+  },
+  {
+    "severity": "P2",
+    "file": "core/GameEngine.Spawn.js",
+    "line": 16,
+    "description": "_spawnCoinsAt 每次击杀 Boss 创建 5-8 个 coin DOM 元素，高难度下同时存在多个coin集合导致 ~50+ DOM 节点。coin 被磁力吸引时每帧更新 style.left/top",
+    "fix": "合并 coin 的 DOM 更新：使用 requestAnimationFrame 节流 style 写入（每帧最多更新一次位置），或使用 CSS transform 代替 left/top（GPU 加速）"
+  },
+  {
+    "severity": "P2",
+    "file": "core/GameEngine.Loop.js",
+    "line": 160,
+    "description": "图腾 buff 应用每帧遍历所有图腾 + 9个相邻格 = O(totems*9) 网格查找。深渊后期 totems 上限10个时仍然可接受，但每格内敌人数量无上限保护",
+    "fix": "对 totemGrid 各格内敌人数量加软上限（如每格最多20个），超出则降级为全图扫描"
+  },
+  {
+    "severity": "P2",
+    "file": "entities/Player.js",
+    "line": 160,
+    "description": "takeDamage 方法中 Math.random() < this.dodgeRate 触发闪避路径时创建大量临时对象。每次受击检查 thornsRate、lifestealRate 等多条路径",
+    "fix": "预计算闪避/吸血/反伤阈值，避免每帧多次 Math.random() 调用。使用位掩码或 flag 合并多条条件分支"
+  },
+  {
+    "severity": "P2",
+    "file": "core/GameEngine.Weapons.js",
+    "line": 75,
+    "description": "TrackingBlade.update 每帧冷却时全图遍历找最近敌人 O(N)。多武器同时激活时 (N*weaponCount) 累积",
+    "fix": "复用 _updateProjectiles 的 grid spatial partitioning，直接查询 projectile 所在格的最近敌人，而非全图扫描"
+  },
+  {
+    "severity": "P2",
+    "file": "core/GameEngine.Combat.js",
+    "line": 7,
+    "description": "Cs.* 委托链中 spawnCoinsAt、spawnExpGemsAt、spawnFloatText 等均注释说明已迁移但代码仍保留，形成死代码路径。若 _combat 未设置则 fallback 到 Gp.* 直接实现，逻辑重复",
+    "fix": "清理 Cs 中所有已迁移的函数，保留唯一存活的 spawnCausalityText。减少 JavaScript 解析和加载负担"
+  },
+  {
+    "severity": "P2",
+    "file": "core/GameEngine.Loop.js",
+    "line": 55,
+    "description": "_battlefieldBg.style.transform 每帧无条件设置，即使 player 未移动也执行 DOM write。背景视差在玩家静止时无意义",
+    "fix": "添加 dirty flag: 仅在 player 位置变化时更新背景 transform。检查 dx/dy > 0 后才写入 style"
+  },
+  {
+    "severity": "P2",
+    "file": "core/ToastSystem.js",
+    "line": 88,
+    "description": "每次 _show 调用创建新 setTimeout 且未在 node 回收时清理旧 timer。快速连续调用 toast 时定时器累积，形成内存泄漏",
+    "fix": "在 _releaseNode 中 clearTimeout(node._timer)。添加最大并发 toast 限制（当前 _prune 方法实现但不保证调用时机）"
+  },
+  {
+    "severity": "P2",
+    "file": "core/GameEngine.Loop.js",
+    "line": 636,
+    "description": "_renderActiveBuffs 每帧构建 buffs 数组并通过 JSON.stringify 做脏检查。每次创建新数组对象和字符串，在 GC 压力下影响帧率稳定性",
+    "fix": "使用整数位掩码或版本号标记 buff 变化，避免每帧分配新对象。如: this._buffDirtyFlag ^= (1 << buffIndex)"
+  },
+  {
+    "severity": "P2",
+    "file": "entities/Enemy.js",
+    "line": 1,
+    "description": "Enemy 构造函数在深渊模式 (loopCount>0) 时执行 Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, loopCount)，该指数计算每生成一个新敌人执行一次。高波次生成频繁时成为瓶颈",
+    "fix": "预计算 abyssMultiplier = Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, loopCount) 到 engine 级别属性，Enemy 构造函数直接引用而非重复计算"
+  },
+  {
+    "severity": "P3",
+    "file": "core/GameEngine.Loop.js",
+    "line": 43,
+    "description": "每个 FCT 节点绑定的 animationend 和 setTimeout 双清理逻辑复杂。若 FCT 在动画结束前被强制回收（cleanup调用），可能出现 onEnd 回调访问已释放 self 引用的边缘情况",
+    "fix": "确认 _returnNode 中的健康检查路径能正确处理 _fctActive 已为 false 的情况（当前已有 guard，但建议添加 null check）"
+  },
+  {
+    "severity": "P3",
+    "file": "core/GameEngine.Render.js",
+    "line": 829,
+    "description": "玩家移动时每 80ms 创建一个拖尾节点。在高速移动场景下（Assassin hero + evolved speed），拖尾创建频率最高，同时 setTimeout 清理延迟 600ms",
+    "fix": "对拖尾节点添加对象池（类似 FxManager 的 pool），复用已有 DOM 节点而非每帧 createElement"
+  },
+  {
+    "severity": "P3",
+    "file": "entities/Enemy.js",
+    "line": 1025,
+    "description": "敌人死亡时创建 7 个 shard 粒子 + 1 个 shatter-anim listener + 1 个 setTimeout。Boss 死亡时额外创建 ground-crack、boss-slam-ring、slam-flash 共 3 个 DOM。高击杀率下短期 DOM 爆炸",
+    "fix": "将 shard 粒子改为 CSS animation 触发（无需 JS 定时器），使用 document fragment 批量 append。Boss 特效使用预创建池"
+  }
+]

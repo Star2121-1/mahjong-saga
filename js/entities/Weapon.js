@@ -19,7 +19,7 @@ window.Weapon = class {
         /* P1: _synNovaLaserActive由Render.js统一初始化，此处不再重置 */
         /* A-030: 暗影步闪避后攻速加成 — 临时减少CD，纳入ASPDCAP保护 */
         var aspdMult = (player && player._dodgeAspdTimer > 0)
-            ? Math.max(1.0 / Balance.HERO_ASSASSIN_DODGE_ASPD_MULT, 1.0 / Balance.WEAPON_ASPD_CAP)
+            ? Math.min(Balance.HERO_ASSASSIN_DODGE_ASPD_MULT, Balance.WEAPON_ASPD_CAP)
             : 1.0;
         this.cooldownTimer -= dt * aspdMult;
     }
@@ -75,7 +75,7 @@ window.TrackingBlade = class extends window.Weapon {
     update(dt, player, enemies, engine) {
         /* P0: 应用刺客被动攻击速度修正，与基类Weapon.update()保持一致 */
         var aspdMult = (player && player._dodgeAspdTimer > 0)
-            ? Math.max(1.0 / Balance.HERO_ASSASSIN_DODGE_ASPD_MULT, 1.0 / Balance.WEAPON_ASPD_CAP)
+            ? Math.min(Balance.HERO_ASSASSIN_DODGE_ASPD_MULT, Balance.WEAPON_ASPD_CAP)
             : 1.0;
         this.cooldownTimer -= dt * aspdMult;
         if (this.cooldownTimer > 0) return;

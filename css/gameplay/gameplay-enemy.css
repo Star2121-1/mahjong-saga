@@ -505,6 +505,7 @@
         0 9px 0 #006064,
         0 10px 14px rgba(0,150,200,0.45) !important;
     animation: iceShimmer 0.8s infinite alternate;
+    will-change: transform, box-shadow;
 }
 
 /* 受击闪烁 */
@@ -533,6 +534,7 @@
 /* Boss 暴怒 — JS 使用 .boss-enraged (不带 .enemy 前缀) */
 .boss-enraged {
     animation: bossEnrageGlow 0.4s ease-in-out infinite alternate;
+    will-change: transform, box-shadow;
 }
 .enemy-hp-bar {
     position: absolute; top: -10px; left: 50%;

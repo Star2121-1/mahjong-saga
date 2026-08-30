@@ -475,6 +475,10 @@ class Player {
             _hasRevive: !!this._hasRevive,
             _discoveredSecrets: this._discoveredSecrets ? [...this._discoveredSecrets] : [],
             _tempBuffTimeLeft: this._tempBuffTimeLeft || 0,
+            /* R64-P0: 序列化临时增益字段，防止断点恢复后丢失 */
+            _tempAtkBoost: this._tempAtkBoost || 0,
+            _tempHpBonus: this._tempHpBonus || 0,
+            _doubleCoinNextWave: !!this._doubleCoinNextWave,
             mapAffinityLevel: this.mapAffinityLevel || 0
         };
     }
@@ -537,6 +541,10 @@ class Player {
         this.critDamageBonus = data.critDamageBonus || 0;
         this._discoveredSecrets = data._discoveredSecrets ? [...data._discoveredSecrets] : [];
         this._tempBuffTimeLeft = data._tempBuffTimeLeft || 0;
+        /* R64-P0: 恢复临时增益字段，防止断点续玩后丢失 */
+        this._tempAtkBoost = data._tempAtkBoost || 0;
+        this._tempHpBonus = data._tempHpBonus || 0;
+        this._doubleCoinNextWave = !!data._doubleCoinNextWave;
         /* _hasRevive 由 meta perks 在 _reapplyMetaBonuses 中重新设置，此处仅初始化快照值 */
         if (!data._hasRevive && this._reviveCount <= 0) this._hasRevive = false;
         this.setResonanceSpeed = !!data.setResonanceSpeed;
