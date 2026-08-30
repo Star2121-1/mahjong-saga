@@ -47,6 +47,7 @@ window.Enemy = class Enemy {
         this._stalkerCooldown = 0;
         this._totemTimer = 0;
         this._bossPhase = 1;
+        this._savedBossPhase = 1; /* R79-P2: 冻结前相位快照，解冻时恢复 */
         this._bossAbilityTimer = 0;
         this._bossWarningTimer = 0;
         this._bossWarningActive = false;
@@ -122,6 +123,7 @@ window.Enemy = class Enemy {
             this.baseSpeed = Balance.BOSS_LORD_BASE_SPEED;
             this.hue = 0;
             this._bossPhase = 1;
+            this._savedBossPhase = 1; /* R79-P2: 冻结前相位快照，解冻时恢复 */
             this._bossAbilityTimer = 1.8;
             this._bossWarningTimer = 0;
             this._bossWarningActive = false;
@@ -164,12 +166,10 @@ window.Enemy = class Enemy {
             if (this.frozenTimer <= 0) {
                 this.frozen = false;
                 if (this.el) this.el.classList.remove('frozen-crystal');
-                /* P2: 解冻时修正相位（基于冻结期间发生的伤害），冻结期间不重算 */
-                if (this.type === 'Boss_Lord') {
-                    var hpPct = this.hp / this.maxHp;
-                    if (hpPct >= Balance.BOSS_PHASE1_THRESHOLD) this._bossPhase = 1;
-                    else if (hpPct >= Balance.BOSS_PHASE2_THRESHOLD) this._bossPhase = 2;
-                    else this._bossPhase = 3;
+                /* P2: 解冻时恢复冻结前相位，避免冻结期间受伤害导致相位回退后解冻瞬间触发过强能力 */
+                if (this.type === 'Boss_Lord' && this._savedBossPhase !== undefined) {
+                    this._bossPhase = this._savedBossPhase;
+                    this._savedBossPhase = undefined;
                 }
             }
             return;
@@ -367,6 +367,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
             if (dist > 0.01) {
                 var spd = this._totemBuffed ? this.speed * Balance.TOTEM_BUFF_SPEED_MULT : this.speed;
                 this.x += (dx / dist) * spd * dt;
+                this.y += (dy / dist) * spd * dt; /* R79-P1: advance阶段必须同步更新Y轴，与retreat块保持一致 */
             this._clampPosition(engine);
             }
             return;
@@ -459,11 +460,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
             this._barrierFacing = moveAngle;
         }
         /* P1: 使用点积替代冗余的atan2，计算方向向量余弦值 */
-        var cosA = Math.cos(this._barrierAngle);
-        var sinA = Math.sin(this._barrierAngle);
-        var len = Math.sqrt(dx * dx + dy * dy) || 1;
-        var nx = dx / len, ny = dy / len;
-        /* R55-P1: _barrierFront is a dead variable (always true due to同义反复), removed */
+        /* R79-P2: 移除未使用的变量 cosA/sinA/len/nx/ny，消除每帧无意义分配 */
 
         if (this.reachedPlayer) {
             this.attackTimer -= dt;
@@ -984,6 +981,8 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                 if (!this.frozen && _pg.freezeChance > 0 && Math.random() < _pg.freezeChance) {
                     this.frozen = true;
                     this.frozenTimer = Balance.FROZEN_TIMER_BONUS_BASE + (_pg.iceDurationBonus || 0);
+                    /* R79-P2: 记录冻结前相位，解冻时恢复 */
+                    if (this.type === 'Boss_Lord') this._savedBossPhase = this._bossPhase;
                     if (this.el) this.el.classList.add('frozen-crystal');
                 }
                 /* 吸血：onClick在外部处理，此处仅武器路径 */

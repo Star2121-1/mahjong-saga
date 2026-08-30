@@ -282,7 +282,19 @@
 .game-clock-frozen .player-trail::after,
 .game-clock-frozen .player-skill-glow,
 .game-clock-frozen .player-skill-glow::before,
-.game-clock-frozen .player-skill-glow::after {
+.game-clock-frozen .player-skill-glow::after,
+.game-clock-frozen .card-back-text,
+.game-clock-frozen .card-back-text::before,
+.game-clock-frozen .card-back-text::after,
+.game-clock-frozen .card-front.quality-epic,
+.game-clock-frozen .card-front.quality-epic::before,
+.game-clock-frozen .card-front.quality-epic::after,
+.game-clock-frozen .card-front.quality-legendary,
+.game-clock-frozen .card-front.quality-legendary::before,
+.game-clock-frozen .card-front.quality-legendary::after,
+.game-clock-frozen .relic-btn.legendary-btn,
+.game-clock-frozen .relic-btn.legendary-btn::before,
+.game-clock-frozen .relic-btn.legendary-btn::after {
     animation-play-state: running !important;
     transition-property: all !important;
 }
