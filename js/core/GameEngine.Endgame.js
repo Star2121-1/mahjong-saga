@@ -184,11 +184,12 @@ Gp.restart = function() {
                 this.player._abyssFrailtyOrigAtk = undefined;
             }
             this.player._abyssFrailtyAtk = undefined;
-            this.player._frailtyDebuff = false;
             this.player._abyssBloodmoonApplied = false;
             this.player._abyssBloodmoonAtkBonus = undefined;
         }
     }
+    /* R37-P1: 确保frailtyDebuff在所有重启路径下被清除 */
+    if (this.player) this.player._frailtyDebuff = false;
     /* P1: 清除残留定时器，防止导航后回调在旧引擎上执行 */
     if (this._gambleTimeout) clearTimeout(this._gambleTimeout);
     if (this._interWaveTimeout) clearTimeout(this._interWaveTimeout);

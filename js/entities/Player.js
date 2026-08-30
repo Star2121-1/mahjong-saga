@@ -12,6 +12,10 @@ class Player {
         this.hitFlashTimer = 0; /* 独立受击闪烁计时器，与无敌帧分离 */
         this.critRate = 0;
         this._weaponCdReduction = 0; /* P1-3: 跨局冷却缩减清零 */
+        this._tempBuffTimeLeft = undefined;
+        this._tempAtkBoost = 0;
+        this._tempHpBonus = 0;
+        this._doubleCoinNextWave = false;
         this.hasDrone = false;
         this.droneTimer = 0;
         this.droneInterval = 0;
@@ -718,6 +722,10 @@ class Player {
         this.hitFlashTimer = 0; /* 独立受击闪烁计时器，与无敌帧分离 */
         this.critRate = 0;
         this._weaponCdReduction = 0; /* P1-3: 跨局冷却缩减清零 */
+        this._tempBuffTimeLeft = undefined;
+        this._tempAtkBoost = 0;
+        this._tempHpBonus = 0;
+        this._doubleCoinNextWave = false;
         this.hasDrone = false;
         this.droneTimer = 0;
         this.droneInterval = 0;
