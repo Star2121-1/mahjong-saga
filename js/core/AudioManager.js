@@ -23,20 +23,21 @@ Ap._ensureContext = function() {
         this._ctx = new AC();
         /* Epoch 16: iOS 12.2+ 需要 resume() 才能播放 */
         if (this._ctx.state === 'suspended') {
-            this._ctx.resume();
+            this._ctx.resume().catch(function(e) { console.warn('[Audio] resume failed:', e); });
         }
-        /* P0-2: 页面可见性恢复机制 */
+        /* P0: 页面可见性恢复机制 */
         var self = this;
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden && self._ctx && self._ctx.state === 'suspended') {
-                self._ctx.resume();
+                self._ctx.resume().catch(function(e) { console.warn('[Audio] visibility resume failed:', e); });
             }
         });
         this._initialized = true;
         return true;
     } catch (e) {
         this._ctx = null;
-        this._initialized = true; /* 标记为已尝试，不再重试 */
+        /* P1: 不标记为已尝试，允许后续重试 */
+        this._initialized = false;
         return false;
     }
 };

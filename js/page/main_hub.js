@@ -1299,7 +1299,7 @@
         /* Epoch 18/22: 每周超级挑战 */
         var weeklyHtml = '';
         if (typeof window.saveManager.getWeeklyChallenges === 'function') {
-            var weekly = window.saveManager.getWeeklyChallenges();
+            var weekly = window.saveManager.getWeeklyChallenges(); /* P0: getWeeklyChallenges现在返回Promise，但hub使用sync模式展示；weekly可能为Promise对象 */
             if (weekly && weekly.length > 0) {
                 var wHtml = '';
                 for (var wi = 0; wi < weekly.length; wi++) {
