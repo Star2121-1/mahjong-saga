@@ -192,12 +192,7 @@ class SaveManager {
         var slot = item.slot;
         if (!slot) return { ok: false, reason: '部位不明' };
         var equipped = this._metaCache.equipped = this._metaCache.equipped || { weapon: null, armor: null, talisman: null };
-        /* R51-P1: 替换时清除同槽位旧装备，防止仓库幽灵累积 */
-        if (equipped[slot] && equipped[slot] !== instanceId) {
-            for (var j = 0; j < eqs.length; j++) {
-                if (eqs[j].instanceId === equipped[slot]) { eqs.splice(j, 1); break; }
-            }
-        }
+        /* R65-P0: 只更新装备槽引用，不删除背包条目 */
         equipped[slot] = instanceId;
         this._saveMetaToStorage().catch(function(e) { console.warn('[SaveManager] equipItem save failed:', e); });
         return { ok: true };

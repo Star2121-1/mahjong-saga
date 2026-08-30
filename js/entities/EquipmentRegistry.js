@@ -18,6 +18,8 @@ window.equipmentRegistry = {
         var key = this._affixKeys[Math.floor(Math.random() * this._affixKeys.length)];
         var def = this.affixPool[key];
         var val = def.min + Math.random() * (def.max - def.min);
+        /* R65-P1: 钳制到[min, max]范围，防止超出设计阈值 */
+        val = Math.max(def.min, Math.min(def.max, val));
         val = Math.round(val * 100) / 100;
         return { id: key, name: def.name, val: val, fmt: def.fmt };
     },
@@ -32,13 +34,14 @@ window.equipmentRegistry = {
         for (var i = 0; i < affixCount; i++) {
             affixes.push(this.getRandomAffix());
         }
+        /* R65-P1: 深拷贝base属性，防止多实例共享同一引用导致污染 */
         return {
             instanceId: 'eq_' + Date.now() + '_' + Math.floor(Math.random() * 99999),
             protoId: protoId,
             slot: proto.slot,
             name: proto.name,
             quality: quality,
-            base: proto.base,
+            base: Object.assign({}, proto.base),
             affixes: affixes
         };
     }
