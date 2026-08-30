@@ -7,12 +7,9 @@
 Gp._checkWeaponSynergies = function() {
     /* 重置所有协同标记 */
     this._synBladeLaser = false;
-    this._synBladeShotgun = false;
     this._synBladeOrbit = false;
-    this._synOrbitSlammer = false;
     this._synNovaLaser = false;
     this._synNovaShotgun = false;
-    this._synSlammerLaser = false;
     this._synNovaOrbit = false;
 
     /* 收集已装备武器ID */
