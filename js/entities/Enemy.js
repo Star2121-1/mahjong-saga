@@ -687,7 +687,7 @@ window.Enemy = class Enemy {
                     /* P1: Slam 伤害范围叠加玩家半径 */
                     var slamReach = Balance.BOSS_SLAM_RANGE + player.radius;
                     if (pdx * pdx + pdy * pdy <= slamReach * slamReach) {
-                        player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * 2.5), engine), this);
+                        player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.BOSS_P3_CONTACT_DMG_MULT), engine), this);
                     }
                     this._slamFx(engine); /* B4: 地裂余震 */
                     if (this._bossWarningEl && this._bossWarningEl.parentNode) this._bossWarningEl.remove();

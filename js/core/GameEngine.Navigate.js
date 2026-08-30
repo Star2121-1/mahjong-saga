@@ -5,6 +5,13 @@
 Gp.restart = function() {
     /* P0: 确保Overdrive状态在所有路径都正确清理，防止伤害残留 */
     if (this._overdriveActive) this._endOverdrive();
+    /* P0: 清理深渊变异组合状态，防止跨局残留 buff */
+    if (this._abyssActiveCombo) {
+        this._abyssActiveCombo = null;
+        this.player._abyssFrailtyAtk = undefined;
+        this.player._abyssBloodmoonApplied = false;
+        this.player._abyssBloodmoonAtkBonus = undefined;
+    }
     /* P1-1: 清除残留定时器，防止导航后回调在旧引擎上执行 */
     if (this._gambleTimeout) { clearTimeout(this._gambleTimeout); this._gambleTimeout = null; }
     if (this._interWaveTimeout) { clearTimeout(this._interWaveTimeout); this._interWaveTimeout = null; }

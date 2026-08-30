@@ -9,10 +9,10 @@
 /* ── 深渊专属变异组合（每5层解锁新组合） ── */
 
 Gp._abyssComboDefinitions = [
-    { id: 'abyss_bloodmoon', name: '深渊血月', desc: '血月效果翻倍（HP+60%, ATK+80%）但掉落×2', unlockAt: 1, effects: { hpMult: 1.6, atkMult: 1.8, dropMult: 2 } },
-    { id: 'abyss_frenzy', name: '深渊狂乱', desc: '敌人攻速+100%，击杀返还50%生命', unlockAt: 5, effects: { speedMult: 2.0, lifestealOnKill: 0.5 } },
+    { id: 'abyss_bloodmoon', name: '深渊血月', desc: '血月效果翻倍（HP+60%, ATK+80%）但掉落×2', unlockAt: 1, effects: { hpMult: Balance.ABYSS_BLOODMOON_HP_MULT, atkMult: Balance.ABYSS_BLOODMOON_ATK_MULT, dropMult: Balance.ABYSS_BLOODMOON_DROP_MULT } },
+    { id: 'abyss_frenzy', name: '深渊狂乱', desc: '敌人攻速+100%，击杀返还50%生命', unlockAt: 5, effects: { speedMult: Balance.ABYSS_FRENZY_SPEED_MULT, lifestealOnKill: 0.5 } },
     { id: 'abyss_gravity', name: '深渊引力', desc: '经验吸附范围×3，但金币掉落-50%', unlockAt: 10, effects: { magnetMult: 3, goldPenalty: 0.5 } },
-    { id: 'abyss_frailty', name: '深渊脆弱', desc: '玩家攻击+150%，受伤+50%', unlockAt: 15, effects: { playerAtkMult: 2.5, playerDamageMult: 1.5 } },
+    { id: 'abyss_frailty', name: '深渊脆弱', desc: '玩家攻击+150%，受伤+50%', unlockAt: 15, effects: { playerAtkMult: Balance.ABYSS_FRAILTY_ATK_MULT, playerDamageMult: Balance.ABYSS_FRAILTY_DMG_MULT } },
     { id: 'abyss_wither', name: '深渊凋零', desc: '每秒损失2%HP但获得等量护盾', unlockAt: 20, effects: { drainPct: 0.02, shieldGen: 0.02 } }
 ];
 
@@ -250,7 +250,6 @@ Gp._applyAbyssCombo = function(comboId) {
 /* ── 在波次间事件中显示深渊商店入口 ── */
 
 Gp._showAbyssShopEntrance = function() {
-    if (this.loopCount < 3) return;
     if (this.loopCount < 3) return; /* 3层后才开放商店 */
 
     var overlay = document.getElementById('reward-overlay');

@@ -174,7 +174,12 @@ Gp.triggerShake = function(intensity, duration) {
 };
 
 Gp.restart = function() {
-    /* Clear all pending timers to prevent stale callbacks after restart */
+    /* P0: 清理深渊变异组合状态，防止跨局残留 buff */
+    if (this._abyssActiveCombo) {
+        this._abyssActiveCombo = null;
+        if (this.player) { this.player._abyssFrailtyAtk = undefined; this.player._abyssBloodmoonApplied = false; this.player._abyssBloodmoonAtkBonus = undefined; }
+    }
+    /* P1: 清除残留定时器，防止导航后回调在旧引擎上执行 */
     if (this._gambleTimeout) clearTimeout(this._gambleTimeout);
     if (this._interWaveTimeout) clearTimeout(this._interWaveTimeout);
     if (this._qqueenShieldTimer) clearTimeout(this._qqueenShieldTimer);

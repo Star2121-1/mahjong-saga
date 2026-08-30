@@ -11,6 +11,12 @@ window.Balance = {
     ABYSS_SHOP_PRICE_MULT: 1.5,     // 深渊商店价格倍率
     ABYSS_COMBO_UNLOCK_INTERVAL: 5, // 每 N 层解锁一个新深渊变异组合
     ABYSS_ENEMY_VARIANT_MULT: 1.2,  // 深渊变体属性倍率
+    ABYSS_BLOODMOON_HP_MULT: 1.6,   // 深渊血月HP加成 (Abyss.js)
+    ABYSS_BLOODMOON_ATK_MULT: 1.8,  // 深渊血月ATK加成 (Abyss.js)
+    ABYSS_BLOODMOON_DROP_MULT: 2,   // 深渊血月掉落加成 (Abyss.js)
+    ABYSS_FRENZY_SPEED_MULT: 2.0,   // 深渊狂乱速度加成 (Abyss.js)
+    ABYSS_FRAILTY_ATK_MULT: 2.5,    // 深渊脆弱玩家攻击加成 (Abyss.js)
+    ABYSS_FRAILTY_DMG_MULT: 1.5,    // 深渊脆弱受伤加成 (Abyss.js)
     ENEMY_BASE_HP: 20,               // 普通敌人基础 HP (Enemy.js)
     ENEMY_BASE_ATK: 5,
     MAP_AFFINITY_REDUCTION_PER_LEVEL: 0.1,   // 每级关卡亲和减伤比例 (Boot.js)
@@ -66,6 +72,7 @@ window.Balance = {
     MUTATOR_FRENZY_GOLD_MULT: 1.5,
     MUTATOR_FRAILTY_PLAYER_ATK_MULT: 1.8,
     MUTATOR_FRAILTY_DAMAGE_TAKEN_MULT: 1.3,
+    BOSS_P3_CONTACT_DMG_MULT: 2.5,      // P3接触伤害倍率 (Enemy.js)
 
     /* ── 刷怪系统 ── */
     DEFAULT_SPAWN_INTERVAL: 1.5,

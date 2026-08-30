@@ -170,7 +170,7 @@ Sys.applyMutator = function(engine, mutatorId) {
         /* L-008: 脆弱突变不再双向增益 — 玩家 +80% ATK 但受击伤害 +30% */
         engine._frailtyOrigPlayerAtk = engine.player.atk;
         engine._frailtyOrigPlayerDmgTaken = engine._frailtyOrigPlayerDmgTaken || 0;
-        engine.player.atk = Math.floor(engine.player.atk * 1.8);
+        engine.player.atk = Math.floor(engine.player.atk * Balance.MUTATOR_FRAILTY_PLAYER_ATK_MULT);
         engine.player._frailtyDebuff = true;
         for (var i = 0; i < engine.enemies.length; i++) {
             var e = engine.enemies[i];
