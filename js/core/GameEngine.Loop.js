@@ -40,6 +40,7 @@ Gp._loop = function(timestamp) {
         if (this._discardMode || this._huLock) {
             this._syncEntities();
             this._syncUI();
+            this._syncPlayerHP(); /* R60-P1: 确保打牌模式期间血条同步 */
             if (this.running && !this.gameOver) requestAnimationFrame(this._guardedLoop || this._boundLoop);
             return;
         }

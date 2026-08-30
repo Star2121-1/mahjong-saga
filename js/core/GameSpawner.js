@@ -157,7 +157,7 @@ Ss._spawnEnemy = function(engine, isBoss) {
         /* _showBossGamble 返回后检查：如果玩家还没做出选择，提前返回 */
         if (this.engine._pendingBossGamble) return;
         var waveIdx = this._waveCount;
-        var maxWaves = this._getMaxWaves();
+        var maxWaves = engine._getMaxWaves(); /* R60-P0: 使用engine方法而非this */
         if (waveIdx >= maxWaves) {
             enemy.radius = 75;
             /* R50-Fix: 使用 Balance.BOSS_LORD_BASE_HP 替代硬编码公式，
