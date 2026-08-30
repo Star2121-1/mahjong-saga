@@ -73,6 +73,7 @@ window.Balance = {
     MUTATOR_FRAILTY_PLAYER_ATK_MULT: 1.8,
     MUTATOR_FRAILTY_DAMAGE_TAKEN_MULT: 1.3,
     BOSS_P3_CONTACT_DMG_MULT: 2.5,      // P3接触伤害倍率 (Enemy.js)
+    BOSS_P2_SLAM_DMG_MULT: 2.0,         // P2砸地伤害倍率 (Enemy.js)
 
     /* ── 刷怪系统 ── */
     DEFAULT_SPAWN_INTERVAL: 1.5,
