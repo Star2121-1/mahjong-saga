@@ -409,6 +409,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                         lifeTime: B.ENEMY_ARCHER_PROJ_RANGE / spd,
                         _hitPlayer: false, el: null
                     };
+                    p._ownerId = this.id; /* R57-P1: 标记弹道所有者，防止穿敌误伤 */
                     engine._enemyProjectiles.push(p);
                 }
                 return;
@@ -790,7 +791,8 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                             vy: Math.sin(radAngle) * radSpd,
                             radius: 5, damage: radDmg,
                             alive: true, lifeTime: Balance.BOSS_P3_RADIATION_LIFE,
-                            _hitPlayer: false, el: null
+                            _hitPlayer: false, el: null,
+                            _ownerId: this.id /* R57-P1: 标记弹道所有者 */
                         });
                     }
                 }

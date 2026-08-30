@@ -492,6 +492,11 @@ Gp._loop = function(timestamp) {
                     if (!this._abyssFrenzyLifestealSet) {
                         this._abyssFrenzyLifestealSet = true;
                     }
+                    /* R57-P0: 补全狂乱combo吸血逻辑，击杀时按比例回血 */
+                    var frenzyHeal = Math.floor(this.player.atk * 0.10);
+                    if (frenzyHeal > 0) {
+                        this.player.hp = Math.min(this.player.maxHp, this.player.hp + frenzyHeal);
+                    }
                 }
             } else if (_abyssCombo === 'abyss_gravity') {
                 /* 深渊引力: 吸附×3（使用基准值，避免每帧累积） */
