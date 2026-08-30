@@ -209,8 +209,8 @@
             if (suit !== 'zi') suitsPresent[suit] = true; /* P0: 排除字牌，避免纯字牌+癞子误判为清一色 */
         }
         var suitKeys = Object.keys(suitsPresent);
-        if (t.jokers > 0 ? suitKeys.length <= 1 : suitKeys.length === 1) {
-            return { huType: 'qingyise', suit: suitKeys[0] || 'wan' };
+        if (suitKeys.length > 0 && (t.jokers > 0 ? suitKeys.length <= 1 : suitKeys.length === 1)) {
+            return { huType: 'qingyise', suit: suitKeys[0] };
         }
         /* 七对子：≥6 对（14=7对，允许1癞子凑第7对） */
         var pairs = 0;
