@@ -348,18 +348,17 @@ Gp._startNewRun = function(heroId, levelId) {
         /* R65-P0: 注册生成的关卡配置，确保 _getMaxWaves/_getWaveEnemyMax 能正确查询 */
         window.levelConfig[levelCfg.id] = levelCfg;
         this._currentLevelId = levelCfg.id;
+    } else {
+        this._currentLevelId = levelId;
     }
-    this._mapW = levelCfg.mapW;
-    this._mapH = levelCfg.mapH;
-    this._vpW = 0;
-    this._vpH = 0;
-    this._currentLevelId = levelId;
     this._totalWaves = levelCfg.maxWaves || 5;
     this._spawnInterval = levelCfg.spawnIntervalMin || 1.5;
     this._spawnIntervalDecay = levelCfg.spawnIntervalDecay || 0.02;
     this._spawnIntervalMin = levelCfg.spawnIntervalMin || 0.5;
     this._enemyTypeWeights = levelCfg.enemyTypes || window.Balance.DEFAULT_ENEMY_WEIGHTS;
 
+    /* R74-P1: 重启时清理FCT节点池，防止跨局飘字节点泄漏 */
+    if (window.fxManager) window.fxManager.cleanup();
     for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
     this._enemyElements.clear();
     this.enemies = [];

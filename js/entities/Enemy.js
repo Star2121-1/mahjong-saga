@@ -991,9 +991,8 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                     }
                 }
                 /* 爆炸溅射：onClick在外部调用_spawnExplosion，此处仅武器/弹道路径 */
-                if (!_fctTypeOverride && _pg.explosionChance > 0 && Math.random() < _pg.explosionChance) {
+                if (!_fctTypeOverride && _pg.explosionChance > 0 && Math.random() < _pg.explosionChance && !this._splashRecursing) {
                     /* R72-P1: 防止splash递归触发无限级联爆炸 */
-                    if (this._splashRecursing) continue;
                     this._splashRecursing = true;
                     var _exX = sourceX != null ? sourceX : (_pg.x || this.x);
                     var _exY = sourceY != null ? sourceY : (_pg.y || this.y);
