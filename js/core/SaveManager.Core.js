@@ -528,6 +528,18 @@
         if (data.meta.equipments) {
             if (!Array.isArray(data.meta.equipments)) return false;
             if (data.meta.equipments.length > 500) return false;
+            /* R32-E-003: 单条装备结构验证，防止损坏数据导致UI崩溃 */
+            var _validQ = ['rare', 'epic', 'legendary'];
+            var _validS = ['weapon', 'armor', 'talisman'];
+            for (var _eqi = 0; _eqi < data.meta.equipments.length; _eqi++) {
+                var _eq = data.meta.equipments[_eqi];
+                if (typeof _eq !== 'object' || Array.isArray(_eq)) return false;
+                if (typeof _eq.instanceId !== 'string' || !_eq.instanceId) return false;
+                if (!_eq.protoId) return false;
+                if (_validQ.indexOf(_eq.quality) === -1) return false;
+                if (_validS.indexOf(_eq.slot) === -1) return false;
+                if (_eq.affixes && !Array.isArray(_eq.affixes)) return false;
+            }
         }
         if (data.activeRun === null || typeof data.activeRun !== 'object' || Array.isArray(data.activeRun)) return false;
         if (typeof data.activeRun.isRunActive !== 'boolean') return false;
