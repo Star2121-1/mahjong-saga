@@ -193,7 +193,7 @@ class SaveManager {
         if (!slot) return { ok: false, reason: '部位不明' };
         var equipped = this._metaCache.equipped = this._metaCache.equipped || { weapon: null, armor: null, talisman: null };
         equipped[slot] = instanceId;
-        this._saveMetaToStorage();
+        this._saveMetaToStorage().catch(function(e) { console.warn('[SaveManager] equipItem save failed:', e); });
         return { ok: true };
     }
 
@@ -201,7 +201,7 @@ class SaveManager {
         if (!this._metaCache) return { ok: false, reason: '存档未初始化' };
         var equipped = this._metaCache.equipped = this._metaCache.equipped || { weapon: null, armor: null, talisman: null };
         equipped[slot] = null;
-        this._saveMetaToStorage();
+        this._saveMetaToStorage().catch(function(e) { console.warn('[SaveManager] unequipSlot save failed:', e); });
         return { ok: true };
     }
 
