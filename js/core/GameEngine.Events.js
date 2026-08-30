@@ -55,7 +55,7 @@ Gp._triggerInterWaveEvent = function() {
     if (this._interWaveTimeout) clearTimeout(this._interWaveTimeout);
     this._interWaveTimeout = setTimeout(function() {
         /* P2: 死亡时防止超时触发事件 */
-        if (self._interWaveEvent && !self.gameOver) {
+        if (self._interWaveEvent && !self.gameOver && self.running) {
             /* R51-P1: 先清除事件引用再应用，防止超时路径与点击路径状态交叉 */
             self._interWaveEvent = null;
             self._spawnCausalityText('⏱ 恩赐已自动接受');
