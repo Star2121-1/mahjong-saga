@@ -195,6 +195,11 @@ Gp.restart = function() {
     this._flameAuraEl = null;
     if (this._iceAuraEl && this._iceAuraEl.parentNode) this._iceAuraEl.remove();
     this._iceAuraEl = null;
+    /* P3: 清理日夜叠加和深渊红雾DOM */
+    if (this._dayNightEl && this._dayNightEl.parentNode) this._dayNightEl.remove();
+    this._dayNightEl = null;
+    if (this._abyssMistEl && this._abyssMistEl.parentNode) this._abyssMistEl.remove();
+    this._abyssMistEl = null;
     var bc = document.getElementById('active-buffs-container');
     if (bc) bc.remove();
     for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
