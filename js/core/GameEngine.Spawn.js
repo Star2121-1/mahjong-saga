@@ -324,7 +324,7 @@ Gp._addTileToHand = function (id, isJoker) {
     if (this._handTiles.length >= window.Balance.HUPAI_HAND_MAX) {
         /* 满手牌：MVP 直接提示（V2 改为地上等待+打牌模式拾取） */
         if (window.toastSystem && !this._handFullToastAt) { window.toastSystem.warning('手牌已满 14/14，点击手牌打出一张'); this._handFullToastAt = Date.now(); }
-        if (Date.now() - (this._handFullToastAt || 0) > 5000) this._handFullToastAt = 0;
+        if (this._handFullToastAt && Date.now() - this._handFullToastAt > 5000) this._handFullToastAt = 0; /* R58-P1: 只在有值时才检查间隔 */
         return;
     }
     this._handTiles.push(id);
