@@ -111,6 +111,8 @@ Gp._tryDropEquipment = function(x, y, isBossLord) {
         var dropItem = (_di === 0) ? item : window.equipmentRegistry.createItem(protoId, quality);
         if (dropItem) {
             meta.equipments.push(dropItem);
+            /* P1: 循环内追加也需检查容量上限 */
+            if (meta.equipments.length > 100) meta.equipments = meta.equipments.slice(-100);
             window.saveManager._saveMetaToStorage().catch(function(e){ console.warn('[Spawn] saveMeta failed:', e); });
             var qLabel = { rare: '稀有', epic: '史诗', legendary: '传说' }[quality] || quality;
             this._spawnCausalityText('🎁 获得装备：' + dropItem.name + ' (' + qLabel + ')' + (_di > 0 ? ' x' + (_di + 1) : ''));
