@@ -83,7 +83,7 @@ Ss.update = function(dt, engine) {
         for (var bi = 0; bi < engine.enemies.length; bi++) {
             if (engine.enemies[bi].alive && engine.enemies[bi].isBoss) bossCount++;
         }
-        if (bossCount < 1 && engine._bossLordWave) this._spawnEnemy(engine, true); /* R47-P0: 仅在Boss波次生成领主 */
+        if (bossCount < 1 && engine._bossLordWave && !engine._bossLordSpawned) this._spawnEnemy(engine, true); /* R47-P0: 仅在Boss波次生成领主 */
     }
 };
 
@@ -189,7 +189,7 @@ Ss._spawnEnemy = function(engine, isBoss) {
     if (enemy.isBoss) {
         el.classList.add('boss');
         var maxW = engine._getMaxWaves();
-        if (this._waveCount >= maxW) el.classList.add('final-boss');
+        if (this._waveCount >= maxW - 1) el.classList.add('final-boss');
         if (enemyType === 'Boss_Lord') el.classList.add('boss-lord');
     }
     el.dataset.id = id;

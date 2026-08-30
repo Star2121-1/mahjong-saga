@@ -637,7 +637,10 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
             }
         }
 
-        this._bossContactTimer -= dt;
+        /* R56-P0-2: 冻结期间不应递减接触冷却，避免解冻后瞬杀 */
+        if (!this.frozen) {
+            this._bossContactTimer -= dt;
+        }
         this.attackTimer -= dt;
 
         /* ── Phase 1：弹幕压制（B4: 每三轮一次蓄力齐射演出） ── */
@@ -744,7 +747,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
             var dy = player.y - this.y;
             var dist = Math.sqrt(dx * dx + dy * dy);
             if (dist > 30 && dist > 0.01) {
-                var spd = this.speed * Balance.BOSS_PHASE3_SPEED_MULT * dt;
+                var spd = this.baseSpeed * Balance.BOSS_PHASE3_SPEED_MULT * dt;
                 this.x += (dx / dist) * spd;
                 this.y += (dy / dist) * spd;
                 this._clampPosition(engine);
