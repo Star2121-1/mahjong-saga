@@ -638,7 +638,7 @@ window.Enemy = class Enemy {
         if (this._bossPhase === 1) {
             this._bossAbilityTimer -= dt;
             if (this._bossAbilityTimer <= 0) {
-                this._bossAbilityTimer = 1.8 * (this._abyssTier >= 3 ? 0.85 : 1);
+                this._bossAbilityTimer = Balance.BOSS_PHASE1_ABILITY_INTERVAL * (this._abyssTier >= 3 ? 0.85 : 1);
                 var selfB = this;
                 this._bossVolleyCount = (this._bossVolleyCount || 0) + 1;
                 var spd = (engine && engine._bloodRageActive) ? 120 : 100;

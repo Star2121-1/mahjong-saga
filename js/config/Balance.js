@@ -150,6 +150,7 @@ window.Balance = {
     BOSS_SPEED_MULT: 0.7,
     BOSS_PHASE3_SPEED_MULT: 1.8,
     BOSS_PHASE1_THRESHOLD: 0.7,    // 龙王第一阶段HP阈值 (Enemy.js)
+    BOSS_PHASE1_ABILITY_INTERVAL: 1.8,  // 龙王P1技能间隔 (Enemy.js)
     BOSS_P1_MIN_DIST: 200,          // 龙王P1保持最小距离(px) (Enemy.js)
     BOSS_PHASE2_THRESHOLD: 0.3,    // 龙王第二阶段HP阈值 (Enemy.js)
     BOSS_PHASE2_ABILITY_INTERVAL: 2.0,  // 龙王二阶段技能间隔 (Enemy.js)
