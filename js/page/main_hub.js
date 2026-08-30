@@ -1218,7 +1218,7 @@
             bpHtml += '<span class="battlepass-xp-text">' + bpXP + '/100 XP → 下一层</span>';
             bpHtml += '</div>';
             bpHtml += '<div class="battlepass-tiers">';
-            for (var _bt = 1; _bt <= Math.min(10, 30); _bt++) {
+            for (var _bt = 1; _bt <= 30; _bt++) {
                 var unlocked = _bt <= bpTier;
                 var claimed = bpClaimed.indexOf(_bt) !== -1;
                 var isPremium = window.BattlePassRewards && window.BattlePassRewards[_bt - 1] && window.BattlePassRewards[_bt - 1].premium;

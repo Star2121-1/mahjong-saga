@@ -689,6 +689,11 @@ Gp._gameOver = async function() {
         }
     } catch(e) { window.toastSystem && window.toastSystem.error('结算错误: ' + e.message); }
 
+    /* Epoch 47: 死亡也发放通行证XP（与胜利路径一致） */
+    if (typeof window.saveManager.addBattlePassXP === 'function') {
+        window.saveManager.addBattlePassXP(5 + Math.floor(this.kills / 20)).catch(function(e) { console.warn('[BattlePass] death XP save failed:', e); });
+    }
+
     await window.saveManager.clearActiveRun().catch(function(e){ window.toastSystem && window.toastSystem.error('清除存档失败: ' + e.message); });
 };
 
