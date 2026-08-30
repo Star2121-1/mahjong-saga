@@ -48,6 +48,11 @@ Gp.restart = function() {
     this._tempShield = 0; /* P0: 重置跨局护盾状态 */
     this._tempShieldEnd = 0; /* P0: 重置护盾过期时间 */
     this._witherTimer = 0; /* P1: 重置枯萎计时器防止跨局残留 */
+    /* P1: 清理雀魂手牌动画定时器，防止跨局残留触发 */
+    if (this._handTileDeliverTimers) {
+        this._handTileDeliverTimers.forEach(function(t) { clearTimeout(t); });
+        this._handTileDeliverTimers = [];
+    }
     if (window.rewardManager) window.rewardManager.hidePanel();
     this.victoryOverlay.classList.remove('active');
     this.gameOverOverlay.classList.remove('active');
