@@ -313,6 +313,7 @@
         if (meta.weeklyChallenges && meta.weeklyChallenges.week === weekKey) {
             return meta.weeklyChallenges.challenges || [];
         }
+        /* Cache miss — regenerate synchronously; async save is fire-and-forget */
         var allChallenges = [
             { id: 'kill_50', type: 'kills', target: 50, reward: { metaTokens: 20, bossCores: 1 } },
             { id: 'kill_200', type: 'kills', target: 200, reward: { metaTokens: 50, bossCores: 3 } },
@@ -334,9 +335,12 @@
         }
         var picked = shuffled.slice(0, 4);
         for (var i = 0; i < picked.length; i++) { picked[i].progress = 0; picked[i].completed = false; }
-        meta.currentWeek = weekKey || ('W' + Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000))); /* P0: 统一使用Unix epoch基准 */
+        meta.currentWeek = weekKey || ('W' + Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000)));
         meta.weeklyChallenges = { week: meta.currentWeek, challenges: picked };
-        return this.saveMeta(meta).then(function() { return picked; }); /* P0: await saveMeta 防止数据丢失 */
+        /* Fire-and-forget save — result already returned synchronously */
+        this._metaCache = meta;
+        this.saveMeta(meta).catch(function(e) { console.warn('[SaveMgr] weeklyChallenges save failed:', e); });
+        return picked;
     };
 
     SaveManager.prototype.checkWeeklyCompletion = function(stats) {
