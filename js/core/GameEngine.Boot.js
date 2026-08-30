@@ -382,6 +382,14 @@ Gp._startNewRun = function(heroId, levelId) {
     this._ignoreGemCollection = false;
     this._mutatorTriggered = false;
     this._activeMutator = null;
+    this._tempEnemyAtkDebuff = 0;
+    this._tempEnemySpeedDebuff = 0;
+    this._tempBerserkBonus = false;
+    this._tempGoldMult = 1;
+    this._tempCritBonus = 0;
+    /* R53: 重置护盾状态，防止跨局残留 */
+    this._tempShield = 0;
+    this._tempShieldEnd = 0;
     this.playerHitCountInLevel1 = 0;
     this._playerHitCountThisRun = 0;
     this.stalkersKilledInLevel2 = 0;

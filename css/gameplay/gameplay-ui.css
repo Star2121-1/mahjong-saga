@@ -215,7 +215,14 @@
    时钟冻结 — 全局动画挂起
    ══════════════════════════════════════════════ */
 
-.game-clock-frozen *, .game-clock-frozen *::before, .game-clock-frozen *::after {
+/* Clock freeze: explicitly list game containers instead of universal * wildcard for better
+   selector performance.  The whitelist below (lines 225–287) re-enables animation for all
+   overlays, particles, effects, and gameplay elements, so this rule only affects the remaining
+   world-layer content that is not explicitly whitelisted. */
+.game-clock-frozen #world-layer,
+.game-clock-frozen #world-layer *,
+.game-clock-frozen #world-layer *::before,
+.game-clock-frozen #world-layer *::after {
     animation-play-state: paused !important;
     transition-property: none !important;
 }

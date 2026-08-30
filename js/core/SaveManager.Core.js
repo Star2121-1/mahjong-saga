@@ -472,6 +472,8 @@
                     if (_wd.atkFactor != null) _wInst.atkFactor = _wd.atkFactor;
                     if (_wd.baseCd != null) _wInst._baseCd = _wd.baseCd;
                     else if (_wInst._baseCd == null) _wInst._baseCd = _wInst.cd;
+                    if (_wd.origBaseCd != null) _wInst._origBaseCd = _wd.origBaseCd;
+                    else if (_wInst._origBaseCd == null) _wInst._origBaseCd = _wInst._baseCd || _wInst.cd;
                     if (_wd.cd != null) _wInst.cd = _wd.cd;
                     else if (_wInst.cd == null) _wInst.cd = _wInst._baseCd || _wInst.cd;
                     engine._activeWeapons.push(_wInst);

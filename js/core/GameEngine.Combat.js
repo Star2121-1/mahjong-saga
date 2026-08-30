@@ -199,6 +199,7 @@ Gp._enterAbyss = function() {
     this._tempGoldMult = 1;
     this._tempCritBonus = 0;
     this._tempShield = 0;
+    this._tempShieldEnd = 0;
     this._extraEliteCount = 0;
     /* P0: 应用深渊轮回属性缩放 — _abyssLoopHpScale/_abyssLoopAtkScale 在 Abyss.js 中已计算 */
     if (this._abyssLoopHpScale && this._abyssLoopHpScale > 1 && this.player) {

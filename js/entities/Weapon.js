@@ -10,6 +10,7 @@ window.Weapon = class {
         this.atkFactor = atkFactor || 1.0;
         this.cd = cd || 1.0;
         this._baseCd = this.cd; /* P0: baseline CD for wa_cd modifier — prevents multiplicative stacking */
+        this._origBaseCd = this.cd; /* R52: 不可变的原始基线CD（不含筒顺等spawn侧修改），供Render.js每帧计算cdReduction使用，防止双重压缩 */
         this._baseAtkFactor = this.atkFactor; /* P0: 存储初始伤害因子用于overdrive恢复 */
         this.cooldownTimer = 0;
         this._justFired = false; /* Visual Enhancement D: 技能发射标记 */
@@ -27,6 +28,7 @@ window.Weapon = class {
         var floor = (playerCdFloor != null) ? playerCdFloor : Balance.DEFAULT_CD_FLOOR;
         this.cd = Math.max(floor, this.cd * Balance.WEAPON_UPGRADE_CD_MULT);
         this._baseCd = Math.max(floor, (this._baseCd || this.cd) * Balance.WEAPON_UPGRADE_CD_MULT); /* P0: 同步更新_baseCd */
+        this._origBaseCd = Math.max(floor, (this._origBaseCd || this._baseCd) * Balance.WEAPON_UPGRADE_CD_MULT); /* R52: _origBaseCd与_baseCd同步升级（保持原始基线用于Render.js计算） */
     }
     reset() { /* P0: 清除overdrive残留状态，防止跨局伤害累积 */
         this._odOrigAtk = undefined;

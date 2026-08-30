@@ -711,7 +711,7 @@ if (window.saveManager) {
         /* R30-H-021: 武器状态纳入断点续玩快照，恢复时由 _restoreWeapons 重建 */
         if (engine._activeWeapons && engine._activeWeapons.length > 0) {
             snap.weapons = engine._activeWeapons.map(function(w) {
-                return { id: w.id, level: w.level, cooldownTimer: w.cooldownTimer, baseCd: w._baseCd, cd: w.cd, atkFactor: w.atkFactor };
+                return { id: w.id, level: w.level, cooldownTimer: w.cooldownTimer, baseCd: w._baseCd, origBaseCd: w._origBaseCd, cd: w.cd, atkFactor: w.atkFactor };
             });
         }
         return snap;

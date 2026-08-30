@@ -86,11 +86,12 @@ Gp._updateWeapons = function(dt) {
         /* Epoch 34: Overdrive 期间武器伤害翻倍
            注意：伤害倍增由 GameSystems.triggerOverdrive 统一处理（设置 _odOrigAtk），
            此处仅做 CD 相关调整，不再重复翻倍以纠正 Round7 发现的 4x 伤害 Bug */
-        /* R29-C-003: 秘密宝牌引力武器冷却减免 */
+        /* R29-C-003: 秘密宝牌引力武器冷却减免
+           R52: 使用 _origBaseCd 而非 _baseCd 计算，防止与 Spawn.js 筒顺减CD双重压缩 */
         if (cdReduction > 0) {
-            w.cd = w._baseCd || w.cd;
-            if (!w._baseCd) w._baseCd = w.cd;
-            w.cd = Math.max(this.player.cdFloor || Balance.DEFAULT_CD_FLOOR, w._baseCd * (1 - cdReduction));
+            w.cd = w._origBaseCd || w._baseCd || w.cd;
+            if (!w._origBaseCd) w._origBaseCd = w._baseCd || w.cd;
+            w.cd = Math.max(this.player.cdFloor || Balance.DEFAULT_CD_FLOOR, w._origBaseCd * (1 - cdReduction));
         }
         w.update(wdt, this.player, this.enemies, this);
     }

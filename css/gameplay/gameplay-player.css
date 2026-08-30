@@ -102,9 +102,12 @@
 }
 
 /* 受击冻结特效 — 冰蓝色统一 */
+/* R60-P3: added will-change: box-shadow to promote iceShimmer to a separate composite layer,
+   preventing full repaint on each keyframe tick when multiple enemies share the class. */
 .frozen-crystal {
     background: linear-gradient(135deg, #70d6ff, #0077b6) !important;
     box-shadow: 0 0 10px #70d6ff, 0 0 4px rgba(112,214,255,0.5) !important;
+    will-change: box-shadow;
     animation: iceShimmer 1s infinite alternate;
 }
 @keyframes iceShimmer {
