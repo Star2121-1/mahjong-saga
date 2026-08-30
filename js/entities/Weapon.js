@@ -141,6 +141,7 @@ window.OrbitShield = class extends window.Weapon {
         var atkMult = 1 + (player._tempAtkBoost || 0);
         var dmg = Math.floor(player.atk * this.atkFactor * atkMult);
         for (var i = 0; i < 3; i++) {
+            this.orbAngles[i] = this.orbAngles[i] % (Math.PI * 2); /* R46-P1: 防止长会话浮点漂移 */
             this.orbAngles[i] += this.rotationSpeed * dt;
             var ox = player.x + Math.cos(this.orbAngles[i]) * this.orbitRadius;
             var oy = player.y + Math.sin(this.orbAngles[i]) * this.orbitRadius;
@@ -344,7 +345,7 @@ window.LaserBeam = class extends window.Weapon {
         if (engine && engine._synNovaLaserActive) {
             dmg = Math.floor(dmg * 2);
         }
-        var extraPen = engine._synBladeLaser ? 1 : 0;
+        var extraPen = engine._synBladeLaserHit ? 1 : 0; /* R46-P0: 使用per-shot触发标志，而非永久协同标志 */
         var hitCount = 0;
         for (var i = 0; i < enemies.length; i++) {
             var e = enemies[i];

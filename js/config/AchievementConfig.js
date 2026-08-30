@@ -28,7 +28,8 @@ window.achievementConfig = [
     { id: 'overdrive_50',   name: '永动机',    desc: '累计触发 Overdrive 50 次', icon: '💫', category: 'special', thresholds: [50] },
     { id: 'get_rich',       name: '财源番涨',  desc: '单局积累 1000 金币',     icon: '💰', category: 'special', thresholds: [1000] },
     { id: 'gold_10k',       name: '富可敌国',  desc: '单局积累 10000 金币',    icon: '🪙', category: 'special', thresholds: [10000] },
-    { id: 'speed_demon',    name: '极速通关',  desc: '单局 3 分钟内胡牌通关',      icon: '⏱️', category: 'special', thresholds: [180] },{ id: 'all_heroes',     name: '群雄汇聚',  desc: '解锁全部 3 名雀士',      icon: '🎭', category: 'special', thresholds: [3] },
+    { id: 'speed_demon',    name: '极速通关',  desc: '单局 3 分钟内胡牌通关',      icon: '⏱️', category: 'special', thresholds: [180] },
+    { id: 'all_heroes',     name: '群雄汇聚',  desc: '解锁全部 3 名付费雀士',      icon: '🎭', category: 'special', thresholds: [3] },
     { id: 'full_set',       name: '番牌共鸣',  desc: '同时激活炎痕+永冻番印',  icon: '🔥❄️', category: 'special', thresholds: [1] },
 ];
 
@@ -41,7 +42,7 @@ window.achievementCheck = {
         gold_10k:       function(engine, gold) { return gold >= 10000; },
         crit_master:    function(engine, val) { return val >= 100; },
         dodge_king:     function(engine, val) { return val >= 50; },
-        speed_demon:    function(engine, elapsed) { return elapsed <= 180; }
+        speed_demon:    function(engine, val) { return val <= 180; }
     },
     endgame: {
         first_kill:     function(meta) { return (meta.totalKills || 0) >= 1; },
