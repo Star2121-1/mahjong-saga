@@ -11,7 +11,17 @@
         var meta = this._metaCache || {};
         var cores = meta.bossCores || 0;
         var level = Math.floor(Math.sqrt(cores));
-        return { cores: cores, level: level, nextLevelCores: (level+1)*(level+1), perks: [] };
+        var nextLevelCores = (level+1)*(level+1);
+        /* R31-E-003: 补全声望UI消费方所需的fields */
+        return {
+            cores: cores,
+            level: level,
+            nextLevelCores: nextLevelCores,
+            points: cores,
+            potential: nextLevelCores,
+            canPrestige: cores >= nextLevelCores,
+            perks: []
+        };
     };
 
     SaveManager.prototype.doPrestige = async function() {

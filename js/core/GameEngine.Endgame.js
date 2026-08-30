@@ -234,6 +234,21 @@ Gp.restart = function() {
     this._clearMutatorEffects();
     this._clearTotems();
     if (window.rewardManager) window.rewardManager.hidePanel();
+    /* R31-E-001: 局内成就计数器重置（修复跨重启泄漏） */
+    this._totalCritsThisRun = 0;
+    this._totalDodgesThisRun = 0;
+    this._bossKillsThisRun = 0;
+    this._finalBossKillsThisRun = 0;
+    this._maxGoldThisRun = 0;
+    /* R31-E-002: 临时增益字段重置（补充 restart() 缺失路径） */
+    this._tempEnemyAtkDebuff = 0;
+    this._tempEnemySpeedDebuff = 0;
+    this._tempBerserkBonus = false;
+    this._tempGoldMult = 1;
+    this._tempCritBonus = 0;
+    this._extraEliteCount = 0;
+    this._tempShield = 0;
+    this._tempShieldEnd = 0;
     this.victoryOverlay.classList.remove('active');
     this.gameOverOverlay.classList.remove('active');
     this.gameOver = false;

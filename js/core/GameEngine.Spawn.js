@@ -183,6 +183,10 @@ Gp._updateCoins = function(dt) {
             collected *= this._tempGoldMult;
             this._tempGoldMult = 1;
         }
+        /* R31-E-004: 深渊引力组合金币-50%惩罚 */
+        if (this._abyssActiveCombo === 'abyss_gravity') {
+            collected = Math.floor(collected * 0.5);
+        }
         player.addGold(collected);
         player.rage = Math.min(player.maxRage, player.rage + 2 * collected);
     }
