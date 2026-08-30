@@ -159,11 +159,18 @@ Ss._spawnEnemy = function(engine, isBoss) {
         /* _showBossGamble 返回后检查：如果玩家还没做出选择，提前返回 */
         if (this.engine._pendingBossGamble) return;
         var waveIdx = this._waveCount;
-        var maxWaves = engine._getMaxWaves();
+        var maxWaves = this._getMaxWaves();
         if (waveIdx >= maxWaves) {
             enemy.radius = 75;
-            var baseHp = Math.floor(20 * Math.pow(1.2, level - 1));
-            enemy.maxHp = baseHp * 20;
+            /* R50-Fix: 使用 Balance.BOSS_LORD_BASE_HP 替代硬编码公式，
+               并在覆盖前显式重应用深渊轮回缩放，防止 Enemy.js 构造器的 abyss 缩放被销毁 */
+            var bossLevel = level;
+            var bossHpMult = Math.pow(Balance.ENEMY_LEVEL_HP_ATK_MULT, bossLevel - 1);
+            enemy.maxHp = Math.floor(Balance.BOSS_LORD_BASE_HP * bossHpMult);
+            var _loopCount = (engine && engine.loopCount) || 0;
+            if (_loopCount > 0) {
+                enemy.maxHp = Math.floor(enemy.maxHp * Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, _loopCount));
+            }
             enemy.hp = enemy.maxHp;
         } else if (waveIdx === maxWaves - 1) {
             enemy.speed *= 2;

@@ -876,8 +876,11 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
         if (this.type === 'Barrier' && this._barrierFront !== undefined) {
             var engine = this._eng || window.gameEngine;
             var player = engine && engine.player;
-            var toPlayerX = (player ? player.x : this.x) - this.x;
-            var toPlayerY = (player ? player.y : this.y) - this.y;
+            /* R50-P1: 使用攻击源位置而非玩家位置，防止投射物从背后命中时误判为正面 */
+            var srcX = sourceX != null ? sourceX : (player ? player.x : this.x);
+            var srcY = sourceY != null ? sourceY : (player ? player.y : this.y);
+            var toPlayerX = srcX - this.x;
+            var toPlayerY = srcY - this.y;
             var toPlayerLen = Math.sqrt(toPlayerX * toPlayerX + toPlayerY * toPlayerY);
             if (toPlayerLen > 0.01) {
                 toPlayerX /= toPlayerLen;
@@ -1039,6 +1042,17 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                     var cid = ++engRef._enemyIdCounter;
                     var offsetX = (_sp === 0 ? -1 : 1) * 20;
                     var child = new window.Enemy(cid, this.x + offsetX, this.y, this.level, false, ct);
+                    /* R50-P1: 生成后检查与玩家碰撞，避免子体生成在玩家体内 */
+                    if (player) {
+                        var cdx = child.x - player.x, cdy = child.y - player.y;
+                        var cdist = Math.sqrt(cdx * cdx + cdy * cdy);
+                        var minDist = child.radius + player.radius;
+                        if (cdist < minDist && cdist > 0.01) {
+                            var push = minDist - cdist;
+                            child.x += (cdx / cdist) * push;
+                            child.y += (cdy / cdist) * push;
+                        }
+                    }
                     child._clampPosition(engRef);
                     child.maxHp = Math.floor(child.maxHp * Balance.SPLITTER_CHILD_HP_MULT);
                     child.hp = child.maxHp;

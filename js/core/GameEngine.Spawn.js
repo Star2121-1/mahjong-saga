@@ -59,10 +59,10 @@ Gp._spawnEliteEnemy = function() {
         if (cfg) diff = cfg.difficultyFactor || 1;
     } catch(e) {}
 
-    /* Elite boost — 复合应用难度系数 */
-    enemy.maxHp = Math.floor(enemy.maxHp * diff * Balance.ELITE_ENEMY_HP_MULT);
+    /* Elite boost — 使用与精英模式一致的 ELITE_HP_MULT/ELITE_ATK_MULT 常量 (H-002) */
+    enemy.maxHp = Math.floor(enemy.maxHp * diff * Balance.ELITE_HP_MULT);
     enemy.hp = enemy.maxHp;
-    enemy.atk = Math.floor(enemy.atk * diff * Balance.ELITE_ENEMY_ATK_MULT);
+    enemy.atk = Math.floor(enemy.atk * diff * Balance.ELITE_ATK_MULT);
     enemy.el && enemy.el.classList.add('elite-marker');
 
     /* R30-M-005: 精英怪也应用临时debuff */
