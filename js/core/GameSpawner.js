@@ -113,7 +113,7 @@ Ss._selectEnemyType = function(isBoss) {
 
 Ss._spawnEnemy = function(engine, isBoss) {
     if (!isBoss) {
-        var cap = this._getWaveEnemyMax();
+        var cap = engine._getWaveEnemyMax ? engine._getWaveEnemyMax() : 999;
         if (this.currentWaveSpawnedCount >= cap) return;
     }
 
@@ -159,7 +159,7 @@ Ss._spawnEnemy = function(engine, isBoss) {
         /* _showBossGamble 返回后检查：如果玩家还没做出选择，提前返回 */
         if (this.engine._pendingBossGamble) return;
         var waveIdx = this._waveCount;
-        var maxWaves = this._getMaxWaves();
+        var maxWaves = engine._getMaxWaves();
         if (waveIdx >= maxWaves) {
             enemy.radius = 75;
             var baseHp = Math.floor(20 * Math.pow(1.2, level - 1));
@@ -181,7 +181,7 @@ Ss._spawnEnemy = function(engine, isBoss) {
     el.dataset.suit = ({ Normal: '萬', Tanker: '條', Stalker: '筒', Shaman: '風', Barrier: '白', Bomber: '發', Splitter: '中', Archer: '索' })[enemyType] || '萬';
     if (enemy.isBoss) {
         el.classList.add('boss');
-        var maxW = this._getMaxWaves();
+        var maxW = engine._getMaxWaves();
         if (this._waveCount >= maxW) el.classList.add('final-boss');
         if (enemyType === 'Boss_Lord') el.classList.add('boss-lord');
     }
@@ -212,32 +212,15 @@ Ss._spawnEnemy = function(engine, isBoss) {
 };
 
 /* ── Boss Lord 生成 ── */
-/* Ss.spawnBossLord 已废弃 — 使用 GameEngine.Events.js 中的 _spawnBossLordFromGamble */
+/* Ss.spawnBossLord 已废弃 — 使用 GameEngine.Events.js 中的 Gp._spawnBossLordFromGamble */
 
 /* ── 图腾清理 ── */
-
-Ss.clearTotems = function(engine) {
-    for (var i = 0; i < this._totems.length; i++) {
-        if (this._totems[i].el && this._totems[i].el.parentNode) this._totems[i].el.remove();
-    }
-    this._totems = [];
-};
-
+/* Ss.clearTotems 已废弃 — 使用 GameEngine prototype 的 Gp._clearTotems */
 /* Ss.cleanEnemyProjectiles 已废弃 — 使用 Gp._cleanEnemyProjectiles */
 /* Ss.updateEnemyProjectiles 已废弃 — 使用 Gp._updateEnemyProjectiles */
 
 /* ── 波次查询 ── */
-
-Ss._getMaxWaves = function() {
-    var cfg = window.levelConfig[this._currentLevelId];
-    return cfg ? cfg.maxWaves : 5;
-};
-
-Ss._getWaveEnemyMax = function() {
-    var cfg = window.levelConfig[this._currentLevelId];
-    if (!cfg || !cfg.waveEnemyMax) return 999;
-    var idx = Math.min(this._waveCount, cfg.waveEnemyMax.length - 1);
-    return cfg.waveEnemyMax[idx] || 999;
-};
+/* _getMaxWaves / _getWaveEnemyMax 已迁移到 GameEngine.Loop.js (Gp 原型) */
+/* 此处通过 engine 代理调用，避免重复实现 */
 
 })();
