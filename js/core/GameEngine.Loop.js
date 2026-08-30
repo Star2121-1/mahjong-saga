@@ -360,8 +360,8 @@ Gp._loop = function(timestamp) {
         this._guidePrevGemCount = this._expGems.length;
 
         /* ── Epoch 43: 引导追踪 — 首次攻击命中 ── */
-        if (!this._guideDismissed && this.enemies.length > (this._guidePrevEnemyCount || 0)) {
-            /* 敌人减少了 = 被击杀了 = 有攻击 */
+        if (!this._guideDismissed && this.enemies.length < (this._guidePrevEnemyCount || 0)) {
+            /* R32-G-003: 敌人减少=被击杀=有攻击（原条件>误写） */
             this._guideHits = (this._guideHits || 0) + 1;
         }
         this._guidePrevEnemyCount = this.enemies.length;

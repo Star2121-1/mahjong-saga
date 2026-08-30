@@ -258,6 +258,15 @@ Gp.restart = function() {
     this._tempCritBonus = 0;
     this._extraEliteCount = 0;
     this._tempShield = 0;
+    /* R32-G-004: 重置引导状态，防止跨局残留（断点恢复路径也会使用restart） */
+    this._guideDismissed = false;
+    this._currentGuideStep = 0;
+    this._guideSteps = null;
+    this._guideMoveDirs = {};
+    this._guideGemsPicked = 0;
+    this._guideHits = 0;
+    this._guidePrevGemCount = undefined;
+    this._guidePrevEnemyCount = undefined;
     this._tempShieldEnd = 0;
     this.victoryOverlay.classList.remove('active');
     this.gameOverOverlay.classList.remove('active');

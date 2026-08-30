@@ -108,11 +108,13 @@ Gp._showGuideStep = function(stepIndex) {
 
     /* Epoch 43: 交互式步骤 — 自动推进 */
     if (step.interactive && step.checkFn) {
+        /* R32-G-001: 先清除旧timer，防止多timer并行 */
+        if (this._guideCheckTimer) { clearInterval(this._guideCheckTimer); this._guideCheckTimer = null; }
         var self = this;
         this._guideCheckTimer = setInterval(function() {
             if (step.checkFn.call(self)) {
-                clearInterval(this._guideCheckTimer);
-                this._guideCheckTimer = null;
+                clearInterval(self._guideCheckTimer);   /* R32-G-002: 用self而非this，防止this绑定为window */
+                self._guideCheckTimer = null;
                 /* 自动前进到下一步 */
                 if (stepIndex < steps.length - 1) {
                     self._currentGuideStep = stepIndex + 1;
