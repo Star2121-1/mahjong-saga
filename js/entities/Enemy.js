@@ -952,8 +952,7 @@ window.Enemy = class Enemy {
                     var _wc = Math.random() < (_pg.critRate + (_eng._tempCritBonus || 0));
                     if (_wc) {
                         actualDmg = Math.floor(actualDmg * (2.5 + (_pg.critDamageBonus || 0)));
-                        this.hp -= actualDmg;
-                        this.flashTimer = Balance.FLASH_DURATION;
+                        /* R32-D-001: 不重复扣血 — hp已在line 938扣减，此处仅重算实际伤害值 */
                     }
                 }
                 /* 冰冻：onClick已在外部冻结，此处防武器路径漏检 */
@@ -1027,9 +1026,9 @@ window.Enemy = class Enemy {
                     var offsetX = (_sp === 0 ? -1 : 1) * 20;
                     var child = new window.Enemy(cid, this.x + offsetX, this.y, this.level, false, ct);
                     child._clampPosition(engRef);
-                    child.maxHp = Math.floor(child.maxHp * 0.5);
+                    child.maxHp = Math.floor(child.maxHp * Balance.SPLITTER_CHILD_HP_MULT);
                     child.hp = child.maxHp;
-                    child.atk = Math.floor(child.atk * 0.5);
+                    child.atk = Math.floor(child.atk * Balance.SPLITTER_CHILD_ATK_MULT);
                     child.speed = child.baseSpeed * 1.2;
                     child.baseSpeed = child.speed;
                     engRef.enemies.push(child);

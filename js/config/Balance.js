@@ -164,6 +164,8 @@ window.Balance = {
     BOMBER_ATK_MULT: 2,              // 自爆怪ATK倍率 (Enemy.js)
     BOMBER_SPEED_MULT: 1.8,          // 自爆怪速度倍率 (Enemy.js)
     SPLITTER_HP_MULT: 1.2,           // 分身怪HP倍率 (Enemy.js)
+    SPLITTER_CHILD_HP_MULT: 0.5,     // 分身怪子体HP倍率 (Enemy.js)
+    SPLITTER_CHILD_ATK_MULT: 0.5,    // 分身怪子体ATK倍率 (Enemy.js)
     BOSS_NONLORD_SPEED_MULT: 0.7,    // 非龙王Boss速度倍率 (Enemy.js)
     STALKER_CHARGE_DURATION: 1.5,    // 猎杀者蓄力时长 (Enemy.js)
     STALKER_CHARGE_OPACITY: 0.4,     // 猎杀者蓄力透明度 (Enemy.js)
