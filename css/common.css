@@ -102,10 +102,6 @@ button { touch-action: manipulation; transition-property: transform, box-shadow,
    ══════════════════════════════════════════════ */
 
 /* 键盘焦点可见性 */
-*:focus-visible {
-    outline: 3px solid #ffd700 !important;
-    outline-offset: 2px !important;
-}
 
 /* 减少动画偏好 */
 /* 已修复于第51-58行的 @media (prefers-reduced-motion: reduce) 块 */

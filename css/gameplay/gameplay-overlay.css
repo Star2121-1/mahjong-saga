@@ -67,11 +67,6 @@
     0% { box-shadow: 0 0 15px rgba(156,39,176,0.3); }
     100% { box-shadow: 0 0 30px rgba(156,39,176,0.6); }
 }
-.legendary-card {
-    border-color: #ffd700;
-    background: rgba(255,215,0,0.06);
-    box-shadow: 0 0 20px rgba(255,215,0,0.15);
-}
 .relic-name { font-size: calc(15 * var(--_fs) * 1px); font-weight: 800; color: #fffef5; line-height: 1.35; }
 .relic-stars { font-size: calc(12 * var(--_fs) * 1px); color: #ffd700; letter-spacing: 2px; }
 .relic-desc { font-size: calc(12 * var(--_fs) * 1px); color: #b8d4c4; line-height: 1.55; }
