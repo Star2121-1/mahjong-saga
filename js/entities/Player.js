@@ -243,7 +243,7 @@ class Player {
         /* H-031: 使用 _baseMaxHp 计算复活血量，避免临时增益膨胀 */
         var baseHp = this._baseMaxHp || this.maxHp;
         this.hp = Math.floor(baseHp * Balance.REVIVE_HP_PERCENT);
-        this.invulnTimer = 3.0; /* REVIVE_INVULN_DURATION is 1.5s; revives use 3s for safety */
+        this.invulnTimer = Balance.REVIVE_INVULN_RESTORE_DURATION;
         if (this._reviveCount <= 0) this._hasRevive = false;
         return true;
     }

@@ -90,6 +90,7 @@ window.Balance = {
     PLAYER_RADIUS: 28,
     REVIVE_HP_PERCENT: 0.3,
     REVIVE_INVULN_DURATION: 1.5,
+    REVIVE_INVULN_RESTORE_DURATION: 3.0,  // 复活恢复无敌时长 (Player.js shouldRevive)
     TEMP_HP_REGEN_PER_SEC: 2,
 
     /* ── FxManager ── */
