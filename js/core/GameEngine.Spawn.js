@@ -474,7 +474,7 @@ Gp._triggerMeld = function (meld) {
 };
 
 Gp._meldFx = function (label, big) {
-    if (this._spawnFloatText && this.player) this._spawnFloatText(this.player.x, this.player.y - 60, label, true);
+    if (this._spawnFloatText && this.player) this._spawnFloatText(this.player.x, this.player.y - 60, label, false, false);
     if (this.triggerShake) this.triggerShake(big ? 2 : 1, big ? 300 : 150);
     if (window.audioManager) window.audioManager.play(big ? 'overdrive' : 'pickup');
 };

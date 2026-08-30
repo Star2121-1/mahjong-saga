@@ -221,7 +221,7 @@ Gp._loop = function(timestamp) {
                 if (this._combat && this._combat.spawnFloatText) {
                     this._combat.spawnFloatText(this, this.player.x, this.player.y, '闪避!', true);
                 } else {
-                    this._spawnFloatText(this.player.x, this.player.y, '闪避!', true);
+                    this._spawnFloatText(this.player.x, this.player.y, '闪避!', false, false);
                 }
                 this.player._dodgeSignal = false;
             }

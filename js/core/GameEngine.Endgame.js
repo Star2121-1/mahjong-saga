@@ -77,18 +77,20 @@ Gp._onClick = function(e) {
     }
 };
 
-Gp._spawnFloatText = function(x, y, text, isCrit) {
+Gp._spawnFloatText = function(x, y, text, isCrit, _isDamage) {
+    /* R55-P0-2: 第三个参数明确是否为伤害数值文本，非伤害提示用默认色 */
+    var isDamageText = (_isDamage !== undefined) ? _isDamage : isCrit;
     if (window.fxManager) {
-        window.fxManager.spawnText(x, y, text, isCrit ? 'crit' : 'normal');
+        window.fxManager.spawnText(x, y, text, isDamageText ? 'crit' : 'normal');
         return;
     }
     var el = document.createElement('div');
-    el.className = 'damage-float' + (isCrit ? ' crit' : '');
+    el.className = 'damage-float' + (isDamageText ? ' crit' : '');
     el.textContent = '-' + text;
     el.style.left = x + 'px';
     el.style.top = y + 'px';
     /* 竹翠青普通伤害，朱砂红暴击 */
-    if (isCrit) {
+    if (isDamageText) {
         el.style.color = '#b62929';
     } else {
         el.style.color = '#1e6f42';

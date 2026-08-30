@@ -307,6 +307,8 @@ Gp._spawnCausalityText = function(text) {
     if (this._combat && this._combat.spawnCausalityText) {
         return this._combat.spawnCausalityText(this, text);
     }
+    /* R55-P1: 防御性null guard防止非Engine上下文调用崩溃 */
+    if (!this.battlefield) return;
     var el = document.createElement('div');
     el.textContent = text;
     el.style.cssText = 'position:absolute;top:20%;left:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:900;color:#ffd700;text-shadow:0 0 20px rgba(255,215,0,0.8),0 0 40px rgba(255,215,0,0.4);z-index:200;pointer-events:none;white-space:nowrap;animation:floatUp 0.6s ease-out forwards;';
