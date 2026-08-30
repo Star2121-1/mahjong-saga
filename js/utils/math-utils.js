@@ -7,6 +7,8 @@
 
     /** 圆-圆碰撞检测 */
     function circleCircle(ax, ay, ar, bx, by, br) {
+        /* R58-P1: 防御NaN参数，防止碰撞检测静默失败 */
+        if (!isFinite(ax) || !isFinite(ay) || !isFinite(bx) || !isFinite(by) || !isFinite(ar) || !isFinite(br)) return false;
         var dx = bx - ax, dy = by - ay;
         return dx * dx + dy * dy <= (ar + br) * (ar + br);
     }
@@ -29,6 +31,8 @@
 
     /** 随机整数 [lo, hi] */
     function randInt(lo, hi) {
+        /* R58-P0: 参数合法性校验，防止lo>hi时产生负步长 */
+        if (lo > hi) { var _t = lo; lo = hi; hi = _t; }
         return Math.floor(lo + Math.random() * (hi - lo + 1));
     }
 

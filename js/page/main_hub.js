@@ -357,7 +357,7 @@
         var isUnlocked = unlocked.indexOf(heroId) !== -1;
         var isSelected = meta.currentSelectedHero === heroId;
 
-        var isExpedition = (HubTabController._currentPanel === 'expedition');
+        var isExpedition = (window.HubTabController._currentPanel === 'expedition');
         var portrait = isExpedition ? DOM.heroPortrait : (document.getElementById('panel-hero-portrait') || DOM.heroPortrait);
         var nameDisp = isExpedition ? DOM.heroNameDisplay : (document.getElementById('panel-hero-name-display') || DOM.heroNameDisplay);
         var statusDisp = isExpedition ? DOM.heroStatusDisplay : (document.getElementById('panel-hero-status-display') || DOM.heroStatusDisplay);
@@ -654,6 +654,10 @@
         }
         /* Epoch 4: 程序化关卡特殊处理 */
         if (cfg.isProcedural) {
+            if (typeof window.proceduralLevelGenerator === 'undefined') {
+                DOM.levelDetailPanel.textContent = '程序化关卡生成器未加载';
+                return;
+            }
             var meta = window.saveManager._metaCache || {};
             var abyssLevel = meta.highestEndlessLoop || 0;
             var gen = window.proceduralLevelGenerator.generate(abyssLevel);
