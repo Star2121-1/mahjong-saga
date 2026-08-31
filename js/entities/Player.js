@@ -736,7 +736,8 @@ class Player {
         /* 装备词条汇总上限校验 */
         this.xpGainFactor = 1.0 + Math.min(Balance.MAX_XP_GAIN_PCT, this.xpGainFactor - 1.0);
         this.iceDurationBonus = Math.min(Balance.MAX_FREEZE_DURATION_BONUS, this.iceDurationBonus);
-        this.speed = _eqBaseSpeed * Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, this.speed / _eqBaseSpeed);
+        /* R124-P1: 防止_eqBaseSpeed为0时除零 */
+        this.speed = _eqBaseSpeed > 0 ? _eqBaseSpeed * Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, this.speed / _eqBaseSpeed) : 0;
 
         /* 保存基础maxHp用于临时增益恢复（装备聚合完成后） */
         this._baseMaxHp = this.maxHp;
