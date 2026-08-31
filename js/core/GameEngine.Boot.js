@@ -424,6 +424,8 @@ Gp._startNewRun = function(heroId, levelId) {
     this._bossLord = null;
     this._bossLordWave = false;
     this._bossLordSpawned = false;
+    /* R116-P1: 防止Boss死亡等待结算期间死亡导致新游戏误触发 */
+    this._pendingBossLordSettle = false;
 
     /* ── Boss Gamble 重置 ── */
     this._gambleActive = false;
