@@ -36,9 +36,8 @@
 
         var savedDiff = localStorage.getItem('cr_difficulty');
         if (savedDiff) {
-            var v = JSON.parse(savedDiff);
-            window.difficultyScale = v;
-            DOM.settingDifficulty.value = v;
+            try { var v = JSON.parse(savedDiff); window.difficultyScale = v; DOM.settingDifficulty.value = v; }
+            catch(e) { console.warn('save_select: invalid cr_difficulty, ignoring', e); }
         }
 
         window.saveManager.init().then(refreshScreen);
