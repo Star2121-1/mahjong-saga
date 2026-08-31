@@ -647,6 +647,8 @@ Gp._replayGuide = function() {
     this._guideDismissed = false;
     this._currentGuideStep = 0;
     this._defineGuideSteps();
+    /* R117-P0: 与 _showGuide 一致，重置时冻结时钟 */
+    this._freezeClock();
     if (this.guideOverlay) this.guideOverlay.classList.add('active');
     this._showGuideStep(0);
 };
