@@ -36,7 +36,7 @@ class Player {
         this.xpGainFactor = 1.0;
         this.iceDurationBonus = 0;
         this.rage = 0;
-        this.maxRage = 100;
+        this.maxRage = Balance.PLAYER_MAX_RAGE;
         this.setResonanceSpeed = false;
         this.setResonanceIce = false;
         this._thornCritX = undefined;
@@ -807,7 +807,7 @@ class Player {
         this._baseMagnetRadius = this.magnetRadius; /* P1: 保存基准值用于深渊引力combo */
         this.damageReduction = 0;
         this.rage = 0;
-        this.maxRage = 100;
+        this.maxRage = Balance.PLAYER_MAX_RAGE;
 
         /* Epoch 2: 新天赋开局加成（在全部重置后应用，避免被覆盖） */
         this.critRate += (talents.ting_intuition || 0) * 0.02;

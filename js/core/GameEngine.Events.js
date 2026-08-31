@@ -231,11 +231,22 @@ Gp._triggerOverdrive = function() {
     if (this._systems && this._systems.triggerOverdrive) {
         return this._systems.triggerOverdrive(this);
     }
-    /* Fallback: Systems 不可用时直接初始化标志 — 成就计数在 Systems 中处理 */
+    /* Fallback: Systems 不可用时直接初始化标志 */
     if (this._overdriveActive) return;
     this._overdriveActive = true;
     this._overdriveTimer = Balance.OVERDRIVE_DURATION;
     this.player.rage = 0;
+    /* R117-P1: fallback 路径也递增计数，确保断点续玩时成就不丢失 */
+    this._overdriveCount = (this._overdriveCount || 0) + 1;
+    /* R117-P1: fallback 路径应用武器增益和敌人冻结（等效 Sys.triggerOverdrive） */
+    if (this._activeWeapons) {
+        for (var _w = 0; _w < this._activeWeapons.length; _w++) {
+            if (this._activeWeapons[_w]) this._activeWeapons[_w].atkFactor = (this._activeWeapons[_w].atkFactor || 1) * 2;
+        }
+    }
+    for (var _e = 0; _e < this.enemies.length; _e++) {
+        if (this.enemies[_e] && this.enemies[_e].alive) this.enemies[_e].speed = 0;
+    }
 };
 
 Gp._endOverdrive = function() {
