@@ -7,6 +7,7 @@ Gp.restart = function() {
     if (this._overdriveActive) this._endOverdrive();
     /* P0: 清理深渊变异组合状态，防止跨局残留 buff */
     if (this._abyssActiveCombo) {
+        if (!this.player) return; /* R116-P1: 防御性null guard，防止初始化前访问player */
         this._abyssActiveCombo = null;
         /* R32-E-002: 还原frailty原始ATK，防止永久残留 */
         if (this.player._abyssFrailtyOrigAtk !== undefined) {

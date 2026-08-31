@@ -47,6 +47,10 @@ class SaveManager {
             if (e && e.key === 'cr_meta.json') {
                 self._metaCache = null;
             }
+            /* R116-P1: 同时监听 active_run 变更，防止跨 Tab 状态下缓存不一致 */
+            if (e && e.key === 'cr_active_run.json') {
+                if (self._activeRunCache) self._activeRunCache = null;
+            }
         });
     }
 
