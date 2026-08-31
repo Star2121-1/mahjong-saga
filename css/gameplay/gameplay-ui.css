@@ -318,6 +318,12 @@
 .game-clock-frozen #wave-announce *::after {
     animation-play-state: running !important;
 }
+/* R118-P1: Boss预警圈warningPulse动画不应在面板打开时被冻结 */
+.game-clock-frozen .boss-warning-zone,
+.game-clock-frozen .boss-warning-zone::before,
+.game-clock-frozen .boss-warning-zone::after {
+    animation-play-state: running !important;
+}
 /* R116-P0: 深渊红雾在面板打开时不应暂停，与雨滴保持一致 */
 .game-clock-frozen .abyss-red-mist,
 .game-clock-frozen .abyss-red-mist::before,
