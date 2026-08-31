@@ -14,6 +14,12 @@ Gp._loop = function(timestamp) {
         var dt = Math.min((timestamp - this._lastTime) / 1000, 0.05);
         var _skipToEnd = false;
         this._lastTime = timestamp;
+        /* R116-P0: 周期性自动存档，每30秒保存一次以防崩溃丢失进度 */
+        this._saveTimer = (this._saveTimer || 0) + dt;
+        if (this._saveTimer >= 30 && !this._pendingReward && !this._paused && !this._announcingWave && this._waveCount > 0) {
+            this._saveTimer = 0;
+            this._autoSave('tick');
+        }
         /* R96-P1: 每帧初重置协同标志，防止跨run残留导致激光额外穿透 */
         this._synBladeLaserHit = false;
         /* C2: 命中停顿 — 顿帧期间世界时间减速至15% */
