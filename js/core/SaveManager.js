@@ -152,7 +152,7 @@ class SaveManager {
 
     /* ── 英雄管理 ── */
 
-    getCurrentHero() { return (this._metaCache && this._metaCache.currentHero) || 'Knight'; }
+    getCurrentHero() { return (this._metaCache && this._metaCache.currentHero) || 'Hero'; }
 
     async setCurrentHero(id) {
         if (!this._metaCache) return { ok: false, reason: '存档未初始化' };

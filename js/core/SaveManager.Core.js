@@ -82,9 +82,11 @@
                     localStorage.setItem('cr_' + fileName + '.bak', current);
                 } catch(e) { /* 当前文件已损坏，跳过备份 */ }
             }
-            /* 写入校验和 */
-            data._checksum = this._computeChecksum(data);
-            localStorage.setItem('cr_' + fileName, JSON.stringify(data));
+            /* 写入校验和 — 浅拷贝避免污染传入的引用（如 _metaCache） */
+            var payload = {};
+            for (var _k in data) { if (Object.prototype.hasOwnProperty.call(data, _k)) payload[_k] = data[_k]; }
+            payload._checksum = this._computeChecksum(payload);
+            localStorage.setItem('cr_' + fileName, JSON.stringify(payload));
             return true;
         } catch (e) {
             /* Epoch 45: localStorage 满/写入失败 → Toast 警告 */
@@ -105,7 +107,7 @@
             metaTokens: 0, totalRuns: 0, totalKills: 0,
             currentHero: 'Hero', unlockedHeroes: ['Hero'],
             currentSelectedHero: 'Hero', lastSaveTimestamp: 0,
-            lastHeroName: '光刃行者', lastLevelName: '试炼森林',
+            lastHeroName: '雀（雀圣本尊）', lastLevelName: '试炼森林',
             techTree: { life_enhancement: 0, sharpening: 0, precision_training: 0 },
             bossCores: 0,
             talents: {
@@ -170,7 +172,7 @@
         if (data.totalRuns == null) data.totalRuns = 0;
         if (data.totalKills == null) data.totalKills = 0;
         if (data.lastSaveTimestamp == null) data.lastSaveTimestamp = 0;
-        if (!data.lastHeroName) data.lastHeroName = '光刃行者';
+        if (!data.lastHeroName) data.lastHeroName = '雀（雀圣本尊）';
         if (!data.lastLevelName) data.lastLevelName = '试炼森林';
         if (!data.techTree) {
             data.techTree = { life_enhancement: 0, sharpening: 0, precision_training: 0 };
@@ -334,7 +336,7 @@
         this._writeJSON('active_run.json', snapshot);
         var meta = await this.getMeta();
         meta.lastSaveTimestamp = snapshot.timestamp || Date.now();
-        meta.lastHeroName = snapshot.heroName || '光刃行者';
+        meta.lastHeroName = snapshot.heroName || '雀（雀圣本尊）';
         meta.lastLevelName = snapshot.levelName || '试炼森林';
         await this.saveMeta(meta);
     };
