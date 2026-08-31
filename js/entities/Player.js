@@ -532,7 +532,7 @@ class Player {
         this.magnetRadius = data.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT;
         this._baseMagnetRadius = data._baseMagnetRadius || this.magnetRadius; /* R57-P1: 恢复基准磁铁半径 */
         this.rage = data.rage || 0;
-        this.maxRage = data.maxRage || 100;
+        this.maxRage = data.maxRage || Balance.PLAYER_MAX_RAGE;
         this.damageReduction = data.damageReduction || 0;
         this._reviveCount = data._reviveCount || 0;
         this._baseMaxHp = data._baseMaxHp || this.maxHp;

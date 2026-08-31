@@ -170,6 +170,8 @@ window.Enemy = class Enemy {
                 if (this.type === 'Boss_Lord' && this._savedBossPhase !== undefined) {
                     this._bossPhase = this._savedBossPhase;
                     this._savedBossPhase = undefined;
+                    /* R117-P1: 解冻后重置接触冷却，防止解冻瞬间误触接触伤害 */
+                    this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
                 }
             }
             return;
