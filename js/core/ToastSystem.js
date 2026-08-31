@@ -62,6 +62,8 @@ window.toastSystem = {
         var icon = icons[type] || icons.info;
 
         var node = this._getNode();
+        /* R88-P1: 限制活跃toast数量，防止rapid调用时pool/active无界增长 */
+        this._prune(5);
         node.className = 'toast-node';
         node.style.cssText =
             'background:rgba(20,30,20,0.92);' +
