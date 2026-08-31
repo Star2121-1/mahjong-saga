@@ -83,10 +83,13 @@ Gp.init = async function() {
     this._bindStage3Events();
     this._initBeforeUnload();
 
-    /* Epoch 5: 初始化模块系统 */
-    if (window.SpawnSystem) window.SpawnSystem.init(this);
-    if (window.CombatSystem) this._combat = window.CombatSystem;
-    if (window.Systems) this._systems = window.Systems;
+    /* Epoch 5: 初始化模块系统 — 仅新游戏/非resume路径需要 */
+    var _resumePath = (data && data.isRunActive === true && data.player);
+    if (!_resumePath) {
+        if (window.SpawnSystem) window.SpawnSystem.init(this);
+        if (window.CombatSystem) this._combat = window.CombatSystem;
+        if (window.Systems) this._systems = window.Systems;
+    }
 
     if (this.battlefield) {
         var self = this;
