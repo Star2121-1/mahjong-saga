@@ -307,6 +307,7 @@ Gp.restart = function() {
     /* R102-P1: 清理残存屏幕震动状态，防止重启后惯性闪烁 */
     this._shakeTimer = 0;
     this._shakeIntensity = 0;
+    var wl = this._worldLayer || document.getElementById('world-layer');
     if (wl) wl.classList.remove('shake-active');
     this._spawnTimer = 0;
     this._spawnInterval = Balance.DEFAULT_SPAWN_INTERVAL;

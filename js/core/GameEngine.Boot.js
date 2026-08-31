@@ -400,6 +400,9 @@ Gp._startNewRun = function(heroId, levelId) {
     this._joystickActive = false;
     this._joystickDX = 0;
     this._joystickDY = 0;
+    /* R117-P1: 清理玩家拖尾计时器，防止重启后立即产生大量拖尾节点 */
+    this._trailTimer = 0;
+    this._lastDt = 0.016;
     this._expGems = [];
     this._levelUpPending = false;
     this._ignoreGemCollection = false;
