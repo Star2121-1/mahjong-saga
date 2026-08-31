@@ -51,6 +51,10 @@ Gp._resumeAfterReward = function() {
 
 Gp._resumeAfterLevelUp = function() {
     if (window.rewardManager) window.rewardManager.hidePanel();
+    /* R102-P1: 清除雀魂护盾定时器，防止跨升级残留 */
+    if (this._qqueenShieldTimer) { clearTimeout(this._qqueenShieldTimer); this._qqueenShieldTimer = null; }
+    /* R102-P1: 清除Boss Gamble状态，防止跨升级残留 */
+    this._pendingBossGamble = false;
     /* R69-P0: 清除 _pendingReward 避免波次结算状态跨升级面板残留，防止奖励面板重复弹出 */
     this._pendingReward = false;
     /* M-001: 升级期间如果波次已清除，恢复以显示奖励面板 */
@@ -316,7 +320,7 @@ Gp._spawnCausalityText = function(text) {
     el.style.cssText = 'position:absolute;top:20%;left:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:900;color:#ffd700;text-shadow:0 0 20px rgba(255,215,0,0.8),0 0 40px rgba(255,215,0,0.4);z-index:200;pointer-events:none;white-space:nowrap;animation:floatUp 0.6s ease-out forwards;';
     this.battlefield.appendChild(el);
     var self = this;
-    setTimeout(function() { if (el.parentNode) el.remove(); }, 2000);
+    setTimeout(function() { if (el.parentNode) el.remove(); }, Balance.CAUSALITY_TIMEOUT_MS);
 };
 
 Gp._settleRun = async function(tokens) {
@@ -389,14 +393,16 @@ Gp._settleRun = async function(tokens) {
             crits: this._totalCritsThisRun || 0,
             waves: this._waveCount || 0,
             hitsTaken: this._playerHitCountThisRun || 0,
-            won: !this.gameOver  /* P0: 金库挑战正确反映胜负状态，非硬编码true */
+            won: !this.gameOver
         };
-        var vaultResult = window.saveManager.evaluateWeeklyVault(runStats);
-        if (vaultResult.evaluated && vaultResult.completed) {
-            meta.metaTokens = (meta.metaTokens || 0) + (vaultResult.reward.metaTokens || 0);
-            meta.bossCores = (meta.bossCores || 0) + (vaultResult.reward.bossCores || 0);
-            this._spawnCausalityText('🏆 金库挑战完成: +' + (vaultResult.reward.metaTokens || 0) + '代币 +' + (vaultResult.reward.bossCores || 0) + '核心');
-        }
+        try {
+            var vaultResult = await window.saveManager.evaluateWeeklyVault(runStats);
+            if (vaultResult.evaluated && vaultResult.completed) {
+                meta.metaTokens = (meta.metaTokens || 0) + (vaultResult.reward.metaTokens || 0);
+                meta.bossCores = (meta.bossCores || 0) + (vaultResult.reward.bossCores || 0);
+                this._spawnCausalityText('🏆 金库挑战完成: +' + (vaultResult.reward.metaTokens || 0) + '代币 +' + (vaultResult.reward.bossCores || 0) + '核心');
+            }
+        } catch(e) { console.warn('[WeeklyVault] evaluation failed:', e); }
     }
 
     await window.saveManager.saveMeta(meta).catch(function(e){ window.toastSystem && window.toastSystem.error('存档失败: ' + e.message); });
@@ -512,7 +518,8 @@ Gp._gameOver = async function() {
         this.playerEl.style.transform = 'scale(0) rotate(180deg)';
         this.playerEl.style.opacity = '0';
         var self = this;
-        setTimeout(function() { if (self.playerEl) self.playerEl.style.display = 'none'; }, 700);
+        /* R102-P1: 存储deathAnimTimer引用，防止restart时旧动画残留 */
+        this._deathAnimTimer = setTimeout(function() { if (self.playerEl) self.playerEl.style.display = 'none'; }, 700);
     }
     for (var _c = 0; _c < this._activeCoins.length; _c++) this._activeCoins[_c].el.remove();
     this._activeCoins = [];
@@ -923,6 +930,8 @@ Gp._checkAchievement = function(id) {
         console.warn('[Achievement] saveMetaToStorage failed:', e);
     });
     var cfg = window.achievementConfig;
+    /* R102-P1: null guard防止config未加载时崩溃 */
+    if (!cfg || !cfg.length) return;
     for (var i = 0; i < cfg.length; i++) {
         if (cfg[i].id === id) {
             this._spawnAchievementText(cfg[i].icon + ' ' + cfg[i].name);
@@ -942,7 +951,7 @@ Gp._checkAchievementInflight = function(id, currentValue) {
 
 /* ── 成就弹出提示：大字体，短暂停留 ── */
 Gp._spawnAchievementText = function(text) {
-    /* Epoch 5: 委托成就文本到 CombatSystem */
+    /* R102-P1: 移除无效委托 — CombatSystem无spawnAchievementText方法 */
     if (this._combat && this._combat.spawnAchievementText) {
         return this._combat.spawnAchievementText(this, text);
     }

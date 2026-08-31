@@ -656,7 +656,8 @@ Gp._beginLoop = function() {
 
 Gp._autoSave = function(trigger) {
     var snap = window.saveManager.snapshotForRun(this);
-    var ok = window.saveManager.saveActiveRun(snap);
+    /* R102-P1: await断点存档防止闪退丢失进度 */
+    window.saveManager.saveActiveRun(snap).catch(function(e) { console.warn('[AutoSave] save failed:', e); });
     /* Epoch 45: 存档确认 Toast */
     if (window.toastSystem) {
         var labels = { wave: '波次存档', relic: '圣物存档', victory: '结算存档', death: '死亡存档' };

@@ -200,6 +200,8 @@ Gp.restart = function() {
     if (this._gambleTimeout) clearTimeout(this._gambleTimeout);
     if (this._interWaveTimeout) clearTimeout(this._interWaveTimeout);
     if (this._qqueenShieldTimer) clearTimeout(this._qqueenShieldTimer);
+    /* R102-P1: 清理死亡动画定时器 */
+    if (this._deathAnimTimer) { clearTimeout(this._deathAnimTimer); this._deathAnimTimer = null; }
     /* Clear guide timers to prevent stale callbacks after restart */
     if (this._highlightTimers) {
         this._highlightTimers.forEach(function(t) { clearTimeout(t); });
@@ -288,6 +290,10 @@ Gp.restart = function() {
     this._elapsed = 0;
     this.kills = 0;
     this.loopCount = 0; /* R96-P0: 防止深渊combo跨局误触发 */
+    /* R102-P1: 清理残存屏幕震动状态，防止重启后惯性闪烁 */
+    this._shakeTimer = 0;
+    this._shakeIntensity = 0;
+    if (wl) wl.classList.remove('shake-active');
     this._spawnTimer = 0;
     this._spawnInterval = Balance.DEFAULT_SPAWN_INTERVAL;
     this._difficultyTimer = 0;
