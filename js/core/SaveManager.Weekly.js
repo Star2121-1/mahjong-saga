@@ -361,7 +361,7 @@
         }
         if (completed.length > 0) {
             meta.weeklyChallenges.challenges = chs;
-            this.saveMeta(meta);
+            this.saveMeta(meta).catch(function(e) { console.warn('[Weekly] completion save failed:', e); });
         }
         return { completed: completed, bonusTokens: bonusTokens, bonusCores: bonusCores };
     };

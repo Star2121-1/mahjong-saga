@@ -275,6 +275,12 @@ window.Balance = {
     LEVEL_EXP_SCALE: 10,              // 每级EXP增量 (Player.js)
     LEVEL_EXP_OFFSET: 15,             // EXP公式偏移量 (Player.js)
 
+    /* ── 死亡补偿 ── */
+    DEATH_REWARD_TOKEN_RATIO: 10,       // 金币转代币比例 (SaveManager.RunStats.js)
+    DEATH_REWARD_CORE_RATIO: 50,        // 击杀转核心比例 (SaveManager.RunStats.js)
+    DEATH_REWARD_FAST_TIME_THRESHOLD: 60, // 快速死亡阈值秒 (SaveManager.RunStats.js)
+    DEATH_REWARD_FAST_TOKEN_MULT: 0.5,  // 快速死亡代币减半倍数 (SaveManager.RunStats.js)
+
     /* ── Timeout/Durations ── */
     TIMEOUT_DECAY_DRAIN_MS: 3000,     // 腐蚀效果超时 (Enemy.js)
     TIMEOUT_BANG_REMOVE_MS: 1600,     // 花牌移除超时 (Spawn.js)

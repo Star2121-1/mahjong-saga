@@ -692,9 +692,9 @@ Gp._gameOver = async function() {
             won: !this.gameOver,
             elapsed: this._elapsed,
             bestAbyssDepth: this.loopCount || 0,
-            totalKills: (meta.totalKills || 0) + this.kills,
-            totalGold: (meta.runStats && meta.runStats.totalGold) || 0,
-            perfectRuns: (meta.runStats && meta.runStats.perfectRuns) || 0
+            totalKills: this.kills, /* R85-P0: 传入当前局击杀数，而非累计值 */
+            totalGold: this._maxGoldThisRun || 0, /* R85-P0: 传入当前局最高金币 */
+            perfectRuns: (!this.gameOver && (this._playerHitCountThisRun || 0) === 0) ? 1 : 0 /* R85-P0: 无伤通关标记 */
         };
         if (typeof window.saveManager.updateLeaderboard === 'function') {
             window.saveManager.updateLeaderboard(lbStats);

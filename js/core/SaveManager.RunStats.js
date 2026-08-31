@@ -46,9 +46,13 @@
     /* ── Epoch 31: 死亡奖励 ── */
 
     SaveManager.prototype.calcDeathReward = function(kills, gold, elapsed) {
-        var metaTokens = Math.floor(gold / 10);
-        var bossCores = Math.floor(kills / 50);
-        if (elapsed < 60) { metaTokens = Math.floor(metaTokens * 0.5); bossCores = 0; }
+        /* R85-P2: 使用 Balance 常量替代硬编码魔法数字 */
+        var metaTokens = Math.floor(gold / Balance.DEATH_REWARD_TOKEN_RATIO);
+        var bossCores = Math.floor(kills / Balance.DEATH_REWARD_CORE_RATIO);
+        if (elapsed < Balance.DEATH_REWARD_FAST_TIME_THRESHOLD) {
+            metaTokens = Math.floor(metaTokens * Balance.DEATH_REWARD_FAST_TOKEN_MULT);
+            bossCores = 0;
+        }
         return { metaTokens: metaTokens, bossCores: bossCores };
     };
 
