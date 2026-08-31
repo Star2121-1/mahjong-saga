@@ -427,13 +427,6 @@ Gp._settleRun = async function(tokens) {
     /* Epoch 47: Boss掉落事件 — 宝石雨 */
     if (this._bossKillRewardEffect) this._bossKillRewardEffect();
     if (this._renderActiveBuffs) this._renderActiveBuffs();
-    try {
-        var pR = this.player && this.player.relicLevels || {};
-        var ur = Object.keys(pR).filter(function(k) { return (pR[k] || 0) > 0; }).length;
-        if (typeof window.saveManager.recordRunStats === 'function') {
-            window.saveManager.recordRunStats(this.kills, this._elapsed, this._maxGoldThisRun || 0, this._overdriveCount || 0, this._totalDodgesThisRun || 0, this._totalCritsThisRun || 0, this._waveCount, this._bossKillsThisRun || 0, this.loopCount || 0, !this.gameOver, this._playerHitCountThisRun || 0, ur);
-        }
-    } catch(e) { window.toastSystem && window.toastSystem.error('统计记录失败: ' + e.message); }
     /* 击杀类 */
     if ((meta.totalKills || 0) >= 1)    this._checkAchievement('first_kill');
     if ((meta.totalKills || 0) >= 100)  this._checkAchievement('hundred_kills');
