@@ -68,7 +68,7 @@ Fp.spawnText = function(x, y, text, typeOrColor) {
         node.removeEventListener('animationend', onEnd);
         node._fctActive = false;
         self._returnNode(node);
-    }, 5000);
+    }, window.Balance.FCT_FALLBACK_TIMEOUT_MS);
 };
 
 Fp._borrowNode = function() {
@@ -97,15 +97,15 @@ Fp._returnNode = function(node) {
     node._fctActive = false;
     if (node._fctTimeout) { clearTimeout(node._fctTimeout); node._fctTimeout = null; }
     /* 健康检查：每 50 次归还扫描一次，强制回收超过 5s 未归还的节点 */
-    if (++this._returnCount % 50 === 0) this._healthCheck();
+    if (++this._returnCount % window.Balance.FCT_HEALTHCHECK_MODULO === 0) this._healthCheck();
 };
 
-/* R70-P1: 缩短健康检查阈值从6000ms到3500ms，减少僵死节点占用池容量的时间 */
+/* R70-P1: 缩短健康检查阈值，减少僵死节点占用池容量的时间 */
 Fp._healthCheck = function() {
     var now = Date.now();
     for (var i = 0; i < this._pool.length; i++) {
         var n = this._pool[i];
-        if (n._fctActive && now - n._lastUsed > 3500) {
+        if (n._fctActive && now - n._lastUsed > window.Balance.FCT_STALE_NODE_TIMEOUT_MS) {
             /* R46-P0-fix: 超时节点放回池底（而非移出DOM），确保池容量可恢复 */
             if (n._fctTimeout) { clearTimeout(n._fctTimeout); n._fctTimeout = null; }
             n.style.display = 'none';
