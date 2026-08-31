@@ -4,6 +4,8 @@
 
 Gp._loop = function(timestamp) {
     if (!this.running || this.gameOver) return;
+    /* R113-P1: 防止玩家对象异常null时主循环崩溃 */
+    if (!this.player) return;
     try {
         /* Epoch 44: 懒初始化音频上下文（首次循环时尝试） */
         if (window.audioManager && !window.audioManager._initialized) {

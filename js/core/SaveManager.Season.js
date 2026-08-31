@@ -36,12 +36,12 @@
         });
     };
 
-    SaveManager.prototype.spendMetaTokens = async function(perkId) {
+    SaveManager.prototype.spendMetaTokens = async function(perkId, cost) {
         var self = this;
         return this.getMeta().then(function(meta) {
-            var cost = 100;
-            if ((meta.metaTokens || 0) < cost) return { ok: false, reason: '元代币不足' };
-            meta.metaTokens -= cost;
+            var actualCost = cost || 100;
+            if ((meta.metaTokens || 0) < actualCost) return { ok: false, reason: '元代币不足' };
+            meta.metaTokens -= actualCost;
             if (!meta.purchasedPerks) meta.purchasedPerks = {};
             if (!meta.purchasedPerks[perkId]) meta.purchasedPerks[perkId] = 0;
             meta.purchasedPerks[perkId]++;
