@@ -47,11 +47,8 @@ Gp.init = async function() {
             for (var _c = 0; _c < this._activeCoins.length; _c++) this._activeCoins[_c].el.remove();
             this._activeCoins = [];
             /* R30-H-018: 清理残留弹道防止幽灵弹道 */
-            for (var _p = 0; _p < (this._projectiles || []).length; _p++) {
-                if (this._projectiles[_p] && this._projectiles[_p].el && this._projectiles[_p].el.parentNode) this._projectiles[_p].el.remove();
-            }
-            this._projectiles = [];
-            this._enemyProjectiles = [];
+            this._cleanAllProjectiles();
+            this._cleanEnemyProjectiles();
             this._lastMoveX = 0;
 
             var vpW = this.battlefield.clientWidth;
@@ -637,6 +634,8 @@ Gp._showGuide = function() {
     this._guideMoveDirs = {};
     this._guideGemsPicked = 0;
     this._guideHits = 0;
+    /* R117-P0: 与所有其他面板一致，guide 激活时冻结时钟 */
+    this._freezeClock();
     if (this.guideOverlay) this.guideOverlay.classList.add('active');
     /* 高亮引导面板 */
     this._highlightElement('#guide-overlay', 6000);
