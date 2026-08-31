@@ -234,6 +234,12 @@ Gp.restart = function() {
         }
         this._rainDrops = [];
     }
+    /* R118-P0: 清理深渊面板DOM和重置标志，防止重启后面板残留导致守卫失效 */
+    var _ap = document.getElementById('abyss-panel');
+    if (_ap) _ap.remove();
+    this._abyssPanelVisible = false;
+    /* R118-P0: 清理FxManager对象池，防止飘字节点跨局泄漏 */
+    if (window.fxManager) window.fxManager.cleanup();
     var bc = document.getElementById('active-buffs-container');
     if (bc) { bc.remove(); this._buffsContainerEl = null; }
     for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
