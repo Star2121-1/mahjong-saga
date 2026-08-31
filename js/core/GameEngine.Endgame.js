@@ -227,6 +227,13 @@ Gp.restart = function() {
     this._dayNightEl = null;
     if (this._abyssMistEl && this._abyssMistEl.parentNode) this._abyssMistEl.remove();
     this._abyssMistEl = null;
+    /* R116-P1: 清理雨滴粒子防止重启泄漏 */
+    if (this._rainDrops) {
+        for (var _rd = 0; _rd < this._rainDrops.length; _rd++) {
+            if (this._rainDrops[_rd] && this._rainDrops[_rd].parentNode) this._rainDrops[_rd].remove();
+        }
+        this._rainDrops = [];
+    }
     var bc = document.getElementById('active-buffs-container');
     if (bc) { bc.remove(); this._buffsContainerEl = null; }
     for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
