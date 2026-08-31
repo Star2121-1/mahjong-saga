@@ -434,7 +434,8 @@ Gp._loop = function(timestamp) {
             }
         }
         this._updateProjectiles(dt);
-        if (!this._pendingReward) this._updateEnemyProjectiles(dt);
+        /* R116-P1: 波次过渡期弹道应持续更新，避免幽灵悬浮+同时命中伤害峰值 */
+        this._updateEnemyProjectiles(dt);
 
         /* ── Overdrive 计时（游戏时间） ── */
         /* 设计决策：面板打开时游戏循环暂停，Overdrive 计时随之暂停。
