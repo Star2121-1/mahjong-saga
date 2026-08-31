@@ -81,6 +81,7 @@ Gp.init = async function() {
     this._initJoystick();
     this._bindAudioButton();
     this._bindStage3Events();
+    this._initVisibilityPause();
     this._initBeforeUnload();
 
     /* Epoch 5: 初始化模块系统 — 仅新游戏/非resume路径需要 */
@@ -306,6 +307,18 @@ Gp._bindStage3Events = function() {
         this._currentGuideStep = 0;
         this._showGuideStep(0);
     }
+};
+
+Gp._initVisibilityPause = function() {
+    /* R110-P0: 页面不可见时暂停rAF循环，防止后台持续消耗CPU并推进游戏逻辑 */
+    var self = this;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            if (self.running && !self.gameOver) self.running = false;
+        } else if (!self._paused && !self.gameOver) {
+            self._beginLoop();
+        }
+    });
 };
 
 Gp._initBeforeUnload = function() {

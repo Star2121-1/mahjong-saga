@@ -311,6 +311,13 @@
     transition-property: all !important;
 }
 
+/* R110-P1: 波次公告动画在面板打开时不应暂停 */
+.game-clock-frozen #wave-announce,
+.game-clock-frozen #wave-announce *,
+.game-clock-frozen #wave-announce *::before,
+.game-clock-frozen #wave-announce *::after {
+    animation-play-state: running !important;
+}
 /* Whitelist HP fills so they transition smoothly even during clock freeze */
 .game-clock-frozen #player-hp-fill,
 .game-clock-frozen .enemy-hp-fill {
