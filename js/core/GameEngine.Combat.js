@@ -515,6 +515,8 @@ Gp._gameOver = async function() {
     if (this._overdriveActive) this._endOverdrive();
     /* R116-P1: 防止 Boss Lord 结算状态跨局残留 */
     this._pendingBossLordSettle = false;
+    /* R117-P0: 防止深渊面板双开守卫在重启后失效 */
+    this._abyssPanelVisible = false;
     var _seqGO = this._runSeq || 0; /* P0-1: 局序号令牌 */
     window.audioManager && window.audioManager.play('gameover');
     /* P0-1 修复: 移除恒真布尔守卫（调用方 Loop 已先行置 flags，原守卫使死亡结算永不执行） */
