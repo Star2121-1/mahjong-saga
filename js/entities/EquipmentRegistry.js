@@ -31,8 +31,16 @@ window.equipmentRegistry = {
         quality = quality || 'rare';
         var affixCount = quality === 'legendary' ? 3 : quality === 'epic' ? 2 : 1;
         var affixes = [];
+        var usedAffixIds = {}; /* R124-P0: 防止同件装备出现重复词条 */
         for (var i = 0; i < affixCount; i++) {
-            affixes.push(this.getRandomAffix());
+            var affix;
+            var attempts = 0;
+            do {
+                affix = this.getRandomAffix();
+                attempts++;
+            } while (usedAffixIds[affix.id] && attempts < 10);
+            usedAffixIds[affix.id] = true;
+            affixes.push(affix);
         }
         /* R65-P1: 深拷贝base属性，防止多实例共享同一引用导致污染 */
         return {
