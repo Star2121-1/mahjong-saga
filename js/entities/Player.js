@@ -119,6 +119,8 @@ class Player {
             this.hp = Math.min(this.hp + dt * 2, this.maxHp); /* 每秒回2HP */
         } else {
             this.maxHp = this._baseMaxHp || this.maxHp;
+            /* R116-P0: 临时HP增益过期后clamp防止溢出 */
+            this.hp = Math.min(this.hp, this.maxHp);
         }
         if (this.invulnTimer > 0) {
             this.invulnTimer -= dt;
