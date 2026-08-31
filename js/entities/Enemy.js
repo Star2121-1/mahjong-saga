@@ -781,7 +781,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
             if (this._bossRadiationTimer >= 1.5) {
                 this._bossRadiationTimer = 0;
                 if (engine && engine._enemyProjectiles) {
-                    var radDmg = Math.floor(this.atk * 0.6);
+                    var radDmg = Math.floor(this.atk * Balance.BOSS_P3_RAD_DMG_MULT);
                     var radSpd = Balance.BOSS_P3_RADIATION_SPEED;
                     for (var ri = 0; ri < Balance.BOSS_P3_RADIATION_COUNT; ri++) {
                         var radAngle = (ri / Balance.BOSS_P3_RADIATION_COUNT) * Math.PI * 2;

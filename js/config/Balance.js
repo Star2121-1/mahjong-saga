@@ -93,7 +93,13 @@ window.Balance = {
 
     /* ── 玩家系统 ── */
     PLAYER_MAX_RAGE: 100,
-    
+
+    /* R118-P1: 新增平衡常量 */
+    EVOLVED_ARMOR_THORNS_BASE: 0.5,       // 太阳神巨像基础反伤率 (Player.js addRelic)
+    AUTO_SAVE_INTERVAL: 30,               // 周期性自动存档间隔(s) (Loop.js _autoSave)
+    FROST_SLOW_MULT: 0.75,                // 北冥图腾减速乘数 (Loop.js player.speed)
+    EVOLVED_DRONE_INTERVAL: 0.35,         // 进化无人机攻击间隔(s) (Loop.js drone)
+    BOSS_P3_RAD_DMG_MULT: 0.6,            // Boss P3辐射伤害倍率 (Enemy.js)
     PLAYER_RADIUS: 28,
     REVIVE_HP_PERCENT: 0.3,
     REVIVE_INVULN_DURATION: 1.5,

@@ -16,7 +16,7 @@ Gp._loop = function(timestamp) {
         this._lastTime = timestamp;
         /* R116-P0: 周期性自动存档，每30秒保存一次以防崩溃丢失进度 */
         this._saveTimer = (this._saveTimer || 0) + dt;
-        if (this._saveTimer >= 30 && !this._pendingReward && !this._paused && !this._announcingWave && this._waveCount > 0) {
+        if (this._saveTimer >= Balance.AUTO_SAVE_INTERVAL && !this._pendingReward && !this._paused && !this._announcingWave && this._waveCount > 0) {
             this._saveTimer = 0;
             this._autoSave('tick');
         }
@@ -56,7 +56,7 @@ Gp._loop = function(timestamp) {
         }
         /* B3: 北冥图腾减速 — 移动期间临时降速，更新后还原 */
         var _spdSave = this.player.speed;
-        if (this.player._frostSlowed) this.player.speed = _spdSave * 0.75;
+        if (this.player._frostSlowed) this.player.speed = _spdSave * Balance.FROST_SLOW_MULT;
         this.player.update(dt, input.x, input.y, this._mapW, this._mapH);
         this.player.speed = _spdSave;
 
@@ -74,7 +74,7 @@ Gp._loop = function(timestamp) {
             }
 
             if (this.player.hasDrone) {
-                var interval = this.player.evolvedDrone ? 0.35 : this.player.droneInterval;
+                var interval = this.player.evolvedDrone ? Balance.EVOLVED_DRONE_INTERVAL : this.player.droneInterval;
                 this.player.droneTimer += dt;
                 while (this.player.droneTimer >= interval) {
                     this.player.droneTimer -= interval;
