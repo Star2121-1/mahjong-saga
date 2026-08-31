@@ -134,7 +134,7 @@
             compendium: { relics: [], weapons: [], enemies: [], equips: [], mutations: [], hupai: [] },
             discoveredSecrets: [],
             /* Epoch 36 */
-            weeklyVault: { active: false, challenge: null, bet: 0, completed: false, reward: null },
+            weeklyVault: { active: false, challenge: null, bet: 0, completed: false, reward: null, multiplier: 1 },
             /* Epoch 37: 赛季/声望/每日挑战默认值 */
             prestigeLevel: 0, prestigeCoresSpent: 0,
             season: { currentSeason: 0, startDate: 0, day: 1, claimedRewards: {} },
@@ -258,7 +258,7 @@
         if (data.makeupTokens == null) data.makeupTokens = 0;
         if (!data.runHistory) data.runHistory = [];
         if (!data.compendium) data.compendium = { relics: [], weapons: [], enemies: [], equips: [], mutations: [], hupai: [] };
-        if (!data.weeklyVault) data.weeklyVault = { active: false, challenge: null, bet: 0, completed: false, reward: null };
+        if (!data.weeklyVault) data.weeklyVault = { active: false, challenge: null, bet: 0, completed: false, reward: null, multiplier: 1 };
         if (!data.discoveredSecrets) data.discoveredSecrets = [];
         /* Epoch 37: 赛季/声望/每日挑战迁移 */
         if (data.prestigeLevel == null) data.prestigeLevel = 0;
@@ -571,6 +571,14 @@
         /* null 不是 object — typeof null === 'object' 是 JS 陷阱 */
         if (data.meta === null || typeof data.meta !== 'object' || Array.isArray(data.meta)) return false;
         if (typeof data.meta.metaTokens !== 'number' || !Number.isFinite(data.meta.metaTokens) || data.meta.metaTokens < 0) return false;
+        /* R117-P0: 校验所有核心数值字段防止Infinity注入 */
+        var _numFields = ['totalRuns','totalKills','bossCores','prestigeLevel','prestigeCoresSpent',
+            'flawlessRuns','overdriveCount','bossKills','finalBossKills','totalCrits','totalDodges',
+            'highestEndlessLoop'];
+        for (var _nf = 0; _nf < _numFields.length; _nf++) {
+            var _nv = data.meta[_numFields[_nf]];
+            if (_nv != null && (typeof _nv !== 'number' || !Number.isFinite(_nv) || _nv < 0)) return false;
+        }
         if (!data.meta.techTree || typeof data.meta.techTree !== 'object') return false;
         /* H-034: 深度验证 talents 子字段防止 Infinity/超大数组注入 */
         if (data.meta.talents) {
@@ -598,6 +606,16 @@
                 if (_validQ.indexOf(_eq.quality) === -1) return false;
                 if (_validS.indexOf(_eq.slot) === -1) return false;
                 if (_eq.affixes && !Array.isArray(_eq.affixes)) return false;
+                /* R117-P0: 校验装备词条防止畸形数据注入 */
+                if (_eq.affixes) {
+                    if (_eq.affixes.length > 20) return false;
+                    for (var _afi = 0; _afi < _eq.affixes.length; _afi++) {
+                        var _a = _eq.affixes[_afi];
+                        if (typeof _a !== 'object' || _a === null || Array.isArray(_a)) return false;
+                        if (typeof _a.name !== 'string' || !_a.name) return false;
+                        if (typeof _a.value !== 'number' || !Number.isFinite(_a.value)) return false;
+                    }
+                }
             }
         }
         if (data.activeRun === null || typeof data.activeRun !== 'object' || Array.isArray(data.activeRun)) return false;
