@@ -329,6 +329,18 @@
 .game-clock-frozen .enemy-hp-fill {
     transition-property: width !important;
 }
+/* R116-P1: 持续状态动画在面板打开时应继续运行 */
+.game-clock-frozen .enemy.frozen,
+.game-clock-frozen .enemy.frozen::before,
+.game-clock-frozen .enemy.frozen::after,
+.game-clock-frozen .boss-enraged,
+.game-clock-frozen .boss-enraged::before,
+.game-clock-frozen .boss-enraged::after,
+.game-clock-frozen .enemy.abyss-variant,
+.game-clock-frozen .enemy.abyss-variant::before,
+.game-clock-frozen .enemy.abyss-variant::after {
+    animation-play-state: running !important;
+}
 
 /* ══════════════════════════════════════════════
    引导面板步骤导航 (Epoch 1)
