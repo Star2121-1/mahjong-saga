@@ -139,7 +139,7 @@ Gp._completeGuide = function() {
     }
     /* 延迟启动游戏循环 */
     var self = this;
-    setTimeout(function() { self._beginLoop(); }, 500);
+    this._completeGuideTimer = setTimeout(function() { self._beginLoop(); }, 500);
 };
 
 Gp._clearHighlightTimers = function() {

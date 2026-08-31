@@ -27,6 +27,8 @@ Gp.restart = function() {
         this._highlightTimers = [];
     }
     if (this._guideCheckTimer) { clearInterval(this._guideCheckTimer); this._guideCheckTimer = null; }
+    /* R101-P1: 清理引导完成定时器 */
+    if (this._completeGuideTimer) { clearTimeout(this._completeGuideTimer); this._completeGuideTimer = null; }
     for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
     this._enemyElements.clear();
     this.enemies = [];
