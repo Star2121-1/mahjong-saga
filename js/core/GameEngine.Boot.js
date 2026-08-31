@@ -85,9 +85,10 @@ Gp.init = async function() {
     var _resumePath = (data && data.isRunActive === true && data.player);
     if (!_resumePath) {
         if (window.SpawnSystem) window.SpawnSystem.init(this);
-        if (window.CombatSystem) this._combat = window.CombatSystem;
-        if (window.Systems) this._systems = window.Systems;
     }
+    /* R118-P1: resume 路径也需初始化 _combat/_systems，否则委托调用降级到 fallback */
+    if (window.CombatSystem) this._combat = window.CombatSystem;
+    if (window.Systems) this._systems = window.Systems;
 
     if (this.battlefield) {
         var self = this;
@@ -709,7 +710,7 @@ Gp._initKeyboard = function() {
         }
         if (!self.running || self.gameOver) return;
         if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyW','KeyA','KeyS','KeyD'].includes(e.code)) e.preventDefault();
-        if (e.code === 'Space' && self.player && self.player.rage >= self.player.maxRage && !self._overdriveActive && !self._paused) {
+        if (e.code === 'Space' && self.player && self.player.rage >= self.player.maxRage && !self._overdriveActive && !self._paused && !self._discardMode && !self._huLock) {
             self._pressedKeys[e.code] = false;
             self._triggerOverdrive();
             return;
