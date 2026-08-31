@@ -91,6 +91,14 @@ Gp.restart = function() {
     this._guidePrevGemCount = undefined;
     this._guidePrevEnemyCount = undefined;
     this._abyssPanelVisible = false;
+    /* R118-P0: 清理FxManager对象池，防止飘字节点跨局泄漏 */
+    if (window.fxManager) window.fxManager.cleanup();
+    /* R120-P1: 清理深渊商店面板DOM，防止重启后面板残留 */
+    var _asp = document.getElementById('abyss-shop-panel');
+    if (_asp) _asp.remove();
+    /* R120-P2: 清理Boss豪赌面板DOM，防止重启后残留 */
+    var _bgp = document.getElementById('boss-gamble-panel');
+    if (_bgp) _bgp.remove();
     /* P1: 移除游戏时钟冻结 */
     if (this.container) this.container.classList.remove('game-clock-frozen');
     this.victoryOverlay.classList.remove('active');

@@ -132,6 +132,8 @@ Sys.showMutatorPanel = function(engine) {
         engine.mutatorChoices.appendChild(card);
     }
     engine.mutatorOverlay.classList.add('active');
+    /* R115-P0: 屏幕阅读器播报突变选择 */
+    engine._announceToSR('波次突变：' + choices.map(function(c) { return c.title; }).join('，'));
 };
 
 Sys.applyMutator = function(engine, mutatorId) {
