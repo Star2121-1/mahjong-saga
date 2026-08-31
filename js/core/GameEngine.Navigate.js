@@ -58,10 +58,16 @@ Gp.restart = function() {
     this._jokersDropped = 0;
     if (this._handTileSlots) this._renderHandTiles();
     if (this._qqueenShieldTimer) { clearTimeout(this._qqueenShieldTimer); this._qqueenShieldTimer = null; }
+    /* R122-P1: 清理共振隐藏定时器（Endgame.js有但Navigate.js遗漏） */
+    if (this._flameHideTimer) { clearTimeout(this._flameHideTimer); this._flameHideTimer = null; }
+    if (this._iceHideTimer) { clearTimeout(this._iceHideTimer); this._iceHideTimer = null; }
+    /* R102-P1: 清理死亡动画定时器 */
+    if (this._deathAnimTimer) { clearTimeout(this._deathAnimTimer); this._deathAnimTimer = null; }
     this._shieldActive = false;
     this._tempShield = 0; /* P0: 重置跨局护盾状态 */
     this._tempShieldEnd = 0; /* P0: 重置护盾过期时间 */
     this._witherTimer = 0; /* P1: 重置枯萎计时器防止跨局残留 */
+    this._monsterSurgeDoubleDrops = false; /* R122-P2: 防止怪物潮双倍掉落跨局残留 */
     /* P1: 清理雀魂手牌动画定时器，防止跨局残留触发 */
     if (this._handTileDeliverTimers) {
         this._handTileDeliverTimers.forEach(function(t) { clearTimeout(t); });
