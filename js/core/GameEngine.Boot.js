@@ -356,6 +356,9 @@ Gp._startNewRun = function(heroId, levelId) {
     this._spawnIntervalDecay = levelCfg.spawnIntervalDecay || 0.02;
     this._spawnIntervalMin = levelCfg.spawnIntervalMin || 0.5;
     this._enemyTypeWeights = levelCfg.enemyTypes || window.Balance.DEFAULT_ENEMY_WEIGHTS;
+    /* R89-P1: 同步关卡地图尺寸到引擎，防止程序化关卡使用默认1500x1500 */
+    this._mapW = levelCfg.mapW || this._mapW;
+    this._mapH = levelCfg.mapH || this._mapH;
 
     /* R74-P1: 重启时清理FCT节点池，防止跨局飘字节点泄漏 */
     if (window.fxManager) window.fxManager.cleanup();

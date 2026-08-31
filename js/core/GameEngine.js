@@ -100,7 +100,6 @@ window.GameEngine = function() {
     this._totalDodgesThisRun = 0;
     this._bossKillsThisRun = 0;
     this._finalBossKillsThisRun = 0;
-    this._startElapsed = 0;
 
     this.battlefield = null;
     this.container = null;
@@ -133,11 +132,12 @@ window.GameEngine = function() {
 
     /* ── Boss Gamble ── */
     this._gambleActive = false;
+    this._monsterSurgeDoubleDrops = false; /* R89-P1: 防止怪物潮标志跨局残留 */
     this._gambleType = null;
     this._gambleStaked = 0;
 };
 
-var Gp = window.GameEngine.prototype;
+/* R89-P1: 移除未使用的 Gp 局部变量，所有原型方法在独立模块中定义 */
 
 /* ══════════════════════════════════════════════
    GameEngine 模块化拆分 — 方法已移至独立文件
