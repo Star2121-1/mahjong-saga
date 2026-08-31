@@ -134,6 +134,8 @@ Gp._showVictory = function() {
     }
 
     this.victoryOverlay.classList.add('active');
+    /* R115-P0: 屏幕阅读器播报胜利 */
+    this._announceToSR('通关！击杀 ' + this.kills + ' 个敌人');
     this._syncUI();
 
     /* ── Boss Gamble 结算 ── */
@@ -283,6 +285,8 @@ Gp._showVictoryOverlay = function() {
     }
 
     this.victoryOverlay.classList.add('active');
+    /* R115-P0: 屏幕阅读器播报胜利 */
+    this._announceToSR('通关！击杀 ' + this.kills + ' 个敌人');
     this._syncUI();
 };
 
@@ -587,6 +591,8 @@ Gp._gameOver = async function() {
     if (this.resultKills) this.resultKills.textContent = this.kills;
     if (this.resultWave) this.resultWave.textContent = (this._waveCount || 0) + ' /' + (this._totalWaves || 0);
     if (this.gameOverOverlay) this.gameOverOverlay.classList.add('active');
+    /* R115-P0: 屏幕阅读器播报失败 */
+    this._announceToSR('游戏结束。击杀 ' + this.kills + ' 个敌人，存活 ' + this._formatTime(this._elapsed));
 
     /* 死亡提示 */
     var deathTips = document.getElementById('death-tips');

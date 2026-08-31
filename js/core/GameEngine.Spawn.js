@@ -590,6 +590,8 @@ Gp._triggerHu = function (hu) {
     this._huLock = true;
     var names = { pihu: '屁胡', qiduizi: '七对子', pengpenghu: '碰碰胡', qingyise: '清一色' };
     var name = names[hu.huType] || '胡牌';
+    /* R115-P0: 屏幕阅读器播报胡牌 */
+    this._announceToSR(name + '！');
     var self = this;
 
     /* 全场时间冻结 */

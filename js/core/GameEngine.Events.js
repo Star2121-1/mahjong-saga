@@ -50,6 +50,8 @@ Gp._triggerInterWaveEvent = function() {
         '</div>';
 
     overlay.classList.add('active');
+    /* R115-P0: 屏幕阅读器播报波次间事件 */
+    this._announceToSR(evt.name + '：' + evt.desc);
     var self = this;
     /* P3-NEW: 波次间事件自动超时（15秒后自动接受） */
     if (this._interWaveTimeout) clearTimeout(this._interWaveTimeout);
@@ -223,6 +225,8 @@ Gp._clearTotems = function() {
 
 Gp._triggerOverdrive = function() {
     window.audioManager && window.audioManager.play('overdrive');
+    /* R115-P0: 屏幕阅读器播报 Overdrive 触发 */
+    this._announceToSR('Overdrive 爆发！');
     /* Epoch 5: 委托 Overdrive 到 Systems */
     if (this._systems && this._systems.triggerOverdrive) {
         return this._systems.triggerOverdrive(this);

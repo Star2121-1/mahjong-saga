@@ -545,6 +545,8 @@ Gp._announceWave = function(waveIdx) {
     var wa = document.getElementById('wave-announce');
     wa.textContent = '第 ' + (waveIdx + 1) + ' 波';
     wa.classList.add('active');
+    /* R115-P0: 屏幕阅读器播报波次公告 */
+    this._announceToSR('第 ' + (waveIdx + 1) + ' 波开始');
     this._autoSave('wave');
     var self = this;
     setTimeout(function() {
@@ -593,6 +595,8 @@ Gp._togglePause = function() {
         this.running = false;
         this._freezeClock();
         if (this.pauseOverlay) this.pauseOverlay.classList.add('active');
+        /* R115-P0: 暂停时焦点移至暂停面板 */
+        this._saveFocusAndFocusOverlay(this.pauseOverlay);
         /* R37-P1: 暂停时挂起 AudioContext，防止后台音效 */
         if (window.audioManager && window.audioManager._ctx && window.audioManager._ctx.state === 'running') {
             window.audioManager._ctx.suspend();
@@ -600,6 +604,8 @@ Gp._togglePause = function() {
     } else {
         this._paused = false;
         if (this.pauseOverlay) this.pauseOverlay.classList.remove('active');
+        /* R115-P0: 恢复时归还焦点 */
+        this._restoreFocus();
         /* R37-P1: 恢复时恢复 AudioContext */
         if (window.audioManager && window.audioManager._ctx && window.audioManager._ctx.state === 'suspended') {
             window.audioManager._ctx.resume().catch(function(e) { console.warn('[Audio] resume failed:', e); });
@@ -854,7 +860,11 @@ Gp._handleKeyNav = function(e) {
     var code = e.code;
     /* Tab 在 overlay 面板中导航 */
     if (code === 'Tab') {
-        var overlay = this.guideOverlay || document.querySelector('.reward-overlay.active, .mutator-overlay.active');
+        /* R115-P0: 用 ID 选择器替代类选择器，覆盖所有可交互面板 */
+        var overlay = this.guideOverlay || document.getElementById('reward-overlay') ||
+            document.getElementById('mutator-overlay') || document.getElementById('victory-overlay') ||
+            document.getElementById('game-over-overlay') || document.getElementById('pause-overlay') ||
+            document.getElementById('boss-gamble-panel') || document.getElementById('abyss-panel');
         if (overlay) {
             var focusable = overlay.querySelectorAll('button, [tabindex="0"]');
             if (focusable.length > 0) {
@@ -875,6 +885,32 @@ Gp._handleKeyNav = function(e) {
             e.preventDefault();
             active.click();
         }
+    }
+};
+
+/* R115-P0: 辅助方法 — 屏幕阅读器播报 */
+Gp._announceToSR = function(text) {
+    var el = document.getElementById('game-announcements');
+    if (el) {
+        el.textContent = '';
+        setTimeout(function() { el.textContent = text; }, 50);
+    }
+};
+
+/* R115-P0: 辅助方法 — 保存焦点并移至 overlay 第一个可聚焦元素 */
+Gp._saveFocusAndFocusOverlay = function(overlay) {
+    if (!overlay) return;
+    this._lastFocusedElement = document.activeElement;
+    var btn = overlay.querySelector('button, [tabindex="0"]');
+    if (btn) btn.focus();
+};
+
+/* R115-P0: 辅助方法 — 恢复之前保存的焦点 */
+Gp._restoreFocus = function() {
+    var el = this._lastFocusedElement;
+    this._lastFocusedElement = null;
+    if (el && typeof el.focus === 'function') {
+        try { el.focus(); } catch(e) {}
     }
 };
 
