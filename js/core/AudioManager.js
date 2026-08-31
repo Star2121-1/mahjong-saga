@@ -69,7 +69,7 @@ Ap.play = function(sound, opts) {
     if (this._muted) return;
     opts = opts || {};
     /* P1: 应用分类音量 */
-    var catKey = (sound === 'victory' || sound === 'gameover' || sound === 'levelup') ? 'music' : 'sfx';
+    var catKey = (sound === 'victory' || sound === 'gameover' || sound === 'levelup' || sound === 'overdrive') ? 'music' : 'sfx';
     var vol = (opts.volume != null ? opts.volume : 1) * this._volume * (this._categoryVolumes[catKey] || 1);
     switch (sound) {
         case 'attack': this._sine(300, 0.06, vol, -0.3); break;

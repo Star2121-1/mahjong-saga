@@ -1023,6 +1023,8 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
         if (this.hp <= 0) {
             this.hp = 0;
             this.alive = false;
+            /* R123-P1: 清除冻结状态，防止死亡后仍显示冰冻特效 */
+            if (this.frozen) { this.frozen = false; this.frozenTimer = 0; }
             if (this.el) this.el.style.opacity = '1';
 
             /* R30-L-006: 敌人死亡触发碎裂动画 */
