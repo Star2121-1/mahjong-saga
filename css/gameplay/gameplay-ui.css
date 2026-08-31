@@ -318,6 +318,12 @@
 .game-clock-frozen #wave-announce *::after {
     animation-play-state: running !important;
 }
+/* R116-P0: 深渊红雾在面板打开时不应暂停，与雨滴保持一致 */
+.game-clock-frozen .abyss-red-mist,
+.game-clock-frozen .abyss-red-mist::before,
+.game-clock-frozen .abyss-red-mist::after {
+    animation-play-state: running !important;
+}
 /* Whitelist HP fills so they transition smoothly even during clock freeze */
 .game-clock-frozen #player-hp-fill,
 .game-clock-frozen .enemy-hp-fill {

@@ -99,7 +99,9 @@ Gp.restart = function() {
     this._elapsed = 0;
     this.kills = 0;
     this._spawnTimer = 0;
-    this._spawnInterval = 1.5;
+    this._spawnInterval = Balance.DEFAULT_SPAWN_INTERVAL;
+    /* R116-P0: 重启时必须清零 loopCount，防止深渊视觉效果跨局残留 */
+    this.loopCount = 0;
     this._difficultyTimer = 0;
 
     /* Visual Enhancement B: 清理天气粒子 */
