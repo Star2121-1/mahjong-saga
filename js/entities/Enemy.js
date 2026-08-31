@@ -8,6 +8,7 @@ window.Enemy = class Enemy {
         this.type = type || 'Normal';
         this.el = null;
         this._eng = null; /* Engine ref — set by caller */
+        this._abyssScaleApplied = false; /* R124-P1: 防止Boss_Lord双重深渊缩放 */
 
         const hpMult = Math.pow(Balance.ENEMY_LEVEL_HP_ATK_MULT, level - 1);
         const atkMult = Math.pow(Balance.ENEMY_LEVEL_HP_ATK_MULT, level - 1);
@@ -136,10 +137,12 @@ window.Enemy = class Enemy {
             this._bossContactTimer = 0;
             this._comboCooldown = 0; /* K-030: 万子连击冷却 */
             /* R29-H-006: Boss_Lord 也需要应用 Abyss 倍增 */
-            if (_lc > 0) {
+            /* R124-P1: Boss_Lord已在上文通用区块应用深渊缩放，此处不再重复 */
+            if (_lc > 0 && !this._abyssScaleApplied) {
                 this.maxHp = Math.floor(this.maxHp * Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, _lc));
                 this.hp = this.maxHp;
                 this.atk = Math.floor(this.atk * Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, _lc));
+                this._abyssScaleApplied = true;
             }
         }
 
