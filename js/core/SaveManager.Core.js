@@ -288,6 +288,7 @@
             this._metaCache = data;
             /* Epoch 46: 成功加载 meta 后清理旧备份 */
             try { localStorage.removeItem('cr_meta.json.bak'); } catch(e) {}
+            try { localStorage.removeItem('cr_active_run.json.bak'); } catch(e) {}
         }
         return this._metaCache;
     };
