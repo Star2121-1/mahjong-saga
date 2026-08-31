@@ -120,6 +120,9 @@ Gp.restart = function() {
     /* R116-P0: 重启时必须清零 loopCount，防止深渊视觉效果跨局残留 */
     this.loopCount = 0;
     this._difficultyTimer = 0;
+    /* R123-P0: 重置视口缓存，防止窗口缩放后相机追踪失效 */
+    this._vpW = 0;
+    this._vpH = 0;
 
     /* Visual Enhancement B: 清理天气粒子 */
     if (this._rainDrops) {

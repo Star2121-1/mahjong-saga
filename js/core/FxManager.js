@@ -33,8 +33,8 @@ Fp.spawnText = function(x, y, text, typeOrColor) {
     if (!node) return;
     /* R72-P1: 使用固定设计分辨率钳制，避免responsive.js scale后clientWidth偏移导致飘字截断 */
     if (this._layer) {
-        var w = 480; /* design width */
-        var h = 720; /* design height */
+        var w = 1920; /* gameplay design width */
+        var h = 1080; /* gameplay design height */
         x = Math.max(0, Math.min(x, w - 40));
         y = Math.max(0, Math.min(y, h - 20));
     }
