@@ -12,6 +12,8 @@ Gp._loop = function(timestamp) {
         var dt = Math.min((timestamp - this._lastTime) / 1000, 0.05);
         var _skipToEnd = false;
         this._lastTime = timestamp;
+        /* R96-P1: 每帧初重置协同标志，防止跨run残留导致激光额外穿透 */
+        this._synBladeLaserHit = false;
         /* C2: 命中停顿 — 顿帧期间世界时间减速至15% */
         if (this._hitStopT > 0) {
             this._hitStopT -= dt;
@@ -348,7 +350,8 @@ Gp._loop = function(timestamp) {
                     this.player.hp = Math.min(this.player.maxHp, this.player.hp + absorbed);
                     if (this._tempShield <= 0) this._tempShield = 0;
                 }
-                this._playerHitCountThisRun++;
+                var _actualDmg = prevHp - this.player.hp;
+                if (_actualDmg > 0) this._playerHitCountThisRun++;
             }
         }
 

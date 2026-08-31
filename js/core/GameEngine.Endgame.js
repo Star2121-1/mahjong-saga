@@ -287,9 +287,14 @@ Gp.restart = function() {
     if (this.container) this.container.classList.remove('game-clock-frozen');
     this._elapsed = 0;
     this.kills = 0;
+    this.loopCount = 0; /* R96-P0: 防止深渊combo跨局误触发 */
     this._spawnTimer = 0;
     this._spawnInterval = Balance.DEFAULT_SPAWN_INTERVAL;
     this._difficultyTimer = 0;
+    this._lastDayNightCycle = -1;
+    this._lastAbyssDepth = -1;
+    this._rainTimer = 0;
+    this._playerHitCountThisRun = 0; /* R96-P1: 防止无伤成就被护盾吸收的伤害错误计数 */
 
     var heroId = this.player ? this.player.heroId : 'Hero';
     var levelId = this._currentLevelId || 'level_1';

@@ -279,6 +279,7 @@ Gp._showBossGamble = function() {
 
     /* H-001: 超时机制 — 10 秒无操作自动选择 safe */
     var self = this;
+    var panel; /* R96-P0: 提前声明避免setTimeout回调中ReferenceError */
     this._gambleTimeout = setTimeout(function() {
         if (self._pendingBossGamble && panel && panel.parentNode) {
             self._pendingBossGamble = false;

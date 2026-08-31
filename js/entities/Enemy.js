@@ -107,7 +107,7 @@ window.Enemy = class Enemy {
             this.baseSpeed = this.speed;
             this.radius = 20;
             this.hue = 90;
-            this._archerFireCd = 1.2 + Math.random();
+            this._archerFireCd = Balance.ENEMY_ARCHER_FIRE_INTERVAL * (0.5 + Math.random() * 0.5);
             this._archerCharging = 0;
         } else if (this.type === 'Boss_Lord') {
             this.radius = 70;
