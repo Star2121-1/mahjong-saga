@@ -5,13 +5,20 @@
 (function() {
     'use strict';
 
+    /* R124-P1: 节流定时器，延迟合并多次 recordCompendiumEntry 调用 */
+    var _compSaveTimer = null;
     SaveManager.prototype.recordCompendiumEntry = function(category, id) {
         if (!this._metaCache) return;
         var arr = this._metaCache.compendium[category];
         if (!arr) return;
         if (arr.indexOf(id) === -1) {
             arr.push(id);
-            this._saveMetaToStorage();
+            if (!_compSaveTimer) {
+                _compSaveTimer = setTimeout(function() {
+                    _compSaveTimer = null;
+                    this._saveMetaToStorage();
+                }.bind(this), 200);
+            }
         }
     };
 

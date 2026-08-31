@@ -214,6 +214,8 @@ Gp.restart = function() {
         clearInterval(this._guideCheckTimer);
         this._guideCheckTimer = null;
     }
+    /* R101-P1: 清理引导完成定时器 */
+    if (this._completeGuideTimer) { clearTimeout(this._completeGuideTimer); this._completeGuideTimer = null; }
     /* R30-H-017: 清理Boss Phase 3红色雾霭DOM */
     if (this._bossMistEl && this._bossMistEl.parentNode) this._bossMistEl.remove();
     this._bossMistEl = null;
@@ -260,6 +262,7 @@ Gp.restart = function() {
         this._handTileDeliverTimers = [];
     }
     this._pendingReward = false;
+    this._pendingBossGamble = false; /* H-017: 防止 Boss Gamble 状态永久挂起 */
     this._bossTimer = 0;
     this._waveCount = 0;
     this.currentWaveSpawnedCount = 0;
@@ -283,7 +286,9 @@ Gp.restart = function() {
     this._tempGoldMult = 1;
     this._tempCritBonus = 0;
     this._extraEliteCount = 0;
+    this._shieldActive = false;
     this._tempShield = 0;
+    this._witherTimer = 0; /* P1: 重置枯萎计时器防止跨局残留 */
     /* R106-P0: 防止怪物潮双倍掉落跨局残留 */
     this._monsterSurgeDoubleDrops = false;
     /* R32-G-004: 重置引导状态，防止跨局残留（断点恢复路径也会使用restart） */
@@ -318,10 +323,17 @@ Gp.restart = function() {
     this._spawnTimer = 0;
     this._spawnInterval = Balance.DEFAULT_SPAWN_INTERVAL;
     this._difficultyTimer = 0;
+    /* R116-P0: 重启时重置周期性存档计时器 */
+    this._saveTimer = 0;
+    /* R123-P0: 重置视口缓存，防止窗口缩放后相机追踪失效 */
+    this._vpW = 0;
+    this._vpH = 0;
     this._lastDayNightCycle = -1;
     this._lastAbyssDepth = -1;
     this._rainTimer = 0;
     this._playerHitCountThisRun = 0; /* R96-P1: 防止无伤成就被护盾吸收的伤害错误计数 */
+    /* R82-P1: 清理战场深渊深度class */
+    if (this._battlefield) this._battlefield.classList.remove('abyss-depth-1', 'abyss-depth-2', 'abyss-depth-3', 'abyss-depth-n');
 
     var heroId = this.player ? this.player.heroId : 'Hero';
     var levelId = this._currentLevelId || 'level_1';
