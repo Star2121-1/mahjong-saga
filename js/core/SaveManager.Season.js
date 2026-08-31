@@ -28,10 +28,12 @@
         var self = this;
         return this.getMeta().then(function(meta) {
             var info = self.getPrestigeInfo();
-            if (info.cores < (info.level+1)*(info.level+1)) return { ok: false, reason: '核心不足' };
-            meta.bossCores = info.cores - (info.level+1)*(info.level+1);
+            /* R119-P0: 修正声望公式 — 原(info.level+1)^2恒大于info.cores(因level=floor(sqrt(cores)))导致守卫永远为false */
+            var cost = 2 * (info.level || 0) + 1;
+            if (info.cores < cost) return { ok: false, reason: '核心不足' };
+            meta.bossCores = info.cores - cost;
             meta.prestigeLevel = (info.level || 0) + 1;
-            meta.prestigeCoresSpent = (meta.prestigeCoresSpent || 0) + (info.level+1)*(info.level+1);
+            meta.prestigeCoresSpent = (meta.prestigeCoresSpent || 0) + cost;
             return self.saveMeta(meta).then(function() { return { ok: true, newLevel: meta.prestigeLevel }; });
         });
     };

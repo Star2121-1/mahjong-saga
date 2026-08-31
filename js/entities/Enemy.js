@@ -1078,6 +1078,8 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                     child.speed = child.baseSpeed * 1.2;
                     child.baseSpeed = child.speed;
                     engRef.enemies.push(child);
+                    /* R119-P1: Splitter子体计入波次计数，防止绕过波次上限 */
+                    if (typeof engRef.currentWaveSpawnedCount !== 'undefined') engRef.currentWaveSpawnedCount += 1;
                     var cel = document.createElement('div');
                     cel.className = 'enemy';
                     cel.dataset.id = cid;

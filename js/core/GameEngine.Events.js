@@ -383,6 +383,7 @@ Gp._resolveGambleChoice = function(choice) {
     }
     /* 生成领主（无论是否赌注） */
     this._spawnBossLordFromGamble();
+    this._unfreezeClock(); /* R119-P0: 手动选择路径必须解冻时钟，与超时路径一致 */
     this._beginLoop();
 };
 

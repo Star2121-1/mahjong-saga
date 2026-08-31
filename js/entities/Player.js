@@ -116,7 +116,7 @@ class Player {
         var tempHpBonus = this._tempHpBonus || 0;
         if (tempHpBonus > 0) {
             this.maxHp = (this._baseMaxHp || this.maxHp) + tempHpBonus;
-            this.hp = Math.min(this.hp + dt * 2, this.maxHp); /* 每秒回2HP */
+            this.hp = Math.min(this.hp + dt * Balance.TEMP_HP_REGEN_PER_SEC, this.maxHp); /* R119-P2: 引用Balance常量防止魔数散落 */
         } else {
             this.maxHp = this._baseMaxHp || this.maxHp;
             /* R116-P0: 临时HP增益过期后clamp防止溢出 */
