@@ -271,6 +271,8 @@ Gp.restart = function() {
     this._tempCritBonus = 0;
     this._extraEliteCount = 0;
     this._tempShield = 0;
+    /* R106-P0: 防止怪物潮双倍掉落跨局残留 */
+    this._monsterSurgeDoubleDrops = false;
     /* R32-G-004: 重置引导状态，防止跨局残留（断点恢复路径也会使用restart） */
     this._guideDismissed = false;
     this._currentGuideStep = 0;

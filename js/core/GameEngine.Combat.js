@@ -567,6 +567,8 @@ Gp._gameOver = async function() {
     /* P4: 死亡时清除所有残存定时器，防止回调在已终止引擎上执行 */
     if (this._interWaveTimeout) { clearTimeout(this._interWaveTimeout); this._interWaveTimeout = null; }
     if (this._qqueenShieldTimer) { clearTimeout(this._qqueenShieldTimer); this._qqueenShieldTimer = null; }
+    /* R106-P0: 防止怪物潮双倍掉落跨局残留 */
+    this._monsterSurgeDoubleDrops = false;
     /* ── Boss Gamble 失败结算 ── */
     if (this._gambleActive) {
         this._resolveGamble(false);
