@@ -200,6 +200,9 @@ Gp.restart = function() {
     if (this._gambleTimeout) clearTimeout(this._gambleTimeout);
     if (this._interWaveTimeout) clearTimeout(this._interWaveTimeout);
     if (this._qqueenShieldTimer) clearTimeout(this._qqueenShieldTimer);
+    /* R104-P1: 清理共振隐藏定时器 */
+    if (this._flameHideTimer) { clearTimeout(this._flameHideTimer); this._flameHideTimer = null; }
+    if (this._iceHideTimer) { clearTimeout(this._iceHideTimer); this._iceHideTimer = null; }
     /* R102-P1: 清理死亡动画定时器 */
     if (this._deathAnimTimer) { clearTimeout(this._deathAnimTimer); this._deathAnimTimer = null; }
     /* Clear guide timers to prevent stale callbacks after restart */
@@ -283,6 +286,8 @@ Gp.restart = function() {
     this._eliteModeActive = false;
     this.victoryOverlay.classList.remove('active');
     this.gameOverOverlay.classList.remove('active');
+    /* R104-P1: 清理突变面板active class，防止重启后短暂残留 */
+    if (this.mutatorOverlay) this.mutatorOverlay.classList.remove('active');
     this.gameOver = false;
     this.running = false;
     /* R46-P0: 解除clock冻结，防止重启前overlay/guide导致新游戏永久冻结 */

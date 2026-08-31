@@ -335,8 +335,10 @@ Gp._loop = function(timestamp) {
                         drop.style.setProperty('--duration', (0.4 + Math.random() * 0.3) + 's');
                         this.battlefield.appendChild(drop);
                         if (!this._rainDrops) this._rainDrops = [];
+                        var _dropIdx = this._rainDrops.length;
                         this._rainDrops.push(drop);
-                        setTimeout(function(el) { if (el && el.parentNode) el.remove(); }, 800, drop);
+                        var _self = this;
+                        setTimeout(function(el, arr, idx) { if(el && el.parentNode) el.remove(); if(idx >= 0 && idx < arr.length) arr.splice(idx, 1); }, 800, drop, this._rainDrops, _dropIdx);
                     }
                 }
             }

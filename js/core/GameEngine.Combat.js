@@ -4,6 +4,17 @@
 
 Gp._resumeAfterReward = function() {
     if (window.rewardManager) window.rewardManager.hidePanel();
+    /* R104-P1: 清理天气/光环DOM，防止波次间累积 */
+    if (this._dayNightEl && this._dayNightEl.parentNode) this._dayNightEl.remove();
+    this._dayNightEl = null;
+    if (this._abyssMistEl && this._abyssMistEl.parentNode) this._abyssMistEl.remove();
+    this._abyssMistEl = null;
+    if (this._bossMistEl && this._bossMistEl.parentNode) this._bossMistEl.remove();
+    this._bossMistEl = null;
+    if (this._flameAuraEl && this._flameAuraEl.parentNode) this._flameAuraEl.remove();
+    this._flameAuraEl = null;
+    if (this._iceAuraEl && this._iceAuraEl.parentNode) this._iceAuraEl.remove();
+    this._iceAuraEl = null;
     for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }
     this._enemyElements.clear();
     this.enemies = [];
