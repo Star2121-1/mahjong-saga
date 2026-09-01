@@ -72,11 +72,13 @@ Fp.spawnText = function(x, y, text, typeOrColor) {
 };
 
 Fp._borrowNode = function() {
-    for (var i = 0; i < this._pool.length; i++) {
-        if (this._pool[i].style.display === 'none' && !this._pool[i]._fctActive) {
-            return this._pool[i];
-        }
+    /* R131-P0: 维护空闲节点栈替代每帧线性扫描，O(1)借出 */
+    if (this._freeStack && this._freeStack.length > 0) {
+        return this._freeStack.pop();
     }
+    /* 池已满但未找到空闲节点，尝试健康检查回收 */
+    if (++this._returnCount % 20 === 0) this._healthCheck();
+    /* 动态扩容：最多到 FCT_POOL_MAX_GROWTH */
     if (this._pool.length < window.Balance.FCT_POOL_MAX_GROWTH) {
         var el = document.createElement('div');
         el.className = 'fct-node';
@@ -96,6 +98,9 @@ Fp._returnNode = function(node) {
     node.className = 'fct-node';
     node._fctActive = false;
     if (node._fctTimeout) { clearTimeout(node._fctTimeout); node._fctTimeout = null; }
+    /* R131-P0: 入空闲栈替代后续线性扫描 */
+    if (!this._freeStack) this._freeStack = [];
+    this._freeStack.push(node);
     /* 健康检查：每 50 次归还扫描一次，强制回收超过 5s 未归还的节点 */
     if (++this._returnCount % window.Balance.FCT_HEALTHCHECK_MODULO === 0) this._healthCheck();
 };
