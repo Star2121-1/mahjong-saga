@@ -21,7 +21,8 @@ window.Enemy = class Enemy {
         /* ── 无尽深渊指数暴涨 ── */
         var eng = this._eng || window.gameEngine;
         var loopCount = (eng && eng.loopCount) || 0;
-        if (loopCount > 0) {
+        /* R137-P0: Boss_Lord在构造器通用区块不应用深渊缩放，由Spawner专门处理，防止三重叠加 */
+        if (loopCount > 0 && this.type !== 'Boss_Lord') {
             this.maxHp = Math.floor(this.maxHp * Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, loopCount));
             this.hp = this.maxHp;
             this.atk = Math.floor(this.atk * Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, loopCount));

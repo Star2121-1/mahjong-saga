@@ -41,6 +41,8 @@ Gp._resumeAfterReward = function() {
 
     this._waveCount++;
     this.currentWaveSpawnedCount = 0;
+    /* R137-P0: 同步SpawnSystem计数器，防止波次间空刷 */
+    if (window.SpawnSystem) window.SpawnSystem.currentWaveSpawnedCount = 0;
     this._mutatorTriggered = false;
     this._clearMutatorEffects();
     this._clearTotems();
