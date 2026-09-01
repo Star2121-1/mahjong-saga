@@ -330,6 +330,24 @@
 .game-clock-frozen .abyss-red-mist::after {
     animation-play-state: running !important;
 }
+/* R142-P1: 套装共鸣特效在面板打开时不应暂停 */
+.game-clock-frozen .resonance-flame,
+.game-clock-frozen .resonance-flame::before,
+.game-clock-frozen .resonance-flame::after,
+.game-clock-frozen .resonance-ice,
+.game-clock-frozen .resonance-ice::before,
+.game-clock-frozen .resonance-ice::after {
+    animation-play-state: running !important;
+}
+/* R142-P1: 敌人死亡碎裂和受击闪烁在面板打开时不应暂停 */
+.game-clock-frozen .enemy.shatter-anim,
+.game-clock-frozen .enemy.shatter-anim::before,
+.game-clock-frozen .enemy.shatter-anim::after,
+.game-clock-frozen .enemy.flash-hit,
+.game-clock-frozen .enemy.flash-hit::before,
+.game-clock-frozen .enemy.flash-hit::after {
+    animation-play-state: running !important;
+}
 /* Whitelist HP fills so they transition smoothly even during clock freeze */
 .game-clock-frozen #player-hp-fill,
 .game-clock-frozen .enemy-hp-fill {
