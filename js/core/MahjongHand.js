@@ -214,10 +214,10 @@
         if (suitKeys.length > 0 && (t.jokers > 0 ? suitKeys.length <= 1 : suitKeys.length === 1)) {
             return { huType: 'qingyise', suit: suitKeys[0] };
         }
-        /* 七对子：≥6 对（14=7对，允许1癞子凑第7对） */
+        /* 七对子：凑齐 7 对（14 张），每癞子可补 1 个缺口 */
         var pairs = 0;
         for (var id2 in t.count) { pairs += Math.floor(t.count[id2] / 2); }
-        if (pairs + t.jokers >= 6 && pairs * 2 + t.jokers >= 12) {
+        if (pairs + t.jokers >= 7) {
             return { huType: 'qiduizi' };
         }
         /* 碰碰胡：刻/杠组 ≥4（癞子可参与已在 extractMelds，但这里用计数快速判定） */
