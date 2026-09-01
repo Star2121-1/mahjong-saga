@@ -413,7 +413,8 @@ Gp._settleRun = async function(tokens) {
             crits: this._totalCritsThisRun || 0,
             waves: this._waveCount || 0,
             hitsTaken: this._playerHitCountThisRun || 0,
-            won: !this.gameOver
+            /* R140-P0: gameOver在胜利路径已提前置true，用_won区分胜负而非!gameOver */
+            won: this._won
         };
         try {
             var vaultResult = await window.saveManager.evaluateWeeklyVault(runStats);
@@ -522,6 +523,7 @@ Gp._gameOver = async function() {
     if (this._overdriveActive) this._endOverdrive();
     /* R138-P0: 清一色金光环在死亡时重置，防止跨局残留 */
     if (this.playerEl) this.playerEl.classList.remove('hu-qingyise');
+    if (this.player) this.player.huQingyise = false; /* R140-P1: 同步重置标志防止后续逻辑依赖 */
     /* R116-P1: 防止 Boss Lord 结算状态跨局残留 */
     this._pendingBossLordSettle = false;
     /* R117-P0: 防止深渊面板双开守卫在重启后失效 */
@@ -651,7 +653,7 @@ Gp._gameOver = async function() {
     /* Epoch 18: 每周超级挑战 */
     var weeklyCompleted = [];
     try {
-        var weeklyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: this._maxGoldThisRun || 0, hitsTaken: this._playerHitCountThisRun || 0, bossKills: this._bossKillsThisRun || 0, abyssDepth: this.loopCount || 0, dodges: this._totalDodgesThisRun || 0, crits: this._totalCritsThisRun || 0, won: !this.gameOver };
+        var weeklyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: this._maxGoldThisRun || 0, hitsTaken: this._playerHitCountThisRun || 0, bossKills: this._bossKillsThisRun || 0, abyssDepth: this.loopCount || 0, dodges: this._totalDodgesThisRun || 0, crits: this._totalCritsThisRun || 0, /* R140-P0: 用_won替代!gameOver防止胜利路径误报失败 */ won: this._won };
         if (typeof window.saveManager.checkWeeklyCompletion === 'function') {
             var wc = window.saveManager.checkWeeklyCompletion(weeklyStats);
             weeklyCompleted = wc.completed || [];
@@ -665,7 +667,7 @@ Gp._gameOver = async function() {
 
     /* Epoch 31: 每日任务完成检查 */
     try {
-        var dailyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: this._maxGoldThisRun || 0, hitsTaken: this._playerHitCountThisRun || 0, won: !this.gameOver, waves: this._waveCount || 0, crits: this._totalCritsThisRun || 0, dodges: this._totalDodgesThisRun || 0, abyssDepth: this.loopCount || 0 };
+        var dailyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: this._maxGoldThisRun || 0, hitsTaken: this._playerHitCountThisRun || 0, /* R140-P0: 用_won替代!gameOver */ won: this._won, waves: this._waveCount || 0, crits: this._totalCritsThisRun || 0, dodges: this._totalDodgesThisRun || 0, abyssDepth: this.loopCount || 0 };
         if (typeof window.saveManager.checkDailyQuestCompletion === 'function') {
             var dqr = window.saveManager.checkDailyQuestCompletion(dailyStats);
             if (dqr.ids && dqr.ids.length > 0) {
@@ -723,7 +725,7 @@ Gp._gameOver = async function() {
     /* Epoch 31: 更新本地排行榜 */
     try {
         var lbStats = {
-            won: !this.gameOver,
+            won: this._won, /* R140-P0: 用_won替代!gameOver防止胜利路径排行榜误报失败 */
             elapsed: this._elapsed,
             bestAbyssDepth: this.loopCount || 0,
             totalKills: this.kills, /* R85-P0: 传入当前局击杀数，而非累计值 */

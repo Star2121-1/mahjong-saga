@@ -217,13 +217,17 @@
         /* 七对子：凑齐 7 对（14 张），每癞子可补 1 个缺口 */
         var pairs = 0;
         for (var id2 in t.count) { pairs += Math.floor(t.count[id2] / 2); }
-        if (pairs + t.jokers >= 7) {
+        /* R140-P0: 修正七对子判定 — 用maxPossiblePairs防止多刻+多对+多癞子误判 */
+        var maxPossiblePairs = pairs + Math.min(t.jokers, t.total - pairs * 2 - t.jokers);
+        if (maxPossiblePairs >= 7) {
             return { huType: 'qiduizi' };
         }
         /* 碰碰胡：刻/杠组 ≥4（癞子可参与已在 extractMelds，但这里用计数快速判定） */
         var triplets = 0;
         for (var id3 in t.count) { triplets += Math.floor(t.count[id3] / 3); }
-        if (triplets + Math.floor(t.jokers) >= 4) {
+        /* R140-P0: 修正碰碰胡判定 — 用maxPossibleTrips防止多刻+单张+癞子误判 */
+        var maxPossibleTrips = triplets + Math.min(t.jokers, t.total - triplets * 3 - t.jokers);
+        if (maxPossibleTrips >= 4) {
             return { huType: 'pengpenghu' };
         }
         /* D2 决策（v2.1 修正）：未成番型不自动屁胡 —— 返回 null，由 Spawn 进入打牌模式换张 */
