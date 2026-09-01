@@ -649,9 +649,13 @@ Gp._getMaxWaves = function() {
 
 Gp._getWaveEnemyMax = function() {
     var cfg = window.levelConfig[this._currentLevelId];
-    if (!cfg || !cfg.waveEnemyMax) return 999;
+    if (!cfg || !cfg.waveEnemyMax) {
+        /* R142-P0: 程序化关卡fallback到有意义的上限，防止50+波敌人无限累积 */
+        var maxW = cfg ? (cfg.maxWaves || 15) : 15;
+        return Math.min(999, maxW * 20);
+    }
     var idx = Math.min(this._waveCount, cfg.waveEnemyMax.length - 1);
-    return cfg.waveEnemyMax[idx] || 999;
+    return cfg.waveEnemyMax[idx] || (this._getMaxWaves() * 20);
 };
 
 /* ══════════════════════════════════════════════

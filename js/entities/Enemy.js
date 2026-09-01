@@ -880,6 +880,10 @@ player.takeDamage(Math.floor(this.atk * Balance.STALKER_ATTACK_MULT), this);
 
     takeDamage(dmg, source, sourceX, sourceY, _fctTypeOverride) {
         if (!this.alive) return false;
+        /* R142-P0: 防护NaN/Infinity/负数伤害，防止武器计算异常导致敌人免疫 */
+        if (dmg == null || !Number.isFinite(dmg) || dmg <= 0) {
+            return false;
+        }
         var actualDmg = dmg;
         /* Epoch 14: 关卡亲和减伤 — 对所有伤害来源统一应用，包括splash */
         var _eng = this._eng || window.gameEngine;
