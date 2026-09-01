@@ -931,7 +931,7 @@ Gp._syncEntities = function() {
             if (!enemy._hpFill) enemy._hpFill = fill;
             /* R38-P2: 防止stale指针 — 检测el是否仍包含该节点 */
             if (fill.parentNode !== el) enemy._hpFill = null;
-            var pct = (enemy.hp / enemy.maxHp) * 100;
+            var pct = (enemy.maxHp > 0 ? enemy.hp / enemy.maxHp : 0) * 100;
             fill.style.width = Math.max(0, pct) + '%';
         }
     }
@@ -1025,7 +1025,7 @@ Gp._syncUI = function() {
 
     /* ── Boss Lord 血条同步 ── */
     if (this._bossLord && this._bossLord.alive && this.bossHpFill) {
-        var pct = (this._bossLord.hp / this._bossLord.maxHp) * 100;
+        var pct = (this._bossLord.maxHp > 0 ? this._bossLord.hp / this._bossLord.maxHp : 0) * 100;
         this.bossHpFill.style.width = Math.max(0, pct) + '%';
     }
 
