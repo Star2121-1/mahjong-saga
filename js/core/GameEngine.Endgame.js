@@ -289,6 +289,7 @@ Gp.restart = function() {
     this._tempBerserkBonus = false;
     this._tempGoldMult = 1;
     this._tempCritBonus = 0;
+    this._overdriveCount = 0; /* R131-P0: 重置Overdrive计数，防止跨restart积累误报成就 */
     this._extraEliteCount = 0;
     this._shieldActive = false;
     this._shieldTimer = 0; /* R128-P1: 重置雀魂护盾计时器防止跨局残留 */

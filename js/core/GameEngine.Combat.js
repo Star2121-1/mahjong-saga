@@ -460,6 +460,8 @@ Gp._settleRun = async function(tokens) {
     /* 金币 */
     if ((meta.maxGoldThisRun || 0) >= 1000) this._checkAchievement('get_rich');
     if ((meta.maxGoldThisRun || 0) >= 10000) this._checkAchievement('gold_10k');
+    /* R131-P0: speed_demon 无终局兜底 — 若Loop中_ elapsed越过180s才结算则永久漏检 */
+    if (!this.gameOver && (this._elapsed || 0) <= 180) this._checkAchievement('speed_demon');
 
     /* ── 变异保险库：20%概率解锁新突变 ── */
     if (Math.random() < Balance.VAULT_MUTATION_UNLOCK_CHANCE) {

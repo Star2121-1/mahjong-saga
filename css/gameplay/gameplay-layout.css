@@ -66,6 +66,8 @@
     display: flex; justify-content: center; align-items: center;
     flex-shrink: 0; border-top: 1px solid rgba(26,83,54,0.2);
     padding: 0 10px;
+    /* R131-P1: iOS安全区域防护，防止底部home indicator遮挡按钮 */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 .hint { font-size: calc(14 * var(--_fs) * 1px); color: #e8e8e0; font-weight: 700; letter-spacing: 1px; flex: 1; text-align: center; }
 #pause-btn {

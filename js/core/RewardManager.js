@@ -89,7 +89,6 @@ class RewardManager {
             this.cardsContainer = this.overlay ? this.overlay.querySelector('.reward-cards') : null;
         }
         if (!this.overlay) { console.warn('[REWARD] overlay not found, retrying...'); this._panelLocked = false; return; }
-        this._panelLocked = true;
         this.overlay.classList.add('levelup-mode');
         var titleEl = this.overlay.querySelector('.reward-title');
         var originalTitle = titleEl ? titleEl.textContent : '';
