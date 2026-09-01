@@ -249,7 +249,12 @@ Gp._triggerOverdrive = function() {
         }
     }
     for (var _e = 0; _e < this.enemies.length; _e++) {
-        if (this.enemies[_e] && this.enemies[_e].alive) this.enemies[_e].speed = 0;
+        var _en = this.enemies[_e];
+        if (_en && _en.alive) {
+            _en._overdriveStored = true; /* R137-P0: 记录状态以便_endOverdrive正确恢复 */
+            _en._overdriveOrigSpeed = _en.speed;
+            _en.speed = 0;
+        }
     }
 };
 

@@ -89,6 +89,8 @@
     font-family: 'Impact', 'Arial Black', sans-serif;
     font-weight: 900; white-space: nowrap;
     pointer-events: none; will-change: transform, opacity;
+    /* R137-P0: X轴截断防护 — 长affix名不溢出fct-layer边界 */
+    max-width: 220px; overflow: hidden; text-overflow: ellipsis;
     /* 最小字体钳制：不低于 18px 确保可读性 */
     font-size: 22px; /* P2: 固定基准大小 */
 }

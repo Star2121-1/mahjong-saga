@@ -265,6 +265,20 @@ Gp._applyAbyssCombo = function(comboId) {
             this.player._abyssBloodmoonApplied = false;
             this.player._abyssBloodmoonAtkBonus = undefined;
         }
+        /* R137-P0: 关闭combo时清理各combo的运行时状态残留 */
+        if (combo.id === 'abyss_frenzy') {
+            for (var _ff = 0; _ff < this.enemies.length; _ff++) {
+                var _fe = this.enemies[_ff];
+                if (_fe.alive && _fe._frenzyApplied) {
+                    _fe.speed = _fe.baseSpeed;
+                    _fe._frenzyApplied = false;
+                }
+            }
+        } else if (combo.id === 'abyss_gravity') {
+            if (this.player) this.player.magnetRadius = this.player._baseMagnetRadius || Balance.MAGNET_RADIUS_DEFAULT;
+        } else if (combo.id === 'abyss_wither') {
+            this._witherAbyssTimer = 0;
+        }
         return;
     }
     this._abyssActiveCombo = comboId;

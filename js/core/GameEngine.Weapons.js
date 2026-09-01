@@ -11,6 +11,7 @@ Gp._checkWeaponSynergies = function() {
     this._synNovaLaser = false;
     this._synNovaShotgun = false;
     this._synNovaOrbit = false;
+    this._synNovaLaserActive = false; /* R137-P0: 防止Nova+Laser协同标志跨局残留导致开局双倍伤害 */
 
     /* 收集已装备武器ID */
     var ids = {};
