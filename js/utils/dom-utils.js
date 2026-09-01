@@ -27,24 +27,21 @@
 
     /** 切换 class */
     function toggleClass(el, cls, force) {
+        if (!el) return false;
         if (force === undefined) force = !el.classList.contains(cls);
         el.classList.toggle(cls, force);
         return force;
     }
 
     /** 添加 class */
-    function addClass(el, cls) { el.classList.add(cls); }
+    function addClass(el, cls) { if (el) el.classList.add(cls); }
 
     /** 移除 class */
-    function removeClass(el, cls) { el.classList.remove(cls); }
+    function removeClass(el, cls) { if (el) el.classList.remove(cls); }
 
     /** 设置/获取 CSS 变量 */
-    function setCssVar(el, name, value) {
-        el.style.setProperty('--' + name, value);
-    }
-    function getCssVar(el, name) {
-        return getComputedStyle(el).getPropertyValue('--' + name).trim();
-    }
+    function setCssVar(el, name, value) { if (el) el.style.setProperty('--' + name, value); }
+    function getCssVar(el, name) { return el ? (getComputedStyle(el).getPropertyValue('--' + name) || '').trim() : ''; }
 
     /** 创建元素 */
     function createElement(tag, className, parent) {
@@ -61,6 +58,7 @@
 
     /** 清空子元素 */
     function emptyElement(el) {
+        if (!el) return;
         while (el.firstChild) el.removeChild(el.firstChild);
     }
 

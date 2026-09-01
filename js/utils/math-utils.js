@@ -15,12 +15,16 @@
 
     /** 两点欧几里得距离 */
     function dist(x1, y1, x2, y2) {
+        /* R136-P0: 防御NaN参数 */
+        if (!isFinite(x1) || !isFinite(y1) || !isFinite(x2) || !isFinite(y2)) return 0;
         var dx = x2 - x1, dy = y2 - y1;
         return Math.sqrt(dx * dx + dy * dy);
     }
 
     /** 钳制值到 [min, max] */
     function clamp(v, lo, hi) {
+        /* R136-P0: 防御NaN参数 */
+        if (!isFinite(v) || !isFinite(lo) || !isFinite(hi)) return lo;
         return v < lo ? lo : (v > hi ? hi : v);
     }
 
@@ -51,6 +55,7 @@
 
     /** Fisher-Yates 洗牌 */
     function shuffle(arr) {
+        if (!arr) return arr;
         for (var i = arr.length - 1; i > 0; i--) {
             var j = Math.floor(Math.random() * (i + 1));
             var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
@@ -60,6 +65,7 @@
 
     /** 从数组中随机取 n 个元素 */
     function sample(arr, n) {
+        if (!arr) return [];
         var copy = arr.slice();
         return shuffle(copy).slice(0, n);
     }
