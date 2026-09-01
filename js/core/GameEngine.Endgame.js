@@ -299,6 +299,8 @@ Gp.restart = function() {
     this._tempCritBonus = 0;
     this._overdriveCount = 0; /* R131-P0: 重置Overdrive计数，防止跨restart积累误报成就 */
     this._extraEliteCount = 0;
+    /* R134-P1: 重置奖励面板置换状态，防止跨局残留 */
+    if (window.rewardManager) window.rewardManager._pendingWeapon = null;
     this._shieldActive = false;
     this._shieldTimer = 0; /* R128-P1: 重置雀魂护盾计时器防止跨局残留 */
     this._tempShield = 0;

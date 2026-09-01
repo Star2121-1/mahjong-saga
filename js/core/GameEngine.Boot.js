@@ -713,7 +713,11 @@ Gp._autoSave = function(trigger) {
 
 Gp._initKeyboard = function() {
     var self = this;
-    document.addEventListener('keydown', function(e) {
+    /* R134-P0: 先移除旧监听器，防止restart后匿名函数累加 */
+    document.removeEventListener('keydown', self._onKeyDown);
+    document.removeEventListener('keyup', self._onKeyUp);
+    document.removeEventListener('keydown', self._onKeyDownNav);
+    self._onKeyDown = function(e) {
         /* Epoch 43: 引导移动追踪 */
         if (self._guideMoveDirs && !self._guideDismissed) {
             if (e.code === 'KeyW' || e.code === 'ArrowUp') self._guideMoveDirs.w = true;
@@ -735,13 +739,16 @@ Gp._initKeyboard = function() {
             return;
         }
         self._pressedKeys[e.code] = true;
-    });
-    document.addEventListener('keyup', function(e) {
+    };
+    self._onKeyUp = function(e) {
         if (!self.running || self.gameOver || self._paused) return;
         self._pressedKeys[e.code] = false;
-    });
+    };
     /* Epoch 43: 键盘导航 */
-    document.addEventListener('keydown', function(e) { self._handleKeyNav(e); });
+    self._onKeyDownNav = function(e) { self._handleKeyNav(e); };
+    document.addEventListener('keydown', self._onKeyDown);
+    document.addEventListener('keyup', self._onKeyUp);
+    document.addEventListener('keydown', self._onKeyDownNav);
 };
 
 Gp._initJoystick = function() {

@@ -11,7 +11,7 @@ Gp._loop = function(timestamp) {
         if (window.audioManager && !window.audioManager._initialized) {
             window.audioManager._ensureContext();
         }
-        var dt = Math.min((timestamp - this._lastTime) / 1000, 0.05);
+        var dt = Math.max(0, Math.min((timestamp - this._lastTime) / 1000, 0.05)); /* R134-P0: 下界保护，防止performance.now()回退导致负dt使护盾/图腾等计时器倒退 */
         var _skipToEnd = false;
         this._lastTime = timestamp;
         /* R116-P0: 周期性自动存档，每30秒保存一次以防崩溃丢失进度 */
@@ -633,7 +633,7 @@ Gp._loop = function(timestamp) {
             this._milestoneCheckTimer = 0;
             if (this._checkMilestones) this._checkMilestones();
         }
-    } catch (err) { console.error('Game loop error:', err); }
+    } catch (err) { console.error('Game loop error:', err); if (this.running && !this.gameOver) requestAnimationFrame(this._guardedLoop || this._boundLoop); }
 
     if (this.running && !this.gameOver) requestAnimationFrame(this._guardedLoop || this._boundLoop);
 };

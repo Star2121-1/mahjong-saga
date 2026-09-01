@@ -901,7 +901,7 @@ player.takeDamage(Math.floor(this.atk * Balance.STALKER_ATTACK_MULT), this);
         }
         var isAssassinCrit = false;
         if (this.frozen) {
-            actualDmg = Math.floor(dmg * Balance.FROZEN_DAMAGE_MULT);
+            actualDmg = Math.floor(actualDmg * Balance.FROZEN_DAMAGE_MULT);
             if (!this._freezeHitDecayed) {
                 this.frozenTimer -= Balance.FROZEN_HIT_DECAY;
                 this._freezeHitDecayed = true;

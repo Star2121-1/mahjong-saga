@@ -237,7 +237,7 @@ class Player {
                     this._healAmount += heal;
                 }
             }
-            attacker.takeDamage(thornDmg);
+            attacker.takeDamage(thornDmg, this, this.x, this.y); /* R134-P0: 传递源位置，防止Barrier正面/背面判定基于玩家坐标而非实际攻击点 */
         }
 
         return this.hp <= 0;
@@ -598,7 +598,7 @@ class Player {
             this.maxHp += base.hp_boost || 0;
             this.hp = Math.min(this.hp, this.maxHp);
             this.magnetRadius += base.magnet_boost || 0;
-            if (base.atk_factor) this.atk = Math.floor(this.atk * (1 + base.atk_factor));
+            if (base.atk_factor && !_skipEquipAffixes) this.atk = Math.floor(this.atk * (1 + base.atk_factor)); /* R134-P0: skip equip base bonuses on restore — snapshot已含最终值，避免二次乘法 */
             if (!_skipEquipAffixes && item.affixes) {
                 for (var ai = 0; ai < item.affixes.length; ai++) {
                     var affix = item.affixes[ai];
