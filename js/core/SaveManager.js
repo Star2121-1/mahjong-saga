@@ -139,7 +139,7 @@ class SaveManager {
         if ((meta.bossCores || 0) < cost) return { ok: false, reason: '魔王核心不足' };
         meta.bossCores -= cost;
         /* R113-P0: 记录通胀，防止无限刷元代币满级天赋 */
-        if (typeof self.recordInflation === 'function') self.recordInflation(cost);
+        if (typeof this.recordInflation === 'function') this.recordInflation(cost);
         meta.talents[talentId] = currentLevel + 1;
         await this.saveMeta(meta);
         return { ok: true };

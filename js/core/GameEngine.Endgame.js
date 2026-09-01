@@ -305,6 +305,7 @@ Gp.restart = function() {
     this._guidePrevGemCount = undefined;
     this._guidePrevEnemyCount = undefined;
     this._tempShieldEnd = 0;
+    this._hitStopT = 0; /* R128-P1: 重置命中停顿计时器防止跨局残留 */
     /* R37-P1: 重置局内增益状态，防止跨局残留 */
     this._vaultMutations = [];
     this._eliteModeActive = false;
@@ -315,6 +316,7 @@ Gp.restart = function() {
     this._abyssLoopHpScale = 1;
     this._abyssLoopAtkScale = 1;
     this._abyssVariantEnabled = false;
+    this._witherAbyssTimer = 0; /* R128-P1: 重置深渊凋零计时器防止跨局残留 */
     if (this.victoryOverlay) this.victoryOverlay.classList.remove('active');
     if (this.gameOverOverlay) this.gameOverOverlay.classList.remove('active');
     /* R104-P1: 清理突变面板active class，防止重启后短暂残留 */

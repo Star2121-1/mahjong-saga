@@ -5,6 +5,7 @@
 Gp._goToSaveSelect = function() {
     this.running = false;
     this.gameOver = false;
+    this._announcingWave = false; /* R128-P2: 防止导航后标志残留影响后续逻辑 */
     this.gameOverOverlay.classList.remove('active');
     this.victoryOverlay.classList.remove('active');
     if (window.rewardManager) window.rewardManager.hidePanel();
