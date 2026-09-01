@@ -14,7 +14,7 @@ Gp._onClick = function(e) {
     if (!enemy || !enemy.alive) return;
 
     var bfRect = this.battlefield.getBoundingClientRect();
-    /* P1: 补偿 responsive.js transform:scale()，与 Boot.js 坐标变换一致 */
+    /* R133-P0: 与 Boot.js _onClick 一致，补偿 responsive.js transform:scale() 和 zoomLevel */
     var containerEl = this.container || document.getElementById('game-container');
     var containerRect = containerEl ? containerEl.getBoundingClientRect() : null;
     var scaleX = 1, scaleY = 1;
@@ -24,6 +24,14 @@ Gp._onClick = function(e) {
     }
     var vx = (e.clientX - bfRect.left) * scaleX;
     var vy = (e.clientY - bfRect.top) * scaleY;
+    /* P0: 补偿 zoomLevel 偏移，防止缩放后点击敌人位置偏差 */
+    var _wz = this._zoomLevel || 1;
+    if (_wz !== 1) {
+        var _cw = this.battlefield.clientWidth || 960;
+        var _ch = this.battlefield.clientHeight || 540;
+        vx = (vx - _cw * (1 - _wz) / 2) / _wz;
+        vy = (vy - _ch * (1 - _wz) / 2) / _wz;
+    }
     var wx = vx + this.cameraX;
     var wy = vy + this.cameraY;
 

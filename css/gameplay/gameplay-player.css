@@ -230,5 +230,6 @@
 }
 @media (max-height: 480px) {
     #player { width: 36px; height: 48px; font-size: 18px; }
+    #player-hp-wrap { width: 40px; } /* R133-P0: 同步缩小HP条宽度，防止溢出battlefield被clip */
     #player-hp-text { font-size: calc(9 * var(--_fs) * 1px); }
 }
