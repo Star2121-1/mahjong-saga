@@ -723,6 +723,7 @@ Gp._initKeyboard = function() {
     document.removeEventListener('keyup', self._onKeyUp);
     document.removeEventListener('keydown', self._onKeyDownNav);
     self._onKeyDown = function(e) {
+        if (e.repeat) return; /* R140-P0: 忽略OS键重复，防止快速连按污染按键状态机 */
         /* Epoch 43: 引导移动追踪 */
         if (self._guideMoveDirs && !self._guideDismissed) {
             if (e.code === 'KeyW' || e.code === 'ArrowUp') self._guideMoveDirs.w = true;

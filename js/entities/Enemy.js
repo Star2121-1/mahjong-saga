@@ -619,6 +619,9 @@ player.takeDamage(Math.floor(this.atk * Balance.STALKER_ATTACK_MULT), this);
                 if (engine && engine.battlefield && !engine._bossMistEl) {
                     var bMist = document.createElement('div');
                     bMist.className = 'abyss-red-mist boss-mist';
+                    /* R140-P0: 注入CSS变量使红雾跟随视口中心，否则var(--mx/--my)使用默认50%导致雾效固定居中无效 */
+                    bMist.style.setProperty('--mx', '50%');
+                    bMist.style.setProperty('--my', '50%');
                     engine.battlefield.appendChild(bMist);
                     engine._bossMistEl = bMist;
                     setTimeout(function () {
