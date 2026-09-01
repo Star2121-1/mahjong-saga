@@ -837,7 +837,8 @@ player.takeDamage(Math.floor(this.atk * Balance.STALKER_ATTACK_MULT), this);
                 x: this.x, y: this.y,
                 vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
                 radius: 6, damage: dmg,
-                alive: true, lifeTime: 4, _hitPlayer: false, el: null
+                alive: true, lifeTime: 4, _hitPlayer: false, el: null,
+                _ownerId: this.id /* R129-P0: 防止Boss被自己的弹幕击中 */
             };
             engine._enemyProjectiles.push(p);
         }
