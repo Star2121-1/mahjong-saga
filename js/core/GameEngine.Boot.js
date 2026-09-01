@@ -368,7 +368,7 @@ Gp._startNewRun = function(heroId, levelId) {
         this._currentLevelId = levelId;
     }
     this._totalWaves = levelCfg.maxWaves || 5;
-    this._spawnInterval = levelCfg.spawnIntervalMin || 1.5;
+    this._spawnInterval = Balance.DEFAULT_SPAWN_INTERVAL || 1.5; /* R129-P0: 使用默认值而非min，避免跳过预热阶段 */
     this._spawnIntervalDecay = levelCfg.spawnIntervalDecay || 0.02;
     this._spawnIntervalMin = levelCfg.spawnIntervalMin || 0.5;
     this._enemyTypeWeights = levelCfg.enemyTypes || window.Balance.DEFAULT_ENEMY_WEIGHTS;
@@ -391,7 +391,7 @@ Gp._startNewRun = function(heroId, levelId) {
     this._elapsed = 0;
     this.kills = 0;
     this._spawnTimer = 0;
-    this._spawnInterval = levelCfg.spawnIntervalMin || 1.5;
+    this._spawnInterval = Balance.DEFAULT_SPAWN_INTERVAL || 1.5; /* R129-P0: 使用默认值而非min */
     this._difficultyTimer = 0;
     this._bossTimer = 0;
     this._lastMoveX = 0;

@@ -614,7 +614,7 @@
                         var _a = _eq.affixes[_afi];
                         if (typeof _a !== 'object' || _a === null || Array.isArray(_a)) return false;
                         if (typeof _a.name !== 'string' || !_a.name) return false;
-                        if (typeof _a.value !== 'number' || !Number.isFinite(_a.value)) return false;
+                        if (typeof _a.val !== 'number' || !Number.isFinite(_a.val)) return false;
                     }
                 }
             }
