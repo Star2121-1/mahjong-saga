@@ -80,6 +80,7 @@ class Player {
         this.maxHp = cfg.hp;
         this.hp = cfg.hp;
         this.atk = cfg.atk;
+        this._baseAtk = this.atk; /* R140-P0: ATK锚点，用于深渊轮回缩放基准，防止跨轮复合累乘 */
         this.baseSpeed = cfg.speed;
         this.speed = cfg.speed;
         this.hue = cfg.hue;
@@ -742,6 +743,7 @@ class Player {
 
         /* 保存基础maxHp用于临时增益恢复（装备聚合完成后） */
         this._baseMaxHp = this.maxHp;
+        this._baseAtk = this.atk; /* R140-P0: reset中同步更新ATK锚点 */
         // REMOVED: redundant baseSpeed assignment (already set at line 716)
 
         /* ── 套装共鸣检测 ── */

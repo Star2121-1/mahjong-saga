@@ -118,6 +118,9 @@ class RewardManager {
         if (window.gameEngine && window.gameEngine._renderWeaponSlots) {
             window.gameEngine._renderWeaponSlots();
         }
+        /* R140-P0: 清理深渊商店入口按钮，防止胜利→返回大本营路径中DOM泄漏 */
+        var _asb = document.getElementById('abyss-shop-entrance-btn');
+        if (_asb && _asb.parentNode) _asb.remove();
     }
 
     /* ── 渲染卡牌 ── */

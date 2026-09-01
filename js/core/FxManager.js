@@ -11,6 +11,7 @@ var Fp = window.FxManager.prototype;
 
 Fp.init = function() {
     if (this._layer) return;
+    this._freeStack = []; /* R140-P1: 预先初始化避免首次borrow走healthCheck路径返回null */
     this._layer = document.getElementById('fct-layer');
     if (!this._layer) {
         this._layer = document.createElement('div');

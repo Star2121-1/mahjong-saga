@@ -425,7 +425,8 @@ Gp._loop = function(timestamp) {
             }[this.player.heroId] || 'rgba(255,255,255,0.5)';
             glow.style.boxShadow = '0 0 20px 10px ' + heroColor;
             this._worldLayer.appendChild(glow);
-            setTimeout(function(el) { if (el && el.parentNode) el.remove(); }, 600, glow);
+            var _glowRef = glow; /* R140-P1: 捕获引用防止restart后回调操作已移除DOM */
+            setTimeout(function(el) { if (el && el.parentNode) el.remove(); }, 600, _glowRef);
             this._weaponJustFired = false;
         }
 

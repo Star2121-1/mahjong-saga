@@ -296,6 +296,7 @@ Gp._showAbyssShopEntrance = function() {
     if (!cardsDiv) return;
 
     var shopBtn = document.createElement('button');
+    shopBtn.id = 'abyss-shop-entrance-btn'; /* R140-P0: 加ID方便跨路径清理，防止DOM泄漏 */
     shopBtn.className = 'relic-btn';
     shopBtn.style.cssText = 'background:#9c27b0;margin-top:12px;width:100%;';
     shopBtn.textContent = '🌀 深渊商店 (' + this._abyssCoins + ' 币)';
