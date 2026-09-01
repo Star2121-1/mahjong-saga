@@ -36,7 +36,7 @@
    ══════════════════════════════════════════════ */
 
 #hand-tile-bar {
-    position: absolute; bottom: 34px; left: 50%;
+    position: absolute; bottom: calc(34px + env(safe-area-inset-bottom, 0px)); left: 50%;
     transform: translateX(-50%);
     width: 83%;
     z-index: 40;

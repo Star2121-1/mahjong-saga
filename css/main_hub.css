@@ -29,7 +29,7 @@
 /* ─── 顶部资源条 ─── */
 #hub-top-stats {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 8px 20px;
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 20px 8px;
     background: linear-gradient(180deg, rgba(6,18,12,0.97), rgba(6,18,12,0.82));
     border-bottom: 1px solid rgba(212,175,55,0.15);
     backdrop-filter: blur(6px);

@@ -40,7 +40,7 @@
 
 /* ── 顶部状态栏：鎏金芯片 HUD（UI 后退，战场向前）── */
 #top-bar {
-    height: 44px; padding-top: 5px;
+    height: 44px; padding-top: calc(5px + env(safe-area-inset-top, 0px));
     background: linear-gradient(180deg, rgba(6,20,13,0.82) 0%, rgba(6,20,13,0.45) 100%);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
@@ -186,7 +186,7 @@
 
 /* 虚拟摇杆 — 增强可见性 */
 #joystick-container {
-    position: absolute; bottom: 24px; right: 24px;
+    position: absolute; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); right: 24px;
     z-index: 40; touch-action: none;
 }
 #joystick-base {
