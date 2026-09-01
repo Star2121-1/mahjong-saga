@@ -764,6 +764,7 @@ class Player {
         /* 保存基础maxHp用于临时增益恢复（装备聚合完成后） */
         this._baseMaxHp = this.maxHp;
         this._baseAtk = this.atk; /* R140-P0: reset中同步更新ATK锚点 */
+        this._frailtyStored = false; /* R143-P0: 重置脆弱突变防重入标志 */
         // REMOVED: redundant baseSpeed assignment (already set at line 716)
 
         /* ── 套装共鸣检测 ── */

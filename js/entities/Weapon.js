@@ -99,7 +99,8 @@ window.TrackingBlade = class extends window.Weapon {
         if (engine && engine._synBladeOrbit) {
             speed = Math.floor(speed * 1.5);
         }
-        var dmg = Math.floor(player.atk * this.atkFactor);
+        var atkMult = 1 + (player && player._tempAtkBoost || 0);
+        var dmg = Math.floor(player.atk * this.atkFactor * atkMult);
         /* Syn-BladeLaser: tracking blade hit triggers laser beam extra penetration */
         if (engine._synBladeLaser) {
             engine._synBladeLaserHit = true;

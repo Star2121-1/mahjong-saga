@@ -360,8 +360,8 @@ Gp._settleRun = async function(tokens) {
     meta.totalCrits = (meta.totalCrits || 0) + (this._totalCritsThisRun || 0);
     meta.totalDodges = (meta.totalDodges || 0) + (this._totalDodgesThisRun || 0);
     meta.maxGoldThisRun = Math.max(meta.maxGoldThisRun || 0, this._maxGoldThisRun || 0);
-    /* 检查套装共鸣成就 */
-    if (this.player && this.player.setResonanceSpeed && this.player.setResonanceIce) {
+    /* 检查套装共鸣成就 — R141修复了&&→||逻辑，此处成就判定同步修复 */
+    if (this.player && (this.player.setResonanceSpeed || this.player.setResonanceIce)) {
         meta.fullSetActivated = true;
     }
     var bonusCores = 1;

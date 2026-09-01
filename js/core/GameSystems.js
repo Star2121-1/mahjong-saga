@@ -177,9 +177,9 @@ Sys.applyMutator = function(engine, mutatorId) {
     } else if (mutatorId === 'frailty') {
         /* L-008: 脆弱突变不再双向增益 — 玩家 +80% ATK 但受击伤害 +30% */
         engine._frailtyOrigPlayerAtk = engine.player.atk;
-        /* R71-P0: 防止跨波脆弱突变玩家ATK二次叠乘 */
-        if (!engine._frailtyStored) {
-            engine._frailtyStored = true;
+        /* R143-P0: 修复脆弱突变防重入守卫 — 使用player级标志而非engine级，防止跨局重复叠乘ATK */
+        if (!engine.player._frailtyStored) {
+            engine.player._frailtyStored = true;
             engine.player.atk = Math.floor(engine.player.atk * Balance.MUTATOR_FRAILTY_PLAYER_ATK_MULT);
             engine.player._frailtyDebuff = true;
         }

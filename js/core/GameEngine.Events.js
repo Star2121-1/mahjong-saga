@@ -166,6 +166,7 @@ Gp._clearMutatorEffects = function() {
     if (this._activeMutator === 'frailty') {
         if (this._frailtyOrigPlayerAtk != null) this.player.atk = this._frailtyOrigPlayerAtk;
         this.player._frailtyDebuff = false; /* P0: 清除脆弱debuff状态 */
+        this.player._frailtyStored = false; /* R143-P0: 清除防重入标志，允许新局重新应用脆弱突变 */
         for (var i = 0; i < this.enemies.length; i++) {
             var e = this.enemies[i];
             if (e._frailtyStored) {
