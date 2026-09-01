@@ -240,6 +240,10 @@ Gp.restart = function() {
     var _ap = document.getElementById('abyss-panel');
     if (_ap) _ap.remove();
     this._abyssPanelVisible = false;
+    /* R125-P1: 清理深渊商店面板DOM，防止restart后残留 */
+    var _asp = document.getElementById('abyss-shop-panel');
+    if (_asp) _asp.remove();
+    this._abyssShopVisible = false;
     /* R118-P0: 清理FxManager对象池，防止飘字节点跨局泄漏 */
     if (window.fxManager) window.fxManager.cleanup();
     var bc = document.getElementById('active-buffs-container');

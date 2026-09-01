@@ -313,7 +313,7 @@
 }
 #mutator-overlay.active { display: flex; }
 .mutator-title {
-    font-size: calc(24 * var(--_fs) * 1px); font-weight: 900; color: #b62929;
+    font-size: calc(24 * var(--_fs) * 1px); font-weight: 900; color: #fff;
     letter-spacing: 3px;
     text-shadow: 0 0 30px rgba(182,41,41,0.5);
     margin-bottom: 8px;
