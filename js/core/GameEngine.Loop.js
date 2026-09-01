@@ -347,7 +347,10 @@ Gp._loop = function(timestamp) {
                         var _dropIdx = this._rainDrops.length;
                         this._rainDrops.push(drop);
                         var _self = this;
-                        setTimeout(function(el, arr, idx) { if(el && el.parentNode) el.remove(); if(idx >= 0 && idx < arr.length) arr.splice(idx, 1); }, 800, drop, this._rainDrops, _dropIdx);
+                        setTimeout(function(el, arr) {
+                            if (el && el.parentNode) el.remove();
+                            if (arr) { var i = arr.indexOf(el); if (i >= 0) arr.splice(i, 1); }
+                        }, 800, drop, this._rainDrops);
                     }
                 }
             }
