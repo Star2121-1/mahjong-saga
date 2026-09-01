@@ -178,6 +178,13 @@ Ss._spawnEnemy = function(engine, isBoss) {
 
     this.engine.enemies.push(enemy);
 
+    /* R129-P1: 超驱动期间新刷出的敌人也应冻结，防止机制遗漏 */
+    if (this.engine._overdriveActive && enemy && enemy.alive) {
+        enemy._overdriveStored = true;
+        enemy._overdriveOrigSpeed = enemy.speed;
+        enemy.speed = 0;
+    }
+
     /* 创建 DOM */
     var el = document.createElement('div');
     el.className = 'enemy';
