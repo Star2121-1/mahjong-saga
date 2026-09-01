@@ -124,7 +124,6 @@ window.Balance = {
     CAUSALITY_ANIM_DURATION: 0.6,
 
     /* ── 雀魂护盾 ── */
-    QQUEEN_SHIELD_INTERVAL: 10,
     QQUEEN_SHIELD_BASE_DURATION: 5,
     QQUEEN_SHIELD_DURATION_PER_LEVEL: 2,
 
@@ -295,7 +294,6 @@ window.Balance = {
     TIMEOUT_FLICKER_REMOVE_MS: 2600,  // 闪烁移除超时 (Combat.js)
 
     /* ── 工具 ── */
-    PI_OVER_3: Math.PI * 2 / 3,
     BARRIER_ANGLE_HALF_WIDTH: Math.PI / 3,  // 屏障怪正面无敌扇区半角 60° (Enemy.js)
 
     /* ── HUPAI / MahjongHand.js + GameEngine.Spawn.js + Player.js ── */
