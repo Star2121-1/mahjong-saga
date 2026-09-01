@@ -5,7 +5,7 @@
 
 (function() {
 
-window.CombatSystem = {};
+window.CombatSystem = window.CombatSystem || {};
 var Cs = window.CombatSystem;
 
 /* ── 已迁移：以下功能均有 Gp.* 独立实现在 GameEngine.*.js 中，

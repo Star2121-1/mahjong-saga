@@ -11,7 +11,6 @@ window.levelConfig = {
         enemyTypes: { Normal: 0.24, Tanker: 0.14, Stalker: 0.17, Archer: 0.14, Shaman: 0.09, Barrier: 0.12, Bomber: 0.10 },
         spawnIntervalMin: 1.5,
         spawnIntervalDecay: 0.02,
-        bossThreshold: 5,
         difficultyTier: 'easy'
     },
     level_2: {
@@ -25,7 +24,6 @@ window.levelConfig = {
         enemyTypes: { Normal: 0.17, Tanker: 0.15, Stalker: 0.19, Archer: 0.16, Shaman: 0.11, Barrier: 0.13, Bomber: 0.09 },
         spawnIntervalMin: 1.2,
         spawnIntervalDecay: 0.03,
-        bossThreshold: 7,
         difficultyTier: 'medium'
     },
     level_3: {
@@ -39,7 +37,6 @@ window.levelConfig = {
         enemyTypes: { Normal: 0.11, Tanker: 0.15, Stalker: 0.17, Archer: 0.18, Shaman: 0.13, Barrier: 0.15, Bomber: 0.11 },
         spawnIntervalMin: 1.0,
         spawnIntervalDecay: 0.04,
-        bossThreshold: 10,
         difficultyTier: 'hard'
     },
     /* Epoch 4: 程序化生成关卡 */
@@ -112,7 +109,8 @@ window.proceduralLevelGenerator = {
             enemyTypes: base.enemyTypes,
             spawnIntervalMin: intervalReduction,
             spawnIntervalDecay: base.spawnIntervalDecay + abyssLevel * 0.005,
-            bossThreshold: effectiveWaves,
+            /* R130-P1: difficultyFactor 钳制上限，防止深渊过深时数值爆炸 */
+            difficultyFactor: Math.min(5.0, base.difficultyFactor * diffMult),
             difficultyTier: base.difficultyTier,
             abyssLevel: abyssLevel,
             isProcedural: true
@@ -163,11 +161,11 @@ window.proceduralSeedGenerator = {
             waveEnemyMax[effectiveWaves - 1] = 1;
         }
 
-        /* 根据种子调整敌人类型权重 */
+        /* 根据种子调整敌人类型权重 — 钳制下限防负值破坏概率分布 */
         var enemyTypes = { Normal: 0.08, Tanker: 0.15, Stalker: 0.15, Archer: 0.20, Shaman: 0.14, Barrier: 0.16, Bomber: 0.12 };
-        if (typeBias < 0.33) { enemyTypes.Stalker += 0.1; enemyTypes.Normal -= 0.1; }
-        else if (typeBias < 0.66) { enemyTypes.Shaman += 0.1; enemyTypes.Tanker -= 0.1; }
-        else { enemyTypes.Tanker += 0.1; enemyTypes.Shaman -= 0.1; }
+        if (typeBias < 0.33) { enemyTypes.Stalker += 0.1; enemyTypes.Normal = Math.max(0, enemyTypes.Normal - 0.1); }
+        else if (typeBias < 0.66) { enemyTypes.Shaman += 0.1; enemyTypes.Tanker = Math.max(0, enemyTypes.Tanker - 0.1); }
+        else { enemyTypes.Tanker += 0.1; enemyTypes.Shaman = Math.max(0, enemyTypes.Shaman - 0.1); }
 
         var seedHash = '';
         var hv = 0;
@@ -181,12 +179,12 @@ window.proceduralSeedGenerator = {
             mapW: base.mapW,
             mapH: base.mapH,
             maxWaves: effectiveWaves,
-            difficultyFactor: base.difficultyFactor * diffMult * hpOffset,
+            difficultyFactor: Math.min(5.0, base.difficultyFactor * diffMult * hpOffset),
             waveEnemyMax: waveEnemyMax,
             enemyTypes: enemyTypes,
             spawnIntervalMin: intervalReduction,
             spawnIntervalDecay: base.spawnIntervalDecay + abyssLevel * 0.005,
-            bossThreshold: effectiveWaves,
+            /* R130-P1: difficultyFactor 钳制上限，防止深渊过深时数值爆炸 */
             difficultyTier: base.difficultyTier,
             abyssLevel: abyssLevel,
             isProcedural: true,

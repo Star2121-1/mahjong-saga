@@ -156,7 +156,7 @@ Gp._updateCoins = function(dt) {
         var dx = player.x - coin.x;
         var dy = player.y - coin.y;
         var dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < player.radius + 6 || dist < (player.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT)) {
+        if (dist < player.radius + 6 || dist < (player.magnetRadius != null ? player.magnetRadius : Balance.MAGNET_RADIUS_DEFAULT)) {
             coin.el.remove();
             this._activeCoins.splice(i, 1);
             collected++;
@@ -223,7 +223,7 @@ Gp._updateExpGems = function(dt) {
         var dx = player.x - gem.x;
         var dy = player.y - gem.y;
         var dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < player.radius + gem.radius || dist < (player.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT)) {
+        if (dist < player.radius + gem.radius || dist < (player.magnetRadius != null ? player.magnetRadius : Balance.MAGNET_RADIUS_DEFAULT)) {
             collected.push(gem);
         } else {
             var speed = 400 + (player.magnetRadius || 0) * 2;
@@ -323,8 +323,8 @@ Gp._addTileToHand = function (id, isJoker) {
     if (MH.isFlower(id)) { this._triggerFlowerEvent(id); return; }
     if (this._handTiles.length >= window.Balance.HUPAI_HAND_MAX) {
         /* 满手牌：MVP 直接提示（V2 改为地上等待+打牌模式拾取） */
-        if (window.toastSystem && !this._handFullToastAt) { window.toastSystem.warning('手牌已满 14/14，点击手牌打出一张'); this._handFullToastAt = Date.now(); }
-        if (this._handFullToastAt && Date.now() - this._handFullToastAt > 5000) this._handFullToastAt = 0; /* R58-P1: 只在有值时才检查间隔 */
+        if (window.toastSystem && !this._handFullToastAt) { window.toastSystem.warning('手牌已满 14/14，点击手牌打出一张'); this._handFullToastAt = this._elapsed; }
+        if (this._handFullToastAt && this._elapsed - this._handFullToastAt > 5) this._handFullToastAt = 0; /* R130-P1: 使用游戏时间防冻结期计时失效 */
         return;
     }
     this._handTiles.push(id);
@@ -421,8 +421,17 @@ Gp._triggerFlowerEvent = function (id) {
                 break;
             }
             case 'hua_lan': p.critRate = Math.min(1, (p.critRate || 0) + 0.10); break;
-            case 'hua_zhu': p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.15); break;
-            case 'hua_ju': p.addGold(10 * Math.max(1, this._waveCount)); break;
+            case 'hua_zhu':
+                /* R130-P0: 竹牌 = 回15%HP + 护盾（设计文档 §4.4） */
+                p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.15);
+                this._tempShield = Math.floor(p.atk * B.HUPAI_HUA_ZHU_SHIELD);
+                this._tempShieldEnd = this._elapsed + B.HUPAI_HUA_ZHU_SHIELD_DUR;
+                break;
+            case 'hua_ju':
+                /* R130-P0: 菊花 = 金币 + 视觉反馈 */
+                p.addGold(10 * Math.max(1, this._waveCount));
+                if (this._spawnFloatText) this._spawnFloatText(p.x, p.y - 70, '💰 +' + (10 * Math.max(1, this._waveCount)), false);
+                break;
         }
     } catch (e) { console.warn('flower event error:', e); }
     if (this._spawnFloatText) this._spawnFloatText(p.x, p.y - 50, '🌸 花·' + label, true);

@@ -10,6 +10,8 @@ Gp.init = async function() {
     if (this._initialized) return;
     this._initialized = true;
     this._cacheStage3DOM();
+    /* R130-P0: 窗口缩放时失效视口缓存，防止相机追踪错位 */
+    this._initViewportResize();
 
     /* 尽早注册音频激活监听器 — 在 await 之前 */
     var _activateAudio = function() {
@@ -332,6 +334,22 @@ Gp._initBeforeUnload = function() {
             e.returnValue = '';
         }
     });
+};
+
+/* R130-P0: 窗口缩放时失效视口缓存，防止相机追踪错位 */
+Gp._initViewportResize = function() {
+    var self = this;
+    function _invalidateVp() {
+        self._vpW = 0;
+        self._vpH = 0;
+    }
+    /* 桌面端 resize */
+    window.addEventListener('resize', _invalidateVp);
+    /* 移动端 visualViewport 变化（键盘弹出、地址栏收缩等） */
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', _invalidateVp);
+        window.visualViewport.addEventListener('change', _invalidateVp);
+    }
 };
 
 Gp._startNewRun = function(heroId, levelId) {
