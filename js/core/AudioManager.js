@@ -67,6 +67,8 @@ Ap.play = function(sound, opts) {
         if (!this._ensureContext()) return;
     }
     if (this._muted) return;
+    /* R125-P1: 防止页面后台暂停期间积压的音频在恢复时洪泛 */
+    if (this._ctx && this._ctx.state === 'suspended') return;
     opts = opts || {};
     /* P1: 应用分类音量 */
     var catKey = (sound === 'victory' || sound === 'gameover' || sound === 'levelup' || sound === 'overdrive') ? 'music' : 'sfx';

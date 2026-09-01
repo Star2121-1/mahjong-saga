@@ -332,9 +332,10 @@
 .mutator-card-icon { font-size: calc(28 * var(--_fs) * 1px); line-height: 1; }
 .mutator-card-title { font-size: calc(13 * var(--_fs) * 1px); font-weight: 700; color: #ffccbc; }
 .mutator-card-desc { font-size: calc(10 * var(--_fs) * 1px); color: #e0e0d8; line-height: 1.4; }
+/* R125-P1: 颜色对比度修复 */
 .mutator-btn {
     padding: 6px 16px; font-size: calc(12 * var(--_fs) * 1px); font-weight: 700;
-    background: rgba(182,41,41,0.2); color: #b62929;
+    background: rgba(182,41,41,0.2); color: #fff;
     border: 1px solid #b62929; border-radius: 6px;
     cursor: pointer; transition: transform 0.15s, border-color 0.15s, background 0.15s; margin-top: 2px;
 }
