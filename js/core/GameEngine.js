@@ -13,6 +13,7 @@ window.GameEngine = function() {
 
     this.running = false;
     this.gameOver = false;
+    this._won = false; /* R136-P0: 胜利标记 — gameOver在_settleRun前已置true，用此字段区分胜负 */
     this._elapsed = 0;
     this.kills = 0;
     this._spawnTimer = 0;

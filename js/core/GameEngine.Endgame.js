@@ -340,6 +340,8 @@ Gp.restart = function() {
     if (this.mutatorOverlay) this.mutatorOverlay.classList.remove('active');
     this.gameOver = false;
     this.running = false;
+    /* R136-P0: 重置胜利标记，防止跨局残留 */
+    this._won = false;
     /* R46-P0: 解除clock冻结，防止重启前overlay/guide导致新游戏永久冻结 */
     if (this.container) this.container.classList.remove('game-clock-frozen');
     this._elapsed = 0;

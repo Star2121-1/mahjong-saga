@@ -270,6 +270,7 @@ Gp._loop = function(timestamp) {
                         } else {
                             this.running = false;
                             this.gameOver = true;
+                            this._won = true; /* R136-P0: 标记胜利，供_settleRun中flawless/speed_demon使用 */
                             if (this._currentLevelId === 'level_3' || this.loopCount > 0) {
                                 this._showAbyssPanel();
                             } else {
@@ -399,6 +400,7 @@ Gp._loop = function(timestamp) {
             this._pendingBossLordSettle = false;
             this.running = false;
             this.gameOver = true;
+            this._won = true; /* R136-P0: 标记胜利，供_settleRun中flawless/speed_demon使用 */
             if (this._currentLevelId === 'level_3' || this.loopCount > 0) {
                 this._showAbyssPanel();
             } else {
@@ -589,6 +591,7 @@ Gp._loop = function(timestamp) {
             if (this._waveCount >= this._getMaxWaves() - 1) {
                 this.running = false;
                 this.gameOver = true;
+                this._won = true; /* R136-P0: 标记胜利，供_settleRun中flawless/speed_demon使用 */
                 this._showVictory();
             } else {
                 /* Epoch 32: 波次间事件 */

@@ -445,8 +445,8 @@ Gp._settleRun = async function(tokens) {
     if ((meta.highestEndlessLoop || 0) >= 5) this._checkAchievement('deep_abyss');
     if ((meta.highestEndlessLoop || 0) >= 10) this._checkAchievement('deep_abyss_10');
     if ((meta.highestEndlessLoop || 0) >= 20) this._checkAchievement('deep_abyss_20');
-    /* 无伤 — 必须获胜才算（P0: 原代码死亡时也会触发，现加 won 条件） */
-    if (this._playerHitCountThisRun === 0 && !this.gameOver) {
+    /* 无伤 — 必须获胜才算（R136-P0: 用_won替代!gameOver，后者在胜利结算前已置true） */
+    if (this._playerHitCountThisRun === 0 && this._won) {
         meta.flawlessRuns = (meta.flawlessRuns || 0) + 1;
     }
     if ((meta.flawlessRuns || 0) >= 1) this._checkAchievement('flawless');
@@ -461,8 +461,8 @@ Gp._settleRun = async function(tokens) {
     /* 金币 */
     if ((meta.maxGoldThisRun || 0) >= 1000) this._checkAchievement('get_rich');
     if ((meta.maxGoldThisRun || 0) >= 10000) this._checkAchievement('gold_10k');
-    /* R131-P0: speed_demon 无终局兜底 — 若Loop中_ elapsed越过180s才结算则永久漏检 */
-    if (!this.gameOver && (this._elapsed || 0) <= 180) this._checkAchievement('speed_demon');
+    /* R136-P0: speed_demon 终局兜底 — 用_won替代!gameOver防止死代码 */
+    if (this._won && (this._elapsed || 0) <= 180) this._checkAchievement('speed_demon');
 
     /* ── 变异保险库：20%概率解锁新突变 ── */
     if (Math.random() < Balance.VAULT_MUTATION_UNLOCK_CHANCE) {
