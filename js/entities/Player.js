@@ -290,6 +290,24 @@ class Player {
         this.thornsRate = Math.min(_thornCap, _base + lv * 0.05 + (this._thornsAffixBonus || 0));
     }
 
+    /* R140-P1: 套装共鸣重算 — 供restore后大厅装备变更场景使用 */
+    _recalcSetResonance() {
+        var sm = window.saveManager;
+        var equipped = (sm && sm._metaCache && sm._metaCache.equipped) || { weapon: null, armor: null, talisman: null };
+        var equipments = (sm && sm._metaCache && sm._metaCache.equipments) || [];
+        var eqMap = {};
+        for (var i = 0; i < equipments.length; i++) eqMap[equipments[i].instanceId] = equipments[i];
+        var affixCounts = {};
+        for (var i = 0; i < equipments.length; i++) {
+            var item = eqMap[equipments[i].instanceId];
+            if (!item || !item.affixes) continue;
+            if (equipments[i].instanceId !== equipped.weapon && equipments[i].instanceId !== equipped.armor && equipments[i].instanceId !== equipped.talisman) continue;
+            for (var j = 0; j < item.affixes.length; j++) affixCounts[item.affixes[j].id] = (affixCounts[item.affixes[j].id] || 0) + 1;
+        }
+        this.setResonanceSpeed = (affixCounts.speed_pct || 0) >= 3;
+        this.setResonanceIce = (affixCounts.ice_bonus || 0) >= 3;
+    }
+
     addRelic(id) {
         this.relicLevels[id] = (this.relicLevels[id] || 0) + 1;
         const lv = Math.min(5, this.relicLevels[id]); /* P1: 圣物等级上限5级，防止无限叠加 */
@@ -567,6 +585,8 @@ class Player {
         this._reapplyMetaBonuses(true); /* R51-P0: skip equip affixes — snapshot已含最终值 */
         this._skipTalentBonus = false;
         if (this.heroId === 'Mage') this._recalcThornsRate();
+        /* R140-P1: 套装共鸣在restore路径从快照恢复，但若大厅装备变更后恢复需重算 */
+        this._recalcSetResonance();
     }
 
     /** 重新应用 meta 天赋/声望/perk 加成 (用于 restore 后) */

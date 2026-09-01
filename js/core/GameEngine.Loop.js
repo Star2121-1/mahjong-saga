@@ -16,7 +16,7 @@ Gp._loop = function(timestamp) {
         this._lastTime = timestamp;
         /* R116-P0: 周期性自动存档，每30秒保存一次以防崩溃丢失进度 */
         this._saveTimer = (this._saveTimer || 0) + dt;
-        if (this._saveTimer >= Balance.AUTO_SAVE_INTERVAL && !this._pendingReward && !this._paused && !this._announcingWave && this._waveCount > 0) {
+        if (this._saveTimer >= Balance.AUTO_SAVE_INTERVAL && !this._pendingReward && !this._paused && !this._announcingWave && this._waveCount > 0 && !this._overdriveActive) {
             this._saveTimer = 0;
             this._autoSave('tick');
         }
@@ -191,7 +191,7 @@ Gp._loop = function(timestamp) {
             }
 
             /* ── 波次突变触发器（Boss Lord 波次跳过） ── */
-            if (!this._bossLordWave && !this._mutatorTriggered && this._activeMutator === null && this.currentWaveSpawnedCount > 0 && !this._pendingReward && !this._levelUpPending) {
+            if (!this._bossLordWave && !this._mutatorTriggered && this._activeMutator === null && this.currentWaveSpawnedCount > 0 && !this._pendingReward && !this._levelUpPending && !this._overdriveActive) {
                 var cap = this._getWaveEnemyMax();
                 if (cap > 0 && this.currentWaveSpawnedCount >= Math.ceil(cap * 0.5)) {
                     this._mutatorTriggered = true;
