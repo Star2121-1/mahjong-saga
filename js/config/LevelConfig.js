@@ -104,7 +104,6 @@ window.proceduralLevelGenerator = {
             mapW: base.mapW,
             mapH: base.mapH,
             maxWaves: effectiveWaves,
-            difficultyFactor: base.difficultyFactor * diffMult,
             waveEnemyMax: waveEnemyMax,
             enemyTypes: base.enemyTypes,
             spawnIntervalMin: intervalReduction,

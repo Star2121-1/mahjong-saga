@@ -298,6 +298,11 @@ Gp._rewardKill = function(enemy) {
     }
     /* 直接给金币（自动吸取，不创建 DOM） */
     var goldAmt = (enemy.isBoss ? Math.floor(5 + (enemy.level || 1) * 0.5 + Math.random() * 4) : Math.floor(3 + (enemy.level || 1) * 0.3 + Math.random() * 3));
+    /* R140-P1: Boss击杀金币也应受点金术等_tempGoldMult加成，与拾取路径一致 */
+    if (this._tempGoldMult > 1) {
+        goldAmt = Math.floor(goldAmt * this._tempGoldMult);
+        this._tempGoldMult = 1;
+    }
     this.player.addGold(goldAmt);
     this.player.rage = Math.min(this.player.maxRage, this.player.rage + 5 + (this._tempBerserkBonus ? 10 : 0));
     if (this._tempBerserkBonus) this._tempBerserkBonus = false;

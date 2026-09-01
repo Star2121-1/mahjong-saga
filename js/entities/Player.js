@@ -806,7 +806,8 @@ class Player {
         this._thornsAffixBonus = 0;
         this._movingToTarget = false;
         this.weaponSlots = [];
-        this.magnetRadius = Balance.MAGNET_RADIUS_DEFAULT;
+        /* R140-P0: 不再重置 magnetRadius — 装备 magnet_boost 已在上方聚合完成，
+           此处若重置会抹除装备加成（line 725），导致磁铁范围归零 */
         this._baseMagnetRadius = this.magnetRadius; /* P1: 保存基准值用于深渊引力combo */
         this.damageReduction = 0;
         this.rage = 0;
