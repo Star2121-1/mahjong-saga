@@ -37,6 +37,7 @@ window.Weapon = class {
         this.atkFactor = this._baseAtkFactor || 1.0; /* 从初始值恢复，而非从构造参数计算 */
         this._justFired = false;
         this.cooldownTimer = 0; /* R57-P1: 重置冷却计时器，防止跨局残留进度 */
+        this._origBaseCd = this._baseCd || this.cd; /* R131-P0: 重置原始基线CD，防止cdReduction跨局污染 */
     }
 };
 
@@ -187,6 +188,7 @@ window.OrbitShield = class extends window.Weapon {
         this.orbitEls = [];
         this.orbitHitSets = [new Set(), new Set(), new Set()];
         this.initialized = false;
+        this.cooldownTimer = 0; /* R131-P1: 补全OrbitShield重置，防止跨波冷却残留 */
     }
 };
 
