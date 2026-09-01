@@ -96,7 +96,8 @@
             showSaveWarning();
             return;
         }
-        await window.saveManager.resetAllData();
+        var ok = await window.saveManager.resetAllData();
+        if (!ok) { notify('⚠️ 存档重置失败，请检查存储空间', '#ff9800'); return; } /* R136-P0: 防止quota满时静默导航到空存档 */
         window.location.href = 's2_main_hub.html';
     }
 

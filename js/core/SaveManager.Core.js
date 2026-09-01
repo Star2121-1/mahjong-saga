@@ -556,12 +556,12 @@
                 return { success: false, error: '存档格式不合法，拒绝导入' };
             }
             this._writeJSON('meta.json', data.meta);
-            this._writeJSON('active_run.json', data.activeRun);
+            var metaOk = this._writeJSON('active_run.json', data.activeRun);
             this._metaCache = null;
             /* R30-H-003: 导入成功后清除 .bak 防止回滚到旧数据 */
             try { localStorage.removeItem('cr_meta.json.bak'); } catch(e) {}
             try { localStorage.removeItem('cr_active_run.json.bak'); } catch(e) {}
-            return { success: true };
+            return { success: metaOk }; /* R136-P0: 传播_writeJSON返回值，防止quota满时误报成功 */
         } catch (e) {
             return { success: false, error: (e && (e.message || String(e))) || '未知错误' };
         }
@@ -646,12 +646,13 @@
 
     SaveManager.prototype.resetAllData = async function() {
         var defaults = this._getDefaultMeta();
-        this._writeJSON('meta.json', defaults);
+        var ok = this._writeJSON('meta.json', defaults);
         this._writeJSON('active_run.json', {
             isRunActive: false, saveName: '', timestamp: Date.now(),
             dateString: this._formatDateString(new Date()),
             waveCount: 0, heroId: '', levelId: '', player: null, kills: 0, elapsed: 0
         });
+        if (!ok) return false; /* R136-P0: localStorage写入失败时返回false，防止调用方静默继续 */
         this._metaCache = defaults;
         /* R128-P0: 清理 .bak 防止重置后旧备份回滚覆盖新数据 */
         try { localStorage.removeItem('cr_meta.json.bak'); } catch(e) {}
