@@ -571,7 +571,9 @@
         if (!data || typeof data !== 'object' || Array.isArray(data)) return false;
         /* null 不是 object — typeof null === 'object' 是 JS 陷阱 */
         if (data.meta === null || typeof data.meta !== 'object' || Array.isArray(data.meta)) return false;
-        if (typeof data.meta.metaTokens !== 'number' || !Number.isFinite(data.meta.metaTokens) || data.meta.metaTokens < 0) return false;
+        var _mt = data.meta.metaTokens;
+        if (_mt == null) _mt = 0; /* R135-P0: 兼容无metaTokens字段的旧存档，防止typeof undefined==='undefined'拒绝导入 */
+        if (typeof _mt !== 'number' || !Number.isFinite(_mt) || _mt < 0) return false;
         /* R117-P0: 校验所有核心数值字段防止Infinity注入 */
         var _numFields = ['totalRuns','totalKills','bossCores','prestigeLevel','prestigeCoresSpent',
             'flawlessRuns','overdriveCount','bossKills','finalBossKills','totalCrits','totalDodges',
