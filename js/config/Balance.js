@@ -129,7 +129,6 @@ window.Balance = {
     QQUEEN_SHIELD_DURATION_PER_LEVEL: 2,
 
     /* ── 波次 ── */
-    WAVE_MILESTONE_THRESHOLD: 0.75,
     WAVE_INTER_EVENT_CHANCE: 0.6,     // 波次间事件触发概率 (GameEngine.Loop.js)
     WAVE_MEDITATION_HP_RESTORE: 0.3,   // 冥想泉源 HP 恢复比例 (Events.js)
     WAVE_MEDITATION_ATK_DEBUFF: 0.8,   // 冥想泉源怪物 ATK 减益 (Events.js)
@@ -233,6 +232,7 @@ window.Balance = {
     GROUND_SLAMMER_MIN_RADIUS: 10,
     GROUND_SLAMMER_RADIUS_GROWTH: 70,
     GROUND_SLAMMER_KNOCKBACK_FORCE: 200,
+    KNOCKBACK_DECAY_RATE: 200,     // 击退速度衰减速率 px/s (Enemy.js)
     LASER_BEAM_LENGTH: 300,
     LASER_BEAM_MAX_HITS: 1,
     LASER_HIT_RADIUS: 4,

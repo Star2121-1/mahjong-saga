@@ -279,7 +279,7 @@ window.GroundSlammer = class extends window.Weapon {
                     var force = Balance.GROUND_SLAMMER_KNOCKBACK_FORCE;
                     e.x += Math.cos(knockAngle) * force;
                     e.y += Math.sin(knockAngle) * force;
-                    e._knockbackVelocity = 200;
+                    e._knockbackVelocity = Balance.KNOCKBACK_DECAY_RATE;
                     if (typeof e._clampPosition === 'function') e._clampPosition(engine);
                 }
             }

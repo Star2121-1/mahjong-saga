@@ -160,7 +160,7 @@ window.Enemy = class Enemy {
     update(dt, player, engine) {
         if (!this.alive) return;
         this._freezeHitDecayed = false;
-        this._knockbackVelocity = Math.max(0, this._knockbackVelocity - dt * 200);
+        this._knockbackVelocity = Math.max(0, this._knockbackVelocity - dt * Balance.KNOCKBACK_DECAY_RATE);
         this.flashTimer = Math.max(0, this.flashTimer - dt);
         this._comboCooldown = Math.max(0, (this._comboCooldown || 0) - dt); /* K-030: 冷却倒计时 */
 
