@@ -334,7 +334,8 @@
 
     SaveManager.prototype.saveActiveRun = async function(snapshot) {
         snapshot.isRunActive = true;
-        this._writeJSON('active_run.json', snapshot);
+        var ok = this._writeJSON('active_run.json', snapshot);
+        if (!ok) { console.warn('SaveManager: saveActiveRun write failed (quota?)'); return false; }
         var meta = await this.getMeta();
         meta.lastSaveTimestamp = snapshot.timestamp || Date.now();
         meta.lastHeroName = snapshot.heroName || '雀（雀圣本尊）';

@@ -30,6 +30,8 @@ Gp._checkWeaponSynergies = function() {
             }
             if (hasAll && sym.apply) {
                 sym.apply(this);
+                /* R138-P1: 同步设置Nova+Laser运行态标志，消除帧内武器顺序竞态 */
+                if (sym.id === 'nova_laser') this._synNovaLaserActive = true;
             }
         }
     }

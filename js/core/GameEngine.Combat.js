@@ -187,6 +187,8 @@ Gp._enterAbyss = function() {
     this._bossMistEl = null;
     var bc = document.getElementById('active-buffs-container');
     if (bc) bc.remove();
+    /* R138-P0: 清一色金光环在进入深渊前重置，防止视觉残留误导 */
+    if (this.playerEl) this.playerEl.classList.remove('hu-qingyise');
     this.loopCount++;
     this._waveCount = 0;
     this.currentWaveSpawnedCount = 0;
@@ -518,6 +520,8 @@ Gp._gameOver = async function() {
     this._bossMistEl = null;
     /* P2: 确保 Overdrive 结束时重置状态 */
     if (this._overdriveActive) this._endOverdrive();
+    /* R138-P0: 清一色金光环在死亡时重置，防止跨局残留 */
+    if (this.playerEl) this.playerEl.classList.remove('hu-qingyise');
     /* R116-P1: 防止 Boss Lord 结算状态跨局残留 */
     this._pendingBossLordSettle = false;
     /* R117-P0: 防止深渊面板双开守卫在重启后失效 */

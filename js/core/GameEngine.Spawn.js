@@ -56,7 +56,7 @@ Gp._spawnEliteEnemy = function() {
     var diff = 1;
     try {
         var cfg = window.levelConfig[this._currentLevelId];
-        if (cfg) diff = cfg.difficultyFactor || 1;
+        if (cfg) diff = (cfg.difficultyFactor || 1) * (window.difficultyScale || 1);
     } catch(e) {}
 
     /* Elite boost — 使用与精英模式一致的 ELITE_HP_MULT/ELITE_ATK_MULT 常量 (H-002) */
@@ -524,6 +524,8 @@ Gp._applyRunBonus = function (suit, tierMult) {
             w._tongCdReduction = newReduction;
             w._baseCd = Math.max(floor, w._baseCd * (1 - deltaRed));
             w.cd = w._baseCd;
+            /* R138-P0: 保持_origBaseCd不变，使Render.js cdReduction逻辑能正确以_baseCd为基准计算，
+               避免筒顺减CD与_hero_weaponCdReduction双重压缩导致实际CD比预期更低 */
         }
         if (this._spawnFloatText) this._spawnFloatText(p.x, p.y - 40, '筒顺 冷却−', false);
     } else if (suit === 'tiao') {
