@@ -257,9 +257,13 @@ Gp._applyAbyssCombo = function(comboId) {
             this.player._frailtyDebuff = false;
         }
         if (combo.id === 'abyss_bloodmoon' && this.player) {
+            /* R125-P1: 关闭时还原原始maxHp，防止血月效果跨combo残留 */
+            if (this.player._abyssBloodmoonOrigMaxHp !== undefined) {
+                this.player.maxHp = this.player._abyssBloodmoonOrigMaxHp;
+                this.player._abyssBloodmoonOrigMaxHp = undefined;
+            }
             this.player._abyssBloodmoonApplied = false;
             this.player._abyssBloodmoonAtkBonus = undefined;
-            /* maxHp恢复由下次_loop循环重新应用，此处不清除以免打断当前帧 */
         }
         return;
     }

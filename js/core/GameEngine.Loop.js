@@ -530,6 +530,8 @@ Gp._loop = function(timestamp) {
                 if (!this.player._abyssBloodmoonApplied) {
                     this.player._abyssBloodmoonApplied = true;
                     /* R46: 补全血月HP加成（之前只实现了ATK） */
+                    /* R125-P1: 保存原始maxHp用于关闭combo时还原 */
+                    this.player._abyssBloodmoonOrigMaxHp = this.player.maxHp;
                     var _bmOrigMaxHp = this.player._baseMaxHp || this.player.maxHp;
                     this.player.maxHp = Math.floor(_bmOrigMaxHp * Balance.ABYSS_BLOODMOON_HP_MULT);
                     this.player.hp = Math.min(this.player.hp, this.player.maxHp);
