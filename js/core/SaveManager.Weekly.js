@@ -23,7 +23,7 @@
         var last = meta.challenges && meta.challenges.lastRotation ? meta.challenges.lastRotation : 0;
         /* P0: 按周粒度旋转，统一使用 Unix epoch 基准与 getWeeklyChallenges 一致 */
         var nowWeek = 'W' + Math.floor(now / (7 * 24 * 60 * 60 * 1000));
-        if (meta.challenges && meta.challenges.weekKey === nowWeek) return false;
+        if (meta.challenges && meta.currentWeek === nowWeek) return false;
         var rng = Math.floor(now / 1000) % SaveManager.CHALLENGE_POOL.length;
         var active = [];
         for (var i = 0; i < 3; i++) {
@@ -32,7 +32,7 @@
         }
         meta.challenges.active = active;
         meta.challenges.lastRotation = now;
-        meta.challenges.weekKey = nowWeek;
+        meta.currentWeek = nowWeek; /* R128-P1: 统一使用 currentWeek 字段与 getWeeklyChallenges 一致 */
         await this.saveMeta(meta);
         return true;
     };
