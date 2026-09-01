@@ -496,6 +496,8 @@ player.takeDamage(Math.floor(this.atk * Balance.STALKER_ATTACK_MULT), this);
 
     /* ── Bomber 自爆怪 AI — 冲向玩家后爆炸 ── */
     _updateBomber(dt, player, engine) {
+        /* R140-P1: 死亡后不再自爆，防止takeDamage先设alive=false后_updateBomber仍触发爆炸的竞态 */
+        if (!this.alive || this._exploded) return;
         var dx = player.x - this.x;
         var dy = player.y - this.y;
         var dist = Math.sqrt(dx * dx + dy * dy);

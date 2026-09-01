@@ -20,7 +20,9 @@ Gp.init = async function() {
 
     /* 尽早注册音频激活监听器 — 在 await 之前 */
     var _activateAudio = function() {
-        if (window.audioManager) window.audioManager._ensureContext();
+        try {
+            if (window.audioManager) window.audioManager._ensureContext();
+        } catch(e) { console.warn('[Audio] init failed:', e); }
         document.removeEventListener('pointerdown', _activateAudio);
         document.removeEventListener('keydown', _activateAudio);
     };
@@ -739,7 +741,7 @@ Gp._initKeyboard = function() {
         }
         if (!self.running || self.gameOver) return;
         if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyW','KeyA','KeyS','KeyD'].includes(e.code)) e.preventDefault();
-        if (e.code === 'Space' && self.player && self.player.rage >= self.player.maxRage && !self._overdriveActive && !self._paused && !self._discardMode && !self._huLock) {
+        if (e.code === 'Space' && self.player && self.player.rage >= self.player.maxRage && !self._overdriveActive && !self._paused && !self._announcingWave && !self._discardMode && !self._huLock) {
             self._pressedKeys[e.code] = false;
             self._triggerOverdrive();
             return;
@@ -765,7 +767,9 @@ Gp._initJoystick = function() {
 
     var getOffset = function() {
         var rect = base.getBoundingClientRect();
-        return { cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2, maxR: rect.width / 2 - knob.offsetWidth / 2 };
+        /* R140-P1: clamp maxR防止极端视口下负值导致除零/NaN */
+        var maxR = Math.max(10, rect.width / 2 - knob.offsetWidth / 2);
+        return { cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2, maxR: maxR };
     };
 
     var updateKnob = function(clientX, clientY) {
