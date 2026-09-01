@@ -48,9 +48,7 @@ class SaveManager {
                 self._metaCache = null;
             }
             /* R116-P1: 同时监听 active_run 变更，防止跨 Tab 状态下缓存不一致 */
-            if (e && e.key === 'cr_active_run.json') {
-                if (self._activeRunCache) self._activeRunCache = null;
-            }
+            /* R128-P2: _activeRunCache 为死代码（从未赋值），仅保留注释 */
         });
     }
 

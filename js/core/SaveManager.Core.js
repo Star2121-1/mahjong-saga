@@ -651,6 +651,9 @@
             waveCount: 0, heroId: '', levelId: '', player: null, kills: 0, elapsed: 0
         });
         this._metaCache = defaults;
+        /* R128-P0: 清理 .bak 防止重置后旧备份回滚覆盖新数据 */
+        try { localStorage.removeItem('cr_meta.json.bak'); } catch(e) {}
+        try { localStorage.removeItem('cr_active_run.json.bak'); } catch(e) {}
     };
 
 })();

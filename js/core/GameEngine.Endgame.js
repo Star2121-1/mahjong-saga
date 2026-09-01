@@ -291,6 +291,7 @@ Gp.restart = function() {
     this._tempCritBonus = 0;
     this._extraEliteCount = 0;
     this._shieldActive = false;
+    this._shieldTimer = 0; /* R128-P1: 重置雀魂护盾计时器防止跨局残留 */
     this._tempShield = 0;
     this._witherTimer = 0; /* P1: 重置枯萎计时器防止跨局残留 */
     /* R106-P0: 防止怪物潮双倍掉落跨局残留 */
