@@ -133,8 +133,11 @@ Gp._spawnExpGemsAt = function(x, y, isBoss, level) {
     var arr = this._pendingExpGems = this._pendingExpGems || [];
     if (isBoss) {
         var cnt = 5 + Math.floor(Math.random() * 4);
-        var avg = Math.floor(25 * bloodMul / cnt);
-        var rem = 25 * bloodMul - avg * cnt;
+        /* R139-P0: Boss EXP随等级/难度缩放，与Enemy.js onDeath路径保持一致 */
+        var bossLevel = level || 1;
+        var bossTotalExp = Math.floor(Balance.BOSS_TOTAL_EXP_GEMS * (1 + (bossLevel - 1) * 0.1) * diff * bloodMul);
+        var avg = Math.floor(bossTotalExp / cnt);
+        var rem = bossTotalExp - avg * cnt;
         for (var gi = 0; gi < cnt; gi++) {
             var v = avg + (gi < rem ? 1 : 0);
             var g = new window.ExpGem(x, y, v);

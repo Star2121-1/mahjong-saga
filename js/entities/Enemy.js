@@ -751,9 +751,9 @@ player.takeDamage(Math.floor(this.atk * Balance.STALKER_ATTACK_MULT), this);
             var dy = player.y - this.y;
             var dist = Math.sqrt(dx * dx + dy * dy);
             if (dist > 30 && dist > 0.01) {
-                var spd = this.baseSpeed * Balance.BOSS_PHASE3_SPEED_MULT * dt;
-                this.x += (dx / dist) * spd;
-                this.y += (dy / dist) * spd;
+                var spd = this.baseSpeed * Balance.BOSS_PHASE3_SPEED_MULT; /* R139-P0: 移除多余*dt，位移已乘dt，避免速度被平方化导致Boss P3移动极慢 */
+                this.x += (dx / dist) * spd * dt;
+                this.y += (dy / dist) * spd * dt;
                 this._clampPosition(engine);
             }
             this._bossSummonTimer -= dt;
