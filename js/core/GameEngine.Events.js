@@ -241,7 +241,11 @@ Gp._triggerOverdrive = function() {
     /* R117-P1: fallback 路径应用武器增益和敌人冻结（等效 Sys.triggerOverdrive） */
     if (this._activeWeapons) {
         for (var _w = 0; _w < this._activeWeapons.length; _w++) {
-            if (this._activeWeapons[_w]) this._activeWeapons[_w].atkFactor = (this._activeWeapons[_w].atkFactor || 1) * 2;
+            var _wep = this._activeWeapons[_w];
+            if (_wep) {
+                _wep._odOrigAtk = _wep.atkFactor; /* R126-P0: 保存原始值以便_endOverdrive恢复 */
+                _wep.atkFactor = (_wep.atkFactor || 1) * 2;
+            }
         }
     }
     for (var _e = 0; _e < this.enemies.length; _e++) {

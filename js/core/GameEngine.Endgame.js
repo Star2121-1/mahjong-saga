@@ -308,8 +308,15 @@ Gp.restart = function() {
     /* R37-P1: 重置局内增益状态，防止跨局残留 */
     this._vaultMutations = [];
     this._eliteModeActive = false;
-    this.victoryOverlay.classList.remove('active');
-    this.gameOverOverlay.classList.remove('active');
+    /* R126-P1: 重置深渊状态，防止跨局残留 */
+    this._abyssActiveCombo = null;
+    this._abyssFrenzyLifestealSet = false;
+    this._abyssCoins = 0;
+    this._abyssLoopHpScale = 1;
+    this._abyssLoopAtkScale = 1;
+    this._abyssVariantEnabled = false;
+    if (this.victoryOverlay) this.victoryOverlay.classList.remove('active');
+    if (this.gameOverOverlay) this.gameOverOverlay.classList.remove('active');
     /* R104-P1: 清理突变面板active class，防止重启后短暂残留 */
     if (this.mutatorOverlay) this.mutatorOverlay.classList.remove('active');
     this.gameOver = false;
