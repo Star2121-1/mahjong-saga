@@ -114,10 +114,12 @@ Fp._healthCheck = function() {
         if (n._fctActive && now - n._lastUsed > window.Balance.FCT_STALE_NODE_TIMEOUT_MS) {
             /* R46-P0-fix: 超时节点放回池底（而非移出DOM），确保池容量可恢复 */
             if (n._fctTimeout) { clearTimeout(n._fctTimeout); n._fctTimeout = null; }
+            n.removeEventListener('animationend', n._fctOnEnd);
             n.style.display = 'none';
             n._fctActive = false;
             n._fctOnEnd = null;
-            /* 节点保留在 fct-layer 的末尾，等待下次 _borrowNode 循环复用 */
+            if (!this._freeStack) this._freeStack = [];
+            this._freeStack.push(n); /* R141-P1: 健康检查回收节点应入栈复用，防止池容量隐性萎缩 */
         }
     }
 };

@@ -148,6 +148,18 @@ Ss._spawnEnemy = function(engine, isBoss) {
         enemy.atk = Math.floor(enemy.atk * engine._eliteMultiplier);
     }
 
+    /* R141-P1: 活跃突变属性修正对新刷敌人生效，与applyMutator对存量的处理保持一致 */
+    if (engine._activeMutator) {
+        var _mut = engine._activeMutator;
+        if (_mut === 'bloodmoon') {
+            enemy.maxHp = Math.floor(enemy.maxHp * Balance.MUTATOR_BLOODMOON_HP_MULT);
+            enemy.hp = enemy.maxHp;
+            enemy.atk = Math.floor(enemy.atk * Balance.MUTATOR_BLOODMOON_ATK_MULT);
+        } else if (_mut === 'frenzy') {
+            enemy.speed *= Balance.MUTATOR_FRENZY_SPEED_MULT;
+        }
+    }
+
     /* Boss Lord 特殊处理 */
     if (isBoss && enemyType === 'Boss_Lord') {
         /* Boss Gamble: 先显示选择面板，玩家决定后再生成领主 */

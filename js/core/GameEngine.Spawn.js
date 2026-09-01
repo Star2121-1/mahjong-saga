@@ -83,7 +83,7 @@ Gp._spawnEliteEnemy = function() {
 /* ── Boss 装备掉落 ── */
 Gp._tryDropEquipment = function(x, y, isBossLord) {
     if (!window.equipmentRegistry || !window.saveManager) return;
-    var chance = isBossLord ? Balance.EQUIPMENT_DROPS_BOSS_LORD : Balance.EQUIPMENT_DROPS_NORMAL;
+    var chance = Math.max(0, Math.min(1, isBossLord ? Balance.EQUIPMENT_DROPS_BOSS_LORD : Balance.EQUIPMENT_DROPS_NORMAL));
     /* Epoch 16: Abyss Gamble 3x 掉落 + 怪物潮双倍 */
     var abyssMult = this._gambleAbyssBonus ? 3 : 1;
     var surgeMult = this._monsterSurgeDoubleDrops ? 2 : 1;

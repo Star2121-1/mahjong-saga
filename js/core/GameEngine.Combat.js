@@ -579,6 +579,9 @@ Gp._gameOver = async function() {
     this._dayNightEl = null;
     if (this._abyssMistEl && this._abyssMistEl.parentNode) this._abyssMistEl.remove();
     this._abyssMistEl = null;
+    /* P2: 清理 Active Buffs 容器，防止死亡后残留在战场中 */
+    var _abc = document.getElementById('active-buffs-container');
+    if (_abc) { _abc.remove(); this._buffsContainerEl = null; }
 
     /* P3-NEW: 死亡时清除 Boss Gamble 超时计时器，防止状态泄漏 */
     if (this._gambleTimeout) {
