@@ -279,6 +279,7 @@ Gp.restart = function() {
     this._waveCount = 0;
     this.currentWaveSpawnedCount = 0;
     this._bossLordSpawned = false; /* R80-P1: 防止跨局Boss领主生成标志残留 */
+    this._bossLord = null; /* R135-P1: 防止restart后_bossLord残留死引用 */
     this._levelUpPending = false;
     this._ignoreGemCollection = false;
     this._mutatorTriggered = false;

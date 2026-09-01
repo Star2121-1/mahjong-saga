@@ -181,7 +181,7 @@ window.OrbitShield = class extends window.Weapon {
             }
         }
     }
-    reset() {
+    reset() { super.reset();
         for (var i = 0; i < this.orbitEls.length; i++) {
             if (this.orbitEls[i].parentNode) this.orbitEls[i].remove();
         }
@@ -234,7 +234,7 @@ window.ShotgunBurst = class extends window.Weapon {
     update(dt, player, enemies, engine) {
         this.cooldownTimer -= dt;
     }
-    reset() {
+    reset() { super.reset();
         /* No resources to clean */
     }
 };
@@ -305,7 +305,7 @@ window.GroundSlammer = class extends window.Weapon {
             hitEnemies: new Set()
         });
     }
-    reset() {
+    reset() { super.reset();
         for (var i = 0; i < this.activeShockwaves.length; i++) {
             if (this.activeShockwaves[i].el.parentNode) this.activeShockwaves[i].el.remove();
         }
@@ -381,7 +381,7 @@ window.LaserBeam = class extends window.Weapon {
     setAngle(angle) {
         this.beamAngle = angle;
     }
-    reset() {
+    reset() { super.reset();
         if (this.laserEl && this.laserEl.parentNode) this.laserEl.remove();
         this.laserEl = null;
         this.initialized = false;
@@ -450,7 +450,7 @@ window.NovaPulse = class extends window.Weapon {
             hitEnemies: new Set()
         });
     }
-    reset() {
+    reset() { super.reset();
         for (var i = 0; i < this.activePulses.length; i++) {
             if (this.activePulses[i].el.parentNode) this.activePulses[i].el.remove();
         }

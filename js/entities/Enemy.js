@@ -396,6 +396,7 @@ player.takeDamage(Math.floor(this.atk * Balance.STALKER_ATTACK_MULT), this);
     /* ── Archer 一索箭妖 AI — 保距风筝 + 蓄力直线骨签（B2） ── */
     _updateArcher(dt, player, engine) {
         var B = Balance;
+        if (!player) return; /* R135-P0: null guard — 其他_update*方法均有engine.player回退，此处缺失导致edge-case崩溃 */
         /* 蓄力瞄准：站定，倒计时结束发射骨签 */
         if (this._archerCharging > 0) {
             this._archerCharging -= dt;
