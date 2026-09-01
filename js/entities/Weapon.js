@@ -399,6 +399,10 @@ window.NovaPulse = class extends window.Weapon {
         this.cooldownTimer -= dt;
         var atkMult = 1 + (player._tempAtkBoost || 0);
         var dmg = Math.floor(player.atk * this.atkFactor * atkMult);
+        /* R125-P1: 协同标志必须在伤害循环前设置，确保同帧其他武器能读取 */
+        if (engine && engine._synNovaLaser) {
+            engine._synNovaLaserActive = true;
+        }
         for (var i = this.activePulses.length - 1; i >= 0; i--) {
             var p = this.activePulses[i];
             p.elapsed += dt;
@@ -428,10 +432,6 @@ window.NovaPulse = class extends window.Weapon {
         if (this.cooldownTimer > 0) return;
         this.cooldownTimer = this.cd;
         this._justFired = true;
-        /* Syn-NovaLaser: 在伤害循环前设置标志，确保同帧其他武器能读取 */
-        if (engine && engine._synNovaLaser) {
-            engine._synNovaLaserActive = true;
-        }
         var maxR = Balance.NOVA_PULSE_MAX_RADIUS;
         var el = document.createElement('div');
         el.className = 'nova-pulse';

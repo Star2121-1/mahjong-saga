@@ -6,7 +6,7 @@ Gp._onClick = function(e) {
     var enemyEl = e.target.closest('.enemy');
     if (!enemyEl) return;
     /* R46-P1: 防止overlay打开时误触攻击 */
-    if (!this.running || this._paused || this._levelUpPending || this._pendingReward) return;
+    if (!this.running || this._paused || this._levelUpPending || this._pendingReward || this._gambleActive) return;
 
     var id = parseInt(enemyEl.dataset.id, 10);
     var enemy = null;

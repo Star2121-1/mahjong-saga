@@ -295,9 +295,7 @@ window.Balance = {
     TIMEOUT_FLICKER_REMOVE_MS: 2600,  // 闪烁移除超时 (Combat.js)
 
     /* ── 工具 ── */
-    MS_PER_SECOND: 1000,
     PI_OVER_3: Math.PI * 2 / 3,
-    PI_OVER_4: Math.PI * 4 / 3,              // Note: value is 4π/3 (240°), name is misleading; use PI_4OVER3 if clarity needed
     BARRIER_ANGLE_HALF_WIDTH: Math.PI / 3,  // 屏障怪正面无敌扇区半角 60° (Enemy.js)
 
     /* ── HUPAI / MahjongHand.js + GameEngine.Spawn.js + Player.js ── */

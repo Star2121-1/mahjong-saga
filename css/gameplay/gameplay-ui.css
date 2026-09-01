@@ -347,6 +347,21 @@
 .game-clock-frozen .enemy.abyss-variant::after {
     animation-play-state: running !important;
 }
+/* R125-P1: Boss持续动画不应在面板打开时冻结 */
+.game-clock-frozen .enemy.boss,
+.game-clock-frozen .enemy.boss::before,
+.game-clock-frozen .enemy.boss::after,
+.game-clock-frozen .enemy.boss.final-boss,
+.game-clock-frozen .enemy.boss.final-boss::before,
+.game-clock-frozen .enemy.boss.final-boss::after,
+.game-clock-frozen .enemy.boss.boss-lord.phase-3,
+.game-clock-frozen .enemy.boss.boss-lord.phase-3::before,
+.game-clock-frozen .enemy.boss.boss-lord.phase-3::after,
+.game-clock-frozen .boss-mist,
+.game-clock-frozen .boss-mist::before,
+.game-clock-frozen .boss-mist::after {
+    animation-play-state: running !important;
+}
 
 /* ══════════════════════════════════════════════
    引导面板步骤导航 (Epoch 1)

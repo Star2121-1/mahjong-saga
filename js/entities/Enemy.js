@@ -209,10 +209,7 @@ window.Enemy = class Enemy {
                 if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
                     this.flashTimer = Balance.FLASH_DURATION;
                     var dmg = this.atk;
-                    /* Epoch 14: 关卡亲和减伤 */
-                    if (engine && engine._mapAffinityReduction) {
-                        dmg = Math.max(1, Math.floor(dmg * (1 - engine._mapAffinityReduction)));
-                    }
+                    /* R125-P1: 关卡亲和减伤已在takeDamage入口处统一应用，此处直接传入原始值 */
                     player.takeDamage(dmg, this);
                 }
             }
@@ -268,7 +265,7 @@ window.Enemy = class Enemy {
                 if (this.el) { this.el.style.opacity = '1'; this.el.classList.remove('stalker-charging'); }
                 if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
                     this.flashTimer = Balance.FLASH_DURATION;
-player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKER_ATTACK_MULT), engine), this);
+player.takeDamage(Math.floor(this.atk * Balance.STALKER_ATTACK_MULT), this);
                 }
             }
             return;
@@ -286,7 +283,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                     this.attackTimer = this.attackCooldown;
                     if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
                         this.flashTimer = Balance.FLASH_DURATION;
-                        player.takeDamage(this._applyMapAffinityDmg(this.atk, engine), this);
+                        player.takeDamage(this.atk, this);
                     }
                 }
                 if (dist > attackRange + Balance.ENEMY_ATTACK_PADDING) this.reachedPlayer = false;
@@ -307,7 +304,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                 this.attackTimer = this.attackCooldown;
                 if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
                     this.flashTimer = Balance.FLASH_DURATION;
-                    player.takeDamage(this._applyMapAffinityDmg(this.atk, engine), this);
+                    player.takeDamage(this.atk, this);
                 }
             }
             if (dist > attackRange + Balance.ENEMY_ATTACK_PADDING) this.reachedPlayer = false;
@@ -384,7 +381,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                 this.attackTimer = this.attackCooldown;
                 if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
                     this.flashTimer = Balance.FLASH_DURATION;
-                    player.takeDamage(this._applyMapAffinityDmg(this.atk, engine), this);
+                    player.takeDamage(this.atk, this);
                 }
             }
             if (dist > attackRange + Balance.ENEMY_ATTACK_PADDING) this.reachedPlayer = false;
@@ -411,7 +408,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                         x: this.x, y: this.y,
                         vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
                         radius: 5,
-                        damage: Math.max(1, Math.floor(this._applyMapAffinityDmg(this.atk * B.ENEMY_ARCHER_DMG_MULT, engine))),
+                        damage: Math.max(1, Math.floor(this.atk * B.ENEMY_ARCHER_DMG_MULT)),
                         alive: true,
                         lifeTime: B.ENEMY_ARCHER_PROJ_RANGE / spd,
                         _hitPlayer: false, el: null
@@ -473,7 +470,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                 this.attackTimer = this.attackCooldown;
                 if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
                     this.flashTimer = Balance.FLASH_DURATION;
-                    player.takeDamage(this._applyMapAffinityDmg(this.atk, engine), this);
+                    player.takeDamage(this.atk, this);
                 }
             }
             if (dist > attackRange + Balance.ENEMY_ATTACK_PADDING) this.reachedPlayer = false;
@@ -543,7 +540,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                         e.takeDamage(Math.floor(this.atk * Balance.BOMBER_EXPLODE_DAMAGE_MULT), this, this.x, this.y);
                     }
                 }
-                player.takeDamage(this._applyMapAffinityDmg(this.atk, engine), this);
+                player.takeDamage(this.atk, this);
             }
             if (this.el && this.el.parentNode) this.el.remove();
         }
@@ -562,7 +559,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                 this.attackTimer = this.attackCooldown;
                 if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
                     this.flashTimer = Balance.FLASH_DURATION;
-                    player.takeDamage(this._applyMapAffinityDmg(this.atk, engine), this);
+                    player.takeDamage(this.atk, this);
                 }
             }
             if (dist > attackRange + Balance.ENEMY_ATTACK_PADDING) this.reachedPlayer = false;
@@ -703,7 +700,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
                     /* P1: Slam 伤害范围叠加玩家半径和Boss自身半径 */
                     var slamReach = Balance.BOSS_SLAM_RANGE + this.radius + player.radius;
                     if (pdx * pdx + pdy * pdy <= slamReach * slamReach) {
-                        player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.BOSS_P2_SLAM_DMG_MULT), engine), this);
+                        player.takeDamage(Math.floor(this.atk * Balance.BOSS_P2_SLAM_DMG_MULT), this);
                     }
                     this._slamFx(engine); /* B4: 地裂余震 */
                     if (this._bossWarningEl && this._bossWarningEl.parentNode) this._bossWarningEl.remove();
@@ -818,7 +815,7 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
             if (this._bossContactTimer <= 0) {
                 this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
                 var contactDmg = this._bossPhase === 3 ? Math.floor(this.atk * Balance.BOSS_P3_CONTACT_DMG_MULT) : this.atk;
-                player.takeDamage(this._applyMapAffinityDmg(contactDmg, engine), this);
+                player.takeDamage(contactDmg, this);
             }
         } else {
             this._bossContactThisFrame = false;
@@ -871,17 +868,16 @@ player.takeDamage(this._applyMapAffinityDmg(Math.floor(this.atk * Balance.STALKE
         }, 800);
     }
 
-    /* ── Epoch 14: 关卡亲和减伤辅助 ── */
-    _applyMapAffinityDmg(dmg, engine) {
-        if (engine && engine._mapAffinityReduction) {
-            return Math.max(1, Math.floor(dmg * (1 - engine._mapAffinityReduction)));
-        }
-        return dmg;
-    }
+    /* ── R125: _applyMapAffinityDmg 已删除，affinity 统一在 takeDamage 入口处理 ── */
 
     takeDamage(dmg, source, sourceX, sourceY, _fctTypeOverride) {
         if (!this.alive) return false;
         var actualDmg = dmg;
+        /* Epoch 14: 关卡亲和减伤 — 对所有伤害来源统一应用，包括splash */
+        var _eng = this._eng || window.gameEngine;
+        if (_eng && _eng._mapAffinityReduction) {
+            actualDmg = Math.max(1, Math.floor(actualDmg * (1 - _eng._mapAffinityReduction)));
+        }
         /* Barrier 正面无敌: 检查攻击方向 */
         if (this.type === 'Barrier') {
             var engine = this._eng || window.gameEngine;
