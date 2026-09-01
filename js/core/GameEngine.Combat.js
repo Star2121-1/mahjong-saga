@@ -206,6 +206,7 @@ Gp._enterAbyss = function() {
     this._gambleAbyssBonus = false;
     this._mutatorTriggered = false;
     this._activeMutator = null;
+    this._clearMutatorEffects(); /* R131-P0: 深渊进入时清理突变效果，防止bloodmoon/frenzy等跨轮回残留 */
     this._pendingReward = false;
     this._levelUpPending = false;
     this.playerHitCountInLevel1 = 0;
@@ -832,6 +833,7 @@ Gp._renderPlayerTile = function() {
 
 Gp._syncEntities = function() {
     /* D2/P1-2: 战场缩放 — 焦点=视口中心（玩家），公式两端与点击反变换严格互逆 */
+    if (!this._worldLayer || !this.player) return; /* R131-P0: null guard防止DOM缺失时崩溃 */
     var _z = this._zoomLevel || 1;
     if (_z !== 1) {
         var _vw = (this.battlefield ? this.battlefield.clientWidth : 960) || 960;
@@ -849,9 +851,11 @@ Gp._syncEntities = function() {
         var deg = this._lastMoveX < -0.1 ? -6 : 6;
         tilt = ' rotate(' + deg + 'deg)';
     }
-    this.playerEl.style.left = this.player.x + 'px';
-    this.playerEl.style.top = this.player.y + 'px';
-    this.playerEl.style.transform = 'translate(-50%,-50%)' + tilt;
+    if (this.playerEl) {
+        this.playerEl.style.left = this.player.x + 'px';
+        this.playerEl.style.top = this.player.y + 'px';
+        this.playerEl.style.transform = 'translate(-50%,-50%)' + tilt;
+    }
 
     /* Visual Enhancement D: 英雄移动轨迹拖尾 */
     if (this.player && Math.abs(this._lastMoveX) > 0.1 && this.player.speed > 0) {
