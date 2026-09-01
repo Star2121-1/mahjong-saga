@@ -137,13 +137,17 @@ Gp._spawnExpGemsAt = function(x, y, isBoss, level) {
         var rem = 25 * bloodMul - avg * cnt;
         for (var gi = 0; gi < cnt; gi++) {
             var v = avg + (gi < rem ? 1 : 0);
-            arr.push(new window.ExpGem(x, y, v));
+            var g = new window.ExpGem(x, y, v);
+            g._gameBirth = this._elapsed; /* R136-P0: 用游戏时钟记录出生时间，防止overlay冻结时宝石提前过期 */
+            arr.push(g);
         }
     } else {
         level = level || 1;
         var gemVal = Math.floor((1 + level * Balance.GEM_LEVEL_SCALE) * diff * bloodMul);
         if (gemVal < 1) gemVal = 1;
-        arr.push(new window.ExpGem(x, y, gemVal));
+        var g = new window.ExpGem(x, y, gemVal);
+        g._gameBirth = this._elapsed; /* R136-P0: 用游戏时钟记录出生时间 */
+        arr.push(g);
     }
 };
 
@@ -205,7 +209,7 @@ Gp._updateExpGems = function(dt) {
     for (var i = this._expGems.length - 1; i >= 0; i--) {
         var gem = this._expGems[i];
         /* Epoch 11: 过期清理，防止经验石无限堆积 */
-        if (gem.isExpired()) {
+        if (gem.isExpired(this._elapsed)) {
             if (gem.el && gem.el.parentNode) gem.el.remove();
             this._expGems.splice(i, 1);
             continue;

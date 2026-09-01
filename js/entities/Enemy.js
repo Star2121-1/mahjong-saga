@@ -1119,13 +1119,17 @@ player.takeDamage(Math.floor(this.atk * Balance.STALKER_ATTACK_MULT), this);
                 var rem = totalExp - avg * cnt;
                 for (var gi = 0; gi < cnt; gi++) {
                     var v = avg + (gi < rem ? 1 : 0);
-                    arr.push(new window.ExpGem(this.x, this.y, v));
+                    var g = new window.ExpGem(this.x, this.y, v);
+                    if (window.gameEngine) g._gameBirth = window.gameEngine._elapsed; /* R136-P0: 游戏时钟记录 */
+                    arr.push(g);
                 }
             } else {
                 /* R38-P1: 普通敌人EXP随等级/难度缩放 */
                 var gemVal = Math.floor((1 + level * Balance.GEM_LEVEL_SCALE) * diff * gemMul);
                 if (gemVal < 1) gemVal = 1;
-                arr.push(new window.ExpGem(this.x, this.y, gemVal));
+                var g = new window.ExpGem(this.x, this.y, gemVal);
+                if (window.gameEngine) g._gameBirth = window.gameEngine._elapsed; /* R136-P0: 游戏时钟记录 */
+                arr.push(g);
             }
             return true;
         }
