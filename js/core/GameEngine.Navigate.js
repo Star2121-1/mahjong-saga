@@ -2,7 +2,7 @@
     'use strict';
     var Gp = window.GameEngine.prototype;
 
-Gp._goToSaveSelect = function() {
+Gp._goToSaveSelect = async function() {
     this.running = false;
     this.gameOver = false;
     this._announcingWave = false; /* R128-P2: 防止导航后标志残留影响后续逻辑 */
@@ -23,8 +23,8 @@ Gp._goToSaveSelect = function() {
     this._clearTotems();
     this._clearMutatorEffects();
     if (this.bossHpBar) this.bossHpBar.classList.remove('active');
-    /* Clear stale active run to prevent "继续游戏" from appearing incorrectly */
-    if (window.saveManager) window.saveManager.clearActiveRun();
+    /* R137-P0: await确保存档写入完成后再跳转，防止竞态导致"继续游戏"误判 */
+    if (window.saveManager) await window.saveManager.clearActiveRun();
     window.location.href = 's2_main_hub.html';
 };
 

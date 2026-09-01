@@ -9,6 +9,11 @@
 Gp.init = async function() {
     if (this._initialized) return;
     this._initialized = true;
+    /* R137-P0: 恢复难度倍率，防止跨页面丢失设置 */
+    var savedDiff = localStorage.getItem('cr_difficulty');
+    if (savedDiff) {
+        try { window.difficultyScale = JSON.parse(savedDiff); } catch(e) { console.warn('Boot: invalid cr_difficulty', e); }
+    }
     this._cacheStage3DOM();
     /* R130-P0: 窗口缩放时失效视口缓存，防止相机追踪错位 */
     this._initViewportResize();
