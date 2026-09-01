@@ -232,7 +232,10 @@ window.ShotgunBurst = class extends window.Weapon {
         }
     }
     update(dt, player, enemies, engine) {
-        this.cooldownTimer -= dt;
+        var aspdMult = (player && player._dodgeAspdTimer > 0)
+            ? Math.min(Balance.HERO_ASSASSIN_DODGE_ASPD_MULT, Balance.WEAPON_ASPD_CAP)
+            : 1.0;
+        this.cooldownTimer -= dt * aspdMult;
     }
     reset() { super.reset();
         /* No resources to clean */

@@ -41,6 +41,7 @@ Gp._restoreWeapons = function(weaponData) {
             w.cooldownTimer = wd.cooldownTimer || 0;
             if (wd.atkFactor != null) w.atkFactor = Math.min(10.0, wd.atkFactor); /* R131-P2: 存档恢复时钳制上限，防止历史bug导致的超额因子叠加 */
             if (wd.baseCd != null) w._baseCd = wd.baseCd; /* P0: 恢复基准CD */
+            if (wd.origBaseCd != null) w._origBaseCd = wd.origBaseCd; /* R141-P1: 恢复原始基线CD，防止筒顺修改跨局丢失 */
             if (wd.cd != null) w.cd = wd.cd; /* P0: 恢复当前CD */
             this._activeWeapons.push(w);
         }

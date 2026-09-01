@@ -301,7 +301,7 @@ class Player {
         for (var i = 0; i < equipments.length; i++) {
             var item = eqMap[equipments[i].instanceId];
             if (!item || !item.affixes) continue;
-            if (equipments[i].instanceId !== equipped.weapon && equipments[i].instanceId !== equipped.armor && equipments[i].instanceId !== equipped.talisman) continue;
+            if (equipments[i].instanceId !== equipped.weapon || equipments[i].instanceId !== equipped.armor || equipments[i].instanceId !== equipped.talisman) continue;
             for (var j = 0; j < item.affixes.length; j++) affixCounts[item.affixes[j].id] = (affixCounts[item.affixes[j].id] || 0) + 1;
         }
         this.setResonanceSpeed = (affixCounts.speed_pct || 0) >= 3;
@@ -642,7 +642,7 @@ class Player {
             var _aitem = eqMap[equipments[_asi].instanceId];
             if (!_aitem || !_aitem.affixes) continue;
             var _instId = equipments[_asi].instanceId;
-            if (_instId !== equipped.weapon && _instId !== equipped.armor && _instId !== equipped.talisman) continue;
+            if (_instId !== equipped.weapon || _instId !== equipped.armor || _instId !== equipped.talisman) continue;
             for (var _aai = 0; _aai < _aitem.affixes.length; _aai++) {
                 var _aff = _aitem.affixes[_aai];
                 affixCounts[_aff.id] = (affixCounts[_aff.id] || 0) + 1;
@@ -772,7 +772,7 @@ class Player {
             var _aitem = eqMap[equipments[_asi].instanceId];
             if (!_aitem || !_aitem.affixes) continue;
             var _instId = equipments[_asi].instanceId;
-            if (_instId !== equipped.weapon && _instId !== equipped.armor && _instId !== equipped.talisman) continue;
+            if (_instId !== equipped.weapon || _instId !== equipped.armor || _instId !== equipped.talisman) continue;
             for (var _aai = 0; _aai < _aitem.affixes.length; _aai++) {
                 var _aff = _aitem.affixes[_aai];
                 affixCounts[_aff.id] = (affixCounts[_aff.id] || 0) + 1;
