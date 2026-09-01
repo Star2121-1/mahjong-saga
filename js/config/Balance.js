@@ -322,7 +322,7 @@ window.Balance = {
     HU_PENGPENG_CD: 0.20,
     HU_QIDUI_DODGE: 0.15,
     HU_QIDUI_SPD: 0.15,
-    HU_QIDUI_MAGNET: 0.20,
+    /* R133-P2: 刪除重複定義（原 0.20 為草稿，最終值 0.80 在第329行） */
     /* R130-P0: 竹牌花牌护盾常量 — 设计文档 §4.4: 回15%HP + 护盾1层 */
     HUPAI_HUA_ZHU_SHIELD: 30,       /* 护盾值 = 玩家 ATK × 此倍率 */
     HUPAI_HUA_ZHU_SHIELD_DUR: 8,    /* 护盾持续秒数 */

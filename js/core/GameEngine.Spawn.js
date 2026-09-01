@@ -655,6 +655,8 @@ Gp._triggerHu = function (hu) {
     /* 清手牌重开一轮收集 */
     this._handTiles = [];
     this._formedMelds = {};
+    this._discardMode = false; /* R133-P1: 胡牌後重置打牌模式狀態，防止滿手牌無法自動進入 */
+    this._discardSel = -1;
     this._renderHandTiles();
 
     setTimeout(function () {
