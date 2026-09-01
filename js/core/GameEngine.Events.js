@@ -584,7 +584,12 @@ Gp._updateEnemyProjectiles = function(dt) {
                 if (edx * edx + edy * edy < (_pe.radius + p.radius) * (_pe.radius + p.radius)) {
                     if (!p._hitEnemy) {
                         p._hitEnemy = true;
-                        if (_pe.takeDamage) _pe.takeDamage(p.damage, p._owner || this);
+                        var projDmg = p.damage;
+                        /* R129-P0: 敌方弹道击中敌人时也应用关卡亲和减伤 */
+                        if (this._mapAffinityReduction) {
+                            projDmg = Math.max(1, Math.floor(projDmg * (1 - this._mapAffinityReduction)));
+                        }
+                        if (_pe.takeDamage) _pe.takeDamage(projDmg, p._owner || this);
                     }
                     p.alive = false;
                     break;

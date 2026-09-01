@@ -1002,8 +1002,8 @@ player.takeDamage(Math.floor(this.atk * Balance.STALKER_ATTACK_MULT), this);
                     var _exX = sourceX != null ? sourceX : (_pg.x || this.x);
                     var _exY = sourceY != null ? sourceY : (_pg.y || this.y);
                     var _splashDmg = Math.floor(actualDmg * Balance.SPLASH_DAMAGE_MULT);
-                    if (_eng && _eng._combat && _eng._combat.spawnExplosion) {
-                        _eng._combat.spawnExplosion(_eng, _exX, _exY, 50, _splashDmg, this.id);
+                    if (_eng && _eng._spawnExplosion) {
+                        _eng._spawnExplosion(_eng, _exX, _exY, 50, _splashDmg, this.id);
                     }
                     this._splashRecursing = false;
                 }
