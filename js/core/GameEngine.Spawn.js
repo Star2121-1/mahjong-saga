@@ -640,8 +640,10 @@ Gp._triggerHu = function (hu) {
                 break;
             case 'qiduizi':
                 p.dodgeRate = Math.min(0.8, (p.dodgeRate || 0) + B.HU_QIDUI_DODGE);
-                p.speed = (p.speed || 100) * (1 + B.HU_QIDUI_SPD);
-                p.magnetRadius = (p.magnetRadius || 60) * (1 + B.HU_QIDUI_MAGNET);
+                p.speed = Math.min(B.PLAYER_MAX_SPEED, (p.speed || 100) * (1 + B.HU_QIDUI_SPD)); /* R137-P0: 七对子速度加成加上限，防止多次胡牌突破500上限 */
+                if (p.magnetRadius > 0) { /* R137-P0: 保留重力combo等debuff的magnetRadius，避免被七对子恢复为默认值 */
+                    p.magnetRadius = p.magnetRadius * (1 + B.HU_QIDUI_MAGNET);
+                }
                 break;
         }
         /* 图鉴记录 */
