@@ -282,10 +282,11 @@ class Player {
         if (this.heroId !== 'Mage') return;
         /* Epoch 42: 九筒筒纹护体 — 基础反伤率 = 5% + 等级 * 5% */
         var lv = this.relicLevels.thorn_armor || 0;
-        /* Mage 被动：即使没有 thorn_armor 也有 5% 基础反伤 */
+        /* R136-P0: Mage获得evolvedArmor后base应为EVOLVED_ARMOR_THORNS_BASE(50%)，否则level-up时丢失50%基础反伤 */
+        var _base = this.evolvedArmor ? Balance.EVOLVED_ARMOR_THORNS_BASE : 0.05;
         /* R30-H-019: evolvedArmor(太阳神巨像)时上限从50%提升至100% */
         var _thornCap = this.evolvedArmor ? 1.0 : 0.5;
-        this.thornsRate = Math.min(_thornCap, 0.05 + lv * 0.05 + (this._thornsAffixBonus || 0));
+        this.thornsRate = Math.min(_thornCap, _base + lv * 0.05 + (this._thornsAffixBonus || 0));
     }
 
     addRelic(id) {
