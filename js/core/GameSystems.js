@@ -198,51 +198,7 @@ Sys.applyMutator = function(engine, mutatorId) {
     engine._beginLoop();
 };
 
-Sys.clearMutatorEffects = function(engine) {
-    if (engine._activeMutator === 'gravity' && engine._origMagnetRadius != null) {
-        engine.player.magnetRadius = engine._origMagnetRadius;
-    }
-    if (engine._activeMutator === 'bloodmoon') {
-        for (var i = 0; i < engine.enemies.length; i++) {
-            var e = engine.enemies[i];
-            if (e._bloodmoonStored) {
-                e.atk = e._bloodmoonOrigAtk;
-                e.maxHp = e._bloodmoonOrigMaxHp;
-                e.hp = e._bloodmoonOrigHp;
-                e._bloodmoonStored = false;
-                e._bloodmoonOrigAtk = undefined;
-                e._bloodmoonOrigMaxHp = undefined;
-                e._bloodmoonOrigHp = undefined;
-            }
-            var el = engine._enemyElements.get(e.id);
-            if (el) el.style.transform = '';
-        }
-    }
-    if (engine._activeMutator === 'frenzy') {
-        for (var i = 0; i < engine.enemies.length; i++) {
-            var e = engine.enemies[i];
-            if (e._frenzyStored) {
-                e.speed = e._frenzyOrigSpeed || e.baseSpeed;
-                e._frenzyStored = false;
-                e._frenzyOrigSpeed = undefined;
-            }
-        }
-    }
-    if (engine._activeMutator === 'frailty') {
-        if (engine._frailtyOrigPlayerAtk != null) engine.player.atk = engine._frailtyOrigPlayerAtk;
-        engine.player._frailtyDebuff = false;
-        for (var i = 0; i < engine.enemies.length; i++) {
-            var e = engine.enemies[i];
-            if (e._frailtyStored) {
-                e.atk = e._frailtyOrigAtk;
-                e._frailtyStored = false;
-                e._frailtyOrigAtk = undefined;
-            }
-        }
-    }
-    engine._activeMutator = null;
-    engine._origMagnetRadius = null;
-};
+/* R130-P2: Sys.clearMutatorEffects 已废弃 — 实际实现在 Gp._clearMutatorEffects (Events.js:136) */
 
 /* ── 套装共鸣 ── */
 
