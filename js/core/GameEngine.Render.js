@@ -103,7 +103,7 @@ Gp._updateProjectiles = function(dt) {
     var grid = {};
     for (var _gi = 0; _gi < this.enemies.length; _gi++) {
         var ge = this.enemies[_gi];
-        if (!ge.alive) continue;
+        if (!ge || !ge.alive) continue;
         var gx = Math.floor(ge.x / GRID_SIZE);
         var gy = Math.floor(ge.y / GRID_SIZE);
         var key = gx + ',' + gy;

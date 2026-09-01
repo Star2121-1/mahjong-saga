@@ -109,6 +109,8 @@ Gp._loop = function(timestamp) {
             var prevHp = this.player.hp;
 
             for (var _ei = 0; _ei < this.enemies.length; _ei++) {
+                if (!this.enemies[_ei]) continue;
+                if (!this.enemies[_ei]) continue;
                 this.enemies[_ei].update(dt, this.player, this);
             }
             /* R30-H-015: 敌人间碰撞分离 — 防止堆叠穿模 */

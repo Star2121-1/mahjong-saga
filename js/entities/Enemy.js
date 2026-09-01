@@ -580,7 +580,7 @@ player.takeDamage(Math.floor(this.atk * Balance.STALKER_ATTACK_MULT), this);
 
     /* ── BossLord 三阶段 ── */
     _updateBossLord(dt, player, engine) {
-        var hpPct = this.hp / this.maxHp;
+        var hpPct = this.maxHp > 0 ? this.hp / this.maxHp : 0;
         var prevPhase = this._bossPhase;
         if (hpPct >= Balance.BOSS_PHASE1_THRESHOLD) this._bossPhase = 1;
         else if (hpPct >= Balance.BOSS_PHASE2_THRESHOLD) this._bossPhase = 2;
