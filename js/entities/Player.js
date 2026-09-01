@@ -544,7 +544,7 @@ class Player {
         /* R51-P0: 恢复缺失的持久化字段 */
         this.critDamageBonus = data.critDamageBonus || 0;
         this._discoveredSecrets = data._discoveredSecrets ? [...data._discoveredSecrets] : [];
-        this._tempBuffTimeLeft = data._tempBuffTimeLeft || 0;
+        this._tempBuffTimeLeft = data._tempBuffTimeLeft ?? undefined; /* R140-P1: 使用??替代||防止旧存档无此字段时被置为0而非undefined */
         /* R64-P0: 恢复临时增益字段，防止断点续玩后丢失 */
         this._tempAtkBoost = data._tempAtkBoost || 0;
         this._tempHpBonus = data._tempHpBonus || 0;
@@ -599,7 +599,7 @@ class Player {
             var base = item.base || {};
             this.maxHp += base.hp_boost || 0;
             this.hp = Math.min(this.hp, this.maxHp);
-            this.magnetRadius += base.magnet_boost || 0;
+            this.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, this.magnetRadius + (base.magnet_boost || 0)); /* R140-P1: magnet_boost加钳制防止越界 */
             if (base.atk_factor && !_skipEquipAffixes) this.atk = Math.floor(this.atk * (1 + base.atk_factor)); /* R134-P0: skip equip base bonuses on restore — snapshot已含最终值，避免二次乘法 */
             if (!_skipEquipAffixes && item.affixes) {
                 for (var ai = 0; ai < item.affixes.length; ai++) {
@@ -723,7 +723,7 @@ class Player {
             var base = item.base || {};
             this.maxHp += base.hp_boost || 0;
             this.hp = this.maxHp;
-            this.magnetRadius += base.magnet_boost || 0;
+            this.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, this.magnetRadius + (base.magnet_boost || 0)); /* R140-P1: magnet_boost加钳制 */
             if (base.atk_factor) this.atk = Math.floor(this.atk * (1 + base.atk_factor));
             if (item.affixes) {
                 for (var ai = 0; ai < item.affixes.length; ai++) {
