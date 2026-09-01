@@ -522,6 +522,8 @@ Gp._gameOver = async function() {
     this._abyssPanelVisible = false;
     var _seqGO = this._runSeq || 0; /* P0-1: 局序号令牌 */
     window.audioManager && window.audioManager.play('gameover');
+    /* R132-P1: 游戏结束前主动存档，防止running=false后beforeunload跳过保存 */
+    this._autoSave('death');
     /* P0-1 修复: 移除恒真布尔守卫（调用方 Loop 已先行置 flags，原守卫使死亡结算永不执行） */
     this.gameOver = true;
     this.running = false;

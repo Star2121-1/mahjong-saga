@@ -62,9 +62,7 @@ Gp.init = async function() {
             this.gameOver = false;
 
             if (window.rewardManager) window.rewardManager.hidePanel();
-            /* R73-P1: 断点恢复路径必须初始化SpawnSystem，否则Update循环中SpawnSystem.update会因engine未设置而崩溃 */
-            if (window.SpawnSystem) window.SpawnSystem.init(this);
-            /* R124-P1: 断点恢复路径同步重置SpawnSystem状态，防止spawnTimer/_bossLordSpawned等跨局残留 */
+            /* R132-P1: resume路径统一调用reset()即可，init()的赋值会被reset()覆盖且语义冗余 */
             if (window.SpawnSystem) window.SpawnSystem.reset(this);
             this._syncEntities();
             this._syncPlayerHP();
@@ -326,7 +324,8 @@ Gp._initVisibilityPause = function() {
 Gp._initBeforeUnload = function() {
     var self = this;
     window.addEventListener('beforeunload', function(e) {
-        if (self.running) {
+        /* R132-P1: 不仅在running时保存，gameOver后也有进度需保存（避免通关/死亡后立即关闭丢失） */
+        if (self.running || (self.gameOver && (self._elapsed || 0) > 0)) {
             var snap = window.saveManager.snapshotForRun(self);
             /* R37-P2: 使用同步写入避免beforeunload异步竞态 */
             window.saveManager._writeJSON('active_run.json', snap);
