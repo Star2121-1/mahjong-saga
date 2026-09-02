@@ -545,14 +545,14 @@
     #victory-overlay h1 { font-size: 24px; letter-spacing: 2px; }
     .result { font-size: 14px; }
     #game-over-overlay h1 { font-size: 24px; }
-    #game-over-overlay .relic-btn { padding: 6px 16px; font-size: 12px; }
+    #game-over-overlay .relic-btn { padding: 8px 16px; font-size: 12px; }
     #mutator-overlay .mutator-title { font-size: 18px; }
     #mutator-overlay .mutator-subtitle { font-size: 11px; }
     .mutator-card { width: 140px; padding: 10px 8px; }
     .mutator-card-icon { font-size: 24px; }
     .mutator-card-title { font-size: 13px; }
     .mutator-card-desc { font-size: 10px; }
-    #mutator-overlay .mutator-btn { padding: 6px 16px; font-size: 12px; }
+    #mutator-overlay .mutator-btn { padding: 8px 16px; font-size: 12px; }
     .abyss-title { font-size: 20px; letter-spacing: 2px; }
     .abyss-subtitle { font-size: 13px; }
     .abyss-warning { font-size: 15px; }
@@ -563,7 +563,7 @@
     .relic-stars { font-size: 10px; }
     .relic-desc { font-size: 10px; }
     .relic-cost { font-size: 11px; }
-    #reward-overlay .relic-btn { padding: 5px 14px; font-size: 11px; }
+    #reward-overlay .relic-btn { padding: 8px 18px; font-size: 11px; }
 }
 
 /* ══════════════════════════════════════════════
