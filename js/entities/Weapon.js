@@ -148,6 +148,10 @@ window.OrbitShield = class extends window.Weapon {
     }
     update(dt, player, enemies, engine) {
         this._init(engine);
+        /* A-030: 暗影步闪避后攻速加成 */
+        var aspdMult = (player && player._dodgeAspdTimer > 0)
+            ? Math.min(Balance.HERO_ASSASSIN_DODGE_ASPD_MULT, Balance.WEAPON_ASPD_CAP)
+            : 1.0;
         if (!player) return; /* R146-P1: null guard — 防止init过渡期player为null时崩溃 */
         var atkMult = 1 + (player._tempAtkBoost || 0);
         var dmg = Math.floor(player.atk * this.atkFactor * atkMult);
@@ -159,7 +163,7 @@ window.OrbitShield = class extends window.Weapon {
             var el = this.orbitEls[i];
             el.style.left = (ox - 8) + 'px';
             el.style.top = (oy - 8) + 'px';
-            this.orbitTickTimers[i] -= dt;
+            this.orbitTickTimers[i] -= dt * aspdMult;
             if (this.orbitTickTimers[i] > 0) continue;
             this.orbitTickTimers[i] = this.cd;
             this.orbitHitSets[i].clear(); /* R30-H-014: 每tick清空去重集合，防止run中永久跳过敌人 */
@@ -384,7 +388,7 @@ window.LaserBeam = class extends window.Weapon {
             if (dist < e.radius + Balance.LASER_HIT_RADIUS) {
                 e.takeDamage(dmg, 'player', player.x, player.y);
                 hitCount++;
-                if (hitCount > Balance.LASER_BEAM_MAX_HITS + extraPen) break;
+                if (hitCount >= Balance.LASER_BEAM_MAX_HITS + extraPen) break;
             }
         }
         /* Reset synBladeLaser flag after one laser fire */
