@@ -279,7 +279,7 @@ Gp._endOverdrive = function() {
     /* P0: 恢复武器原始伤害（Sys.endOverdrive已实现，此处补齐） */
     for (var _wi = 0; _wi < (this._activeWeapons || []).length; _wi++) {
         var _w = this._activeWeapons[_wi];
-        if (_w && _w._odOrigAtk) {
+        if (_w && _w._odOrigAtk !== undefined) {
             _w.atkFactor = _w._odOrigAtk;
             _w._odOrigAtk = undefined;
         }

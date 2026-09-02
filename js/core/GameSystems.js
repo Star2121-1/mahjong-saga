@@ -80,7 +80,7 @@ Sys.endOverdrive = function(engine) {
     /* P2: 恢复武器原始伤害（triggerOverdrive 曾将其×2） */
     for (var _wi = 0; _wi < (engine._activeWeapons || []).length; _wi++) {
         var _w = engine._activeWeapons[_wi];
-        if (_w && _w._odOrigAtk) {
+        if (_w && _w._odOrigAtk !== undefined) {
             _w.atkFactor = _w._odOrigAtk;
             _w._odOrigAtk = undefined;
         }

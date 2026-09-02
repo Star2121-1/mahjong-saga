@@ -775,7 +775,8 @@ Gp._initKeyboard = function() {
         self._pressedKeys[e.code] = true;
     };
     self._onKeyUp = function(e) {
-        if (!self.running || self.gameOver || self._paused) return;
+        /* R160-P1: keyup 需与keydown同等的状态守卫，防止overlay期间误触发移动 */
+        if (!self.running || self.gameOver || self._paused || self._pendingReward || self._levelUpPending || self._discardMode || self._huLock) return;
         self._pressedKeys[e.code] = false;
     };
     /* Epoch 43: 键盘导航 */

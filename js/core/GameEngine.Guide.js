@@ -123,6 +123,14 @@ Gp._showGuideStep = function(stepIndex) {
             }
         }, 300);
     }
+    /* R160-P0: autoAdvance 步骤无需交互，3秒后自动进入下一步，防止永久卡死 */
+    else if (step.autoAdvance && stepIndex < steps.length - 1) {
+        var _self2 = this;
+        setTimeout(function() {
+            _self2._currentGuideStep = stepIndex + 1;
+            _self2._showGuideStep(stepIndex + 1);
+        }, 3000);
+    }
 };
 
 Gp._completeGuide = function() {
