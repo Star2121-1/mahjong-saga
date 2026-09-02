@@ -342,7 +342,8 @@ class Player {
                 this._recalcThornsRate();
                 break;
             case 'wind_walker':
-                this.speedMultiplier = 1.0 + lv * Balance.EVOLVED_SPEED_PER_LEVEL;
+                /* R156-P0: += 而非 =，防止覆盖其他速度加成(assassin/passive/relic affix) */
+                this.speedMultiplier += lv * Balance.RELIC_WW_SPEED_PER_LEVEL;
                 this.speed = this.baseSpeed * this.speedMultiplier;
                 break;
             case 'vamp_ring':
@@ -623,9 +624,12 @@ class Player {
             var item = eqMap[instanceId];
             if (!item) continue;
             var base = item.base || {};
-            this.maxHp += Math.min(Balance.MAX_EQUIP_HP_BOOST - (this.maxHp - (window.heroConfig[this.heroId] && window.heroConfig[this.heroId].hp || 100)), base.hp_boost || 0);
-            this.hp = Math.min(this.hp, this.maxHp);
-            this.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, this.magnetRadius + (base.magnet_boost || 0)); /* R140-P1: magnet_boost加钳制防止越界 */
+            /* R156-P0: skip equip base bonuses on restore — snapshot已含最终maxHp/magnetRadius，避免重复叠加 */
+            if (!_skipEquipAffixes) {
+                this.maxHp += Math.min(Balance.MAX_EQUIP_HP_BOOST - (this.maxHp - (window.heroConfig[this.heroId] && window.heroConfig[this.heroId].hp || 100)), base.hp_boost || 0);
+                this.hp = Math.min(this.hp, this.maxHp);
+                this.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, this.magnetRadius + (base.magnet_boost || 0)); /* R140-P1: magnet_boost加钳制防止越界 */
+            }
             if (base.atk_factor && !_skipEquipAffixes) this.atk = Math.floor(this.atk * (1 + Math.min(Balance.MAX_EQUIP_ATK_FACTOR, base.atk_factor))); /* R134-P0: skip equip base bonuses on restore; R145-P1: equip atk_factor上限钳制 */
             if (!_skipEquipAffixes && item.affixes) {
                 for (var ai = 0; ai < item.affixes.length; ai++) {
