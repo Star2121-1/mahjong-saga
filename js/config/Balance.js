@@ -250,7 +250,10 @@ window.Balance = {
     LASER_HIT_RADIUS: 4,
     TRACKING_BLADE_PROJ_LIFE: 2.0,
     TRACKING_BLADE_CD: 0.8, /* GAME_BIBLE: TrackingBlade CD=0.8s | R152-P1: 修正从0.5→0.8对齐设计文档 */
+    ORBIT_SHIELD_CD: 0.5,   // 环形护体CD (Weapon.js)
     SHOTGUN_BURST_CD: 0.4,    // 七对散牌CD (Weapon.js)
+    GROUND_SLAMMER_CD: 1.8,   // 碰牌震波CD (Weapon.js)
+    LASER_BEAM_CD: 0.3,       // 一气贯通CD (Weapon.js)
     SHOTGUN_PROJ_LIFE: 0.8,
     TRACKING_BLADE_RADIUS: 4,
     SHOTGUN_RADIUS: 3,

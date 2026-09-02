@@ -126,7 +126,7 @@ window.TrackingBlade = class extends window.Weapon {
 
 window.OrbitShield = class extends window.Weapon {
     constructor(level) {
-        super('OrbitShield', '\u73af\u5f62\u62a4\u4f53', level || 1, 0.3, 0.5);
+        super('OrbitShield', '\u73af\u5f62\u62a4\u4f53', level || 1, 0.3, Balance.ORBIT_SHIELD_CD);
         this.orbitRadius = Balance.ORBIT_SHIELD_RADIUS;
         this.orbRadius = Balance.ORBIT_ORB_RADIUS;
         this.rotationSpeed = Balance.ORBIT_ROTATION_SPEED;
@@ -255,7 +255,7 @@ window.ShotgunBurst = class extends window.Weapon {
 
 window.GroundSlammer = class extends window.Weapon {
     constructor(level) {
-        super('GroundSlammer', '\u78b0\u724c\u9707\u6ce2', level || 1, 1.5, 1.8);
+        super('GroundSlammer', '\u78b0\u724c\u9707\u6ce2', level || 1, 1.5, Balance.GROUND_SLAMMER_CD);
         this.activeShockwaves = [];
     }
     update(dt, player, enemies, engine) {
@@ -333,7 +333,7 @@ window.GroundSlammer = class extends window.Weapon {
 
 window.LaserBeam = class extends window.Weapon {
     constructor(level) {
-        super('LaserBeam', '\u4e00\u6c14\u8d2f\u901a', level || 1, 1.2, 0.3);
+        super('LaserBeam', '\u4e00\u6c14\u8d2f\u901a', level || 1, 1.2, Balance.LASER_BEAM_CD);
         this.beamLength = Balance.LASER_BEAM_LENGTH;
         this.beamAngle = 0;
         this.laserEl = null;
