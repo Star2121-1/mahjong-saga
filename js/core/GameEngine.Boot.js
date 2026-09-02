@@ -387,6 +387,7 @@ Gp._startNewRun = function(heroId, levelId) {
     this._handTiles = [];
     this._formedMelds = {};
     this._jokersDropped = 0;
+    this._mainSuit = 'wan'; /* R158-P0: 重置主花色，防止跨局花色偏好残留 */
     this._discardMode = false;
     this._discardSel = -1;
     this._huLock = false;
