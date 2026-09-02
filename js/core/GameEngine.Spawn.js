@@ -548,7 +548,7 @@ Gp._applyRunBonus = function (suit, tierMult) {
         if (this._spawnFloatText) this._spawnFloatText(p.x, p.y - 40, '筒顺 冷却−', false);
     } else if (suit === 'tiao') {
         var dodgeInc = B.HUPAI_RUN_TIAO_DODGE_INC * (tierIdx + 1);
-        p.dodgeRate = Math.min(B.MAX_LIFESTEAL_RATE, (p.dodgeRate || 0) + dodgeInc);
+        p.dodgeRate = Math.min(B.MAX_DODGE_RATE, (p.dodgeRate || 0) + dodgeInc);
         p.speed = Math.min(p.speed || 100, B.PLAYER_MAX_SPEED) * (1 + Math.min(B.HUPAI_RUN_TIAO_CAP, B.HUPAI_RUN_TIAO_SPD_INC * (tierIdx + 1)));
         if (this._spawnFloatText) this._spawnFloatText(p.x, p.y - 40, '条顺 敏捷↑', false);
     }
@@ -770,7 +770,7 @@ if (window.saveManager) {
         /* R30-H-021: 武器状态纳入断点续玩快照，恢复时由 _restoreWeapons 重建 */
         if (engine._activeWeapons && engine._activeWeapons.length > 0) {
             snap.weapons = engine._activeWeapons.map(function(w) {
-                return { id: w.id, level: w.level, cooldownTimer: w.cooldownTimer, baseCd: w._baseCd, origBaseCd: w._origBaseCd, cd: w.cd, atkFactor: w.atkFactor };
+                return { id: w.id, level: w.level, cooldownTimer: w.cooldownTimer, baseCd: w._baseCd, origBaseCd: w._origBaseCd, rawBaseCd: w._rawBaseCd, cd: w.cd, atkFactor: w.atkFactor };
             });
         }
         return snap;

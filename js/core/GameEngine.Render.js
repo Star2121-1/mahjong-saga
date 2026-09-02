@@ -81,7 +81,8 @@ Gp._updateWeapons = function(dt) {
     var cdReduction = (this.player && this.player._weaponCdReduction) || 0;
     for (var _i = 0; _i < this._activeWeapons.length; _i++) {
         var w = this._activeWeapons[_i];
-        if (w instanceof window.LaserBeam) {
+        /* R165-P0: 防御性检查 — LaserBeam类未定义时跳过setAngle，避免Strict模式下instanceof崩溃 */
+        if (window.LaserBeam && w instanceof window.LaserBeam) {
             w.setAngle(this._lastClickAngle);
         }
         /* Epoch 34: Overdrive 期间武器伤害翻倍
@@ -187,6 +188,49 @@ Gp._updateProjectiles = function(dt) {
         if (!p.alive && p.el && p.el.parentNode) {
             p.el.remove();
             this._projectiles.splice(_i, 1);
+        }
+    }
+};
+
+/* ══════════════════════════════════════════════
+   敌方弹道管理 — R164-P0: 补全缺失方法
+   ══════════════════════════════════════════════ */
+
+Gp._cleanEnemyProjectiles = function() {
+    if (!this._enemyProjectiles) return;
+    for (var _i = 0; _i < this._enemyProjectiles.length; _i++) {
+        var p = this._enemyProjectiles[_i];
+        if (p.el && p.el.parentNode) p.el.remove();
+    }
+    this._enemyProjectiles = [];
+};
+
+Gp._updateEnemyProjectiles = function(dt) {
+    /* R164-P0: 防御性检查 — 数组未初始化时跳过 */
+    if (!this._enemyProjectiles) return;
+    for (var _i = this._enemyProjectiles.length - 1; _i >= 0; _i--) {
+        var p = this._enemyProjectiles[_i];
+        if (!p || !p.alive) {
+            if (p && p.el && p.el.parentNode) p.el.remove();
+            this._enemyProjectiles.splice(_i, 1);
+            continue;
+        }
+        p.update(dt);
+        if (!p.alive) {
+            if (p.el && p.el.parentNode) p.el.remove();
+            this._enemyProjectiles.splice(_i, 1);
+            continue;
+        }
+        if (p.el) {
+            p.el.style.left = (p.x - p.radius) + 'px';
+            p.el.style.top = (p.y - p.radius) + 'px';
+        }
+        if (p.x < -100 || p.x > this._mapW + 100 || p.y < -100 || p.y > this._mapH + 100) {
+            p.alive = false;
+        }
+        if (!p.alive && p.el && p.el.parentNode) {
+            p.el.remove();
+            this._enemyProjectiles.splice(_i, 1);
         }
     }
 };

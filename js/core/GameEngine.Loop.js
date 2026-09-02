@@ -200,8 +200,9 @@ Gp._loop = function(timestamp) {
                 }
             }
 
-            /* Epoch 47: 深渊变异组合自动激活 */
-            if (this.loopCount > 0 && this._abyssUnlockedCombos && this._abyssUnlockedCombos.length > 0 && !this._abyssActiveCombo) {
+            /* Epoch 47: 深渊变异组合自动激活（每局仅一次） */
+            if (this.loopCount > 0 && this._abyssUnlockedCombos && this._abyssUnlockedCombos.length > 0 && !this._abyssActiveCombo && !this._abyssComboActivated) {
+                this._abyssComboActivated = true;
                 var firstCombo = this._abyssUnlockedCombos[0];
                 /* R156-P0: 调用 _applyAbyssCombo 而非直接设置标志，确保combo效果正确应用（速度/吸血/磁铁等） */
                 this._applyAbyssCombo(firstCombo);

@@ -266,6 +266,15 @@ Gp.restart = function() {
     if (_odf && _odf.parentNode) _odf.remove();
     /* R118-P0: 清理FxManager对象池，防止飘字节点跨局泄漏 */
     if (window.fxManager) window.fxManager.cleanup();
+    /* R165-P0: 清理ToastSystem活跃节点，防止restart后toast DOM残留 */
+    if (window.toastSystem && window.toastSystem._active) {
+        for (var _ti = 0; _ti < window.toastSystem._active.length; _ti++) {
+            var _tn = window.toastSystem._active[_ti];
+            if (_tn && _tn._timer) clearTimeout(_tn._timer);
+            if (_tn && _tn.parentNode) _tn.parentNode.removeChild(_tn);
+        }
+        window.toastSystem._active = [];
+    }
     var bc = document.getElementById('active-buffs-container');
     if (bc) { bc.remove(); this._buffsContainerEl = null; }
     for (var _el of this._enemyElements.values()) { if (_el && _el.parentNode) _el.remove(); }

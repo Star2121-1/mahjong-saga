@@ -225,8 +225,10 @@
         /* 碰碰胡：刻/杠组 ≥4（癞子可参与已在 extractMelds，但这里用计数快速判定） */
         var triplets = 0;
         for (var id3 in t.count) { triplets += Math.floor(t.count[id3] / 3); }
-        /* R140-P0: 修正碰碰胡判定 — 用maxPossibleTrips防止多刻+单张+癞子误判 */
-        var maxPossibleTrips = triplets + Math.min(t.jokers, t.total - triplets * 3);
+        /* R166-P0: 修正碰碰胡判定 — 原公式高估癞子成刻能力，单张+1joker无法成刻需2joker */
+        var nonTrips = t.total - triplets * 3;
+        var maxExtraTrips = Math.floor((nonTrips + t.jokers) / 3);
+        var maxPossibleTrips = triplets + maxExtraTrips;
         if (maxPossibleTrips >= 4) {
             return { huType: 'pengpenghu' };
         }

@@ -60,6 +60,8 @@
                     var expected = this._computeChecksum(data);
                     if (data._checksum && data._checksum !== expected) {
                         console.warn('SaveManager backup checksum mismatch for', fileName, 'skipping rollback');
+                        /* R164-P0: notify user when backup is also corrupt */
+                        if (window.toastSystem) window.toastSystem.error('备份存档 "' + fileName + '" 也损坏，无法恢复');
                         return null;
                     }
                     /* 恢复备份到主文件 */
@@ -338,6 +340,7 @@
         snapshot.isRunActive = true;
         var ok = this._writeJSON('active_run.json', snapshot);
         if (!ok) { console.warn('SaveManager: saveActiveRun write failed (quota?)'); return false; }
+        /* R165-P1: Only update meta timestamp on successful write — prevent phantom "last saved" after quota failure */
         var meta = await this.getMeta();
         meta.lastSaveTimestamp = snapshot.timestamp || Date.now();
         meta.lastHeroName = snapshot.heroName || '雀（雀圣本尊）';
@@ -420,28 +423,30 @@
     };
 
     SaveManager.prototype.restoreRunToEngine = function(engine, data) {
-        engine._waveCount = data.waveCount || 0;
-        engine._elapsed = data.elapsed || 0;
-        engine.kills = data.kills || 0;
+        /* R164-P0: helper to reject negative values (|| 0 only guards falsy, not negatives) */
+        function _posOrZero(v, def) { return (v != null && typeof v === 'number' && isFinite(v) && v >= 0) ? v : (def || 0); }
+        engine._waveCount = _posOrZero(data.waveCount, 0);
+        engine._elapsed = _posOrZero(data.elapsed, 0);
+        engine.kills = _posOrZero(data.kills, 0);
         engine._spawnInterval = data.spawnInterval || 1.5;
         engine._difficultyTimer = data.difficultyTimer || 0;
         engine._bossTimer = data.bossTimer || 0;
         engine._spawnTimer = data.spawnTimer || 0;
-        engine.loopCount = data.loopCount || 0;
-        engine._totalCritsThisRun = data.totalCritsThisRun || 0;
-        engine._totalDodgesThisRun = data.totalDodgesThisRun || 0;
-        engine._bossKillsThisRun = data.bossKillsThisRun || 0;
-        engine._finalBossKillsThisRun = data.finalBossKillsThisRun || 0;
-        engine._maxGoldThisRun = data.maxGoldThisRun || 0;
-        engine._playerHitCountThisRun = data.playerHitCountThisRun || 0;
-        engine._overdriveCount = data.overdriveCount || 0;
+        engine.loopCount = _posOrZero(data.loopCount, 0);
+        engine._totalCritsThisRun = _posOrZero(data.totalCritsThisRun, 0);
+        engine._totalDodgesThisRun = _posOrZero(data.totalDodgesThisRun, 0);
+        engine._bossKillsThisRun = _posOrZero(data.bossKillsThisRun, 0);
+        engine._finalBossKillsThisRun = _posOrZero(data.finalBossKillsThisRun, 0);
+        engine._maxGoldThisRun = _posOrZero(data.maxGoldThisRun, 0);
+        engine._playerHitCountThisRun = _posOrZero(data.playerHitCountThisRun, 0);
+        engine._overdriveCount = _posOrZero(data.overdriveCount, 0);
         engine._vaultMutations = data.vaultMutations || [];
-        engine._abyssCoins = data.abyssCoins || 0;
+        engine._abyssCoins = _posOrZero(data.abyssCoins, 0);
         engine._abyssUnlockedCombos = data.abyssUnlockedCombos || [];
         engine._abyssActiveCombo = data.abyssActiveCombo || null;
         engine._gambleActive = data.gambleActive || false;
         engine._gambleType = data.gambleType || null;
-        engine._gambleStaked = data.gambleStaked || 0;
+        engine._gambleStaked = _posOrZero(data.gambleStaked, 0);
         engine._shieldActive = data.shieldActive || false;
         engine._shieldTimer = data.shieldTimer || 0;
         engine._eliteModeActive = data.eliteModeActive || false;
@@ -451,15 +456,26 @@
         engine._tempEnemySpeedDebuff = data.tempEnemySpeedDebuff !== null && data.tempEnemySpeedDebuff !== undefined ? data.tempEnemySpeedDebuff : 0;
         engine._godModeApplied = data.godModeApplied || false;
         engine._bloodRageActive = data.bloodRageActive || false;
-        engine.currentWaveSpawnedCount = data.currentWaveSpawnedCount || 0;
+        engine.currentWaveSpawnedCount = _posOrZero(data.currentWaveSpawnedCount, 0);
         engine._handTiles = data.handTiles ? data.handTiles.slice() : [];
         engine._formedMelds = data.formedMelds || {};
-        engine._jokersDropped = data.jokersDropped || 0;
+        engine._jokersDropped = _posOrZero(data.jokersDropped, 0);
         engine._mainSuit = data.mainSuit || 'wan';
         var levelId = data.levelId || 'level_1';
         engine._currentLevelId = levelId;
         var levelCfg = window.levelConfig[levelId];
         if (levelCfg) { engine._mapW = levelCfg.mapW; engine._mapH = levelCfg.mapH; }
+        /* R164-P0: reset engine fields not covered by snapshot to prevent stale state on resume */
+        engine._overdriveActive = false;
+        engine._overdriveTimer = 0;
+        engine._totems = [];
+        engine._bossLord = null;
+        engine._bossLordWave = false;
+        engine._bossLordSpawned = false;
+        engine._monsterSurgeDoubleDrops = false;
+        engine._pendingBossGamble = false;
+        engine._gambleAbyssBonus = false;
+        engine._witherTimer = 0;
         engine.player.restore(data.player);
         /* R30-H-022: 武器断点恢复（含降级保护，避免旧存档或加载顺序导致崩溃） */
         try {
@@ -641,6 +657,20 @@
                 if (typeof data.activeRun.weapons[awi] !== 'object' || !data.activeRun.weapons[awi].id) return false;
                 if (validWeapons.indexOf(data.activeRun.weapons[awi].id) === -1) return false;
             }
+        }
+        /* R164-P0: validate activeRun.player numeric fields to prevent crafted imports from setting negative HP / Infinity ATK */
+        if (data.activeRun.player) {
+            var _p = data.activeRun.player;
+            var _pNumFields = ['hp','maxHp','atk','speed','baseSpeed','gold','critRate',
+                'dodgeRate','lifestealRate','explosionChance','freezeChance','thornsRate',
+                'rage','maxRage','cdFloor','xpGainFactor','speedMultiplier','damageReduction'];
+            for (var _pn = 0; _pn < _pNumFields.length; _pn++) {
+                var _pv = _p[_pNumFields[_pn]];
+                if (_pv != null && (typeof _pv !== 'number' || !Number.isFinite(_pv))) return false;
+            }
+            if (_p.hp != null && _p.hp < 0) return false;
+            if (_p.maxHp != null && _p.maxHp <= 0) return false;
+            if (_p.atk != null && _p.atk < 0) return false;
         }
         return true;
     };

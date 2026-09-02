@@ -419,7 +419,7 @@ class Player {
                 { id: 'se_splash', name: '溅射', apply: function(p) { p.explosionChance = Math.min(1, (p.explosionChance || 0) + 0.15); } }
             ],
             golden_finger: [
-                { id: 'gf_lifesteal', name: '吸血', apply: function(p) { p.lifestealRate = Math.min(0.8, (p.lifestealRate || 0) + 0.1); } },
+                { id: 'gf_lifesteal', name: '吸血', apply: function(p) { p.lifestealRate = Math.min(Balance.MAX_LIFESTEAL_RATE, (p.lifestealRate || 0) + 0.1); } },
                 { id: 'gf_thorns', name: '反伤', apply: function(p) { p._thornsAffixBonus = (p._thornsAffixBonus || 0) + 0.1; p._recalcThornsRate(); } }
             ],
             thorn_armor: [
@@ -537,10 +537,15 @@ class Player {
         this.nextLvlExp = data.nextLvlExp || 15;
 
         this.hue = data.hue ?? this.hue;
-        this.hp = data.hp ?? this.maxHp;
-        this.maxHp = data.maxHp ?? this.maxHp;
-        this.atk = data.atk ?? this.atk;
-        this.speed = data.speed ?? this.speed;
+        /* R164-P0: clamp restored HP/maxHp/atk to prevent crafted imports from setting negative/Infinity values */
+        this.maxHp = (data.maxHp != null && Number.isFinite(data.maxHp) && data.maxHp > 0)
+            ? data.maxHp : this.maxHp;
+        this.hp = (data.hp != null && Number.isFinite(data.hp) && data.hp >= 0)
+            ? Math.min(data.hp, this.maxHp) : this.maxHp;
+        this.atk = (data.atk != null && Number.isFinite(data.atk) && data.atk >= 0)
+            ? data.atk : this.atk;
+        this.speed = (data.speed != null && Number.isFinite(data.speed) && data.speed >= 0)
+            ? data.speed : this.speed;
 
         this.relicLevels = data.relicLevels ? { ...data.relicLevels } : {};
         /* R145-P1: 钳制存档中的圣物等级上限，防止localStorage篡改绕过5级上限 */
@@ -553,6 +558,8 @@ class Player {
             if (cfg.cdFloor != null) this.cdFloor = cfg.cdFloor;
         }
         this.maxWeaponSlots = data.maxWeaponSlots !== undefined ? data.maxWeaponSlots : this.maxWeaponSlots;
+        /* R164-P1: 钳制存档中恶意篡改的maxWeaponSlots，防止突破武器槽上限 */
+        this.maxWeaponSlots = Math.min(12, Math.max(1, this.maxWeaponSlots));
         this.cdFloor = data.cdFloor !== undefined ? data.cdFloor : this.cdFloor;
         this.xpGainFactor = data.xpGainFactor || 1.0;
         this.iceDurationBonus = data.iceDurationBonus || 0;
@@ -642,8 +649,10 @@ class Player {
         /* 装备词条汇总上限校验 */
         this.xpGainFactor = 1.0 + Math.min(Balance.MAX_XP_GAIN_PCT, this.xpGainFactor - 1.0);
         this.iceDurationBonus = Math.min(Balance.MAX_FREEZE_DURATION_BONUS, this.iceDurationBonus);
-        /* R124-P1: 防止_eqBaseSpeed为0时除零 */
-        this.speed = _eqBaseSpeed > 0 ? _eqBaseSpeed * Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, this.speed / _eqBaseSpeed) : 0;
+        /* R164-P1: 防止_eqBaseSpeed为0时除零 — 保留速度下限防止玩家冻结 */
+        this.speed = _eqBaseSpeed > 0 ? _eqBaseSpeed * Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, this.speed / _eqBaseSpeed) : (this.baseSpeed || 180);
+        /* R164-P0: 强制玩家速度上限，防止多buff叠加溢出（原常量声明但未使用） */
+        this.speed = Math.min(Balance.PLAYER_MAX_SPEED, this.speed);
         /* 套装共鸣 */
         var affixCounts = {};
         for (var _asi = 0; _asi < equipments.length; _asi++) {
@@ -699,7 +708,7 @@ class Player {
         var POOL = [
             { id: 'se_pierce', apply: function(p) { p.atk += 5; } },
             { id: 'se_splash', apply: function(p) { p.explosionChance = Math.min(1, (p.explosionChance || 0) + 0.15); } },
-            { id: 'gf_lifesteal', apply: function(p) { p.lifestealRate = Math.min(0.8, (p.lifestealRate || 0) + 0.1); } },
+            { id: 'gf_lifesteal', apply: function(p) { p.lifestealRate = Math.min(Balance.MAX_LIFESTEAL_RATE, (p.lifestealRate || 0) + 0.1); } },
             { id: 'gf_thorns', apply: function(p) { p._thornsAffixBonus = (p._thornsAffixBonus || 0) + 0.1; p._recalcThornsRate(); } },
             { id: 'ta_hp', apply: function(p) { p.maxHp += 30; p.hp = Math.min(p.hp + 30, p.maxHp); } },
             { id: 'ta_crit', apply: function(p) { p.critRate = Math.min(1, (p.critRate || 0) + 0.1); } },
@@ -768,8 +777,10 @@ class Player {
         /* 装备词条汇总上限校验 */
         this.xpGainFactor = 1.0 + Math.min(Balance.MAX_XP_GAIN_PCT, this.xpGainFactor - 1.0);
         this.iceDurationBonus = Math.min(Balance.MAX_FREEZE_DURATION_BONUS, this.iceDurationBonus);
-        /* R124-P1: 防止_eqBaseSpeed为0时除零 */
-        this.speed = _eqBaseSpeed > 0 ? _eqBaseSpeed * Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, this.speed / _eqBaseSpeed) : 0;
+        /* R165-P0: 防止_eqBaseSpeed为0时speed归零导致玩家永久冻结 */
+        this.speed = _eqBaseSpeed > 0 ? _eqBaseSpeed * Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, this.speed / _eqBaseSpeed) : ((this.baseSpeed || (window.heroConfig[this.heroId] && window.heroConfig[this.heroId].speed) || 180));
+        /* R164-P0: 强制玩家速度上限，防止多buff叠加溢出 */
+        this.speed = Math.min(Balance.PLAYER_MAX_SPEED, this.speed);
 
         /* 保存基础maxHp用于临时增益恢复（装备聚合完成后） */
         this._baseMaxHp = this.maxHp;

@@ -135,14 +135,14 @@ Gp._showAbyssShop = function() {
     var cardsHtml = '';
     for (var i = 0; i < items.length; i++) {
         var it = items[i];
-        /* R159-P0: 应用深渊商店价格倍率，防止深度10+仍可廉价购买 */
-        it._displayCost = Math.floor(it.cost * Balance.ABYSS_SHOP_PRICE_MULT);
-        var canAfford = this._abyssCoins >= it._displayCost;
+        /* R165-P0: 不修改共享原型上的_displayCost，用本地变量避免跨局污染 */
+        var displayCost = Math.floor(it.cost * Balance.ABYSS_SHOP_PRICE_MULT);
+        var canAfford = this._abyssCoins >= displayCost;
         cardsHtml +=
             '<div class="abyss-shop-card">' +
                 '<div class="abyss-shop-card-name">' + it.name + '</div>' +
                 '<div class="abyss-shop-card-desc">' + it.desc + '</div>' +
-                '<div class="abyss-shop-card-cost">' + it._displayCost + ' 深渊币</div>' +
+                '<div class="abyss-shop-card-cost">' + displayCost + ' 深渊币</div>' +
                 '<button class="abyss-shop-btn"' + (canAfford ? '' : ' disabled') + '>购买</button>' +
             '</div>';
     }
@@ -155,19 +155,18 @@ Gp._showAbyssShop = function() {
 
     this.battlefield.appendChild(panel);
 
-    /* 绑定按钮 */
+    /* R165-P0: displayCost now stored as closure variable — recompute in button handler */
     panel.querySelectorAll('.abyss-shop-btn').forEach(function(btn, idx) {
         btn.addEventListener('click', function() {
             var item = items[idx];
-            /* R159-P0: 使用调整后价格而非原始cost */
-            var cost = item._displayCost || item.cost;
-            if (self._abyssCoins < cost) return;
-            self._abyssCoins -= cost;
+            var displayCost = Math.floor(item.cost * Balance.ABYSS_SHOP_PRICE_MULT);
+            if (self._abyssCoins < displayCost) return;
+            self._abyssCoins -= displayCost;
             self._buyAbyssItem(item);
             panel.querySelector('.abyss-shop-balance').textContent = '深渊币: ' + self._abyssCoins;
             /* 更新按钮状态 */
             panel.querySelectorAll('.abyss-shop-btn').forEach(function(b, i) {
-                var ic = items[i]._displayCost || items[i].cost;
+                var ic = Math.floor(items[i].cost * Balance.ABYSS_SHOP_PRICE_MULT);
                 b.disabled = self._abyssCoins < ic;
             });
         });

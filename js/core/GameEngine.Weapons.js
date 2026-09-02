@@ -11,7 +11,7 @@ Gp._checkWeaponSynergies = function() {
     this._synNovaLaser = false;
     this._synNovaShotgun = false;
     this._synNovaOrbit = false;
-    this._synNovaLaserActive = false; /* R137-P0: 防止Nova+Laser协同标志跨局残留导致开局双倍伤害 */
+    /* R167-P1: _synNovaLaserActive 已由 _updateWeapons 每帧重置，此处的赋值是死代码（始终被覆盖），移除以保持清晰 */
 
     /* 收集已装备武器ID */
     var ids = {};
@@ -30,8 +30,6 @@ Gp._checkWeaponSynergies = function() {
             }
             if (hasAll && sym.apply) {
                 sym.apply(this);
-                /* R138-P1: 同步设置Nova+Laser运行态标志，消除帧内武器顺序竞态 */
-                if (sym.id === 'nova_laser') this._synNovaLaserActive = true;
             }
         }
     }

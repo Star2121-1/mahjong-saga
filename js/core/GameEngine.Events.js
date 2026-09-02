@@ -56,17 +56,19 @@ Gp._triggerInterWaveEvent = function() {
     /* P3-NEW: 波次间事件自动超时（15秒后自动接受） */
     if (this._interWaveTimeout) clearTimeout(this._interWaveTimeout);
     this._interWaveTimeout = setTimeout(function() {
-        /* P2: 死亡/暂停时防止超时触发事件 */
-        if (self._interWaveEvent && !self.gameOver && !self._paused) {
-            /* R159-P0: 清除overlay active状态，防止超时路径残留覆盖游戏界面 */
-            var overlay = document.getElementById('reward-overlay');
-            if (overlay) { overlay.classList.remove('active'); overlay.classList.remove('levelup-mode'); }
-            /* R51-P1: 先清除事件引用再应用，防止超时路径与点击路径状态交叉 */
+        /* R165-P1: Guard against game state changes during 15s timeout — prevent stale callback on game over/pause */
+        if (!self._interWaveEvent || self.gameOver || self._paused) {
             self._interWaveEvent = null;
-            self._spawnCausalityText('⏱ 恩赐已自动接受');
-            evt.apply.call(self);
-            self._continueAfterInterWave();
+            return;
         }
+        /* R159-P0: 清除overlay active状态，防止超时路径残留覆盖游戏界面 */
+        var overlay = document.getElementById('reward-overlay');
+        if (overlay) { overlay.classList.remove('active'); overlay.classList.remove('levelup-mode'); }
+        /* R51-P1: 先清除事件引用再应用，防止超时路径与点击路径状态交叉 */
+        self._interWaveEvent = null;
+        self._spawnCausalityText('⏱ 恩赐已自动接受');
+        evt.apply.call(self);
+        self._continueAfterInterWave();
     }, 15000);
     document.getElementById('interevent-accept').addEventListener('click', function() {
         /* R153-P1: 超时与点击竞态保护 — 超时已处理则跳过 */

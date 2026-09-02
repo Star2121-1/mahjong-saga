@@ -52,7 +52,8 @@ Fp.spawnText = function(x, y, text, typeOrColor) {
     node._fctActive = true;
     node.style.display = '';
     /* 移除旧的 animationend listener 避免重复绑定 */
-    node.removeEventListener('animationend', node._fctOnEnd);
+    /* R165-P0: 防御性null检查 — _fctOnEnd可能未初始化（首次borrow前） */
+    if (node._fctOnEnd) node.removeEventListener('animationend', node._fctOnEnd);
     /* 注：无需 offsetWidth reflow — CSS animation-fill-mode:forwards 保证动画从初始状态重新开始 */
     /* 注意：不清空 node.style.animation，否则会覆盖 CSS 类的 animation 属性 */
     /* 绑定清理回调 — 保存到节点上以便后续 remove */
@@ -80,15 +81,27 @@ Fp._borrowNode = function() {
     /* 池已满但未找到空闲节点，尝试健康检查回收 */
     if (++this._returnCount % Balance.FCT_HEALTHCHECK_MODULO === 0) this._healthCheck();
     /* 动态扩容：最多到 FCT_POOL_MAX_GROWTH */
+    /* R165-P0: 池耗尽时创建临时DOM节点，防止飘字完全消失 */
     if (this._pool.length < window.Balance.FCT_POOL_MAX_GROWTH) {
         var el = document.createElement('div');
         el.className = 'fct-node';
         el.style.display = 'none';
-        this._layer.appendChild(el);
+        if (this._layer && this._layer.parentNode) {
+            this._layer.appendChild(el);
+        }
         this._pool.push(el);
         return el;
     }
-    return null;
+    /* R165-P0: 池已满(≥MAX_GROWTH)，创建不受池管理的临时节点保底 */
+    var el = document.createElement('div');
+    el.className = 'fct-node';
+    el.style.display = '';
+    el.style.left = '0px'; el.style.top = '0px';
+    if (this._layer && this._layer.parentNode) {
+        this._layer.appendChild(el);
+    }
+    this._pool.push(el);
+    return el;
 };
 
 Fp._returnNode = function(node) {

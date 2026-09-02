@@ -11,6 +11,19 @@ window.AudioManager = function() {
         sfx: 1.0,    /* 攻击/暴击/受击等效果音 */
         music: 0.8   /* 胜利/失败/升级等氛围音 */
     };
+    this._activeOscillators = []; /* R165-P1: 跟踪活跃振荡器，防止tryReinit时内存泄漏 */
+    /* R165-P0: restore persisted category volumes from meta — write path exists but read was missing */
+    try {
+        var _amMeta = window.saveManager && window.saveManager._metaCache;
+        if (_amMeta) {
+            if (_amMeta.audioCategoryVolumes) {
+                if (_amMeta.audioCategoryVolumes.sfx != null) this._categoryVolumes.sfx = _amMeta.audioCategoryVolumes.sfx;
+                if (_amMeta.audioCategoryVolumes.music != null) this._categoryVolumes.music = _amMeta.audioCategoryVolumes.music;
+            }
+            if (_amMeta.audioVolume != null) this._volume = _amMeta.audioVolume;
+            if (_amMeta.audioMuted != null) this._muted = _amMeta.audioMuted;
+        }
+    } catch(e) {}
 };
 
 var Ap = window.AudioManager.prototype;
@@ -55,10 +68,20 @@ Ap._ensureContext = function() {
  */
 Ap.tryReinit = function() {
     /* R54-P1: 检查ctx状态而非仅initialized标志，防止浏览器回收后永久失效 */
-    if (!this._ctx || this._ctx.state === 'closed' || this._ctx.state === 'suspended') {
-        this._initialized = false;
-        this._ensureContext();
+    if (this._ctx && (this._ctx.state === 'closed' || this._ctx.state === 'suspended')) {
+        /* R165-P1: 显式断开所有active振荡器，防止Safari GC延迟导致内存累积 */
+        if (this._activeOscillators) {
+            for (var _ao = this._activeOscillators.length - 1; _ao >= 0; _ao--) {
+                var _osc = this._activeOscillators[_ao];
+                try { _osc.stop(); _osc.disconnect(); } catch(e) {}
+            }
+            this._activeOscillators = [];
+        }
+        try { this._ctx.close(); } catch(e) {} /* R165-P1: 显式释放已关闭的context */
+        this._ctx = null;
     }
+    this._initialized = false;
+    this._ensureContext();
 };
 
 /* 统一播放入口 */
@@ -71,7 +94,7 @@ Ap.play = function(sound, opts) {
     }
     if (this._muted) return;
     /* R125-P1: 防止页面后台暂停期间积压的音频在恢复时洪泛 */
-    if (this._ctx && this._ctx.state === 'suspended') return;
+    if (this._ctx && (this._ctx.state === 'suspended' || this._ctx.state === 'closed')) return;
     opts = opts || {};
     /* P1: 应用分类音量 */
     var catKey = (sound === 'victory' || sound === 'gameover' || sound === 'levelup' || sound === 'overdrive') ? 'music' : 'sfx';
@@ -128,7 +151,12 @@ Ap._osc = function(type, freq, startTime, duration, vol, rampEndFreq) {
         o.start(startTime);
         o.stop(startTime + duration + 0.01);
         /* R155-P0: 播放结束后断开节点，防止Safari GC延迟导致内存累积 */
-        o.onended = function() { try { o.disconnect(); g.disconnect(); } catch(e) {} };
+        o.onended = function() {
+            var idx = self._activeOscillators.indexOf(o);
+            if (idx !== -1) self._activeOscillators.splice(idx, 1);
+            try { o.disconnect(); g.disconnect(); } catch(e) {}
+        };
+        self._activeOscillators.push(o);
     } catch(e) { console.warn('[AudioManager] _osc error:', e); }
 };
 
@@ -160,7 +188,12 @@ Ap._noise = function(dur, vol) {
         src.start(t);
         src.stop(t + dur + 0.01);
         /* R157-P0: 播放结束后断开节点，防止Safari GC延迟导致内存累积 */
-        src.onended = function() { try { src.disconnect(); filt.disconnect(); g.disconnect(); } catch(e) {} };
+        src.onended = function() {
+            var idx = self._activeOscillators.indexOf(src);
+            if (idx !== -1) self._activeOscillators.splice(idx, 1);
+            try { src.disconnect(); filt.disconnect(); g.disconnect(); } catch(e) {}
+        };
+        self._activeOscillators.push(src);
     } catch(e) { console.warn('[AudioManager] _noise error:', e); }
 };
 Ap._sweep = function(from, to, dur, vol) {
@@ -178,7 +211,12 @@ Ap._sweep = function(from, to, dur, vol) {
         o.start(t);
         o.stop(t + dur + 0.01);
         /* R155-P0: 播放结束后断开节点 */
-        o.onended = function() { try { o.disconnect(); g.disconnect(); } catch(e) {} };
+        o.onended = function() {
+            var idx = self._activeOscillators.indexOf(o);
+            if (idx !== -1) self._activeOscillators.splice(idx, 1);
+            try { o.disconnect(); g.disconnect(); } catch(e) {}
+        };
+        self._activeOscillators.push(o);
     } catch(e) { console.warn('[AudioManager] _sweep error:', e); }
 };
 Ap._chord = function(freqs, dur, vol) {
@@ -187,11 +225,12 @@ Ap._chord = function(freqs, dur, vol) {
 };
 Ap._wall = function(vol) {
     var t = this._ctx.currentTime;
-    /* 三层锯齿叠加制造密集感 */
-    this._saw(80, 0.3, vol * 0.3);
-    this._saw(120, 0.25, vol * 0.25);
-    this._saw(200, 0.2, vol * 0.2);
-    this._noise(0.3, vol * 0.3);
+    /* 三层锯齿叠加制造密集感 — R165-P0: 加入90%头部空间防止4层叠加超Unity增益导致削波失真 */
+    var v = vol * 0.9;
+    this._saw(80, 0.3, v * 0.28);
+    this._saw(120, 0.25, v * 0.24);
+    this._saw(200, 0.2, v * 0.2);
+    this._noise(0.3, v * 0.28);
 };
 
 Ap.setMuted = function(muted) {
@@ -206,7 +245,7 @@ Ap.setMuted = function(muted) {
 };
 
 Ap.setVolume = function(v) {
-    this._volume = Math.max(0, Math.min(1, v));
+    this._volume = Math.max(0.02, Math.min(1, v)); /* R165-P1: 2%下限防止误触静音 */
     /* P1: 持久化音量到 meta，刷新后恢复 */
     try {
         var m = window.saveManager && window.saveManager._metaCache;

@@ -25,6 +25,7 @@ var Cs = window.CombatSystem;
 /* 唯一存活的 Cs 函数，被 GameSystems.js:63 直接调用（不经过 this._combat） */
 
 Cs.spawnCausalityText = function(engine, text) {
+    if (!engine || !engine.battlefield) return;
     var el = document.createElement('div');
     el.textContent = text;
     el.style.cssText = 'position:absolute;top:20%;left:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:900;color:#ffd700;text-shadow:0 0 20px rgba(255,215,0,0.8),0 0 40px rgba(255,215,0,0.4);z-index:200;pointer-events:none;white-space:nowrap;animation:floatUp 0.6s ease-out forwards;';
