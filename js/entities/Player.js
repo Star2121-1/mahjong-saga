@@ -501,7 +501,7 @@ class Player {
             critDamageBonus: this.critDamageBonus || 0,
             _hasRevive: !!this._hasRevive,
             _discoveredSecrets: this._discoveredSecrets ? [...this._discoveredSecrets] : [],
-            _tempBuffTimeLeft: this._tempBuffTimeLeft || 0,
+            _tempBuffTimeLeft: this._tempBuffTimeLeft ?? 0,
             /* R64-P0: 序列化临时增益字段，防止断点恢复后丢失 */
             _tempAtkBoost: this._tempAtkBoost || 0,
             _tempHpBonus: this._tempHpBonus || 0,
@@ -552,8 +552,8 @@ class Player {
             if (cfg.weaponSlots != null) this.maxWeaponSlots = cfg.weaponSlots;
             if (cfg.cdFloor != null) this.cdFloor = cfg.cdFloor;
         }
-        this.maxWeaponSlots = data.maxWeaponSlots || this.maxWeaponSlots;
-        this.cdFloor = data.cdFloor || this.cdFloor;
+        this.maxWeaponSlots = data.maxWeaponSlots !== undefined ? data.maxWeaponSlots : this.maxWeaponSlots;
+        this.cdFloor = data.cdFloor !== undefined ? data.cdFloor : this.cdFloor;
         this.xpGainFactor = data.xpGainFactor || 1.0;
         this.iceDurationBonus = data.iceDurationBonus || 0;
         this.magnetRadius = data.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT;
@@ -562,11 +562,10 @@ class Player {
         this.maxRage = data.maxRage || Balance.PLAYER_MAX_RAGE;
         this.damageReduction = data.damageReduction || 0;
         this._reviveCount = data._reviveCount || 0;
-        this._baseMaxHp = data._baseMaxHp || this.maxHp;
+        this._baseMaxHp = data._baseMaxHp !== undefined ? data._baseMaxHp : this.maxHp;
         this._relicAffixes = data._relicAffixes ? { ...data._relicAffixes } : {};
         this._startsWithRelic = !!data._startsWithRelic;
-        this._hasRevive = this._reviveCount > 0;
-        /* R51-P0: 恢复缺失的持久化字段 */
+        this._hasRevive = this._reviveCount > 0; /* R159-P1: restore后由_reviveCount直接计算，与578行逻辑合并 */
         this.critDamageBonus = data.critDamageBonus || 0;
         this._discoveredSecrets = data._discoveredSecrets ? [...data._discoveredSecrets] : [];
         this._tempBuffTimeLeft = data._tempBuffTimeLeft ?? undefined; /* R140-P1: 使用??替代||防止旧存档无此字段时被置为0而非undefined */
@@ -574,8 +573,6 @@ class Player {
         this._tempAtkBoost = data._tempAtkBoost || 0;
         this._tempHpBonus = data._tempHpBonus || 0;
         this._doubleCoinNextWave = !!data._doubleCoinNextWave;
-        /* _hasRevive 由 meta perks 在 _reapplyMetaBonuses 中重新设置，此处仅初始化快照值 */
-        if (!data._hasRevive && this._reviveCount <= 0) this._hasRevive = false;
         this.setResonanceSpeed = !!data.setResonanceSpeed;
         this.setResonanceIce = !!data.setResonanceIce;
         this.mapAffinityLevel = data.mapAffinityLevel || 0;
