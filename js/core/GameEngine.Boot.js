@@ -323,14 +323,17 @@ Gp._initVisibilityPause = function() {
         if (document.hidden) {
             if (self.running && !self.gameOver) self.running = false;
         } else if (!self._paused && !self.gameOver) {
-            self._beginLoop();
+            /* R164-P1: 防止面板未关闭时误恢复循环 */
+            if (!self._pendingReward && !self._announcingWave && !self._levelUpPending) {
+                self._beginLoop();
+            }
         }
     });
 };
 
 Gp._initBeforeUnload = function() {
     var self = this;
-    window.addEventListener('beforeunload', function(e) {
+    var handler = function(e) {
         /* R132-P1: 不仅在running时保存，gameOver后也有进度需保存（避免通关/死亡后立即关闭丢失） */
         if (self.running || (self.gameOver && (self._elapsed || 0) > 0)) {
             var snap = window.saveManager.snapshotForRun(self);
@@ -339,7 +342,13 @@ Gp._initBeforeUnload = function() {
             e.preventDefault();
             e.returnValue = '';
         }
-    });
+    };
+    /* R164-P1: 先移除旧handler防止restart累积，存储引用以便restart()清理 */
+    if (this._beforeUnloadHandler) {
+        window.removeEventListener('beforeunload', this._beforeUnloadHandler);
+    }
+    this._beforeUnloadHandler = handler;
+    window.addEventListener('beforeunload', handler);
 };
 
 /* R130-P0: 窗口缩放时失效视口缓存，防止相机追踪错位 */
@@ -787,6 +796,14 @@ Gp._initKeyboard = function() {
     document.addEventListener('keydown', self._onKeyDown);
     document.addEventListener('keyup', self._onKeyUp);
     document.addEventListener('keydown', self._onKeyDownNav);
+};
+
+Gp._removeBeforeUnload = function() {
+    /* R164-P1: 清理beforeunload监听器，防止restart后旧handler累积 */
+    if (this._beforeUnloadHandler) {
+        window.removeEventListener('beforeunload', this._beforeUnloadHandler);
+        this._beforeUnloadHandler = null;
+    }
 };
 
 Gp._initJoystick = function() {
