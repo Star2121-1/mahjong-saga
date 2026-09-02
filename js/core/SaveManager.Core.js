@@ -307,14 +307,16 @@
         });
     };
 
-    SaveManager.prototype._saveMetaToStorage = async function() {
+    SaveManager.prototype._saveMetaToStorage = async function(metaOverride) {
         try {
-            /* R30-H-001: 统一走 _writeJSON 避免与 saveMeta 竞态 */
-            var ok = this._writeJSON('meta.json', this._metaCache);
+            /* R152-P0: 传入meta快照，禁止并发竞态读写共享_metaCache */
+            var payload = metaOverride !== undefined ? metaOverride : this._metaCache;
+            if (!payload) return false;
+            var ok = this._writeJSON('meta.json', payload);
             if (!ok) {
                 console.warn('SaveManager _saveMetaToStorage via _writeJSON failed');
             }
-            return ok; /* P1: 返回结果以便caller可await检测失败 */
+            return ok;
         } catch (e) {
             console.warn('SaveManager _saveMetaToStorage error:', e);
             return false;

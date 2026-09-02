@@ -991,7 +991,7 @@ window.Enemy = class Enemy {
             if (_pg) {
                 /* 暴击：onClick传'crit'override，此处跳过已处理的情况 */
                 if (!_fctTypeOverride && _pg.critRate > 0) {
-                    var _wc = Math.random() < (_pg.critRate + (_eng._tempCritBonus || 0));
+                    var _wc = Math.random() < Math.min(1, _pg.critRate + (_eng._tempCritBonus || 0));
                     if (_wc) {
                         actualDmg = Math.floor(actualDmg * (Balance.CRIT_BASE_MULT + (_pg.critDamageBonus || 0)));
                         /* R32-D-001: 不重复扣血 — hp已在line 938扣减，此处仅重算实际伤害值 */

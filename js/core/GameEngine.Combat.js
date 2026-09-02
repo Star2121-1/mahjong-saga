@@ -733,7 +733,7 @@ Gp._gameOver = async function() {
             bestAbyssDepth: this.loopCount || 0,
             totalKills: this.kills, /* R85-P0: 传入当前局击杀数，而非累计值 */
             totalGold: this._maxGoldThisRun || 0, /* R85-P0: 传入当前局最高金币 */
-            perfectRuns: (!this.gameOver && (this._playerHitCountThisRun || 0) === 0) ? 1 : 0 /* R85-P0: 无伤通关标记 */
+            perfectRuns: (this._won && (this._playerHitCountThisRun || 0) === 0) ? 1 : 0 /* R85-P0: 无伤通关标记 */
         };
         if (typeof window.saveManager.updateLeaderboard === 'function') {
             window.saveManager.updateLeaderboard(lbStats);

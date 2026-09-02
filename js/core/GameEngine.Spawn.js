@@ -72,6 +72,12 @@ Gp._spawnEliteEnemy = function() {
     if (this._tempEnemySpeedDebuff > 0) {
         enemy.speed *= this._tempEnemySpeedDebuff;
     }
+    /* R152-F2: 波次间事件debuff在首次敌人生成时消费并清零，
+       确保冥想(攻击-20%)/时光缓流(移速-30%)正确应用到下一波 */
+    if (this._tempEnemyAtkDebuff > 0 || this._tempEnemySpeedDebuff > 0) {
+        this._tempEnemyAtkDebuff = 0;
+        this._tempEnemySpeedDebuff = 0;
+    }
 
     this.enemies.push(enemy);
     /* P1: 直接调用GameEngine原型方法，而非通过 Systems（不存在此方法） */

@@ -379,6 +379,8 @@ Gp._removeViewportResize = function() {
 };
 
 Gp._startNewRun = function(heroId, levelId) {
+    /* R152-P0: 重启时重新注册resize监听器，防止viewport缓存失效后相机漂移 */
+    this._initViewportResize();
     /* P0-1: 局序号递增 — 使旧局未完成结算的 await 守卫失效 */
     this._runSeq = (this._runSeq || 0) + 1;
     /* P1-4: 跨局状态重置（雀魂手牌/面子/打牌态/金光环） */
@@ -762,7 +764,7 @@ Gp._initKeyboard = function() {
         }
         if (!self.running || self.gameOver) return;
         if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyW','KeyA','KeyS','KeyD'].includes(e.code)) e.preventDefault();
-        if (e.code === 'Space' && self.player && self.player.rage >= self.player.maxRage && !self._overdriveActive && !self._paused && !self._announcingWave && !self._discardMode && !self._huLock) {
+        if (e.code === 'Space' && self.player && self.player.rage >= self.player.maxRage && !self._overdriveActive && !self._paused && !self._announcingWave && !self._discardMode && !self._huLock && !self._pendingReward && !self._levelUpPending && !self._gambleActive && !self._activeMutator) {
             self._pressedKeys[e.code] = false;
             self._triggerOverdrive();
             return;

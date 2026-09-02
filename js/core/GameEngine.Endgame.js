@@ -255,6 +255,9 @@ Gp.restart = function() {
     var _asp = document.getElementById('abyss-shop-panel');
     if (_asp) _asp.remove();
     this._abyssShopVisible = false;
+    /* R152-P0: 清理Overdrive全屏白闪DOM，防止重启后残留节点 */
+    var _odf = document.getElementById('overdrive-flash');
+    if (_odf && _odf.parentNode) _odf.remove();
     /* R118-P0: 清理FxManager对象池，防止飘字节点跨局泄漏 */
     if (window.fxManager) window.fxManager.cleanup();
     var bc = document.getElementById('active-buffs-container');

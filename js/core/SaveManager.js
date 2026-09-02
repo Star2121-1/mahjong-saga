@@ -145,11 +145,12 @@ class SaveManager {
 
     /* ── 元货币 ── */
 
-    addMetaTokens(amount) {
+    /* R152-P0: 改为async，传入meta快照防竞态 */
+    async addMetaTokens(amount) {
         var meta = this._metaCache || {};
         meta.metaTokens = (meta.metaTokens || 0) + amount;
         this._metaCache = meta;
-        this._saveMetaToStorage();
+        return this._saveMetaToStorage(meta);
     }
 
     calcMetaTokens(kills, elapsed) { return Math.floor(kills * 0.1 + elapsed * 0.05); }
@@ -187,7 +188,8 @@ class SaveManager {
 
     /* ── 装备管理 ── */
 
-    equipItem(instanceId) {
+    /* R152-P0: 改为async，传入meta快照防竞态 */
+    async equipItem(instanceId) {
         if (!this._metaCache) return { ok: false, reason: '存档未初始化' };
         var eqs = this._metaCache.equipments || [];
         var item = null;
@@ -198,16 +200,15 @@ class SaveManager {
         var equipped = this._metaCache.equipped = this._metaCache.equipped || { weapon: null, armor: null, talisman: null };
         /* R65-P0: 只更新装备槽引用，不删除背包条目 */
         equipped[slot] = instanceId;
-        this._saveMetaToStorage().catch(function(e) { console.warn('[SaveManager] equipItem save failed:', e); });
-        return { ok: true };
+        return this._saveMetaToStorage(this._metaCache);
     }
 
-    unequipSlot(slot) {
+    /* R152-P0: 改为async，传入meta快照防竞态 */
+    async unequipSlot(slot) {
         if (!this._metaCache) return { ok: false, reason: '存档未初始化' };
         var equipped = this._metaCache.equipped = this._metaCache.equipped || { weapon: null, armor: null, talisman: null };
         equipped[slot] = null;
-        this._saveMetaToStorage().catch(function(e) { console.warn('[SaveManager] unequipSlot save failed:', e); });
-        return { ok: true };
+        return this._saveMetaToStorage(this._metaCache);
     }
 
     async rerollAffix(instanceId, affixIndex, cost) {

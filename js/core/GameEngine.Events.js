@@ -56,8 +56,8 @@ Gp._triggerInterWaveEvent = function() {
     /* P3-NEW: 波次间事件自动超时（15秒后自动接受） */
     if (this._interWaveTimeout) clearTimeout(this._interWaveTimeout);
     this._interWaveTimeout = setTimeout(function() {
-        /* P2: 死亡时防止超时触发事件 */
-        if (self._interWaveEvent && !self.gameOver && self.running) {
+        /* P2: 死亡/暂停时防止超时触发事件 */
+        if (self._interWaveEvent && !self.gameOver && !self._paused) {
             /* R51-P1: 先清除事件引用再应用，防止超时路径与点击路径状态交叉 */
             self._interWaveEvent = null;
             self._spawnCausalityText('⏱ 恩赐已自动接受');
@@ -97,6 +97,9 @@ Gp._continueAfterInterWave = function() {
     this._tempBerserkBonus = false;
     this._tempGoldMult = 1;
     this._tempCritBonus = 0;
+    /* R152-F2: 波次间事件临时增益在 _continueAfterInterWave 中不清除，
+       等待 Spawn.js 下一波生成时由 applySpawnModifiers 消费后清零，
+       确保冥想/时光缓流等 debuff 能正确应用到下一波敌人 */
     /* P2: 不清除仍在生效的护盾 — 只清除已过期的 */
     if (this._tempShieldEnd > 0 && this._elapsed >= this._tempShieldEnd) {
         this._tempShield = 0;
