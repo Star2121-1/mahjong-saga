@@ -780,6 +780,9 @@ Gp._initKeyboard = function() {
     };
     /* Epoch 43: 键盘导航 */
     self._onKeyDownNav = function(e) { self._handleKeyNav(e); };
+    /* R160-P0: Tab/Enter/Space 需在所有游戏状态守卫下运行，防止overlay/pause/overdrive期间误触发 */
+    var _navBlocked = function() { return !self.running || self.gameOver || self._paused || self._pendingReward || self._levelUpPending || self._gambleActive || self._activeMutator || self._announcingWave || self._discardMode || self._huLock; };
+    self._onKeyDownNav = function(e) { if (_navBlocked()) return; self._handleKeyNav(e); };
     document.addEventListener('keydown', self._onKeyDown);
     document.addEventListener('keyup', self._onKeyUp);
     document.addEventListener('keydown', self._onKeyDownNav);

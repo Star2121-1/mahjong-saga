@@ -27,6 +27,8 @@ window.Weapon = class {
     upgrade() {
         this.level++;
         this.atkFactor = Math.min(10.0, this.atkFactor + Balance.WEAPON_UPGRADE_ATK_INC);
+        /* R159-P0: overdrive期间升级武器时同步更新_odOrigAtk，防止overdrive结束后升级丢失 */
+        if (this._odOrigAtk !== undefined) this._odOrigAtk = Math.min(10.0, this._odOrigAtk + Balance.WEAPON_UPGRADE_ATK_INC);
         var playerCdFloor = (window.gameEngine && window.gameEngine.player) ? window.gameEngine.player.cdFloor : null;
         var floor = (playerCdFloor != null) ? playerCdFloor : Balance.DEFAULT_CD_FLOOR;
         this.cd = Math.max(floor, this.cd * Balance.WEAPON_UPGRADE_CD_MULT);
@@ -34,8 +36,14 @@ window.Weapon = class {
         this._origBaseCd = Math.max(floor, (this._origBaseCd || this._baseCd) * Balance.WEAPON_UPGRADE_CD_MULT); /* R52: _origBaseCd与_baseCd同步升级（保持原始基线用于Render.js计算） */
     }
     reset() { /* P0: 清除overdrive残留状态，防止跨局伤害累积 */
+        /* R159-P0: 优先恢复_odOrigAtk（overdrive期间升级的武器），再清除标志 */
+        if (this._odOrigAtk !== undefined) {
+            this.atkFactor = this._odOrigAtk;
+            this._odOrigAtk = undefined;
+        } else {
+            this.atkFactor = this._baseAtkFactor || 1.0;
+        }
         this._odOrigAtk = undefined;
-        this.atkFactor = this._baseAtkFactor || 1.0; /* 从初始值恢复，而非从构造参数计算 */
         this._justFired = false;
         this.cooldownTimer = 0; /* R57-P1: 重置冷却计时器，防止跨局残留进度 */
         this._origBaseCd = this._rawBaseCd || this.cd; /* R131-P0: 重置原始基线CD — 使用构造时原始值，而非可能被筒顺修改过的_baseCd */
@@ -424,7 +432,8 @@ window.NovaPulse = class extends window.Weapon {
         var atkMult = 1 + (player._tempAtkBoost || 0);
         var dmg = Math.floor(player.atk * this.atkFactor * atkMult);
         /* R125-P1: 协同标志必须在伤害循环前设置，确保同帧其他武器能读取 */
-        if (engine && engine._synNovaLaser) {
+        /* R159-P1: 仅在脉冲激活时设置标志，防止LaserBeam永久双倍伤害 */
+        if (engine && engine._synNovaLaser && this.activePulses.length > 0) {
             engine._synNovaLaserActive = true;
         }
         for (var i = this.activePulses.length - 1; i >= 0; i--) {
