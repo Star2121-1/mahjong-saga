@@ -154,7 +154,7 @@ window.Enemy = class Enemy {
 
         if (this.isBoss && this.type !== 'Boss_Lord') {
             this.radius = 45;
-            this.maxHp = Math.floor(this.maxHp * 6);
+            this.maxHp = Math.floor(this.maxHp * Balance.BOSS_NONLORD_HP_MULT);
             this.hp = this.maxHp;
             this.atk = Math.floor(this.atk * Balance.BOSS_NONLORD_ATK_MULT); /* R57-P0: 使用独立常量替代BOMBER_ATK_MULT */
             this.speed *= Balance.BOSS_NONLORD_SPEED_MULT;
@@ -931,7 +931,9 @@ window.Enemy = class Enemy {
         var isAssassinCrit = false;
         if (this.frozen) {
             actualDmg = Math.floor(actualDmg * Balance.FROZEN_DAMAGE_MULT);
-            if (!this._freezeHitDecayed) {
+            /* R159-P0: 仅玩家攻击来源衰减冰冻计时器，反伤/环境伤害不消耗冰冻时长 */
+            var _frozenByPlayer = source === 'player' || (source && typeof source.x === 'number');
+            if (_frozenByPlayer && !this._freezeHitDecayed) {
                 this.frozenTimer -= Balance.FROZEN_HIT_DECAY;
                 this._freezeHitDecayed = true;
             }

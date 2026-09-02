@@ -196,6 +196,7 @@ window.Balance = {
     SPLITTER_CHILD_ATK_MULT: 0.5,    // 分身怪子体ATK倍率 (Enemy.js)
     BOSS_NONLORD_SPEED_MULT: 0.7,    // 非龙王Boss速度倍率 (Enemy.js)
     BOSS_NONLORD_ATK_MULT: 3,        // 非龙王Boss攻击倍率 (Enemy.js) — 替代BOMBER_ATK_MULT
+    BOSS_NONLORD_HP_MULT: 6,          // R159-P1: 非龙王Boss HP倍率（原硬编码6）
     STALKER_CHARGE_DURATION: 1.5,    // 猎杀者蓄力时长 (Enemy.js)
     STALKER_CHARGE_OPACITY: 0.4,     // 猎杀者蓄力透明度 (Enemy.js)
     ENEMY_DEAD_OPACITY: 0,           // 敌人死亡透明度 (Enemy.js)
