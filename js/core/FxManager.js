@@ -78,7 +78,7 @@ Fp._borrowNode = function() {
         return this._freeStack.pop();
     }
     /* 池已满但未找到空闲节点，尝试健康检查回收 */
-    if (++this._returnCount % 20 === 0) this._healthCheck();
+    if (++this._returnCount % Balance.FCT_HEALTHCHECK_MODULO === 0) this._healthCheck();
     /* 动态扩容：最多到 FCT_POOL_MAX_GROWTH */
     if (this._pool.length < window.Balance.FCT_POOL_MAX_GROWTH) {
         var el = document.createElement('div');
@@ -103,7 +103,7 @@ Fp._returnNode = function(node) {
     if (!this._freeStack) this._freeStack = [];
     this._freeStack.push(node);
     /* 健康检查：每 50 次归还扫描一次，强制回收超过 5s 未归还的节点 */
-    if (++this._returnCount % window.Balance.FCT_HEALTHCHECK_MODULO === 0) this._healthCheck();
+    if (++this._returnCount % Balance.FCT_HEALTHCHECK_MODULO === 0) this._healthCheck();
 };
 
 /* R70-P1: 缩短健康检查阈值，减少僵死节点占用池容量的时间 */
