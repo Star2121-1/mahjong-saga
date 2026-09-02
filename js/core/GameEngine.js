@@ -4,8 +4,8 @@
    Epoch 5: 模块委托代理
    ══════════════════════════════════════════════ */
 if (window.SpawnSystem) window.SpawnSystem.init = window.SpawnSystem.init || function(engine) { this.engine = engine; };
-if (window.CombatSystem) {}
-if (window.Systems) {}
+if (window.CombatSystem) window.CombatSystem.init = window.CombatSystem.init || function(engine) { this.engine = engine; };
+if (window.Systems) window.Systems.init = window.Systems.init || function(engine) { this.engine = engine; };
 
 window.GameEngine = function() {
     this._currentLevelId = 'level_1';
