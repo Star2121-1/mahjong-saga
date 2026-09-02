@@ -301,7 +301,7 @@ window.Enemy = class Enemy {
                 spd = this._totemBuffed ? spd * Balance.TOTEM_BUFF_SPEED_MULT : spd;
                 this.x += (dx / dist) * spd * dt;
                 this.y += (dy / dist) * spd * dt;
-            this._clampPosition(engine);
+                this._clampPosition(engine);
             }
             return;
         }
@@ -648,12 +648,20 @@ window.Enemy = class Enemy {
                     this._bossWarningActive = false;
                 }
             }
+            if (this._bossPhase === 3) {
+                if (window.audioManager) window.audioManager.play('boss');
+            }
             if (this._bossPhase === 2) {
                 this._bossAbilityTimer = Balance.BOSS_PHASE2_ABILITY_INTERVAL;
-                this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN; /* R148-P1: 进入P2时重置接触冷却，防止P3首击无CD瞬杀 */
+                this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
                 if (this._bossWarningEl && this._bossWarningEl.parentNode) this._bossWarningEl.remove();
                 this._bossWarningEl = null;
                 this._bossWarningActive = false;
+            }
+            /* R159-P0-1: P2初始化需无条件执行，防止P1→P3跳过时_bossAbilityTimer残留P1值 */
+            if (this._bossPhase >= 2) {
+                this._bossAbilityTimer = Balance.BOSS_PHASE2_ABILITY_INTERVAL;
+                this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
             }
         }
 
