@@ -990,8 +990,7 @@ window.Enemy = class Enemy {
                 this._comboCooldown = Balance.KNIGHT_COMBO_COOLDOWN;
             }
         }
-        this.hp -= actualDmg;
-        this.flashTimer = Balance.FLASH_DURATION;
+        this.flashTimer = Balance.FLASH_DURATION; /* R160-P0: flash仅设定时器，hp扣减移至所有修改后 */
 
         /* ── Epoch 47: 玩家RPG属性应用（武器/弹道/Drone路径）──
            onClick路径已处理crit/lifesteal/freeze/explosion，通过_fctTypeOverride标记防重复。
@@ -1040,6 +1039,9 @@ window.Enemy = class Enemy {
                 }
             }
         }
+
+        /* R160-P0: 延迟扣血至所有伤害修改器（暴击/刺客/骑士连击/冰冻加成）执行完毕 */
+        if (actualDmg > 0) this.hp -= actualDmg;
 
         /* ── FCT 喷射 ── */
         if (window.fxManager && actualDmg > 0) {
