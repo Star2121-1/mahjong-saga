@@ -136,13 +136,13 @@ Gp._showAbyssShop = function() {
     for (var i = 0; i < items.length; i++) {
         var it = items[i];
         /* R159-P0: 应用深渊商店价格倍率，防止深度10+仍可廉价购买 */
-        var adjustedCost = Math.floor(it.cost * Balance.ABYSS_SHOP_PRICE_MULT);
-        var canAfford = this._abyssCoins >= adjustedCost;
+        it._displayCost = Math.floor(it.cost * Balance.ABYSS_SHOP_PRICE_MULT);
+        var canAfford = this._abyssCoins >= it._displayCost;
         cardsHtml +=
             '<div class="abyss-shop-card">' +
                 '<div class="abyss-shop-card-name">' + it.name + '</div>' +
                 '<div class="abyss-shop-card-desc">' + it.desc + '</div>' +
-                '<div class="abyss-shop-card-cost">' + adjustedCost + ' 深渊币</div>' +
+                '<div class="abyss-shop-card-cost">' + it._displayCost + ' 深渊币</div>' +
                 '<button class="abyss-shop-btn"' + (canAfford ? '' : ' disabled') + '>购买</button>' +
             '</div>';
     }
@@ -159,13 +159,16 @@ Gp._showAbyssShop = function() {
     panel.querySelectorAll('.abyss-shop-btn').forEach(function(btn, idx) {
         btn.addEventListener('click', function() {
             var item = items[idx];
-            if (self._abyssCoins < item.cost) return;
-            self._abyssCoins -= item.cost;
+            /* R159-P0: 使用调整后价格而非原始cost */
+            var cost = item._displayCost || item.cost;
+            if (self._abyssCoins < cost) return;
+            self._abyssCoins -= cost;
             self._buyAbyssItem(item);
             panel.querySelector('.abyss-shop-balance').textContent = '深渊币: ' + self._abyssCoins;
             /* 更新按钮状态 */
             panel.querySelectorAll('.abyss-shop-btn').forEach(function(b, i) {
-                b.disabled = self._abyssCoins < items[i].cost;
+                var ic = items[i]._displayCost || items[i].cost;
+                b.disabled = self._abyssCoins < ic;
             });
         });
     });
