@@ -239,7 +239,7 @@
                 var meta = window.saveManager._metaCache || {};
                 abyssVal.textContent = (meta.highestEndlessLoop || 0) + ' 轮重塑';
             }
-        });
+        }).catch(function(e) { window.toastSystem && window.toastSystem.error('初始化失败: ' + e.message); });
     }
 
     function refreshMainHub() {
@@ -743,6 +743,8 @@
             var result = await window.saveManager.unlockHero(id, cost);
             if (result.ok) {
                 this.refreshTavernMaze();
+                /* R149-P1: 解锁英雄后同步刷新门户侧边栏，防止按钮不更新 */
+                if (typeof refreshHeroCarousel === 'function') refreshHeroCarousel();
                 var meta = window.saveManager._metaCache || {};
                 var el = document.getElementById('talent-cores-count');
                 if (el) el.textContent = meta.bossCores || 0;
