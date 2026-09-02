@@ -136,6 +136,9 @@ Fp.cleanup = function() {
             n.className = 'fct-node';
             n._fctActive = false;
             n._fctOnEnd = null;
+            /* R159-P0: 清理后将节点放回空闲栈，防止下次borrow时池空返回null */
+            if (!this._freeStack) this._freeStack = [];
+            this._freeStack.push(n);
         }
     }
 };

@@ -135,12 +135,14 @@ Gp._showAbyssShop = function() {
     var cardsHtml = '';
     for (var i = 0; i < items.length; i++) {
         var it = items[i];
-        var canAfford = this._abyssCoins >= it.cost;
+        /* R159-P0: 应用深渊商店价格倍率，防止深度10+仍可廉价购买 */
+        var adjustedCost = Math.floor(it.cost * Balance.ABYSS_SHOP_PRICE_MULT);
+        var canAfford = this._abyssCoins >= adjustedCost;
         cardsHtml +=
             '<div class="abyss-shop-card">' +
                 '<div class="abyss-shop-card-name">' + it.name + '</div>' +
                 '<div class="abyss-shop-card-desc">' + it.desc + '</div>' +
-                '<div class="abyss-shop-card-cost">' + it.cost + ' 深渊币</div>' +
+                '<div class="abyss-shop-card-cost">' + adjustedCost + ' 深渊币</div>' +
                 '<button class="abyss-shop-btn"' + (canAfford ? '' : ' disabled') + '>购买</button>' +
             '</div>';
     }

@@ -456,6 +456,8 @@ Gp._startNewRun = function(heroId, levelId) {
     this._ignoreGemCollection = false;
     this._mutatorTriggered = false;
     this._activeMutator = null;
+    this._witherTimer = 0; /* R159-P0: 重置突变计时器，防止跨局残留 */
+    this._clearMutatorEffects(); /* R159-P0: 清除突变效果，防止跨局状态污染 */
     this._tempEnemyAtkDebuff = 0;
     this._tempEnemySpeedDebuff = 0;
     this._tempBerserkBonus = false;

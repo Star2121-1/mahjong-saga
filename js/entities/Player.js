@@ -189,7 +189,7 @@ class Player {
         /* L-008: 脆弱 — 突变+30% / 深渊+50% */
         if (this._frailtyDebuff) {
             /* R154-P0: _frailtyStored 由mutator设(true)，abyss不设；abyss用 _abyssFrailtyOrigAtk 标志 */
-            var _frailtyMult = (this._frailtyStored || (window.gameEngine && window.gameEngine._frailtyOrigPlayerAtk !== undefined))
+            var _frailtyMult = (this._frailtyStored || (this._abyssFrailtyOrigAtk !== undefined))
                 ? Balance.MUTATOR_FRAILTY_DAMAGE_TAKEN_MULT : Balance.ABYSS_FRAILTY_DMG_MULT;
             dmg = Math.floor(dmg * _frailtyMult);
         }

@@ -31,8 +31,11 @@ Ap._ensureContext = function() {
         if (!this._visibilityListenerAdded) {
             this._visibilityListenerAdded = true;
             document.addEventListener('visibilitychange', function() {
-                if (!document.hidden && self._ctx && self._ctx.state === 'suspended') {
-                    self._ctx.resume().catch(function(e) { console.warn('[Audio] visibility resume failed:', e); });
+                if (!document.hidden && self._ctx) {
+                    /* R159-P0: 恢复对'closed'状态的处理，extended tab switch后AudioContext可能变为closed */
+                    if (self._ctx.state === 'suspended' || self._ctx.state === 'closed') {
+                        self.tryReinit();
+                    }
                 }
             });
         }
