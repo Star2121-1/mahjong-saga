@@ -634,7 +634,10 @@ Gp._triggerKnightDodgeSlam = function() {
     slamEl.style.height = (radius * 2) + 'px';
     this._worldLayer.appendChild(slamEl);
     var self = this;
-    setTimeout(function() { if (slamEl.parentNode) slamEl.remove(); }, 500);
+    /* R147-P1: 使用animationend替代setTimeout，防止game-clock-frozen时DOM提前清除 */
+    slamEl.addEventListener('animationend', function() { if (slamEl.parentNode) slamEl.remove(); });
+    /* Fallback: 极端情况下animationend未触发则5s后强制移除 */
+    setTimeout(function() { if (slamEl.parentNode) slamEl.remove(); }, 5000);
     /* 伤害范围内敌人 */
     for (var i = 0; i < this.enemies.length; i++) {
         var e = this.enemies[i];
