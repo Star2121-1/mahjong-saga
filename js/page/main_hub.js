@@ -732,6 +732,8 @@
             var result = await window.saveManager.setCurrentHero(id);
             if (result.ok) {
                 this.refreshTavernMaze();
+                /* R148-P1: 部署英雄后同步刷新门户侧边栏，防止"使用该英雄"按钮不更新 */
+                if (typeof refreshHeroCarousel === 'function') refreshHeroCarousel();
             } else {
                 this._flashReason(result.reason);
             }

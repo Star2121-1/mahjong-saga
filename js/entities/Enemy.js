@@ -59,6 +59,11 @@ window.Enemy = class Enemy {
         this._bossContactThisFrame = false; /* R75-P1: 防止接触伤害单帧内重复触发 */
         this._comboCooldown = 0; /* K-030: 万子连击全局冷却 */
 
+        /* R148-P0: 图腾攻击增益 — _getEffectiveAtk() 在每次攻击时读取，避免修改 this.atk 影响存档 */
+        this._getEffectiveAtk = function() {
+            return this._totemBuffed ? Math.floor(this.atk * Balance.TOTEM_BUFF_ATK_MULT) : this.atk;
+        };
+
         if (this.type === 'Tanker') {
             this.speed = this.baseSpeed * Balance.TANKER_SPEED_MULT;
             this.baseSpeed = this.speed;
@@ -209,7 +214,7 @@ window.Enemy = class Enemy {
                 this.attackTimer = this.attackCooldown;
                 if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
                     this.flashTimer = Balance.FLASH_DURATION;
-                    var dmg = this.atk;
+                    var dmg = this._getEffectiveAtk();
                     /* R125-P1: 关卡亲和减伤已在takeDamage入口处统一应用，此处直接传入原始值 */
                     player.takeDamage(dmg, this);
                 }
@@ -307,7 +312,7 @@ window.Enemy = class Enemy {
                 this.attackTimer = this.attackCooldown;
                 if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
                     this.flashTimer = Balance.FLASH_DURATION;
-                    player.takeDamage(this.atk, this);
+                    player.takeDamage(this._getEffectiveAtk(), this);
                 }
             }
             if (dist > attackRange + Balance.ENEMY_ATTACK_PADDING) this.reachedPlayer = false;
@@ -384,7 +389,7 @@ window.Enemy = class Enemy {
                 this.attackTimer = this.attackCooldown;
                 if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
                     this.flashTimer = Balance.FLASH_DURATION;
-                    player.takeDamage(this.atk, this);
+                    player.takeDamage(this._getEffectiveAtk(), this);
                 }
             }
             if (dist > attackRange + Balance.ENEMY_ATTACK_PADDING) this.reachedPlayer = false;
@@ -474,7 +479,7 @@ window.Enemy = class Enemy {
                 this.attackTimer = this.attackCooldown;
                 if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
                     this.flashTimer = Balance.FLASH_DURATION;
-                    player.takeDamage(this.atk, this);
+                    player.takeDamage(this._getEffectiveAtk(), this);
                 }
             }
             if (dist > attackRange + Balance.ENEMY_ATTACK_PADDING) this.reachedPlayer = false;
@@ -546,7 +551,7 @@ window.Enemy = class Enemy {
                         e.takeDamage(Math.floor(this.atk * Balance.BOMBER_EXPLODE_DAMAGE_MULT), this, this.x, this.y);
                     }
                 }
-                player.takeDamage(this.atk, this, this.x, this.y); /* R144-P2: 传递爆炸源位置防止Barrier无敌判定错误 */
+                player.takeDamage(this._getEffectiveAtk(), this, this.x, this.y); /* R144-P2: 传递爆炸源位置防止Barrier无敌判定错误 */
             }
             if (this.el && this.el.parentNode) this.el.remove();
         }
@@ -565,7 +570,7 @@ window.Enemy = class Enemy {
                 this.attackTimer = this.attackCooldown;
                 if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
                     this.flashTimer = Balance.FLASH_DURATION;
-                    player.takeDamage(this.atk, this);
+                    player.takeDamage(this._getEffectiveAtk(), this);
                 }
             }
             if (dist > attackRange + Balance.ENEMY_ATTACK_PADDING) this.reachedPlayer = false;
@@ -641,7 +646,7 @@ window.Enemy = class Enemy {
             }
             if (this._bossPhase === 2) {
                 this._bossAbilityTimer = Balance.BOSS_PHASE2_ABILITY_INTERVAL;
-                this._bossContactTimer = 0; /* R56-P1: 进入P2时重置接触冷却 */
+                this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN; /* R148-P1: 进入P2时重置接触冷却，防止P3首击无CD瞬杀 */
                 if (this._bossWarningEl && this._bossWarningEl.parentNode) this._bossWarningEl.remove();
                 this._bossWarningEl = null;
                 this._bossWarningActive = false;

@@ -143,6 +143,7 @@ window.Balance = {
     /* ── 图腾 ── */
     TOTEM_SPAWN_INTERVAL: 5,
     TOTEM_BUFF_SPEED_MULT: 1.3,              // 图腾增益速度倍率 (Enemy.js)
+    TOTEM_BUFF_ATK_MULT: 1.2,                // 图腾增益攻击倍率 (Enemy.js) — GAME_BIBLE 写明"攻×1.2"
 
     /* ── Stalker ── */
     STALKER_ATTACK_MULT: 1.5,            // 猎杀者蓄力攻击加成 (Enemy.js)

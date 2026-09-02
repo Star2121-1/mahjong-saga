@@ -39,7 +39,7 @@ Gp._loop = function(timestamp) {
             if (p._tempBuffTimeLeft <= 0) {
                 p._tempAtkBoost = 0;
                 p._tempHpBonus = 0;
-                p._doubleCoinNextWave = false;
+                /* R148-P1: 双币buff仅在拾取时消费，不在过期时清零，防止buff到期但金币未拾取时丢失效果 */
                 p._tempBuffTimeLeft = 0;
             }
         }
