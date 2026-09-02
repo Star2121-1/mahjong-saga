@@ -779,6 +779,7 @@ class Player {
         this._baseMaxHp = this.maxHp;
         this._baseAtk = this.atk; /* R140-P0: reset中同步更新ATK锚点 */
         this._frailtyStored = false; /* R143-P0: 重置脆弱突变防重入标志 */
+        this.huQingyise = false; /* R158-P1: 清一色状态跨局残留修复 */
         // REMOVED: redundant baseSpeed assignment (already set at line 716)
 
         /* ── 套装共鸣检测 ── */
