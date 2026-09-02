@@ -227,6 +227,8 @@ Gp.restart = function() {
     }
     /* R101-P1: 清理引导完成定时器 */
     if (this._completeGuideTimer) { clearTimeout(this._completeGuideTimer); this._completeGuideTimer = null; }
+    /* R154-P0: 清除引导透明度Map，防止跨局战场元素错误褪色 */
+    if (this._originalOpacities) { this._originalOpacities.clear(); this._originalOpacities = null; }
     /* R30-H-017: 清理Boss Phase 3红色雾霭DOM */
     if (this._bossMistEl && this._bossMistEl.parentNode) this._bossMistEl.remove();
     this._bossMistEl = null;

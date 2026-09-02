@@ -186,9 +186,12 @@ class Player {
             dmg = Math.max(1, Math.floor(dmg * (1 - this.damageReduction)));
         }
 
-        /* L-008: 脆弱突变 — 受击伤害 +30% */
+        /* L-008: 脆弱 — 突变+30% / 深渊+50% */
         if (this._frailtyDebuff) {
-            dmg = Math.floor(dmg * Balance.MUTATOR_FRAILTY_DAMAGE_TAKEN_MULT);
+            /* R154-P0: _frailtyStored 由mutator设(true)，abyss不设；abyss用 _abyssFrailtyOrigAtk 标志 */
+            var _frailtyMult = (this._frailtyStored || (window.gameEngine && window.gameEngine._frailtyOrigPlayerAtk !== undefined))
+                ? Balance.MUTATOR_FRAILTY_DAMAGE_TAKEN_MULT : Balance.ABYSS_FRAILTY_DMG_MULT;
+            dmg = Math.floor(dmg * _frailtyMult);
         }
 
         if (dmg > 0 && window.audioManager) window.audioManager.play('hit');
@@ -806,6 +809,8 @@ class Player {
         this.evolvedSpeed = false;
         this.evolvedVamp = false;
         this.thornsLifesteal = false; /* R82-P1: 清除花缠枝状态，防止跨局残留 */
+        this._qiduiSpdBonus = 0; /* R154-P1: 七对子速度加成跨局清零，防止残留叠加 */
+        this._qiduiMagBonus = 0; /* R154-P1: 七对子磁铁加成跨局清零 */
         this.speedMultiplier = 1.0;
         this.speed = this.baseSpeed;
         /* H-029: 雀灵流转 -- reset 中恢复速度 */

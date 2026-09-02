@@ -490,7 +490,7 @@ Gp._loop = function(timestamp) {
                     for (var _wi = 0; _wi < this.enemies.length; _wi++) {
                         var _we = this.enemies[_wi];
                         if (!_we.alive) continue;
-                        var dmg = Math.max(1, Math.floor(_we.maxHp * Balance.THORNS_TICK_PER_SEC));
+                        var dmg = Math.max(1, Math.floor(_we.maxHp * Balance.WITHER_HP_LOSS_PCT));
                         _we.takeDamage(dmg, 'wither', this.player.x, this.player.y);
                     }
                 }
