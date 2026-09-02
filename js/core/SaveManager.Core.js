@@ -498,6 +498,7 @@
                     else if (_wInst._origBaseCd == null) _wInst._origBaseCd = _wInst._baseCd || _wInst.cd;
                     if (_wd.cd != null) _wInst.cd = _wd.cd;
                     else if (_wInst.cd == null) _wInst.cd = _wInst._baseCd || _wInst.cd;
+                    if (_wd.rawBaseCd != null) _wInst._rawBaseCd = _wd.rawBaseCd; /* R167-P0: 恢复原始基线CD，防止reset时回退到错误值 */
                     engine._activeWeapons.push(_wInst);
                 }
                 if (engine._activeWeapons.length === 0) {
