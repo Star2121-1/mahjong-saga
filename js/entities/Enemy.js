@@ -126,7 +126,7 @@ window.Enemy = class Enemy {
             this.hue = 0;
             this._bossPhase = 1;
             this._savedBossPhase = 1; /* R79-P2: 冻结前相位快照，解冻时恢复 */
-            this._bossAbilityTimer = 1.8;
+            this._bossAbilityTimer = Balance.BOSS_PHASE1_ABILITY_INTERVAL; /* R144-P1: 使用Balance常量替代硬编码1.8 */
             this._bossWarningTimer = 0;
             this._bossWarningActive = false;
             this._bossWarningTargetX = 0;
@@ -266,7 +266,9 @@ window.Enemy = class Enemy {
                 if (this.el) { this.el.style.opacity = '1'; this.el.classList.remove('stalker-charging'); }
                 if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
                     this.flashTimer = Balance.FLASH_DURATION;
-player.takeDamage(Math.floor(this.atk * Balance.STALKER_ATTACK_MULT), this);
+                    player.takeDamage(Math.floor(this.atk * Balance.STALKER_ATTACK_MULT), this);
+                    /* R144-P1: Stalker冲锋命中后重置attackTimer，防止Fatigue阶段立刻追加普攻 */
+                    this.attackTimer = this.attackCooldown;
                 }
             }
             return;
@@ -502,7 +504,7 @@ player.takeDamage(Math.floor(this.atk * Balance.STALKER_ATTACK_MULT), this);
         var dy = player.y - this.y;
         var dist = Math.sqrt(dx * dx + dy * dy);
 
-        if (this._exploded) return;
+        /* R144-P2: 移除冗余的双重_exploded检查 */
 
         /* 一直冲向玩家，不减速 */
         if (dist > 0.01) {
@@ -544,7 +546,7 @@ player.takeDamage(Math.floor(this.atk * Balance.STALKER_ATTACK_MULT), this);
                         e.takeDamage(Math.floor(this.atk * Balance.BOMBER_EXPLODE_DAMAGE_MULT), this, this.x, this.y);
                     }
                 }
-                player.takeDamage(this.atk, this);
+                player.takeDamage(this.atk, this, this.x, this.y); /* R144-P2: 传递爆炸源位置防止Barrier无敌判定错误 */
             }
             if (this.el && this.el.parentNode) this.el.remove();
         }

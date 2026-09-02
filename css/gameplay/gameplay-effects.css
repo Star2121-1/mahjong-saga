@@ -136,13 +136,6 @@
     75%  { opacity: 0.3; transform: translateY(-38px) scale(0.85); }
     100% { opacity: 0; transform: translateY(-55px) scale(0.75); }
 }
-@keyframes fctOverdriveArc {
-    0%   { opacity: 1; transform: translateY(0) scale(1.2); }
-    20%  { transform: translateX(12px) translateY(-20px) scale(1.4); }
-    50%  { opacity: 1; transform: translateX(-8px) translateY(-40px) scale(1.1); }
-    100% { opacity: 0; transform: translateX(0) translateY(-60px) scale(0.8); }
-}
-
 /* ══════════════════════════════════════════════
    套装共鸣特效
    ══════════════════════════════════════════════ */

@@ -380,6 +380,33 @@
 .game-clock-frozen .boss-mist::after {
     animation-play-state: running !important;
 }
+/* R144-P1: weather-fog雾效在面板打开时应继续运行 */
+.game-clock-frozen .weather-fog,
+.game-clock-frozen .weather-fog::before,
+.game-clock-frozen .weather-fog::after {
+    animation-play-state: running !important;
+}
+/* R144-P1: rage bar双动画在面板打开时应继续运行 */
+.game-clock-frozen #rage-bar-container.rage-full,
+.game-clock-frozen #rage-bar-fill {
+    animation-play-state: running !important;
+}
+/* R144-P1: frost totem光环在面板打开时应继续运行 */
+.game-clock-frozen .totem-pillar.frost,
+.game-clock-frozen .totem-pillar.frost::before,
+.game-clock-frozen .totem-pillar.frost::after {
+    animation-play-state: running !important;
+}
+/* R144-P2: tile-delivering入场动画在面板打开时不应冻结 */
+.game-clock-frozen .tile-delivering,
+.game-clock-frozen .tile-delivering::before,
+.game-clock-frozen .tile-delivering::after {
+    animation-play-state: running !important;
+}
+/* R144-P2: context-highlight脉冲动画在面板打开时不应冻结 */
+.game-clock-frozen .context-highlight {
+    animation-play-state: running !important;
+}
 
 /* ══════════════════════════════════════════════
    引导面板步骤导航 (Epoch 1)

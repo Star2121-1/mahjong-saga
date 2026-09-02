@@ -321,7 +321,6 @@ Gp.restart = function() {
     this._hitStopT = 0; /* R128-P1: 重置命中停顿计时器防止跨局残留 */
     /* R130-P0: 重置突变系统引擎级状态，防止跨局残留 */
     this._origMagnetRadius = null; /* R130-P0: 引力突变原始磁铁半径快照 */
-    this._frailtyStored = false; /* R130-P0: 脆弱突变引擎级存储标志 */
     if (this.mutatorOverlay) this.mutatorOverlay.classList.remove('active');
     /* R37-P1: 重置局内增益状态，防止跨局残留 */
     this._vaultMutations = [];

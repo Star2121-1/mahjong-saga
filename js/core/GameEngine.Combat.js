@@ -499,8 +499,8 @@ Gp._settleRun = async function(tokens) {
         if (typeof window.saveManager.recordRunHistory === 'function') {
             window.saveManager.recordRunHistory(
                 this.player.heroId, this._currentLevelId, this.kills, this._elapsed,
-                !this.gameOver, this.loopCount || 0, uniqueRelics, _wc
-            );
+                this._won, this.loopCount || 0, uniqueRelics, _wc
+            ); /* R144-P1: 使用_won标志替代!gameOver — gameOver在结算时已置true，导致胜利也被记为败北 */
         }
     } catch(e) { window.toastSystem && window.toastSystem.error('战局记录失败: ' + e.message); }
 

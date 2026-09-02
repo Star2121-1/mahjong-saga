@@ -196,8 +196,7 @@ window.Balance = {
     ELITE_HP_MULT: 1.5,                  // 精英模式HP倍率 (GameSpawner.js / Events.js)
     ELITE_ATK_MULT: 1.5,                 // 精英模式ATK倍率 (GameSpawner.js / Events.js)
     ELITE_CORE_MULT: 1.5,                // 精英模式核心收益倍率 (Boot.js)
-    ELITE_ENEMY_HP_MULT: 1.5,             // 精英怪HP加成 (GameEngine.Spawn.js)
-    ELITE_ENEMY_ATK_MULT: 1.3,             // 精英怪ATK加成 (GameEngine.Spawn.js)
+    /* R144-P0: 删除ELITE_ENEMY_HP/ATK_MULT死代码 — 从未被任何JS引用，且ATK值(1.3)与ELITE_ATK_MULT(1.5)不一致易误导 */
 
     /* ── 敌人 ── */
     TANKER_HP_MULT: 2,
@@ -323,8 +322,8 @@ window.Balance = {
     HU_QIDUI_DODGE: 0.15,
     HU_QIDUI_SPD: 0.15,
     /* R133-P2: 刪除重複定義（原 0.20 為草稿，最終值 0.80 在第329行） */
-    /* R130-P0: 竹牌花牌护盾常量 — 设计文档 §4.4: 回15%HP + 护盾1层 */
-    HUPAI_HUA_ZHU_SHIELD: 30,       /* 护盾值 = 玩家 ATK × 此倍率 */
+    /* R130-P0: 竹牌花牌护盾常量 — 护盾值 = 玩家 ATK × 此倍率 (Spawn.js:439) */
+    HUPAI_HUA_ZHU_SHIELD: 30,
     HUPAI_HUA_ZHU_SHIELD_DUR: 8,    /* 护盾持续秒数 */
     HU_QIDUI_MAGNET: 0.80,
     ATK_MAX_CAP: 9999, /* R56-P1: 玩家攻击力上限保护，防止胡牌增益无限叠加 */
