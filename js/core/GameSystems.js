@@ -225,7 +225,7 @@ Sys.updateResonanceAuras = function(engine, dt) {
             var px = engine.player.x;
             var py = engine.player.y;
             var auraR = 80;
-            var dmg = Math.floor(engine.player.atk * 0.10); /* H-027: 从 0.15 降至 0.10 防 DPS 过高 */
+            var dmg = Math.floor(engine.player.atk * Balance.FLAME_AURA_DAMAGE_MULT); /* H-027: 从 0.15 降至 0.10 防 DPS 过高 */
             for (var ae = 0; ae < engine.enemies.length; ae++) {
                 var e = engine.enemies[ae];
                 if (!e.alive) continue;

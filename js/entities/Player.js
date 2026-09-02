@@ -287,7 +287,7 @@ class Player {
         /* R136-P0: Mage获得evolvedArmor后base应为EVOLVED_ARMOR_THORNS_BASE(50%)，否则level-up时丢失50%基础反伤 */
         var _base = this.evolvedArmor ? Balance.EVOLVED_ARMOR_THORNS_BASE : 0.05;
         /* R30-H-019: evolvedArmor(太阳神巨像)时上限从50%提升至100% */
-        var _thornCap = this.evolvedArmor ? 1.0 : 0.5;
+        var _thornCap = this.evolvedArmor ? Balance.EVOLVED_ARMOR_THORNS_CAP : Balance.DEFAULT_THORNS_CAP;
         this.thornsRate = Math.min(_thornCap, _base + lv * 0.05 + (this._thornsAffixBonus || 0));
     }
 
@@ -708,7 +708,7 @@ class Player {
             { id: 'fc_chance', apply: function(p) { p.freezeChance = Math.min(0.8, (p.freezeChance || 0) + 0.1); } },
             { id: 'gc_xp', apply: function(p) { p.xpGainFactor = Math.min(Balance.MAX_XP_GAIN_FACTOR, (p.xpGainFactor || 1) + 0.15); } },
             { id: 'gc_magnet', apply: function(p) { p.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, (p.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT) + 50); } },
-            { id: 'wa_cd', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { eng._activeWeapons[i].cd = Math.max(p.cdFloor || Balance.DEFAULT_CD_FLOOR, (eng._activeWeapons[i]._baseCd || eng._activeWeapons[i].cd) * 0.9); } } } },
+            { id: 'wa_cd', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { eng._activeWeapons[i].cd = Math.max(p.cdFloor || Balance.DEFAULT_CD_FLOOR, (eng._activeWeapons[i]._baseCd || eng._activeWeapons[i].cd) * Balance.WEAPON_UPGRADE_CD_MULT); } } } }, /* R146-P1: 统一使用WEAPON_UPGRADE_CD_MULT常量 */
             { id: 'wa_atk', apply: function(p) { p.atk += 5; } }
         ];
         var map = {};

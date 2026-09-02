@@ -510,10 +510,7 @@ Gp._spawnEnemyType = function(type) {
     enemy._eng = this; /* Inject engine ref */
     /* Apply level difficulty factor (consistent with SpawnSystem) */
     var diff = 1;
-    try {
-        var cfg = window.levelConfig[this._currentLevelId];
-        if (cfg) diff = cfg.difficultyFactor || 1;
-    } catch(e) {}
+    try { diff = (window.levelConfig[this._currentLevelId].difficultyFactor || 1) * (window.difficultyScale || 1); } catch(e) {}
     enemy.maxHp = Math.floor(enemy.maxHp * diff);
     enemy.hp = enemy.maxHp;
     enemy.atk = Math.floor(enemy.atk * diff);

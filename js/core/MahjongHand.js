@@ -218,7 +218,7 @@
         var pairs = 0;
         for (var id2 in t.count) { pairs += Math.floor(t.count[id2] / 2); }
         /* R140-P0: 修正七对子判定 — 用maxPossiblePairs防止多刻+多对+多癞子误判 */
-        var maxPossiblePairs = pairs + Math.min(t.jokers, t.total - pairs * 2 - t.jokers);
+        var maxPossiblePairs = pairs + Math.min(t.jokers, t.total - pairs * 2);
         if (maxPossiblePairs >= 7) {
             return { huType: 'qiduizi' };
         }
@@ -226,7 +226,7 @@
         var triplets = 0;
         for (var id3 in t.count) { triplets += Math.floor(t.count[id3] / 3); }
         /* R140-P0: 修正碰碰胡判定 — 用maxPossibleTrips防止多刻+单张+癞子误判 */
-        var maxPossibleTrips = triplets + Math.min(t.jokers, t.total - triplets * 3 - t.jokers);
+        var maxPossibleTrips = triplets + Math.min(t.jokers, t.total - triplets * 3);
         if (maxPossibleTrips >= 4) {
             return { huType: 'pengpenghu' };
         }

@@ -371,6 +371,7 @@ Gp._startNewRun = function(heroId, levelId) {
     this._huCountThisRun = 0;
     this._tempAspd = 0;
     this._tempAspdT = 0;
+    this._frailtyOrigPlayerAtk = null; /* R146-P1: 脆弱突变基线清零，防止跨续玩周期残留旧局值 */
     /* R38-P1: 重置满手牌Toast计时器，防止新游戏误触发 */
     this._handFullToastAt = 0;
     /* R30-H-017: 重置深渊combo状态，防止跨局污染 */
@@ -445,7 +446,7 @@ Gp._startNewRun = function(heroId, levelId) {
     this.stalkersKilledInLevel2 = 0;
     this._interWaveEvent = null;
     this._interWaveTimer = 0;
-    if (this._currentLevelId === 'level_1' || !this.loopCount) this.loopCount = 0;
+    this.loopCount = 0; /* R146-P1: 无条件清零，与Endgame.js restart()保持一致 */
     this._clearTotems();
     this._cleanEnemyProjectiles();
     this._bossLord = null;

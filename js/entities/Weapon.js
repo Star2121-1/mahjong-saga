@@ -12,6 +12,7 @@ window.Weapon = class {
         this._baseCd = this.cd; /* P0: baseline CD for wa_cd modifier — prevents multiplicative stacking */
         this._origBaseCd = this.cd; /* R52: 不可变的原始基线CD（不含筒顺等spawn侧修改），供Render.js每帧计算cdReduction使用，防止双重压缩 */
         this._baseAtkFactor = this.atkFactor; /* P0: 存储初始伤害因子用于overdrive恢复 */
+        this._rawBaseCd = this.cd; /* R146-P0: 保存构造时原始CD，防止reset时从被筒顺修改过的_baseCd反推污染_origBaseCd */
         this.cooldownTimer = 0;
         this._justFired = false; /* Visual Enhancement D: 技能发射标记 */
     }
@@ -37,7 +38,7 @@ window.Weapon = class {
         this.atkFactor = this._baseAtkFactor || 1.0; /* 从初始值恢复，而非从构造参数计算 */
         this._justFired = false;
         this.cooldownTimer = 0; /* R57-P1: 重置冷却计时器，防止跨局残留进度 */
-        this._origBaseCd = this._baseCd || this.cd; /* R131-P0: 重置原始基线CD，防止cdReduction跨局污染 */
+        this._origBaseCd = this._rawBaseCd || this.cd; /* R131-P0: 重置原始基线CD — 使用构造时原始值，而非可能被筒顺修改过的_baseCd */
     }
 };
 
@@ -147,6 +148,7 @@ window.OrbitShield = class extends window.Weapon {
     }
     update(dt, player, enemies, engine) {
         this._init(engine);
+        if (!player) return; /* R146-P1: null guard — 防止init过渡期player为null时崩溃 */
         var atkMult = 1 + (player._tempAtkBoost || 0);
         var dmg = Math.floor(player.atk * this.atkFactor * atkMult);
         for (var i = 0; i < 3; i++) {

@@ -497,7 +497,7 @@ class RewardManager {
             if (w.level >= 5) continue;
             var info = this.weaponInfos[w.id];
             if (!info) continue;
-            pool.push({ type: 'weapon_up', id: w.id, name: info.name, desc: 'Lv.' + w.level + ' → Lv.' + (w.level + 1) + ' 攻倍率 ' + w.atkFactor.toFixed(1) + '→' + (w.atkFactor + 0.15).toFixed(1), cost: 0, cardData: info, weaponIndex: ai, weaponLevel: w.level });
+            pool.push({ type: 'weapon_up', id: w.id, name: info.name, desc: 'Lv.' + w.level + ' → Lv.' + (w.level + 1) + ' 攻倍率 ' + w.atkFactor.toFixed(1) + '→' + (w.atkFactor + Balance.WEAPON_UPGRADE_ATK_INC).toFixed(1), cost: 0, cardData: info, weaponIndex: ai, weaponLevel: w.level });
         }
 
         return pool;
@@ -631,6 +631,10 @@ class RewardManager {
         /* 降一级 */
         p.relicLevels[bestRelic] = bestLevel - 1;
         if (p.relicLevels[bestRelic] <= 0) delete p.relicLevels[bestRelic];
+        /* R146-P0: 圣物降级后重算词条效果，防止属性残留 */
+        p._relicAffixes = null;
+        if (!p._skipRelicAffixes) p._applyRelicAffixes();
+        if (p.heroId === 'Mage') p._recalcThornsRate();
 
         /* 应用奖励 */
         switch (item.sacrificeType) {
