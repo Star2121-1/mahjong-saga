@@ -24,14 +24,17 @@ window.toastSystem = {
                 return this._pool[i];
             }
         }
-    /* R158-P0: 限制pool最大容量，防止跨局累计无限增长 */
-    if (this._pool.length > 10) {
-        var toRemove = this._pool.length - 10;
-        for (var i = 0; i < toRemove && this._pool.length > 10; i++) {
-            var extra = this._pool.pop();
-            if (extra.parentNode) extra.parentNode.removeChild(extra);
+        /* R158-P0: 限制pool最大容量，防止跨局累计无限增长 */
+        if (this._pool.length < 10) {
+            var node = document.createElement('div');
+            node.used = true;
+            this._pool.push(node);
+            return node;
         }
-    }
+        /* pool已满10个节点，复用任意一个（强制覆盖） */
+        var node = this._pool[0];
+        node.used = true;
+        return node;
     },
 
     _releaseNode: function(node) {
