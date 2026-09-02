@@ -90,9 +90,10 @@ Gp._updateWeapons = function(dt) {
         /* R29-C-003: 秘密宝牌引力武器冷却减免
            R52: 使用 _origBaseCd 而非 _baseCd 计算，防止与 Spawn.js 筒顺减CD双重压缩 */
         if (cdReduction > 0) {
-            w.cd = w._origBaseCd || w._baseCd || w.cd;
-            if (!w._origBaseCd) w._origBaseCd = w._baseCd || w.cd;
-            w.cd = Math.max(this.player.cdFloor || Balance.DEFAULT_CD_FLOOR, w._origBaseCd * (1 - cdReduction));
+            var cdBase = w._baseCd || w._origBaseCd || w.cd; /* R157-P0: 优先读_baseCd（含筒顺），确保筒顺减CD不被秘密宝牌吞没 */
+            w.cd = Math.max(this.player.cdFloor || Balance.DEFAULT_CD_FLOOR, cdBase * (1 - cdReduction));
+        } else {
+            w.cd = w._baseCd || w._origBaseCd || w.cd; /* R157-P0: cdReduction移除后恢复正确基准 */
         }
         w.update(wdt, this.player, this.enemies, this);
     }

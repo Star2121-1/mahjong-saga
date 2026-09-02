@@ -50,6 +50,10 @@ Gp._spawnEliteEnemy = function() {
         if (roll < cumulative) { enemyType = typeKeys[_ti]; break; }
     }
     var enemy = new Enemy(id, x, y, level, false, enemyType);
+    /* R157-P0: 精英怪生成位置需clamp到地图边界，防止穿墙 */
+    var _spM = Balance.ENEMY_SPAWN_MARGIN;
+    enemy.x = Math.max(_spM, Math.min(this._mapW - _spM, enemy.x));
+    enemy.y = Math.max(_spM, Math.min(this._mapH - _spM, enemy.y));
     enemy._eng = this; /* Inject engine ref */
 
     /* P2: 应用关卡难度系数，与_spawnEnemy保持一致 */

@@ -183,6 +183,7 @@ Gp._clearMutatorEffects = function() {
     }
     this._activeMutator = null;
     this._origMagnetRadius = null;
+    this._witherTimer = 0; /* R157-P0: 重置枯萎计时器，防止跨突变残留 */
     /* Epoch 38: 清除 Mutator 视觉反馈 */
     this._updateMutatorBadge();
 };

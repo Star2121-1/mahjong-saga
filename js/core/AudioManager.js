@@ -64,7 +64,7 @@ Ap.play = function(sound, opts) {
     if (!this._ctx) {
         var now = Date.now();
         if (now - (this._lastRetryTime || 0) < 2000) return;
-        if (!this._ensureContext()) return;
+        if (!this._ensureContext()) { this._lastRetryTime = now; return; }
     }
     if (this._muted) return;
     /* R125-P1: 防止页面后台暂停期间积压的音频在恢复时洪泛 */
@@ -156,7 +156,9 @@ Ap._noise = function(dur, vol) {
         g.connect(this._ctx.destination);
         src.start(t);
         src.stop(t + dur + 0.01);
-    } catch(e) { console.warn('[AudioManager] _osc error:', e); }
+        /* R157-P0: 播放结束后断开节点，防止Safari GC延迟导致内存累积 */
+        src.onended = function() { try { src.disconnect(); filt.disconnect(); g.disconnect(); } catch(e) {} };
+    } catch(e) { console.warn('[AudioManager] _noise error:', e); }
 };
 Ap._sweep = function(from, to, dur, vol) {
     try {
