@@ -496,12 +496,14 @@ Gp._loop = function(timestamp) {
         if (this._abyssActiveCombo && !this._pendingReward) {
             var _abyssCombo = this._abyssActiveCombo;
             if (_abyssCombo === 'abyss_frenzy') {
-                /* 深渊狂乱: 敌人攻速+100%（P1-5 修复：基于 baseSpeed 一次性派生，杜绝逐帧×2指数爆炸） */
+                /* R159-P0: 深渊狂乱 — 存储baseSpeed快照，防止combo关闭后baseSpeed被污染导致下次激活指数爆炸 */
                 for (var _af = 0; _af < this.enemies.length; _af++) {
                     var _ae = this.enemies[_af];
                     if (_ae.alive && !_ae._frenzyApplied) {
                         _ae._frenzyApplied = true;
-                        _ae.speed = Math.floor(_ae.baseSpeed * Balance.ABYSS_FRENZY_SPEED_MULT);
+                        _ae._frenzyBaseSpeed = _ae.baseSpeed; /* R159-P0: 快照原始baseSpeed */
+                        _ae.baseSpeed = Math.floor(_ae.baseSpeed * Balance.ABYSS_FRENZY_SPEED_MULT);
+                        _ae.speed = _ae.baseSpeed;
                     }
                 }
                 if (this.player.lifestealRate < 1) {

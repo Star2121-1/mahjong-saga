@@ -699,15 +699,14 @@ window.Enemy = class Enemy {
             var dist = Math.sqrt(dx * dx + dy * dy);
             /* R30-H-016: Boss P1保持最小距离而非完全停走 — 防止玩家贴脸 exploit */
             if (dist < Balance.BOSS_P1_MIN_DIST && dist > 0.01) {
-                /* 玩家过近时后退 */
-                var spd = this.speed * dt;
-                this.x -= (dx / dist) * spd;
-                this.y -= (dy / dist) * spd;
+                /* R159-P0: 移除多余*dt，位移已乘dt，避免速度被平方化导致Boss P1移动极慢 */
+                this.x -= (dx / dist) * this.speed * dt;
+                this.y -= (dy / dist) * this.speed * dt;
                 this._clampPosition(engine);
             } else if (dist > 0.01) {
-                var spd = this.speed * dt;
-                this.x += (dx / dist) * spd;
-                this.y += (dy / dist) * spd;
+                /* R159-P0: 同上，P3正确写法是参考 */
+                this.x += (dx / dist) * this.speed * dt;
+                this.y += (dy / dist) * this.speed * dt;
                 this._clampPosition(engine);
             }
             return;

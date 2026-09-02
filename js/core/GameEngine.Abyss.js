@@ -272,11 +272,16 @@ Gp._applyAbyssCombo = function(comboId) {
             for (var _ff = 0; _ff < this.enemies.length; _ff++) {
                 var _fe = this.enemies[_ff];
                 if (_fe.alive && _fe._frenzyApplied) {
+                    /* R159-P0: 恢复原始baseSpeed，防止combo多次开关导致速度指数增长 */
+                    if (_fe._frenzyBaseSpeed !== undefined) {
+                        _fe.baseSpeed = _fe._frenzyBaseSpeed;
+                        _fe._frenzyBaseSpeed = undefined;
+                    }
                     _fe.speed = _fe.baseSpeed;
                     _fe._frenzyApplied = false;
                 }
             }
-            this._abyssFrenzyLifestealSet = false; /* R156-P0: 关闭狂乱combo时重置吸血标志，防止下次激活重复触发 */
+            this._abyssFrenzyLifestealSet = false; /* R156-P0: 关闭狂乱combo时重置吸血标志 */
         } else if (combo.id === 'abyss_gravity') {
             if (this.player) this.player.magnetRadius = this.player._baseMagnetRadius || Balance.MAGNET_RADIUS_DEFAULT;
         } else if (combo.id === 'abyss_wither') {
