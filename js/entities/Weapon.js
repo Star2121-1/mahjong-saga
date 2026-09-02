@@ -255,7 +255,11 @@ window.GroundSlammer = class extends window.Weapon {
         this.activeShockwaves = [];
     }
     update(dt, player, enemies, engine) {
-        this.cooldownTimer -= dt;
+        /* A-030: 暗影步闪避后攻速加成 */
+        var aspdMult = (player && player._dodgeAspdTimer > 0)
+            ? Math.min(Balance.HERO_ASSASSIN_DODGE_ASPD_MULT, Balance.WEAPON_ASPD_CAP)
+            : 1.0;
+        this.cooldownTimer -= dt * aspdMult;
         var atkMult = 1 + (player._tempAtkBoost || 0);
         var dmg = Math.floor(player.atk * this.atkFactor * atkMult);
         for (var i = this.activeShockwaves.length - 1; i >= 0; i--) {
@@ -341,7 +345,11 @@ window.LaserBeam = class extends window.Weapon {
     }
     update(dt, player, enemies, engine) {
         this._init(engine);
-        this.cooldownTimer -= dt;
+        /* A-030: 暗影步闪避后攻速加成 */
+        var aspdMult = (player && player._dodgeAspdTimer > 0)
+            ? Math.min(Balance.HERO_ASSASSIN_DODGE_ASPD_MULT, Balance.WEAPON_ASPD_CAP)
+            : 1.0;
+        this.cooldownTimer -= dt * aspdMult;
         var cosA = Math.cos(this.beamAngle);
         var sinA = Math.sin(this.beamAngle);
         var len = this.beamLength;
@@ -404,7 +412,11 @@ window.NovaPulse = class extends window.Weapon {
         this.activePulses = [];
     }
     update(dt, player, enemies, engine) {
-        this.cooldownTimer -= dt;
+        /* A-030: 暗影步闪避后攻速加成 */
+        var aspdMult = (player && player._dodgeAspdTimer > 0)
+            ? Math.min(Balance.HERO_ASSASSIN_DODGE_ASPD_MULT, Balance.WEAPON_ASPD_CAP)
+            : 1.0;
+        this.cooldownTimer -= dt * aspdMult;
         var atkMult = 1 + (player._tempAtkBoost || 0);
         var dmg = Math.floor(player.atk * this.atkFactor * atkMult);
         /* R125-P1: 协同标志必须在伤害循环前设置，确保同帧其他武器能读取 */

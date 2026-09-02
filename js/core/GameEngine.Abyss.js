@@ -55,7 +55,9 @@ Gp._initAbyssState = function() {
         this.player._abyssFrailtyAtk = undefined;
         this.player._abyssBloodmoonApplied = false;
         this.player._abyssBloodmoonAtkBonus = undefined;
+        this.player._abyssBloodmoonOrigMaxHp = undefined; /* R147-P1: 初始化血月原始HP字段，防止跨局污染 */
         this.player._frailtyDebuff = false;
+        this._abyssFrenzyLifestealSet = false; /* R147-P1: 初始化狂乱吸血标志，防止跨局污染 */
     }
 };
 
