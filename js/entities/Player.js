@@ -592,8 +592,7 @@ class Player {
         this._reapplyMetaBonuses(true); /* R51-P0: skip equip affixes — snapshot已含最终值 */
         this._skipTalentBonus = false;
         if (this.heroId === 'Mage') this._recalcThornsRate();
-        /* R140-P1: 套装共鸣在restore路径从快照恢复，但若大厅装备变更后恢复需重算 */
-        this._recalcSetResonance();
+        /* R159-P1: _reapplyMetaBonuses 已计算 setResonanceSpeed/setResonanceIce，无需二次重算 */
     }
 
     /** 重新应用 meta 天赋/声望/perk 加成 (用于 restore 后) */
