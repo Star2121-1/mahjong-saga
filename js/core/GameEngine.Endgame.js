@@ -278,6 +278,7 @@ Gp.restart = function() {
     this._cleanAllProjectiles();
     this._cleanEnemyProjectiles();
     this._resetAllWeapons();
+    this._checkWeaponSynergies(); /* R161-P0a: 重启后重新计算协同标志，防止跨局残留 */
     /* P1: 清理雀魂手牌动画定时器，防止跨局残留触发 */
     if (this._handTileDeliverTimers) {
         this._handTileDeliverTimers.forEach(function(t) { clearTimeout(t); });

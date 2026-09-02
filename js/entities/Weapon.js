@@ -33,7 +33,7 @@ window.Weapon = class {
         var floor = (playerCdFloor != null) ? playerCdFloor : Balance.DEFAULT_CD_FLOOR;
         this.cd = Math.max(floor, this.cd * Balance.WEAPON_UPGRADE_CD_MULT);
         this._baseCd = Math.max(floor, (this._baseCd || this.cd) * Balance.WEAPON_UPGRADE_CD_MULT); /* P0: 同步更新_baseCd */
-        this._origBaseCd = Math.max(floor, (this._origBaseCd || this._baseCd) * Balance.WEAPON_UPGRADE_CD_MULT); /* R52: _origBaseCd与_baseCd同步升级（保持原始基线用于Render.js计算） */
+        this._origBaseCd = Math.max(floor, this._origBaseCd * Balance.WEAPON_UPGRADE_CD_MULT); /* R161-P0b: 使用自身而非_baseCd，防止筒顺修改后二次压缩 */
     }
     reset() { /* P0: 清除overdrive残留状态，防止跨局伤害累积 */
         /* R159-P0: 优先恢复_odOrigAtk（overdrive期间升级的武器），再清除标志 */
@@ -46,7 +46,7 @@ window.Weapon = class {
         this._odOrigAtk = undefined;
         this._justFired = false;
         this.cooldownTimer = 0; /* R57-P1: 重置冷却计时器，防止跨局残留进度 */
-        this._origBaseCd = this._rawBaseCd || this.cd; /* R131-P0: 重置原始基线CD — 使用构造时原始值，而非可能被筒顺修改过的_baseCd */
+        this._origBaseCd = this._rawBaseCd; /* R161-P0c: 无条件恢复构造时原始值，防止筒顺/升级路径污染 */
     }
 };
 
@@ -231,7 +231,7 @@ window.ShotgunBurst = class extends window.Weapon {
             n += 4;
         }
         for (var i = 0; i < n; i++) {
-            var offset = (i - (n - 1) / 2) * this.spreadAngle / Math.max(n - 1, 1);
+            var offset = (i - (n - 1) / 2) * this.spreadAngle; /* R161-P1c: 移除/n-1除法，spreadAngle是总扩散角 */
             var angle = baseAngle + offset;
             var proj = new window.Projectile(
                 player.x, player.y,
