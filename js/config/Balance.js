@@ -58,6 +58,8 @@ window.Balance = {
     MAX_FREEZE_DURATION_BONUS: 5.0,  // ice_bonus词条累计冻结时长上限(s) (Player.js)
     MAX_SPEED_BONUS_PCT: 0.30,       // speed_pct词条累计移速加成上限(相对baseSpeed) (Player.js)
     MAX_MAGNET_RADIUS: 200,          // 磁铁半径上限 (Player.js)
+    MAX_EQUIP_HP_BOOST: 500,         // 装备hp_boost累计上限 (Player.js _reapplyMetaBonuses/reset)
+    MAX_EQUIP_ATK_FACTOR: 3.0,       // 装备atk_factor累计上限 (Player.js _reapplyMetaBonuses/reset)
     PLAYER_MAX_SPEED: 500,           // 玩家速度上限 (Spawn.js 条顺攻速保护)
     LIFESTEAL_PER_VAMP_LEVEL: 0.08,  // 吸血戒指每级增幅 (Player.js)
     MAX_EXPLOSION_CHANCE: 0.75,      // 爆炸概率上限 (Player.js)

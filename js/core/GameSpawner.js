@@ -172,15 +172,13 @@ Ss._spawnEnemy = function(engine, isBoss) {
         var maxWaves = engine._getMaxWaves(); /* R60-P0: 使用engine方法而非this */
         if (waveIdx >= maxWaves) {
             enemy.radius = 75;
-            /* R50-Fix: 使用 Balance.BOSS_LORD_BASE_HP 替代硬编码公式，
-               并在覆盖前显式重应用深渊轮回缩放，防止 Enemy.js 构造器的 abyss 缩放被销毁 */
+            /* R50-Fix: 使用 Balance.BOSS_LORD_BASE_HP 替代硬编码公式 */
             var bossLevel = level;
             var bossHpMult = Math.pow(Balance.ENEMY_LEVEL_HP_ATK_MULT, bossLevel - 1);
             enemy.maxHp = Math.floor(Balance.BOSS_LORD_BASE_HP * bossHpMult);
             var _loopCount = (engine && engine.loopCount) || 0;
-            if (_loopCount > 0) {
-                enemy.maxHp = Math.floor(enemy.maxHp * Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, _loopCount));
-            }
+            /* R145-P0: 不在这里重应用深渊缩放 — Enemy.js构造器已在line141-147正确应用ABYSS_LOOP_HP_ATK_MULT^loopCount，
+               此处再乘会导致Boss HP被双重深渊缩放(1.08^2*loopCount)，实际HP为预期的1.08^loopCount倍 */
             enemy.hp = enemy.maxHp;
         } else if (waveIdx === maxWaves - 1) {
             enemy.speed *= 2;

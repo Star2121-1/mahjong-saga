@@ -181,6 +181,7 @@ class Player {
         }
 
         /* Epoch 2: 杠牌硬气减伤 */
+        var originalDmg = dmg; /* R145-P1: 保存原始伤害用于thorns反伤，避免damageReduction削弱自己的反伤 */
         if (this.damageReduction > 0) {
             dmg = Math.max(1, Math.floor(dmg * (1 - this.damageReduction)));
         }
@@ -219,7 +220,7 @@ class Player {
         }
 
         if (attacker && this.thornsRate > 0 && attacker.alive) {
-            let thornDmg = Math.floor(dmg * this.thornsRate);
+            let thornDmg = Math.floor(originalDmg * this.thornsRate);
             if (this.evolvedArmor) {
                 const isCrit = Math.random() < this.critRate;
                 if (isCrit) {
@@ -383,7 +384,7 @@ class Player {
                     for (var _wi = 0; _wi < eng._activeWeapons.length; _wi++) {
                         var w = eng._activeWeapons[_wi];
                         w.atkFactor += Balance.WEAPON_AMPLIFY_ATK_FACTOR_INC;
-                        w.cd = Math.max(this.cdFloor || Balance.DEFAULT_CD_FLOOR, (w._baseCd || w.cd) * 0.9);
+                        w.cd = Math.max(this.cdFloor || Balance.DEFAULT_CD_FLOOR, (w._baseCd || w.cd) * Balance.WEAPON_UPGRADE_CD_MULT); /* R145-P1: 使用Balance常量替代硬编码0.9 */
                     }
                 }
                 break;
@@ -442,7 +443,7 @@ class Player {
                 { id: 'gc_magnet', name: '巨吸', apply: function(p) { p.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, (p.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT) + 50); } }
             ],
             weapon_amplify: [
-                { id: 'wa_cd', name: '迅捷', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { eng._activeWeapons[i].cd = Math.max(eng.player.cdFloor || Balance.DEFAULT_CD_FLOOR, (eng._activeWeapons[i]._baseCd || eng._activeWeapons[i].cd) * 0.9); } } } },
+                { id: 'wa_cd', name: '迅捷', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { eng._activeWeapons[i].cd = Math.max(eng.player.cdFloor || Balance.DEFAULT_CD_FLOOR, (eng._activeWeapons[i]._baseCd || eng._activeWeapons[i].cd) * Balance.WEAPON_UPGRADE_CD_MULT); } } } }, /* R145-P1: 使用Balance常量替代硬编码0.9 */
                 { id: 'wa_atk', name: '强化', apply: function(p) { p.atk += 5; } }
             ]
         };
@@ -538,6 +539,8 @@ class Player {
         this.speed = data.speed ?? this.speed;
 
         this.relicLevels = data.relicLevels ? { ...data.relicLevels } : {};
+        /* R145-P1: 钳制存档中的圣物等级上限，防止localStorage篡改绕过5级上限 */
+        for (var _rlid in this.relicLevels) this.relicLevels[_rlid] = Math.min(5, this.relicLevels[_rlid] || 0);
         this.weaponSlots = data.weaponSlots ? data.weaponSlots.map(function(w) { return { id: w.id, level: w.level }; }) : [];
         /* 从 HeroConfig 恢复英雄特有参数 */
         const cfg = window.heroConfig[this.heroId];
@@ -617,10 +620,10 @@ class Player {
             var item = eqMap[instanceId];
             if (!item) continue;
             var base = item.base || {};
-            this.maxHp += base.hp_boost || 0;
+            this.maxHp += Math.min(Balance.MAX_EQUIP_HP_BOOST - (this.maxHp - (window.heroConfig[this.heroId] && window.heroConfig[this.heroId].hp || 100)), base.hp_boost || 0);
             this.hp = Math.min(this.hp, this.maxHp);
             this.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, this.magnetRadius + (base.magnet_boost || 0)); /* R140-P1: magnet_boost加钳制防止越界 */
-            if (base.atk_factor && !_skipEquipAffixes) this.atk = Math.floor(this.atk * (1 + base.atk_factor)); /* R134-P0: skip equip base bonuses on restore — snapshot已含最终值，避免二次乘法 */
+            if (base.atk_factor && !_skipEquipAffixes) this.atk = Math.floor(this.atk * (1 + Math.min(Balance.MAX_EQUIP_ATK_FACTOR, base.atk_factor))); /* R134-P0: skip equip base bonuses on restore; R145-P1: equip atk_factor上限钳制 */
             if (!_skipEquipAffixes && item.affixes) {
                 for (var ai = 0; ai < item.affixes.length; ai++) {
                     var affix = item.affixes[ai];
@@ -741,10 +744,10 @@ class Player {
             var item = eqMap[instanceId];
             if (!item) continue;
             var base = item.base || {};
-            this.maxHp += base.hp_boost || 0;
+            this.maxHp += Math.min(Balance.MAX_EQUIP_HP_BOOST - (this.maxHp - (window.heroConfig[this.heroId] && window.heroConfig[this.heroId].hp || 100)), base.hp_boost || 0);
             this.hp = this.maxHp;
             this.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, this.magnetRadius + (base.magnet_boost || 0)); /* R140-P1: magnet_boost加钳制 */
-            if (base.atk_factor) this.atk = Math.floor(this.atk * (1 + base.atk_factor));
+            if (base.atk_factor) this.atk = Math.floor(this.atk * (1 + Math.min(Balance.MAX_EQUIP_ATK_FACTOR, base.atk_factor))); /* R145-P1: equip atk_factor上限钳制 */
             if (item.affixes) {
                 for (var ai = 0; ai < item.affixes.length; ai++) {
                     var affix = item.affixes[ai];
