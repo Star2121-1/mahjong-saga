@@ -271,7 +271,7 @@ window.Enemy = class Enemy {
                 if (this.el) { this.el.style.opacity = '1'; this.el.classList.remove('stalker-charging'); }
                 if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
                     this.flashTimer = Balance.FLASH_DURATION;
-                    player.takeDamage(Math.floor(this.atk * Balance.STALKER_ATTACK_MULT), this);
+                    player.takeDamage(Math.floor(this._getEffectiveAtk() * Balance.STALKER_ATTACK_MULT), this);
                     /* R144-P1: Stalker冲锋命中后重置attackTimer，防止Fatigue阶段立刻追加普攻 */
                     this.attackTimer = this.attackCooldown;
                 }
@@ -291,7 +291,7 @@ window.Enemy = class Enemy {
                     this.attackTimer = this.attackCooldown;
                     if (dist <= attackRange + Balance.ENEMY_ATTACK_PADDING) {
                         this.flashTimer = Balance.FLASH_DURATION;
-                        player.takeDamage(this.atk, this);
+                        player.takeDamage(this._getEffectiveAtk(), this);
                     }
                 }
                 if (dist > attackRange + Balance.ENEMY_ATTACK_PADDING) this.reachedPlayer = false;
@@ -417,7 +417,7 @@ window.Enemy = class Enemy {
                         x: this.x, y: this.y,
                         vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
                         radius: 5,
-                        damage: Math.max(1, Math.floor(this.atk * B.ENEMY_ARCHER_DMG_MULT)),
+                        damage: Math.max(1, Math.floor(this._getEffectiveAtk() * B.ENEMY_ARCHER_DMG_MULT)),
                         alive: true,
                         lifeTime: B.ENEMY_ARCHER_PROJ_RANGE / spd,
                         _hitPlayer: false, el: null
@@ -548,7 +548,7 @@ window.Enemy = class Enemy {
                     /* P1: 使用平方距离比较避免 sqrt */
                     var explodeR2 = this._explodeRadius * this._explodeRadius;
                     if (exdx * exdx + exdy * exdy <= explodeR2) {
-                        e.takeDamage(Math.floor(this.atk * Balance.BOMBER_EXPLODE_DAMAGE_MULT), this, this.x, this.y);
+                        e.takeDamage(Math.floor(this._getEffectiveAtk() * Balance.BOMBER_EXPLODE_DAMAGE_MULT), this, this.x, this.y);
                     }
                 }
                 player.takeDamage(this._getEffectiveAtk(), this, this.x, this.y); /* R144-P2: 传递爆炸源位置防止Barrier无敌判定错误 */
@@ -667,7 +667,7 @@ window.Enemy = class Enemy {
                 var selfB = this;
                 this._bossVolleyCount = (this._bossVolleyCount || 0) + 1;
                 var spd = (engine && engine._bloodRageActive) ? 120 : 100;
-                var baseDmg = Math.floor(this.atk);
+                var baseDmg = this._getEffectiveAtk();
                 if (this._bossVolleyCount % 3 === 0) {
                     /* 蓄力 0.8s 后齐射 */
                     if (this.el) this.el.classList.add('p1-charging');
@@ -714,7 +714,7 @@ window.Enemy = class Enemy {
                     /* P1: Slam 伤害范围叠加玩家半径和Boss自身半径 */
                     var slamReach = Balance.BOSS_SLAM_RANGE + this.radius + player.radius;
                     if (pdx * pdx + pdy * pdy <= slamReach * slamReach) {
-                        player.takeDamage(Math.floor(this.atk * Balance.BOSS_P2_SLAM_DMG_MULT), this);
+                        player.takeDamage(Math.floor(this._getEffectiveAtk() * Balance.BOSS_P2_SLAM_DMG_MULT), this);
                     }
                     this._slamFx(engine); /* B4: 地裂余震 */
                     if (this._bossWarningEl && this._bossWarningEl.parentNode) this._bossWarningEl.remove();
@@ -795,7 +795,7 @@ window.Enemy = class Enemy {
             if (this._bossRadiationTimer >= 1.5) {
                 this._bossRadiationTimer = 0;
                 if (engine && engine._enemyProjectiles) {
-                    var radDmg = Math.floor(this.atk * Balance.BOSS_P3_RAD_DMG_MULT);
+                    var radDmg = Math.floor(this._getEffectiveAtk() * Balance.BOSS_P3_RAD_DMG_MULT);
                     var radSpd = Balance.BOSS_P3_RADIATION_SPEED;
                     for (var ri = 0; ri < Balance.BOSS_P3_RADIATION_COUNT; ri++) {
                         var radAngle = (ri / Balance.BOSS_P3_RADIATION_COUNT) * Math.PI * 2;
@@ -828,7 +828,7 @@ window.Enemy = class Enemy {
             }
             if (this._bossContactTimer <= 0) {
                 this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
-                var contactDmg = this._bossPhase === 3 ? Math.floor(this.atk * Balance.BOSS_P3_CONTACT_DMG_MULT) : this.atk;
+                var contactDmg = this._bossPhase === 3 ? Math.floor(this._getEffectiveAtk() * Balance.BOSS_P3_CONTACT_DMG_MULT) : this._getEffectiveAtk();
                 player.takeDamage(contactDmg, this);
             }
         } else {
