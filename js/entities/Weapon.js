@@ -412,7 +412,7 @@ window.LaserBeam = class extends window.Weapon {
 
 window.NovaPulse = class extends window.Weapon {
     constructor(level) {
-        super('NovaPulse', '\u6e05\u4e00\u8272', level || 1, 2.5, 3.5);
+        super('NovaPulse', '\u6e05\u4e00\u8272', level || 1, Balance.NOVA_PULSE_ATK_FACTOR, Balance.NOVA_PULSE_CD);
         this.activePulses = [];
     }
     update(dt, player, enemies, engine) {
