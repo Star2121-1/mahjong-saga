@@ -288,6 +288,7 @@ Gp.restart = function() {
     this._bossTimer = 0;
     this._waveCount = 0;
     this.currentWaveSpawnedCount = 0;
+    this._announcingWave = false; /* R158-P1: 重置波次公告标志，防止跨restart阻塞 */
     this._bossLordSpawned = false; /* R80-P1: 防止跨局Boss领主生成标志残留 */
     this._bossLord = null; /* R135-P1: 防止restart后_bossLord残留死引用 */
     this._levelUpPending = false;
