@@ -177,8 +177,7 @@ Ss._spawnEnemy = function(engine, isBoss) {
             var bossHpMult = Math.pow(Balance.ENEMY_LEVEL_HP_ATK_MULT, bossLevel - 1);
             enemy.maxHp = Math.floor(Balance.BOSS_LORD_BASE_HP * bossHpMult);
             var _loopCount = (engine && engine.loopCount) || 0;
-            /* R145-P0: 不在这里重应用深渊缩放 — Enemy.js构造器已在line141-147正确应用ABYSS_LOOP_HP_ATK_MULT^loopCount，
-               此处再乘会导致Boss HP被双重深渊缩放(1.08^2*loopCount)，实际HP为预期的1.08^loopCount倍 */
+            /* R160-P0: 保留深渊缩放 — 构造器已应用，此处不覆盖 */
             enemy.hp = enemy.maxHp;
         } else if (waveIdx === maxWaves - 1) {
             enemy.speed *= 2;
