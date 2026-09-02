@@ -389,10 +389,64 @@ Gp.restart = function() {
     this._playerHitCountThisRun = 0; /* R96-P1: 防止无伤成就被护盾吸收的伤害错误计数 */
     /* R82-P1: 清理战场深渊深度class */
     if (this._battlefield) this._battlefield.classList.remove('abyss-depth-1', 'abyss-depth-2', 'abyss-depth-3', 'abyss-depth-n');
+    /* R168-P0: 重置成就标志，防止跨局误报 */
+    this._achievementFlags = {};
 
     var heroId = this.player ? this.player.heroId : 'Hero';
     var levelId = this._currentLevelId || 'level_1';
     this._startNewRun(heroId, levelId);
+};
+
+/* ══════════════════════════════════════════════
+   R168-P0: 胜利/失败结算 — 补全缺失的 _showVictory / _gameOver 方法
+   ══════════════════════════════════════════════ */
+
+Gp._showVictory = function() {
+    /* 刷新成 that 到 meta，防止跨局丢失 */
+    this._flushAchievementsToMeta();
+    if (window.saveManager && window.saveManager.recordRunStats) {
+        var meta = window.saveManager._metaCache || {};
+        window.saveManager.recordRunStats(
+            this.kills || 0,
+            this._elapsed || 0,
+            this.player ? (this.player.gold || 0) : 0,
+            this._overdriveCount || 0,
+            this._totalDodgesThisRun || 0,
+            this._totalCritsThisRun || 0,
+            this._waveCount || 0,
+            this._bossKillsThisRun || 0,
+            this.loopCount || 0,
+            true,
+            (this.player && this.player._tempShieldEnd > 0) ? (this._playerHitCountThisRun || 0) : (this.player ? this.player.hitCountThisRun : 0),
+            0
+        );
+    }
+    if (this.victoryOverlay) this.victoryOverlay.classList.add('active');
+    this._unfreezeClock();
+};
+
+Gp._gameOver = function() {
+    /* 刷新成就到 meta */
+    this._flushAchievementsToMeta();
+    if (window.saveManager && window.saveManager.recordRunStats) {
+        var meta = window.saveManager._metaCache || {};
+        window.saveManager.recordRunStats(
+            this.kills || 0,
+            this._elapsed || 0,
+            this.player ? (this.player.gold || 0) : 0,
+            this._overdriveCount || 0,
+            this._totalDodgesThisRun || 0,
+            this._totalCritsThisRun || 0,
+            this._waveCount || 0,
+            this._bossKillsThisRun || 0,
+            this.loopCount || 0,
+            false,
+            this._playerHitCountThisRun || 0,
+            0
+        );
+    }
+    if (this.gameOverOverlay) this.gameOverOverlay.classList.add('active');
+    this._unfreezeClock();
 };
 
 /* ══════════════════════════════════════════════

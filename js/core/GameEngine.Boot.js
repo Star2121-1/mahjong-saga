@@ -607,6 +607,8 @@ Gp._announceWave = function(waveIdx) {
     this._announcingWave = true; /* M-030: 阻止 _beginLoop 在公告期间被重入 */
     this._unfreezeClock();
     var wa = document.getElementById('wave-announce');
+    /* R168-P0: 防御性null检查 — wave-announce元素不存在时跳过，防止TypeError崩溃 */
+    if (!wa) { this._announcingWave = false; return; }
     wa.textContent = '第 ' + (waveIdx + 1) + ' 波';
     wa.classList.add('active');
     /* R115-P0: 屏幕阅读器播报波次公告 */

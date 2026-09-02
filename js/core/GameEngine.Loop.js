@@ -30,7 +30,11 @@ Gp._loop = function(timestamp) {
         this._elapsed += dt;
 
         /* R29-H-005: speed_demon 成就 — 3分钟内通关 */
-        this._checkAchievementInflight('speed_demon', this._elapsed);
+        /* R168-P0: _checkAchievementInflight 从未定义，替换为内联检查防止ReferenceError崩溃 */
+        if (this._elapsed > 0 && this._elapsed <= 180 && window.achievementConfig) {
+            var _sd = window.achievementConfig.find(function(a) { return a.id === 'speed_demon'; });
+            if (_sd) { this._checkAchievement('speed_demon', Math.max(0, 180 - Math.floor(this._elapsed))); }
+        }
 
         /* Epoch 32: 临时增益过期检查 — 使用游戏时间而非墙钟时间，避免面板冻结导致意外过期 */
         var p = this.player;
@@ -718,6 +722,34 @@ Gp._checkMilestones = function() {
             this._spawnCausalityText(m.msg);
         }
     }
+};
+
+/* ══════════════════════════════════════════════
+   R168-P0: 成就检测系统 — 补全缺失的 _checkAchievement 方法
+   ══════════════════════════════════════════════ */
+
+Gp._checkAchievement = function(achievementId, value) {
+    if (!window.achievementConfig || !window.achievementCheck || !window.achievementCheck.inflight) return;
+    var handler = window.achievementCheck.inflight[achievementId];
+    if (!handler) return;
+    try {
+        var unlocked = handler(this, value);
+        if (unlocked && !this._achievementFlags) this._achievementFlags = {};
+        if (!this._achievementFlags[achievementId]) {
+            this._achievementFlags[achievementId] = true;
+            this._spawnCausalityText('🏆 成就解锁：' + achievementId);
+        }
+    } catch(e) { console.warn('[Achievement] check failed:', achievementId, e); }
+};
+
+Gp._flushAchievementsToMeta = function() {
+    if (!this._achievementFlags || !window.saveManager) return;
+    var meta = window.saveManager._metaCache || {};
+    if (!meta.achievements) meta.achievements = {};
+    for (var id in this._achievementFlags) {
+        if (this._achievementFlags[id]) meta.achievements[id] = true;
+    }
+    window.saveManager._metaCache = meta;
 };
 
 })();

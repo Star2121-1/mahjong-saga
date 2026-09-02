@@ -154,6 +154,11 @@ Fp.cleanup = function() {
             this._freeStack.push(n);
         }
     }
+    /* R168-P0: 收缩池中膨胀的应急节点，防止重启后DOM泄漏 */
+    while (this._pool.length > this._poolSize) {
+        var excess = this._pool.pop();
+        if (excess && excess.parentNode) excess.parentNode.removeChild(excess);
+    }
 };
 
 window.fxManager = new window.FxManager();
