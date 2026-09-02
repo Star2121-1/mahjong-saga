@@ -205,7 +205,7 @@ window.OrbitShield = class extends window.Weapon {
 
 window.ShotgunBurst = class extends window.Weapon {
     constructor(level) {
-        super('ShotgunBurst', '\u4e03\u5bf9\u6563\u724c', level || 1, 0.6, 0.4);
+        super('ShotgunBurst', '\u4e03\u5bf9\u6563\u724c', level || 1, 0.6, Balance.SHOTGUN_BURST_CD);
         this.spreadCount = Balance.SHOTGUN_SPREAD_COUNT;
         this.spreadAngle = Balance.SHOTGUN_SPREAD_ANGLE;
     }

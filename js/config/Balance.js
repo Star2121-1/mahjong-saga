@@ -249,7 +249,8 @@ window.Balance = {
     LASER_BEAM_MAX_HITS: 1,
     LASER_HIT_RADIUS: 4,
     TRACKING_BLADE_PROJ_LIFE: 2.0,
-    TRACKING_BLADE_CD: 0.5, /* P0: 独立武器CD常量，与弹道寿命区分 */
+    TRACKING_BLADE_CD: 0.8, /* GAME_BIBLE: TrackingBlade CD=0.8s | R152-P1: 修正从0.5→0.8对齐设计文档 */
+    SHOTGUN_BURST_CD: 0.4,    // 七对散牌CD (Weapon.js)
     SHOTGUN_PROJ_LIFE: 0.8,
     TRACKING_BLADE_RADIUS: 4,
     SHOTGUN_RADIUS: 3,
@@ -258,6 +259,8 @@ window.Balance = {
     KNIGHT_DODGE_SLAM_TIMEOUT_MS: 300,
     NOVA_PULSE_MAX_RADIUS: 350,      // NovaPulse清一色最大半径(px) (Weapon.js)
     NOVA_PULSE_EXPAND_DURATION: 0.5,  // NovaPulse扩展时长(s) (Weapon.js)
+    NOVA_PULSE_CD: 7.0,             // 大四喜CD (Weapon.js) — GAME_BIBLE: 7.0s
+    NOVA_PULSE_ATK_FACTOR: 5.0,      // 大四喜atkFactor (Weapon.js) — GAME_BIBLE: 5.0
 
     /* ── 经验石/金币 ── */
     BOSS_MIN_GEM_COUNT: 5,
