@@ -788,6 +788,14 @@ Gp._initJoystick = function() {
     if (!base || !knob) return;
     var self = this;
 
+    /* R153-P0: 移除旧监听器，防止restart累积导致摇杆输出N倍 */
+    document.removeEventListener('mousemove', this._joystickMouseMove);
+    document.removeEventListener('mouseup', this._joystickMouseUp);
+    document.removeEventListener('touchmove', this._joystickTouchMove);
+    document.removeEventListener('touchend', this._joystickTouchEnd);
+    document.removeEventListener('touchcancel', this._joystickTouchCancel);
+    document.removeEventListener('mouseleave', this._joystickMouseLeave);
+
     var getOffset = function() {
         var rect = base.getBoundingClientRect();
         /* R140-P1: clamp maxR防止极端视口下负值导致除零/NaN */
@@ -823,11 +831,13 @@ Gp._initJoystick = function() {
         self._joystickActive = true;
         updateKnob(e.clientX, e.clientY);
     });
-    document.addEventListener('mousemove', function(e) {
+    this._joystickMouseMove = function(e) {
         if (!self._joystickActive) return;
         updateKnob(e.clientX, e.clientY);
-    });
-    document.addEventListener('mouseup', function() { resetKnob(); });
+    };
+    this._joystickMouseUp = function() { resetKnob(); };
+    document.addEventListener('mousemove', this._joystickMouseMove);
+    document.addEventListener('mouseup', this._joystickMouseUp);
     base.addEventListener('touchstart', function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -836,7 +846,7 @@ Gp._initJoystick = function() {
         _touchId = t.identifier;
         updateKnob(t.clientX, t.clientY);
     }, { passive: false });
-    document.addEventListener('touchmove', function(e) {
+    this._joystickTouchMove = function(e) {
         if (!self._joystickActive) return;
         for (var i = 0; i < e.changedTouches.length; i++) {
             if (e.changedTouches[i].identifier === _touchId) {
@@ -845,8 +855,8 @@ Gp._initJoystick = function() {
                 return;
             }
         }
-    }, { passive: false });
-    document.addEventListener('touchend', function(e) {
+    };
+    this._joystickTouchEnd = function(e) {
         if (_touchId !== null) {
             var found = false;
             for (var i = 0; i < e.changedTouches.length; i++) { if (e.changedTouches[i].identifier === _touchId) { found = true; break; } }
@@ -854,11 +864,15 @@ Gp._initJoystick = function() {
             _touchId = null;
         }
         resetKnob();
-    });
-    document.addEventListener('touchcancel', function(e) {
+    };
+    this._joystickTouchCancel = function(e) {
         if (_touchId !== null) { _touchId = null; resetKnob(); }
-    });
-    document.addEventListener('mouseleave', function() { if (self._joystickActive) resetKnob(); });
+    };
+    this._joystickMouseLeave = function() { if (self._joystickActive) resetKnob(); };
+    document.addEventListener('touchmove', this._joystickTouchMove, { passive: false });
+    document.addEventListener('touchend', this._joystickTouchEnd);
+    document.addEventListener('touchcancel', this._joystickTouchCancel);
+    base.addEventListener('mouseleave', this._joystickMouseLeave);
 };
 
 Gp._getInputVector = function() {

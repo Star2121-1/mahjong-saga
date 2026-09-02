@@ -506,7 +506,7 @@ Gp._loop = function(timestamp) {
                     var _ae = this.enemies[_af];
                     if (_ae.alive && !_ae._frenzyApplied) {
                         _ae._frenzyApplied = true;
-                        _ae.speed = Math.floor(_ae.baseSpeed * 2.0);
+                        _ae.speed = Math.floor(_ae.baseSpeed * Balance.ABYSS_FRENZY_SPEED_MULT);
                     }
                 }
                 if (this.player.lifestealRate < 1) {

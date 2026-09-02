@@ -6,6 +6,7 @@
 #game-container {
     background: #1a5c38;
     --_fs: 1.4;
+    touch-action: none; /* R153-P0: 防止iOS Safari横屏触摸手势触发浏览器缩放/下拉刷新 */
 }
 
 /* 16:9 战场主体 — 竹席纹理叠加翡翠绿 */

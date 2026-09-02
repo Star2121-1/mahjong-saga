@@ -361,6 +361,10 @@ window.Enemy = class Enemy {
         }
 
         var retreatDist = Balance.SHAMAN_RETREAT_DIST;
+        /* R153-P1: 渊巫撤退距离+50% */
+        if (this._abyssVariant && this._abyssVariant.retreatMult) {
+            retreatDist *= this._abyssVariant.retreatMult;
+        }
         var advanceDist = Balance.SHAMAN_ADVANCE_DIST;
 
         if (dist < retreatDist) {

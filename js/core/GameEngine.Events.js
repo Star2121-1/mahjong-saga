@@ -66,6 +66,8 @@ Gp._triggerInterWaveEvent = function() {
         }
     }, 15000);
     document.getElementById('interevent-accept').addEventListener('click', function() {
+        /* R153-P1: 超时与点击竞态保护 — 超时已处理则跳过 */
+        if (!self._interWaveEvent) return;
         window.audioManager && window.audioManager.play('reward');
         overlay.classList.remove('active');
         overlay.classList.remove('levelup-mode');
