@@ -197,7 +197,6 @@
         0 8px 0 #ff6f00,
         0 10px 20px rgba(255,111,0,0.35);
 }
-.enemy.boss::before { font-size: calc(28 * var(--_fs) * 1px); }
 
 /* 最终 Boss — 红中（传奇牌） */
 .enemy.boss.final-boss {

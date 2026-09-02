@@ -148,7 +148,9 @@ Gp._spawnExplosion = function(x, y, radius, damage, excludeId) {
         var dx = e.x - x;
         var dy = e.y - y;
         if (dx * dx + dy * dy <= radius * radius) {
-            e.takeDamage(damage, 'splash');
+            var _sx = this.player ? this.player.x : x;
+            var _sy = this.player ? this.player.y : y;
+            e.takeDamage(damage, 'splash', _sx, _sy); /* R156-P0: 传递爆炸源位置，防止Barrier判定错误 */
         }
     }
     var el = document.createElement('div');

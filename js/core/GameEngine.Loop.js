@@ -202,14 +202,9 @@ Gp._loop = function(timestamp) {
 
             /* Epoch 47: 深渊变异组合自动激活 */
             if (this.loopCount > 0 && this._abyssUnlockedCombos && this._abyssUnlockedCombos.length > 0 && !this._abyssActiveCombo) {
-                /* 自动激活第一个未激活的组合 */
                 var firstCombo = this._abyssUnlockedCombos[0];
-                this._abyssActiveCombo = firstCombo;
-                var comboName = '';
-                for (var _ci = 0; _ci < this._abyssComboDefinitions.length; _ci++) {
-                    if (this._abyssComboDefinitions[_ci].id === firstCombo) { comboName = this._abyssComboDefinitions[_ci].name; break; }
-                }
-                if (comboName) this._spawnCausalityText('🌀 自动激活深渊变异: ' + comboName);
+                /* R156-P0: 调用 _applyAbyssCombo 而非直接设置标志，确保combo效果正确应用（速度/吸血/磁铁等） */
+                this._applyAbyssCombo(firstCombo);
             }
 
             /* Buff/Debuff 计时递减统一在上方 Epoch 32 块处理（修复双重递减 bug） */
@@ -637,7 +632,7 @@ Gp._loop = function(timestamp) {
             this._milestoneCheckTimer = 0;
             if (this._checkMilestones) this._checkMilestones();
         }
-    } catch (err) { console.error('Game loop error:', err); if (this.running && !this.gameOver) requestAnimationFrame(this._guardedLoop || this._boundLoop); }
+    } catch (err) { console.error('Game loop error:', err); if (this.running && !this.gameOver) requestAnimationFrame(this._guardedLoop || this._boundLoop); return; }
 
     if (this.running && !this.gameOver) requestAnimationFrame(this._guardedLoop || this._boundLoop);
 };

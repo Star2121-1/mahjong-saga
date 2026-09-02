@@ -242,7 +242,7 @@ class Player {
                     this._healAmount += heal;
                 }
             }
-            attacker.takeDamage(thornDmg, this, this.x, this.y); /* R134-P0: 传递源位置，防止Barrier正面/背面判定基于玩家坐标而非实际攻击点 */
+            attacker.takeDamage(thornDmg, 'thorns', this.x, this.y); /* R156-P0: 标记'纯反伤'来源，防止触发武器路径暴击/冰冻/溅射 */
         }
 
         return this.hp <= 0;
@@ -631,6 +631,8 @@ class Player {
                 this.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, this.magnetRadius + (base.magnet_boost || 0)); /* R140-P1: magnet_boost加钳制防止越界 */
             }
             if (base.atk_factor && !_skipEquipAffixes) this.atk = Math.floor(this.atk * (1 + Math.min(Balance.MAX_EQUIP_ATK_FACTOR, base.atk_factor))); /* R134-P0: skip equip base bonuses on restore; R145-P1: equip atk_factor上限钳制 */
+            /* R156-P0: 装备词条应用后钳制攻击力上限，防止无限叠加 */
+            this.atk = Math.min(Balance.ATK_MAX_CAP, this.atk);
             if (!_skipEquipAffixes && item.affixes) {
                 for (var ai = 0; ai < item.affixes.length; ai++) {
                     var affix = item.affixes[ai];
@@ -755,6 +757,8 @@ class Player {
             this.hp = this.maxHp;
             this.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, this.magnetRadius + (base.magnet_boost || 0)); /* R140-P1: magnet_boost加钳制 */
             if (base.atk_factor) this.atk = Math.floor(this.atk * (1 + Math.min(Balance.MAX_EQUIP_ATK_FACTOR, base.atk_factor))); /* R145-P1: equip atk_factor上限钳制 */
+            /* R156-P0: 装备词条应用后钳制攻击力上限，防止无限叠加 */
+            this.atk = Math.min(Balance.ATK_MAX_CAP, this.atk);
             if (item.affixes) {
                 for (var ai = 0; ai < item.affixes.length; ai++) {
                     var affix = item.affixes[ai];

@@ -276,6 +276,7 @@ Gp._applyAbyssCombo = function(comboId) {
                     _fe._frenzyApplied = false;
                 }
             }
+            this._abyssFrenzyLifestealSet = false; /* R156-P0: 关闭狂乱combo时重置吸血标志，防止下次激活重复触发 */
         } else if (combo.id === 'abyss_gravity') {
             if (this.player) this.player.magnetRadius = this.player._baseMagnetRadius || Balance.MAGNET_RADIUS_DEFAULT;
         } else if (combo.id === 'abyss_wither') {

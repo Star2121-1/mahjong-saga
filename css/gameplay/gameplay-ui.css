@@ -308,7 +308,7 @@
 .game-clock-frozen .knight-dodge-slam::after,
 .game-clock-frozen #overdrive-flash {
     animation-play-state: running !important;
-    transition-property: all !important;
+    transition: all !important; /* R156-P0: transition-property不支持all关键字，改用transition简写 */
 }
 
 /* R110-P1: 波次公告动画在面板打开时不应暂停 */

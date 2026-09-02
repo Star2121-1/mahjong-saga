@@ -291,8 +291,7 @@
 /* 响应式: 飘字 */
 @media (max-height: 768px) {
     .damage-float { font-size: 14px; }
-    .heal-float { font-size: 14px; }
-    .crit-float { font-size: 20px; }
+    /* R156-P0: 移除.heal-float/.crit-float — 这两种类名从未存在，JS使用fct-heal/fct-crit */
 }
 @media (max-height: 600px) {
     .damage-float { font-size: 12px; }
