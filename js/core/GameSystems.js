@@ -220,11 +220,11 @@ Sys.updateResonanceAuras = function(engine, dt) {
     /* 焰痕 */
     if (engine.player.setResonanceSpeed && !engine._pendingReward) {
         engine._flameAuraTimer = (engine._flameAuraTimer || 0) + dt;
-        if (engine._flameAuraTimer >= 0.5) {
+        if (engine._flameAuraTimer >= Balance.FLAME_AURA_INTERVAL) {
             engine._flameAuraTimer = 0;
             var px = engine.player.x;
             var py = engine.player.y;
-            var auraR = 80;
+            var auraR = Balance.FLAME_AURA_RADIUS;
             var dmg = Math.floor(engine.player.atk * Balance.FLAME_AURA_DAMAGE_MULT); /* H-027: 从 0.15 降至 0.10 防 DPS 过高 */
             for (var ae = 0; ae < engine.enemies.length; ae++) {
                 var e = engine.enemies[ae];
@@ -250,12 +250,12 @@ Sys.updateResonanceAuras = function(engine, dt) {
     /* 永冻 */
     if (engine.player.setResonanceIce && !engine._pendingReward) {
         engine._iceAuraTimer = (engine._iceAuraTimer || 0) + dt;
-        if (engine._iceAuraTimer >= 0.8) {
+        if (engine._iceAuraTimer >= Balance.ICE_AURA_INTERVAL) {
             engine._iceAuraTimer = 0;
             var px2 = engine.player.x;
             var py2 = engine.player.y;
-            var iceR = 60;
-            var dur = 0.5 + (engine.player.iceDurationBonus || 0);
+            var iceR = Balance.ICE_AURA_RADIUS;
+            var dur = Balance.ICE_AURA_BASE_DURATION + (engine.player.iceDurationBonus || 0);
             for (var ie = 0; ie < engine.enemies.length; ie++) {
                 var e2 = engine.enemies[ie];
                 if (!e2.alive) continue;

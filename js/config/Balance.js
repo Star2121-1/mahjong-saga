@@ -105,6 +105,13 @@ window.Balance = {
     EVOLVED_DRONE_INTERVAL: 0.35,         // 进化无人机攻击间隔(s) (Loop.js drone)
     BOSS_P3_RAD_DMG_MULT: 0.6,            // Boss P3辐射伤害倍率 (Enemy.js)
     FLAME_AURA_DAMAGE_MULT: 0.10,         // 焰痕套装共鸣每0.5s伤害倍率 (GameSystems.js)
+    FLAME_AURA_INTERVAL: 0.5,              // 焰痕套装共鸣触发间隔(s) (GameSystems.js)
+    FLAME_AURA_RADIUS: 80,                  // 焰痕套装共鸣半径(px) (GameSystems.js)
+    ICE_AURA_INTERVAL: 0.8,                 // 永冻套装共鸣触发间隔(s) (GameSystems.js)
+    ICE_AURA_RADIUS: 60,                    // 永冻套装共鸣半径(px) (GameSystems.js)
+    ICE_AURA_BASE_DURATION: 0.5,            // 永冻套装共鸣基础持续时间(s) (GameSystems.js)
+    THORNS_TICK_PER_SEC: 0.05,              // 荆棘/枯萎每秒伤害百分比 (GameSystems.js + Loop.js)
+    THORN_PER_LEVEL: 0.05,                  // 太阳神巨像每级反伤率增量 (Player.js)
     PLAYER_RADIUS: 28,
     REVIVE_HP_PERCENT: 0.3,
     REVIVE_INVULN_DURATION: 1.5,
@@ -129,8 +136,8 @@ window.Balance = {
     CAUSALITY_ANIM_DURATION: 0.6,
 
     /* ── 雀魂护盾 ── */
-    QQUEEN_SHIELD_BASE_DURATION: 5,
-    QQUEEN_SHIELD_DURATION_PER_LEVEL: 2,
+    QUEN_SHIELD_BASE_DURATION: 5,
+    QUEN_SHIELD_DURATION_PER_LEVEL: 2,
 
     /* ── 波次 ── */
     WAVE_INTER_EVENT_CHANCE: 0.6,     // 波次间事件触发概率 (GameEngine.Loop.js)

@@ -288,7 +288,7 @@ class Player {
         var _base = this.evolvedArmor ? Balance.EVOLVED_ARMOR_THORNS_BASE : 0.05;
         /* R30-H-019: evolvedArmor(太阳神巨像)时上限从50%提升至100% */
         var _thornCap = this.evolvedArmor ? Balance.EVOLVED_ARMOR_THORNS_CAP : Balance.DEFAULT_THORNS_CAP;
-        this.thornsRate = Math.min(_thornCap, _base + lv * 0.05 + (this._thornsAffixBonus || 0));
+        this.thornsRate = Math.min(_thornCap, _base + lv * Balance.THORN_PER_LEVEL + (this._thornsAffixBonus || 0));
     }
 
     /* R140-P1: 套装共鸣重算 — 供restore后大厅装备变更场景使用 */
@@ -360,7 +360,7 @@ class Player {
                 var _baseThorns = Balance.EVOLVED_ARMOR_THORNS_BASE;
                 if (this.heroId === 'Mage') {
                     /* Mage被动在基础反伤之上增加，R38-P0: 包含affix加成防止丢失 */
-                    this.thornsRate = Math.min(1.0, _baseThorns + (this.relicLevels.thorn_armor || 0) * 0.05 + (this._thornsAffixBonus || 0));
+                    this.thornsRate = Math.min(1.0, _baseThorns + (this.relicLevels.thorn_armor || 0) * Balance.THORN_PER_LEVEL + (this._thornsAffixBonus || 0));
                 } else {
                     this.thornsRate = _baseThorns;
                 }
