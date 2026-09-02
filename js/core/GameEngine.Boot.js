@@ -349,12 +349,32 @@ Gp._initViewportResize = function() {
         self._vpW = 0;
         self._vpH = 0;
     }
+    /* R151-P2: 存储handler引用以便restart()时移除，防止多次restart累积监听器 */
+    this._vpResizeHandler = _invalidateVp;
     /* 桌面端 resize */
     window.addEventListener('resize', _invalidateVp);
     /* 移动端 visualViewport 变化（键盘弹出、地址栏收缩等） */
     if (window.visualViewport) {
+        this._vpVvResizeHandler = _invalidateVp;
+        this._vpVvChangeHandler = _invalidateVp;
         window.visualViewport.addEventListener('resize', _invalidateVp);
         window.visualViewport.addEventListener('change', _invalidateVp);
+    }
+};
+
+Gp._removeViewportResize = function() {
+    /* R151-P2: 清理viewport resize监听器，防止restart()后累积 */
+    if (this._vpResizeHandler) {
+        window.removeEventListener('resize', this._vpResizeHandler);
+        this._vpResizeHandler = null;
+    }
+    if (this._vpVvResizeHandler && window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', this._vpVvResizeHandler);
+        this._vpVvResizeHandler = null;
+    }
+    if (this._vpVvChangeHandler && window.visualViewport) {
+        window.visualViewport.removeEventListener('change', this._vpVvChangeHandler);
+        this._vpVvChangeHandler = null;
     }
 };
 

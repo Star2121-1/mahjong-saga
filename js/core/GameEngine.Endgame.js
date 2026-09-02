@@ -186,6 +186,8 @@ Gp.triggerShake = function(intensity, duration) {
 };
 
 Gp.restart = function() {
+    /* R151-P2: 清理viewport resize监听器，防止多次restart累积 */
+    this._removeViewportResize();
     /* R46-P1: 清理Overdrive状态，防止重启后伤害倍率残留 */
     if (this._overdriveActive) this._endOverdrive();
     /* P0: 清理深渊变异组合状态，防止跨局残留 buff */
