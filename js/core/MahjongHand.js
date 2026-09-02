@@ -132,7 +132,7 @@
                     if (cc === 0) miss.push(c);
                     if (miss.length === 1 && jok > 0 && (ca + cb + cc) === 2) {
                         pool[a] -= (ca > 0 ? 1 : 0); pool[b] -= (cb > 0 ? 1 : 0); pool[c] -= (cc > 0 ? 1 : 0);
-                        t.jokers--;
+                        t.jokers--; /* R163-P0: 同步消耗癞子，防止同一癞子被多顺子重复使用 */
                         var maxTier = Math.max(tierMult(a), tierMult(b), tierMult(c));
                         melds.push({ type: 'run', tiles: [a, b, c, 'joker'], tierMult: maxTier * B.HUPAI_MELD_EFFECT_MULT_JOKER });
                     }
