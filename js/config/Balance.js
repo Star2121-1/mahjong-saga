@@ -111,6 +111,7 @@ window.Balance = {
     ICE_AURA_RADIUS: 60,                    // 永冻套装共鸣半径(px) (GameSystems.js)
     ICE_AURA_BASE_DURATION: 0.5,            // 永冻套装共鸣基础持续时间(s) (GameSystems.js)
     THORNS_TICK_PER_SEC: 0.05,              // 荆棘/枯萎每秒伤害百分比 (GameSystems.js + Loop.js)
+    WITHER_HP_LOSS_PCT: 0.05,               // 枯萎突变每秒HP损失比例 (GameSystems.js)
     THORN_PER_LEVEL: 0.05,                  // 太阳神巨像每级反伤率增量 (Player.js)
     PLAYER_RADIUS: 28,
     REVIVE_HP_PERCENT: 0.3,

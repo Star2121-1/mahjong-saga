@@ -310,7 +310,7 @@ Sys.updateWither = function(engine, dt) {
             for (var wi = 0; wi < engine.enemies.length; wi++) {
                 var we = engine.enemies[wi];
                 if (!we.alive) continue;
-                var dmg = Math.max(1, Math.floor(we.maxHp * 0.05));
+                var dmg = Math.max(1, Math.floor(we.maxHp * Balance.WITHER_HP_LOSS_PCT));
                 we.takeDamage(dmg, 'wither');
             }
         }
