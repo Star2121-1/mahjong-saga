@@ -15,7 +15,7 @@
                 return self._rotateChallenges(meta).then(function() { return meta.challenges; });
             }
             return meta.challenges;
-        });
+        }).catch(function(e){console.warn("[Weekly] save error:",e);});
     };
 
     SaveManager.prototype._rotateChallenges = async function(meta) {
@@ -72,7 +72,7 @@
             meta.weeklyVault = vault;
             return self.saveMeta(meta).then(function() {
                 return { ok: true, challenge: vault.challenge, bet: tier.bet };
-            });
+            }).catch(function(e){console.warn("[Weekly] save error:",e);});
         });
     };
 
@@ -87,7 +87,7 @@
             vault.completed = false; vault.reward = null;
             meta.weeklyVault = vault;
             return self.saveMeta(meta).then(function() { return { ok: true }; });
-        });
+        }).catch(function(e){console.warn("[Weekly] save error:",e);});
     };
 
     SaveManager.prototype.evaluateWeeklyVault = async function(runStats) {
@@ -121,7 +121,7 @@
             vault.completed = false; vault.reward = null;
             meta.weeklyVault = vault;
             return self.saveMeta(meta).then(function() { return { ok: true }; });
-        });
+        }).catch(function(e){console.warn("[Weekly] save error:",e);});
     };
 
     /* ── Epoch 15: 每日登录奖励 ── */
@@ -157,7 +157,7 @@
             meta.dailyRewardsClaimed = claimed;
             return self.saveMeta(meta).then(function() {
                 return { streak: streak, claimed: true, reward: reward, makeupTokens: meta.makeupTokens || 0 };
-            });
+            }).catch(function(e){console.warn("[Weekly] save error:",e);});
         });
     };
 
@@ -173,7 +173,7 @@
             meta.dailyRewardsClaimed = claimed;
             return self.saveMeta(meta).then(function() {
                 return { ok: true, reward: reward, streak: streak };
-            });
+            }).catch(function(e){console.warn("[Weekly] save error:",e);});
         });
     };
 
@@ -205,7 +205,7 @@
             var reward = self._getDailyReward(meta.loginStreak);
             return self.saveMeta(meta).then(function() {
                 return { ok: true, streak: meta.loginStreak, reward: reward, makeupTokens: meta.makeupTokens };
-            });
+            }).catch(function(e){console.warn("[Weekly] save error:",e);});
         });
     };
 
@@ -276,7 +276,7 @@
             meta.metaTokens = (meta.metaTokens || 0) + (def.reward.metaTokens || 0);
             meta.bossCores = (meta.bossCores || 0) + (def.reward.bossCores || 0);
             return self.saveMeta(meta).then(function() { return { ok: true, reward: def.reward }; });
-        });
+        }).catch(function(e){console.warn("[Weekly] save error:",e);});
     };
 
     /* ── Epoch 15: 运行历史 ── */
@@ -295,7 +295,7 @@
             meta.runHistory.unshift(entry);
             if (meta.runHistory.length > 50) meta.runHistory = meta.runHistory.slice(0, 50);
             return self.saveMeta(meta).then(function() { return entry; });
-        });
+        }).catch(function(e){console.warn("[Weekly] save error:",e);});
     };
 
     SaveManager.prototype.getRunHistory = function(limit) {

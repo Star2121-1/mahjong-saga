@@ -35,7 +35,7 @@
             meta.prestigeLevel = (info.level || 0) + 1;
             meta.prestigeCoresSpent = (meta.prestigeCoresSpent || 0) + cost;
             return self.saveMeta(meta).then(function() { return { ok: true, newLevel: meta.prestigeLevel }; });
-        });
+        }).catch(function(e){console.warn("[Season] save error:",e);});
     };
 
     SaveManager.prototype.spendMetaTokens = async function(perkId, cost) {
@@ -48,7 +48,7 @@
             if (!meta.purchasedPerks[perkId]) meta.purchasedPerks[perkId] = 0;
             meta.purchasedPerks[perkId]++;
             return self.saveMeta(meta).then(function() { return { ok: true }; });
-        });
+        }).catch(function(e){console.warn("[Season] save error:",e);});
     };
 
     /* ── Epoch 22: 通胀防护 ── */
@@ -99,7 +99,7 @@
             meta.season = season;
             return self.saveMeta(meta).then(function() {
                 return { triggered: true, season: season.currentSeason };
-            });
+            }).catch(function(e){console.warn("[Season] save error:",e);});
         });
     };
 
@@ -161,7 +161,7 @@
             meta.bossCores = (meta.bossCores || 0) + (reward.bossCores || 0);
             return self.saveMeta(meta).then(function() {
                 return { ok: true, reward: reward };
-            });
+            }).catch(function(e){console.warn("[Season] save error:",e);});
         });
     };
 
@@ -194,7 +194,7 @@
             if (bp.currentTier >= 30) bp.currentTier = 30; /* 满级 */
             meta.season = season;
             return self.saveMeta(meta).then(function() { return { tier: bp.currentTier, xp: bp.xp }; });
-        });
+        }).catch(function(e){console.warn("[Season] save error:",e);});
     };
 
     SaveManager.prototype.claimBattlePassTier = async function(tier) {
@@ -221,7 +221,7 @@
             }
             meta.season = season;
             return self.saveMeta(meta).then(function() { return { ok: true, reward: reward }; });
-        });
+        }).catch(function(e){console.warn("[Season] save error:",e);});
     };
 
     SaveManager.prototype.buyBattlePassPremium = async function() {
@@ -235,7 +235,7 @@
             season.battlePass.premium = true;
             meta.season = season;
             return self.saveMeta(meta).then(function() { return { ok: true }; });
-        });
+        }).catch(function(e){console.warn("[Season] save error:",e);});
     };
 
     /* 30层通行证奖励表 */
@@ -279,7 +279,7 @@
         return this.getMeta().then(function(meta) {
             meta.eliteMode = true;
             return self.saveMeta(meta).then(function() { return { ok: true }; });
-        });
+        }).catch(function(e){console.warn("[Season] save error:",e);});
     };
 
     SaveManager.prototype.disableEliteMode = async function() {
@@ -287,7 +287,7 @@
         return this.getMeta().then(function(meta) {
             meta.eliteMode = false;
             return self.saveMeta(meta).then(function() { return { ok: true }; });
-        });
+        }).catch(function(e){console.warn("[Season] save error:",e);});
     };
 
     SaveManager.prototype.isEliteMode = function() {
