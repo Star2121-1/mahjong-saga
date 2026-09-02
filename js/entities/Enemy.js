@@ -1006,7 +1006,7 @@ window.Enemy = class Enemy {
                     var _wc = Math.random() < Math.min(1, _pg.critRate + (_eng._tempCritBonus || 0));
                     if (_wc) {
                         actualDmg = Math.floor(actualDmg * (Balance.CRIT_BASE_MULT + (_pg.critDamageBonus || 0)));
-                        /* R32-D-001: 不重复扣血 — hp已在line 938扣减，此处仅重算实际伤害值 */
+                        /* R32-D-001: 不重复扣血 — hp已在所有修改器后统一扣减（R160-P0修复） */
                     }
                 }
                 /* 冰冻：onClick已在外部冻结，此处防武器路径漏检 */
