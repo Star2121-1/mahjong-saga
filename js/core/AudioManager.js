@@ -124,6 +124,8 @@ Ap._osc = function(type, freq, startTime, duration, vol, rampEndFreq) {
         g.connect(this._ctx.destination);
         o.start(startTime);
         o.stop(startTime + duration + 0.01);
+        /* R155-P0: 播放结束后断开节点，防止Safari GC延迟导致内存累积 */
+        o.onended = function() { try { o.disconnect(); g.disconnect(); } catch(e) {} };
     } catch(e) { console.warn('[AudioManager] _osc error:', e); }
 };
 
@@ -170,7 +172,9 @@ Ap._sweep = function(from, to, dur, vol) {
         g.connect(this._ctx.destination);
         o.start(t);
         o.stop(t + dur + 0.01);
-    } catch(e) { console.warn('[AudioManager] _osc error:', e); }
+        /* R155-P0: 播放结束后断开节点 */
+        o.onended = function() { try { o.disconnect(); g.disconnect(); } catch(e) {} };
+    } catch(e) { console.warn('[AudioManager] _sweep error:', e); }
 };
 Ap._chord = function(freqs, dur, vol) {
     var self = this;
