@@ -2,14 +2,8 @@
    响应式: 小视口战场优化
    ══════════════════════════════════════════════ */
 
-/* ≤768px 高度: 缩小角色和敌人尺寸 (宽高由 gameplay-enemy.css 权威定义) */
-@media (max-height: 768px) {
-    .enemy { width: 30px; height: 40px; }
-}
-
-/* ≤600px 高度: 大幅缩小 */
+/* ≤600px 高度: 面板字号缩小 (敌人尺寸由 gameplay-enemy.css 权威定义) */
 @media (max-height: 600px) {
-    .enemy { width: 24px; height: 32px; }
     .pause-panel { padding: 20px 24px; }
     .pause-title { font-size: calc(22 * var(--_fs) * 1px); }
     .guide-panel { padding: 16px 18px; }
@@ -20,11 +14,6 @@
     .mutator-card-icon { font-size: calc(28 * var(--_fs) * 1px); }
     .mutator-card-title { font-size: calc(14 * var(--_fs) * 1px); }
     .mutator-card-desc { font-size: calc(11 * var(--_fs) * 1px); }
-}
-
-/* ≤480px 极小视口 */
-@media (max-height: 480px) {
-    .enemy { width: 20px; height: 28px; }
 }
 
 /* 超宽屏: 战场居中 */
