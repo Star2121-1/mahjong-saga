@@ -35,6 +35,7 @@
         s.totalHitsTaken += hitsTaken;
         if (hitsTaken === 0 && won) s.perfectRuns++;
         if (uniqueRelics > s.relicVariety) s.relicVariety = uniqueRelics;
+        this._metaCache.runStats = s; /* R148-P1: 写回_metaCache，防止赛季激活依赖stale数据需二次刷新 */
         return s;
     };
 
