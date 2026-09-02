@@ -76,6 +76,8 @@
         if (stats.totalKills > lb.mostKills) lb.mostKills = stats.totalKills;
         if (stats.totalGold > lb.mostGold) lb.mostGold = stats.totalGold;
         if (stats.perfectRuns > lb.perfectRuns) lb.perfectRuns = stats.perfectRuns;
+        /* R158-P0: 排行榜更新后持久化，防止页面刷新丢失 */
+        try { this._saveMetaToStorage().catch(function(e) { console.warn('[SaveManager] leaderboard persist failed:', e); }); } catch(e) {}
         return lb;
     };
 

@@ -24,11 +24,14 @@ window.toastSystem = {
                 return this._pool[i];
             }
         }
-        /* 没空闲节点 → 创建新的 */
-        var node = document.createElement('div');
-        node.used = true;
-        this._pool.push(node);
-        return node;
+    /* R158-P0: 限制pool最大容量，防止跨局累计无限增长 */
+    if (this._pool.length > 10) {
+        var toRemove = this._pool.length - 10;
+        for (var i = 0; i < toRemove && this._pool.length > 10; i++) {
+            var extra = this._pool.pop();
+            if (extra.parentNode) extra.parentNode.removeChild(extra);
+        }
+    }
     },
 
     _releaseNode: function(node) {
