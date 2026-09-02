@@ -96,6 +96,9 @@ Sys.endOverdrive = function(engine) {
     }
 
     if (engine.container) engine.container.classList.remove('overdrive-active');
+    /* R170-P1: 清除残存定时器，防止overdrive结束后状态泄漏 */
+    if (engine._flameHideTimer) { clearTimeout(engine._flameHideTimer); engine._flameHideTimer = null; }
+    if (engine._iceHideTimer) { clearTimeout(engine._iceHideTimer); engine._iceHideTimer = null; }
 };
 
 /* ── 突变系统 ── */

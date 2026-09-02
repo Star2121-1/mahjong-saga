@@ -13,7 +13,7 @@ window.heroConfig = {
         passiveName: '雀灵祝福',
         passiveDesc: '攻击速度 +15%，武器冷却缩减 10%',
         weaponSlots: 6,
-        cdFloor: 0.18
+        cdFloor: 0.2 /* R170-P1: 设0.2后由Player.js * 0.9 = 0.18，避免双重应用导致实际值0.162 */
     },
     Knight: {
         id: 'Knight',

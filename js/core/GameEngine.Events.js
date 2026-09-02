@@ -68,6 +68,7 @@ Gp._triggerInterWaveEvent = function() {
         self._interWaveEvent = null;
         self._spawnCausalityText('⏱ 恩赐已自动接受');
         evt.apply.call(self);
+        self._syncUI(); /* R170-P1: 超时自动接受路径补全_syncUI，防止UI显示滞后 */
         self._continueAfterInterWave();
     }, 15000);
     document.getElementById('interevent-accept').addEventListener('click', function() {
@@ -87,6 +88,8 @@ Gp._triggerInterWaveEvent = function() {
 
 Gp._continueAfterInterWave = function() {
     this._pendingReward = false;
+    /* R170-P1: 确保interWaveEvent引用被清除，防止后续检查使用陈旧引用 */
+    this._interWaveEvent = null;
     /* Epoch 47: 深渊商店入口 */
     if (this._showAbyssShopEntrance && this._abyssShopVisible === false) {
         this._showAbyssShopEntrance();

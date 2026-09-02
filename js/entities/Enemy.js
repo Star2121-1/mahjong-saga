@@ -181,6 +181,8 @@ window.Enemy = class Enemy {
                     this._savedBossPhase = undefined;
                     /* R117-P1: 解冻后重置接触冷却，防止解冻瞬间误触接触伤害 */
                     this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
+                    /* R170-P1: 重置接触标志，防止解冻瞬间跳过接触伤害 */
+                    this._bossContactThisFrame = false;
                 }
             }
             return;
@@ -985,7 +987,8 @@ window.Enemy = class Enemy {
         /* K-029: 万子连击 -- 15% 几率造成额外 50% 伤害，有全局冷却防高频触发 */
         var _eng3 = this._eng || window.gameEngine;
         if (_eng3 && _eng3.player && _eng3.player.heroId === 'Knight') {
-            if (this._comboCooldown <= 0 && Math.random() < Balance.KNIGHT_COMBO_CHANCE) {
+            /* R170-P1: 反伤伤害不应触发英雄连击，防止thorns伤害二次放大 */
+            if (this._comboCooldown <= 0 && source !== 'thorns' && Math.random() < Balance.KNIGHT_COMBO_CHANCE) {
                 actualDmg = Math.floor(actualDmg * Balance.KNIGHT_COMBO_DAMAGE_MULT);
                 this._comboCooldown = Balance.KNIGHT_COMBO_COOLDOWN;
             }
@@ -1107,6 +1110,8 @@ window.Enemy = class Enemy {
                         }
                     }
                     child._clampPosition(engRef);
+                    /* R170-P1: 设置子体引擎引用，防止回退到全局gameEngine导致异常 */
+                    child._eng = engRef;
                     child.maxHp = Math.floor(child.maxHp * Balance.SPLITTER_CHILD_HP_MULT);
                     child.hp = child.maxHp;
                     child.atk = Math.floor(child.atk * Balance.SPLITTER_CHILD_ATK_MULT);

@@ -175,7 +175,8 @@ class Player {
             /* Epoch 3: 闪避计数 */
             if (window.gameEngine) {
                 window.gameEngine._totalDodgesThisRun = (window.gameEngine._totalDodgesThisRun || 0) + 1;
-                window.gameEngine._checkAchievementInflight('dodge_king', window.gameEngine._totalDodgesThisRun);
+                /* R170-P1: 修复 _checkAchievementInflight 未定义引用（R168已重命名为_checkAchievement） */
+                window.gameEngine._checkAchievement('dodge_king', window.gameEngine._totalDodgesThisRun);
             }
             return false;
         }

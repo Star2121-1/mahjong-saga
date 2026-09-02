@@ -264,6 +264,9 @@ Gp.restart = function() {
     /* R152-P0: 清理Overdrive全屏白闪DOM，防止重启后残留节点 */
     var _odf = document.getElementById('overdrive-flash');
     if (_odf && _odf.parentNode) _odf.remove();
+    /* R170-P1: 清理Overdrive金色流光粒子，防止重启后DOM泄漏 */
+    var _bursts = document.querySelectorAll('.legendary-burst');
+    for (var _bi = 0; _bi < _bursts.length; _bi++) { if (_bursts[_bi].parentNode) _bursts[_bi].remove(); }
     /* R118-P0: 清理FxManager对象池，防止飘字节点跨局泄漏 */
     if (window.fxManager) window.fxManager.cleanup();
     /* R165-P0: 清理ToastSystem活跃节点，防止restart后toast DOM残留 */
@@ -402,8 +405,12 @@ Gp.restart = function() {
    ══════════════════════════════════════════════ */
 
 Gp._showVictory = function() {
-    /* 刷新成 that 到 meta，防止跨局丢失 */
+    /* R168-P0: 刷新成 that 到 meta，防止跨局丢失 */
     this._flushAchievementsToMeta();
+    /* R170-P1: 隐藏可能残留的active overlays，防止与victory界面叠显示 */
+    if (window.rewardManager) window.rewardManager.hidePanel();
+    if (this.mutatorOverlay) this.mutatorOverlay.classList.remove('active');
+    if (this._bossGamblePanel && this._bossGamblePanel.parentNode) this._bossGamblePanel.remove();
     if (window.saveManager && window.saveManager.recordRunStats) {
         var meta = window.saveManager._metaCache || {};
         window.saveManager.recordRunStats(
@@ -426,8 +433,18 @@ Gp._showVictory = function() {
 };
 
 Gp._gameOver = function() {
-    /* 刷新成就到 meta */
+    /* R168-P0: 刷新成就到 meta */
     this._flushAchievementsToMeta();
+    /* R170-P0: 清理Boss Gamble状态，防止overlay残留叠加在game-over界面上 */
+    this._pendingBossGamble = false;
+    this._gambleActive = false;
+    this._gambleType = null;
+    this._gambleStaked = 0;
+    if (this._interWaveTimeout) { clearTimeout(this._interWaveTimeout); this._interWaveTimeout = null; }
+    /* R170-P1: 隐藏可能残留的active overlays，防止与game-over界面叠显示 */
+    if (window.rewardManager) window.rewardManager.hidePanel();
+    if (this.mutatorOverlay) this.mutatorOverlay.classList.remove('active');
+    if (this._bossGamblePanel && this._bossGamblePanel.parentNode) this._bossGamblePanel.remove();
     if (window.saveManager && window.saveManager.recordRunStats) {
         var meta = window.saveManager._metaCache || {};
         window.saveManager.recordRunStats(
