@@ -621,7 +621,7 @@ Gp._triggerHu = function (hu) {
     var B = window.Balance, p = this.player;
     if (!p || this._huLock || this.gameOver) return;
     this._huLock = true;
-    var names = { pihu: '屁胡', qiduizi: '七对子', pengpenghu: '碰碰胡', qingyise: '清一色' };
+    var names = { qiduizi: '七对子', pengpenghu: '碰碰胡', qingyise: '清一色' }; /* R188-P1: 移除死代码pihu */
     var name = names[hu.huType] || '胡牌';
     /* R115-P0: 屏幕阅读器播报胡牌 */
     this._announceToSR(name + '！');
@@ -644,9 +644,6 @@ Gp._triggerHu = function (hu) {
     /* 番型增益（圣物Lv3-4锚定，本局生效） */
     try {
         switch (hu.huType) {
-            case 'pihu':
-                p.addGold(B.HU_PIHU_GOLD);
-                break;
             case 'qingyise':
                 p.atk += Math.ceil(p.atk * B.HU_QINGYISE_DMG);
                 p.atk = Math.min(p.atk, B.ATK_MAX_CAP); /* R56-P1: 单色攻击上限保护，防止无限叠加 */

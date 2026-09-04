@@ -337,7 +337,7 @@ window.Balance = {
 
     /* ── HUPAI / MahjongHand.js + GameEngine.Spawn.js + Player.js ── */
     HUPAI_DROP_CHANCE: 0.06,
-    HUPAI_FLOWER_POOL_RATIO: 0.05,
+    HUPAI_FLOWER_POOL_RATIO: 0.03, /* R188-P1: 从0.05降至0.03，对齐设计文档要求 */
     HUPAI_MAIN_SUIT_WEIGHT: 0.50,
     HUPAI_HAND_MAX: 14,
     HUPAI_WILDCARD_MAX: 3,
