@@ -226,7 +226,6 @@
     animation-play-state: paused !important;
     transition-property: none !important;
 }
-}
 .game-clock-frozen #reward-overlay,
 .game-clock-frozen #reward-overlay *,
 .game-clock-frozen #reward-overlay *::before,
