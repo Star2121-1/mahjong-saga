@@ -753,22 +753,10 @@ Gp._checkMilestones = function() {
 };
 
 /* ══════════════════════════════════════════════
-   R168-P0: 成就检测系统 — 补全缺失的 _checkAchievement 方法
+   R168-P0: 成就检测系统
+   _checkAchievement 权威实现在 GameEngine.Combat.js（后加载覆盖）
+   此处仅保留 _flushAchievementsToMeta 辅助方法
    ══════════════════════════════════════════════ */
-
-Gp._checkAchievement = function(achievementId, value) {
-    if (!window.achievementConfig || !window.achievementCheck || !window.achievementCheck.inflight) return;
-    var handler = window.achievementCheck.inflight[achievementId];
-    if (!handler) return;
-    try {
-        var unlocked = handler(this, value);
-        if (unlocked && !this._achievementFlags) this._achievementFlags = {};
-        if (!this._achievementFlags[achievementId]) {
-            this._achievementFlags[achievementId] = true;
-            this._spawnCausalityText('🏆 成就解锁：' + achievementId);
-        }
-    } catch(e) { console.warn('[Achievement] check failed:', achievementId, e); }
-};
 
 Gp._flushAchievementsToMeta = function() {
     if (!this._achievementFlags || !window.saveManager) return;

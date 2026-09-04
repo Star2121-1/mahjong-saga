@@ -126,18 +126,11 @@ Gp._spawnCoinBurst = function(count) {
     if (!this.battlefield) return;
     var px = this.player.x;
     var py = this.player.y;
-    for (var i = 0; i < count; i++) {
-        var angle = (Math.PI * 2 / count) * i + Math.random() * 0.5;
-        var dist = 30 + Math.random() * 40;
-        var cx = px + Math.cos(angle) * dist;
-        var cy = py + Math.sin(angle) * dist;
-        this.player.addGold(1);
-    }
-    /* L-022: 添加视觉反馈 — 委托给 CombatSystem */
+    /* L-022: 通过 spawnCoinsAt 生成可拾取金币，避免 addGold 直接加钱导致双倍 */
     if (this._combat && this._combat.spawnCoinsAt) {
-        this._combat.spawnCoinsAt(this, px, py, false, 1);
+        this._combat.spawnCoinsAt(this, px, py, false, count);
     }
-    if (window.fxManager) window.fxManager.spawnText(px, py, '+' + count + ' 🪙', '#ffd700', 24); /* P1: 移除未使用的duration参数 */
+    if (window.fxManager) window.fxManager.spawnText(px, py, '+' + count + ' 🪙', '#ffd700', 24);
 };
 
 /* ══════════════════════════════════════════════
