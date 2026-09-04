@@ -148,6 +148,8 @@ window.Balance = {
     WAVE_TIME_DILATION_SPEED_DEBUFF: 0.7, // 时光缓流移速减益 (Events.js)
     WAVE_IRON_FIST_CRIT_BONUS: 0.25,   // 铁拳暴击加成 (Events.js)
     KNIGHT_SLAM_ATK_FACTOR: 0.5,       // 骑士闪避冲击波 ATK 系数 (Events.js)
+    DRONE_EVOLVED_SLAM_FACTOR: 0.6,    // 进化无人机撞击伤害系数 (Loop.js)
+    DRONE_NORMAL_SLAM_FACTOR: 0.4,     // 普通无人机撞击伤害系数 (Loop.js)
 
     /* ── 图腾 ── */
     TOTEM_SPAWN_INTERVAL: 5,

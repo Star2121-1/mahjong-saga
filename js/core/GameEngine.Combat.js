@@ -75,6 +75,19 @@ Gp._resumeAfterLevelUp = function() {
         && this.currentWaveSpawnedCount >= this._getWaveEnemyMax() && this._waveCount < this._getMaxWaves() - 1) {
         this._pendingReward = true;
     }
+    /* R200-P0: Boss死亡期间升级 — 恢复后检查是否需结算胜利（防止波次已清除但无胜利路径的永久运行） */
+    if (this.enemies.length === 0 && this._activeCoins.length === 0 && this._expGems.length === 0
+        && this._waveCount >= this._getMaxWaves() - 1 && !this._pendingBossLordSettle) {
+        this.running = false;
+        this.gameOver = true;
+        this._won = true;
+        if (this._currentLevelId === 'level_3' || this.loopCount > 0) {
+            this._showAbyssPanel();
+        } else {
+            this._showVictory();
+        }
+        return;
+    }
     /* Epoch 2: 雀魂护盾 — 每10波触发 */
     this._checkQqueenShield();
     this._beginLoop();
@@ -613,7 +626,7 @@ Gp._gameOver = async function() {
 
     if (this.resultTime) this.resultTime.textContent = this._formatTime(this._elapsed);
     if (this.resultKills) this.resultKills.textContent = this.kills;
-    if (this.resultWave) this.resultWave.textContent = (this._waveCount || 0) +' /' + (this._totalWaves || 0);
+    if (this.resultWave) this.resultWave.textContent = (this._waveCount || 0) +' /' + (this._totalWaves || this._getMaxWaves() || 0);
     if (this.gameOverOverlay) this.gameOverOverlay.classList.add('active');
     /* R115-P0: 屏幕阅读器播报失败 */
     this._announceToSR('游戏结束。击杀 ' + this.kills + ' 个敌人，存活 ' + this._formatTime(this._elapsed));

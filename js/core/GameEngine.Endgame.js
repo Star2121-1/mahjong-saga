@@ -212,8 +212,8 @@ Gp.restart = function() {
     /* R37-P1: 确保frailtyDebuff在所有重启路径下被清除 */
     if (this.player) this.player._frailtyDebuff = false;
     /* P1: 清除残留定时器，防止导航后回调在旧引擎上执行 */
-    if (this._gambleTimeout) clearTimeout(this._gambleTimeout);
-    if (this._interWaveTimeout) clearTimeout(this._interWaveTimeout);
+    if (this._gambleTimeout) { clearTimeout(this._gambleTimeout); this._gambleTimeout = null; }
+    if (this._interWaveTimeout) { clearTimeout(this._interWaveTimeout); this._interWaveTimeout = null; }
     if (this._qqueenShieldTimer) clearTimeout(this._qqueenShieldTimer);
     /* R104-P1: 清理共振隐藏定时器 */
     if (this._flameHideTimer) { clearTimeout(this._flameHideTimer); this._flameHideTimer = null; }

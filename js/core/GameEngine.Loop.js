@@ -102,7 +102,7 @@ Gp._loop = function(timestamp) {
                                 _top3.push({ e: _e, d: _dist2 });
                             }
                         }
-                        for (var _ti = 0; _ti < _top3.length; _ti++) _top3[_ti].e.takeDamage(Math.max(1, Math.floor(this.player.atk * 0.6 * (1 + (this.player._tempAtkBoost || 0)))), this.player);
+                        for (var _ti = 0; _ti < _top3.length; _ti++) _top3[_ti].e.takeDamage(Math.max(1, Math.floor(this.player.atk * Balance.DRONE_EVOLVED_SLAM_FACTOR * (1 + (this.player._tempAtkBoost || 0)))), this.player);
                     } else {
                         var nearest = null;
                         var nearestDist = Infinity;
@@ -114,7 +114,7 @@ Gp._loop = function(timestamp) {
                             var _nd = _ndx * _ndx + _ndy * _ndy;
                             if (_nd < nearestDist) { nearestDist = _nd; nearest = _ne; }
                         }
-                        if (nearest) nearest.takeDamage(Math.max(1, Math.floor(this.player.atk * 0.4 * (1 + (this.player._tempAtkBoost || 0)))), this.player);
+                        if (nearest) nearest.takeDamage(Math.max(1, Math.floor(this.player.atk * Balance.DRONE_NORMAL_SLAM_FACTOR * (1 + (this.player._tempAtkBoost || 0)))), this.player);
                     }
                 }
             }

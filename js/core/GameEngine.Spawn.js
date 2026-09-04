@@ -108,6 +108,8 @@ Gp._tryDropEquipment = function(x, y, isBossLord) {
     var chance = Math.max(0, Math.min(1, isBossLord ? Balance.EQUIPMENT_DROPS_BOSS_LORD : Balance.EQUIPMENT_DROPS_NORMAL));
     /* Epoch 16: Abyss Gamble 3x 掉落 + 怪物潮双倍 */
     var abyssMult = this._gambleAbyssBonus ? 3 : 1;
+    /* R200-P0: 深渊血月combo掉落加成 */
+    if (this._abyssActiveCombo === 'abyss_bloodmoon') abyssMult *= Balance.ABYSS_BLOODMOON_DROP_MULT;
     var surgeMult = this._monsterSurgeDoubleDrops ? 2 : 1;
     var totalMult = abyssMult * surgeMult;
     if (Math.random() > chance) return;
@@ -124,16 +126,13 @@ Gp._tryDropEquipment = function(x, y, isBossLord) {
     meta.equipments = meta.equipments || [];
     /* 限制装备仓库最近 100 件，防止无限增长 */
     if (meta.equipments.length > 100) meta.equipments = meta.equipments.slice(-100);
-    window.saveManager._saveMetaToStorage().catch(function(e){ console.warn('[Spawn] saveMeta failed:', e); });
-    var qualityLabel = { rare: '稀有', epic: '史诗', legendary: '传说' }[quality] || quality;
-    this._spawnCausalityText('🎁 获得装备：' + item.name + ' (' + qualityLabel + ')');
-    /* Epoch 16: Abyss Gamble + 怪物潮双倍掉落 — 先保存原始item，循环生成额外副本 */
+    /* R200-P0: 先推入再保存，避免中间态丢失掉落 + 重复toast */
     meta.equipments.push(item);
     if (meta.equipments.length > 100) meta.equipments = meta.equipments.slice(-100);
     window.saveManager._saveMetaToStorage().catch(function(e){ console.warn('[Spawn] saveMeta failed:', e); });
     var qualityLabel = { rare: '稀有', epic: '史诗', legendary: '传说' }[quality] || quality;
     this._spawnCausalityText('🎁 获得装备：' + item.name + ' (' + qualityLabel + ')');
-    /* 生成额外副本（totalMult-1 个） */
+    /* Epoch 16: Abyss Gamble + 怪物潮双倍掉落 — 额外副本 */
     for (var _di = 1; _di < totalMult; _di++) {
         var dropItem = window.equipmentRegistry.createItem(protoId, quality);
         if (dropItem) {
