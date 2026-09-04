@@ -73,6 +73,8 @@ Gp.init = async function() {
             if (window.rewardManager) window.rewardManager.hidePanel();
             /* R132-P1: resume路径统一调用reset()即可，init()的赋值会被reset()覆盖且语义冗余 */
             if (window.SpawnSystem) window.SpawnSystem.reset(this);
+            /* R206-P1: 恢复路径补全视口resize监听，防止restart后再恢复时相机追踪失效 */
+            this._initViewportResize();
             /* R189-P1: 重置_announcingWave，防止崩溃时处于wave公告状态导致resume后死锁 */
             this._announcingWave = false;
             this._syncEntities();
@@ -116,7 +118,7 @@ Gp.init = async function() {
             if (e.button !== 0) return;
             if (e.target.closest && e.target.closest('#joystick-container')) return;
             /* 排除 overlay 区域 — 防止拦截 modal 点击 */
-            if (e.target.closest && (e.target.closest('#reward-overlay, #victory-overlay, #game-over-overlay, #pause-overlay, #guide-overlay, #mutator-overlay, #boss-gamble-panel'))) return;
+            if (e.target.closest && (e.target.closest('#reward-overlay, #victory-overlay, #game-over-overlay, #pause-overlay, #guide-overlay, #mutator-overlay, #boss-gamble-panel, #abyss-panel, #abyss-shop-panel'))) return;
             if (!self.running || self.gameOver || self._pendingReward) return;
             /* P1-7: 打牌/胡牌演出期间冻结战场输入 */
             if (self._discardMode || self._huLock) return;

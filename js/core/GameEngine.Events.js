@@ -40,7 +40,7 @@ Gp._triggerInterWaveEvent = function() {
     if (titleEl) titleEl.textContent = evt.icon + ' ' + evt.name;
 
     var cardsDiv = overlay.querySelector('.reward-cards');
-    if (!cardsDiv) { console.error('[Events] .reward-cards not found in overlay'); this._unfreezeClock(); return; }
+    if (!cardsDiv) { console.error('[Events] .reward-cards not found in overlay'); this._unfreezeClock(); this._beginLoop(); return; }
     cardsDiv.innerHTML =
         '<div style="text-align:center;padding:20px;">' +
         '<div style="font-size:48px;margin:10px;">' + evt.icon + '</div>' +
