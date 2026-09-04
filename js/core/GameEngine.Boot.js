@@ -634,9 +634,20 @@ Gp._announceWave = function(waveIdx) {
 
 Gp._freezeClock = function() {
     if (this.container) this.container.classList.add('game-clock-frozen');
+    /* R190-P0: 暂停AudioContext防止面板打开时音效持续播放 */
+    if (window.audioManager && window.audioManager._ctx) {
+        var ctx = window.audioManager._ctx;
+        if (ctx.state === 'running') ctx.suspend();
+    }
 };
 Gp._unfreezeClock = function() {
     if (this.container) this.container.classList.remove('game-clock-frozen');
+    /* R190-P0: 恢复AudioContext */
+    if (window.audioManager && window.audioManager._ctx) {
+        window.audioManager._ctx.resume().catch(function(e) {
+            console.warn('[Audio] resume failed:', e);
+        });
+    }
 };
 
 /* ── 暂停系统 ── */
