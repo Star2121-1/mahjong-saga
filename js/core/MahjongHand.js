@@ -204,14 +204,17 @@
         if (effective < B.HUPAI_HAND_MAX) return null;
         /* 清一色：非癞子全部同花色（癞子视为该花色任意），字牌不计入花色 */
         var suitsPresent = {};
+        var hasHonor = false; /* R188-P0: 追踪字牌存在性，防止字牌+单花色误判清一色 */
         for (var id in t.count) {
             var fi = FACE_MAP[id];
             if (!fi) continue; /* R46-P1: 防御非法ID防止空指针 */
             var suit = fi.suit;
+            if (isHonor(id)) { hasHonor = true; continue; } /* R188-P0: 显式追踪字牌 */
             if (suit !== 'zi') suitsPresent[suit] = true; /* P0: 排除字牌，避免纯字牌+癞子误判为清一色 */
         }
         var suitKeys = Object.keys(suitsPresent);
-        if (suitKeys.length > 0 && (t.jokers > 0 ? suitKeys.length <= 1 : suitKeys.length === 1)) {
+        /* R188-P0: 增加 !hasHonor 约束，防止字牌+单花色被误判为清一色 */
+        if (suitKeys.length > 0 && !hasHonor && (t.jokers > 0 ? suitKeys.length <= 1 : suitKeys.length === 1)) {
             return { huType: 'qingyise', suit: suitKeys[0] };
         }
         /* 七对子：凑齐 7 对（14 张），每癞子可补 1 个缺口 */
