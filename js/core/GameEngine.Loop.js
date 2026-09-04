@@ -102,7 +102,7 @@ Gp._loop = function(timestamp) {
                                 _top3.push({ e: _e, d: _dist2 });
                             }
                         }
-                        for (var _ti = 0; _ti < _top3.length; _ti++) _top3[_ti].e.takeDamage(Math.max(1, Math.floor(this.player.atk * 0.6 * (1 + (this.player._tempAtkBoost || 0)))));
+                        for (var _ti = 0; _ti < _top3.length; _ti++) _top3[_ti].e.takeDamage(Math.max(1, Math.floor(this.player.atk * 0.6 * (1 + (this.player._tempAtkBoost || 0)))), this.player);
                     } else {
                         var nearest = null;
                         var nearestDist = Infinity;
@@ -114,7 +114,7 @@ Gp._loop = function(timestamp) {
                             var _nd = _ndx * _ndx + _ndy * _ndy;
                             if (_nd < nearestDist) { nearestDist = _nd; nearest = _ne; }
                         }
-                        if (nearest) nearest.takeDamage(Math.max(1, Math.floor(this.player.atk * 0.4 * (1 + (this.player._tempAtkBoost || 0)))));
+                        if (nearest) nearest.takeDamage(Math.max(1, Math.floor(this.player.atk * 0.4 * (1 + (this.player._tempAtkBoost || 0)))), this.player);
                     }
                 }
             }
@@ -180,7 +180,7 @@ Gp._loop = function(timestamp) {
                 /* B3: 图腾寿命到期清理（8s） */
                 for (var _tex = this._totems.length - 1; _tex >= 0; _tex--) {
                     var _tt = this._totems[_tex];
-                    if (_tt.born !== undefined && this._elapsed - _tt.born > 8) {
+                    if (_tt.born !== undefined && this._elapsed - _tt.born > Balance.TOTEM_LIFETIME) {
                         if (_tt.el && _tt.el.parentNode) _tt.el.remove();
                         this._totems.splice(_tex, 1);
                     }
@@ -297,6 +297,8 @@ Gp._loop = function(timestamp) {
                         this._cleanEnemyProjectiles();
                         /* R30-H-016: Boss Lord死亡后清理金币/宝石，但不移除其他活敌 */
                         // 注：非Boss活敌由主死亡循环正常处理，此处仅清理掉落物和状态
+                        /* R199-P0: Boss死亡时归还未拾取金币，防止丢失 */
+                        for (var _lci = 0; _lci < this._activeCoins.length; _lci++) this.player.addGold(1);
                         for (var _lci = 0; _lci < this._activeCoins.length; _lci++) this._activeCoins[_lci].el.remove();
                         this._activeCoins = [];
                         if (this.bossHpBar) this.bossHpBar.classList.remove('active');
@@ -384,10 +386,11 @@ Gp._loop = function(timestamp) {
                         var _dropIdx = this._rainDrops.length;
                         this._rainDrops.push(drop);
                         var _self = this;
+                        var _dur = parseFloat(drop.style.getPropertyValue('--duration')) || 0.6;
                         setTimeout(function(el, arr) {
                             if (el && el.parentNode) el.remove();
                             if (arr) { var i = arr.indexOf(el); if (i >= 0) arr.splice(i, 1); }
-                        }, 700, drop, this._rainDrops);
+                        }, (_dur + 0.1) * 1000, drop, this._rainDrops);
                     }
                 }
             }

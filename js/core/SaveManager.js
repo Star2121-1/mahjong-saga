@@ -44,7 +44,7 @@ class SaveManager {
         /* M-005: 监听跨页面 localStorage 变更，使缓存失效 */
         var self = this;
         window.addEventListener('storage', function(e) {
-            if (e && e.key === 'cr_meta.json') {
+            if (e && (e.key === 'cr_meta.json' || e.key === 'cr_active_run.json')) {
                 self._metaCache = null;
             }
             /* R116-P1: 同时监听 active_run 变更，防止跨 Tab 状态下缓存不一致 */

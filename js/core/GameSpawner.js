@@ -34,6 +34,7 @@ Ss.init = function(engine) {
 /* ── 重置 ── */
 
 Ss.reset = function(engine) {
+    this.engine = engine; /* R199-P0: 必须在reset时保存engine引用，resume路径需要 */
     this._spawnTimer = 0;
     this._difficultyTimer = 0;
     this._bossTimer = 0;

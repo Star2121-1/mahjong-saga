@@ -32,8 +32,13 @@ window.Weapon = class {
         var playerCdFloor = (window.gameEngine && window.gameEngine.player) ? window.gameEngine.player.cdFloor : null;
         var floor = (playerCdFloor != null) ? playerCdFloor : Balance.DEFAULT_CD_FLOOR;
         this.cd = Math.max(floor, this.cd * Balance.WEAPON_UPGRADE_CD_MULT);
-        this._baseCd = Math.max(floor, (this._baseCd || this.cd) * Balance.WEAPON_UPGRADE_CD_MULT); /* P0: 同步更新_baseCd */
-        this._origBaseCd = Math.max(floor, this._origBaseCd * Balance.WEAPON_UPGRADE_CD_MULT); /* R161-P0b: 使用自身而非_baseCd，防止筒顺修改后二次压缩 */
+        /* R199-P0: 升级始终基于_origBaseCd，避免_tongCdReduction被二次乘算 */
+        this._origBaseCd = Math.max(floor, this._origBaseCd * Balance.WEAPON_UPGRADE_CD_MULT);
+        if (this._tongCdReduction > 0) {
+            this._baseCd = Math.max(floor, this._origBaseCd * (1 - this._tongCdReduction));
+        } else {
+            this._baseCd = this._origBaseCd;
+        }
     }
     reset() { /* P0: 清除overdrive残留状态，防止跨局伤害累积 */
         /* R159-P0: 优先恢复_odOrigAtk（overdrive期间升级的武器），再清除标志 */
@@ -219,10 +224,8 @@ window.ShotgunBurst = class extends window.Weapon {
     }
     fireAt(targetX, targetY, player, engine) {
         if (this.cooldownTimer > 0) return;
-        /* R187-P1: 应用cdFloor保护，防止weapon_amplify圣物绕过上限导致CD异常 */
-        var playerCdFloor = (window.gameEngine && window.gameEngine.player) ? window.gameEngine.player.cdFloor : null;
-        var floor = (playerCdFloor != null) ? playerCdFloor : Balance.DEFAULT_CD_FLOOR;
-        this.cooldownTimer = Math.max(floor, this.cd);
+        /* R199-P1: 使用当前帧已计算的cd值，与_updateWeapons保持一致（含_tempAspd疾风连打buff） */
+        this.cooldownTimer = this.cd;
         this._justFired = true;
         var baseAngle = Math.atan2(targetY - player.y, targetX - player.x);
         var speed = 250 + this.level * 10;
@@ -302,11 +305,16 @@ window.GroundSlammer = class extends window.Weapon {
                 if (swdist < e.radius + radius) {
                     sw.hitEnemies.add(e.id);
                     e.takeDamage(dmg, 'player', sw.x, sw.y);
-                    var knockAngle = Math.atan2(swdy, swdx);
-                    var force = Balance.GROUND_SLAMMER_KNOCKBACK_FORCE;
-                    e.x += Math.cos(knockAngle) * force;
-                    e.y += Math.sin(knockAngle) * force;
-                    e._knockbackVelocity = Balance.GROUND_SLAMMER_KNOCKBACK_FORCE;
+                    /* R199-P1: 击退只应用一次，防止每帧叠加导致敌人被推出地图 */
+                    if (!sw._knockbackApplied) sw._knockbackApplied = new Set();
+                    if (!sw._knockbackApplied.has(e.id)) {
+                        sw._knockbackApplied.add(e.id);
+                        var knockAngle = Math.atan2(swdy, swdx);
+                        var force = Balance.GROUND_SLAMMER_KNOCKBACK_FORCE;
+                        e.x += Math.cos(knockAngle) * force;
+                        e.y += Math.sin(knockAngle) * force;
+                        e._knockbackVelocity = force;
+                    }
                     if (typeof e._clampPosition === 'function') e._clampPosition(engine);
                 }
             }

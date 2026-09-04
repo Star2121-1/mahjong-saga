@@ -29,7 +29,7 @@
                 navItems[i].addEventListener('click', function(e) {
                     e.preventDefault();
                     if (this.id === 'btn-hub-home') {
-                        window.location.href = '../index.html';
+                        window.location.href = './s1_save_select.html';
                         return;
                     }
                     var panelId = this.getAttribute('data-panel');

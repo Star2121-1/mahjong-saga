@@ -111,6 +111,9 @@ class Player {
         this.hp = this.maxHp;
         this.atk += (tech.sharpening || 0) * 2;
         this.critRate += (tech.precision_training || 0) * 0.03;
+        /* R199-P1: 更新锚点，防止临时增益过期后fallback到未包含天赋加成后的值 */
+        this._baseMaxHp = this.maxHp;
+        this._baseAtk = this.atk;
     }
 
     update(dt, moveX, moveY, mapW, mapH) {
@@ -378,7 +381,7 @@ class Player {
                 break;
             case 'evolved_speed':
                 this.evolvedSpeed = true;
-                this.dodgeRate = Math.min(1, this.dodgeRate + Balance.EVOLVED_DODGE_BONUS);
+                this.dodgeRate = Math.min(Balance.MAX_DODGE_RATE, this.dodgeRate + Balance.EVOLVED_DODGE_BONUS);
                 this.speedMultiplier += Balance.EVOLVED_DODGE_BONUS;
                 this.speed = this.baseSpeed * this.speedMultiplier;
                 break;
@@ -399,7 +402,11 @@ class Player {
                         w.atkFactor += Balance.WEAPON_AMPLIFY_ATK_FACTOR_INC;
                         /* R188-P0: 同步更新_odOrigAtk防止overdrive结束后恢复错误值 */
                         if (w._odOrigAtk !== undefined) w._odOrigAtk += Balance.WEAPON_AMPLIFY_ATK_FACTOR_INC;
-                        w.cd = Math.max(this.cdFloor || Balance.DEFAULT_CD_FLOOR, (w._baseCd || w.cd) * Balance.WEAPON_UPGRADE_CD_MULT); /* R145-P1: 使用Balance常量替代硬编码0.9 */
+                        /* R199-P0: weapon_amplify应乘到_origBaseCd而非_baseCd，避免与_render cdReduction双重压缩 */
+                        var _ampFloor = this.cdFloor || Balance.DEFAULT_CD_FLOOR;
+                        w._origBaseCd = Math.max(_ampFloor, (w._origBaseCd || w.cd) * Balance.WEAPON_UPGRADE_CD_MULT);
+                        w._baseCd = w._origBaseCd;
+                        w.cd = Math.max(_ampFloor, w._origBaseCd * (1 - (this._weaponCdReduction || 0)));
                     }
                 }
                 break;
@@ -601,13 +608,14 @@ class Player {
         this._healAmount = 0;
         this._dodgeSignal = false;
         this._dodgeAspdTimer = 0; /* A-030: 暗影步闪避后攻速加成计时 */
-        this._thornsAffixBonus = 0;
+        /* R199-P0: _thornsAffixBonus已由line538从快照恢复，此处不应清零 — 否则断点续玩丢失gf_thorns反伤词条 */
 
         /* Epoch 23: restore 后重新应用天赋/声望/装备词缀 */
         this._skipRelicAffixes = true; /* P0: snapshot已含最终词条值，避免二次应用导致数值翻倍 */
         this._skipTalentBonus = true; /* R73-P0: 跳过天赋加成重算 — snapshot已含最终值，避免talent HP/speed/magnet暴击/减伤翻倍 */
         this._reapplyMetaBonuses(true); /* R51-P0: skip equip affixes — snapshot已含最终值 */
         this._skipTalentBonus = false;
+        this._skipRelicAffixes = false; /* R199-P1: 重置标志，允许后续代码路径正常使用relic affixes */
         if (this.heroId === 'Mage') this._recalcThornsRate();
         /* R159-P1: _reapplyMetaBonuses 已计算 setResonanceSpeed/setResonanceIce，无需二次重算 */
     }
@@ -842,19 +850,11 @@ class Player {
         this._qiduiMagBonus = 0; /* R154-P1: 七对子磁铁加成跨局清零 */
         this.speedMultiplier = 1.0;
         this.speed = this.baseSpeed;
-        /* H-029: 雀灵流转 -- reset 中恢复速度 */
-        if (this.heroId === 'Hero') {
-            this.speed = this.baseSpeed * Balance.HERO_SPEED_BONUS;
-        }
-        /* Epoch 42: 雀灵流转 -- reset 中恢复CD缩减 */
+        /* H-029: 雀灵流转 -- reset 中恢复CD缩减 */
         if (this.heroId === 'Hero') {
             this.cdFloor = Math.max(0.05, this.cdFloor * Balance.HERO_CD_FLOOR_REDUCTION);
         }
-        /* A-029: 暗影步 -- reset 中恢复速度 */
-        if (this.heroId === 'Assassin') {
-            this.speedMultiplier += Balance.HERO_ASSASSIN_SPEED_MULT - 1;
-            this.speed = this.baseSpeed * this.speedMultiplier;
-        }
+        /* A-029: 暗影步 -- reset 中恢复速度（已在_initFromConfig应用，此处跳过避免重复叠加） */
         this.currentLvl = 1;
         this.currentExp = 0;
         this.nextLvlExp = Balance.LEVEL_EXP_BASE;

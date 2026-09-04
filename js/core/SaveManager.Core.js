@@ -349,17 +349,15 @@
     };
 
     SaveManager.prototype.clearActiveRun = async function() {
-        this._writeJSON('active_run.json', {
+        var ok = this._writeJSON('active_run.json', {
             isRunActive: false, saveName: '', timestamp: Date.now(),
             dateString: this._formatDateString(new Date()),
             waveCount: 0, heroId: '', levelId: '', player: null, kills: 0, elapsed: 0
         });
-        /* R187-P1 + R189-P0: 先持久化再更新时间戳，防止saveMeta失败时_metaCache持有虚假时间 */
+        if (!ok) return false; /* R199-P0: 检查写入结果，quota满时返回false防止后续错误流程 */
         var meta = await this.getMeta();
-        await this.saveMeta(meta);
-        meta = await this.getMeta(); /* R189-P0: 重新读取确保一致性 */
         meta.lastSaveTimestamp = Date.now();
-        await this.saveMeta(meta);
+        return await this.saveMeta(meta); /* R199-P0: 单次meta写入即可，消除双重写竞争 */
     };
 
     SaveManager.prototype.hasContinueData = async function() {
@@ -441,7 +439,9 @@
                     baseCd: w._baseCd,
                     origBaseCd: w._origBaseCd,
                     cd: w.cd,
-                    rawBaseCd: w._rawBaseCd
+                    rawBaseCd: w._rawBaseCd,
+                    /* R199-P0: 序列化筒顺CD减免，防止断点续玩后丢失 */
+                    tongCdReduction: w._tongCdReduction || 0
                 };
             }) : []
         };
@@ -525,6 +525,8 @@
                     else if (_wInst.cd == null) _wInst.cd = _wInst._baseCd || _wInst.cd;
                     if (_wd.rawBaseCd != null) _wInst._rawBaseCd = _wd.rawBaseCd; /* R167-P0: 恢复原始基线CD，防止reset时回退到错误值 */
                     else if (_wInst._rawBaseCd == null) _wInst._rawBaseCd = _wInst._baseCd || _wInst.cd; /* R171-P1: 缺少rawBaseCd时初始化，防止undefined导致CD计算NaN */
+                    /* R199-P0: 恢复筒顺CD减免，防止断点续玩后丢失 */
+                    if (_wd.tongCdReduction != null) _wInst._tongCdReduction = _wd.tongCdReduction;
                     engine._activeWeapons.push(_wInst);
                 }
                 if (engine._activeWeapons.length === 0) {
@@ -723,6 +725,7 @@
         /* R128-P0: 清理 .bak 防止重置后旧备份回滚覆盖新数据 */
         try { localStorage.removeItem('cr_meta.json.bak'); } catch(e) {}
         try { localStorage.removeItem('cr_active_run.json.bak'); } catch(e) {}
+        return true; /* R199-P0: 返回true让调用方确认重置成功，避免误报"存档重置失败" */
     };
 
 })();

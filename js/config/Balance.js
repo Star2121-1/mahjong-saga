@@ -10,12 +10,13 @@ window.Balance = {
     ABYSS_LOOP_SPEED_MULT: 1.05,    // 深渊轮回 Speed 倍率 (Enemy.js)
     ABYSS_SHOP_PRICE_MULT: 1.0,     // R181-P0: 从1.5降至1.0，避免深渊经济崩溃（精英怪掉率低+高价商品=永远买不起）
     ABYSS_COMBO_UNLOCK_INTERVAL: 5, // 每 N 层解锁一个新深渊变异组合
-    ABYSS_BLOODMOON_HP_MULT: 1.6,   // 深渊血月HP加成 (Abyss.js)
-    ABYSS_BLOODMOON_ATK_MULT: 1.8,  // 深渊血月ATK加成 (Abyss.js)
-    ABYSS_BLOODMOON_DROP_MULT: 2,   // 深渊血月掉落加成 (Abyss.js)
-    ABYSS_FRENZY_SPEED_MULT: 2.0,   // 深渊狂乱速度加成 (Abyss.js)
-    ABYSS_FRAILTY_ATK_MULT: 2.5,    // 深渊脆弱玩家攻击加成 (Abyss.js)
-    ABYSS_FRAILTY_DMG_MULT: 1.5,    // 深渊脆弱受伤加成 (Abyss.js)
+    ABYSS_BLOODMOON_HP_MULT: 1.6,   // 深渊血月HP加成 (Loop.js _abyssCombo bloodmoon路径)
+    ABYSS_BLOODMOON_ATK_MULT: 1.8,  // 深渊血月ATK加成 (Loop.js _abyssCombo bloodmoon路径)
+    ABYSS_BLOODMOON_DROP_MULT: 2,   // 深渊血月掉落加成 (Loop.js Spawn.js)
+    ABYSS_FRENZY_SPEED_MULT: 2.0,   // 深渊狂乱速度加成 (Loop.js)
+    ABYSS_FRAILTY_ATK_MULT: 2.5,    // 深渊脆弱玩家攻击加成 (Loop.js _abyssCombo frailty路径)
+    ABYSS_FRAILTY_DMG_MULT: 1.5,    // 深渊脆弱受伤加成 (Loop.js)
+    TOTEM_LIFETIME: 8,              // 图腾生存时长(s) (Loop.js _totems清理)
     ENEMY_BASE_HP: 20,               // 普通敌人基础 HP (Enemy.js)
     ENEMY_BASE_ATK: 5,
     MAP_AFFINITY_REDUCTION_PER_LEVEL: 0.1,   // 每级关卡亲和减伤比例 (Boot.js)

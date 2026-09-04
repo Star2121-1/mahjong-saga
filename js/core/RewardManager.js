@@ -26,7 +26,7 @@ class RewardManager {
             ShotgunBurst:  { name: '七对子', desc: '点击打出 7 张散牌，近距叠吃多段', color: '#ff6d00', category: '对对', synergizes: ['golden_finger', 'sharp_edge'], atkFactor: 0.6, cd: 0.4 },
             GroundSlammer: { name: '碰碰胡', desc: '4s 冷却大范围碰牌震波扩散 + 击退', color: '#ffc107', category: '碰碰', synergizes: ['wind_walker', 'gravity_core'], atkFactor: 1.5, cd: 1.8 },
             LaserBeam:     { name: '一气贯通', desc: '300px 一气打通牌列高频融化，朝鼠标方向', color: '#ff1744', category: '一气', synergizes: ['vamp_ring', 'weapon_amplify'], atkFactor: 1.2, cd: 0.3 },
-            NovaPulse:     { name: '大四喜', desc: '3.5s 蓄力大四喜清场蒸发级伤害', color: '#d50000', category: '大四', synergizes: ['explosive_core', 'frost_core', 'weapon_amplify'], atkFactor: 2.5, cd: 3.5 }
+            NovaPulse:     { name: '大四喜', desc: '3.5s 蓄力大四喜清场蒸发级伤害', color: '#d50000', category: '大四', synergizes: ['explosive_core', 'frost_core', 'weapon_amplify'], atkFactor: 5.0, cd: 3.5 }
         };
 
         /* ── 武器间协同效果 ── */
@@ -105,6 +105,10 @@ class RewardManager {
         this._panelLocked = false;
         /* Clean up suckin animation if in progress */
         if (this._suckinCleanup) { this._suckinCleanup(); this._suckinCleanup = null; }
+        /* R199-P0: 无论overlay是否存在，始终解冻时钟 — 防止面板引用丢失时永久冻结游戏 */
+        if (window.gameEngine && typeof window.gameEngine._unfreezeClock === 'function') {
+            try { window.gameEngine._unfreezeClock(); } catch(e) {}
+        }
         if (!this.overlay) return;
         this.overlay.classList.remove('active');
         this.overlay.classList.remove('levelup-mode');
@@ -576,7 +580,8 @@ class RewardManager {
                 p._discoveredSecrets = discovered;
                 s.reward(p);
                 if (window.saveManager) {
-                    window.saveManager.recordDiscoveredSecret(s.id);
+                    /* R199-P0: 排队保存，防止快速连续发现秘密时race condition导致重复条目 */
+                    this._pendingSecretSave = this._pendingSecretSave.then(() => window.saveManager.recordDiscoveredSecret(s.id));
                 }
                 if (window.gameEngine && typeof window.gameEngine._spawnCausalityText === 'function') {
                     window.gameEngine._spawnCausalityText('🔮 秘密发现: ' + s.name + ' — ' + s.desc);

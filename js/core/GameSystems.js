@@ -239,7 +239,7 @@ Sys.updateResonanceAuras = function(engine, dt) {
                 var adx = e.x - px;
                 var ady = e.y - py;
                 if (adx * adx + ady * ady <= auraR * auraR) {
-                    e.takeDamage(dmg);
+                    e.takeDamage(dmg, 'player', px, py);
                 }
             }
             var flameEl = engine._flameAuraEl;

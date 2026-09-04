@@ -37,7 +37,8 @@ Gp.init = async function() {
     var data = await window.saveManager.loadActiveRun();
         if (data && data.isRunActive === true && data.player) {
             window.saveManager.restoreRunToEngine(this, data);
-            this._restoreWeapons(data.weapons);
+            /* R199-P1: 武器已由restoreRunToEngine内联恢复，此行是已删除方法的残留调用 — 注释掉 */
+            // this._restoreWeapons(data.weapons);
             /* R30-H-022: 恢复后重新计算武器协同标志 */
             this._checkWeaponSynergies();
             /* A6: 雀魂手牌状态恢复 */
@@ -327,7 +328,8 @@ Gp._initVisibilityPause = function() {
             if (self.running && !self.gameOver) self.running = false;
         } else if (!self._paused && !self.gameOver) {
             /* R164-P1: 防止面板未关闭时误恢复循环 */
-            if (!self._pendingReward && !self._announcingWave && !self._levelUpPending) {
+            /* R199-P1: 引导进行中时不允许恢复循环，防止alt-tab后引导被跳过 */
+            if (!self._pendingReward && !self._announcingWave && !self._levelUpPending && self._guideDismissed) {
                 self._beginLoop();
             }
         }
@@ -406,11 +408,17 @@ Gp._startNewRun = function(heroId, levelId) {
     this._huCountThisRun = 0;
     this._tempAspd = 0;
     this._tempAspdT = 0;
+    /* R199-P0: 重置玩家级临时buff计时，防止跨局残留 */
+    if (this.player) { this.player._tempBuffTimeLeft = 0; this.player._tempAtkBoost = 0; this.player._tempHpBonus = 0; }
     this._frailtyOrigPlayerAtk = null; /* R146-P1: 脆弱突变基线清零，防止跨续玩周期残留旧局值 */
     /* R38-P1: 重置满手牌Toast计时器，防止新游戏误触发 */
     this._handFullToastAt = 0;
     /* R30-H-017: 重置深渊combo状态，防止跨局污染 */
     if (typeof this._initAbyssState === 'function') this._initAbyssState();
+    /* R199-P0: 清理跨局残留DOM元素 — 避免abyss雾霭/昼夜指示器泄漏 */
+    if (this._abyssMistEl && this._abyssMistEl.parentNode) this._abyssMistEl.remove();
+    this._abyssMistEl = null;
+    this._dayNightEl = null;
     this._zoomLevel = 1;
     if (this.battlefield) this.battlefield.classList.remove('discard-mode');
     if (this.playerEl) this.playerEl.classList.remove('hu-qingyise');

@@ -49,6 +49,8 @@ Gp._restoreOpacity = function() {
 
 Gp._showGuideStep = function(stepIndex) {
     if (!this.guideOverlay) return;
+    /* R199-P1: 清除上一步残留的自动推进计时器 */
+    if (this._guideAutoAdvanceTimer) { clearTimeout(this._guideAutoAdvanceTimer); this._guideAutoAdvanceTimer = null; }
     var steps = this._guideSteps || [];
     if (stepIndex >= steps.length) {
         this._completeGuide();
@@ -84,11 +86,14 @@ Gp._showGuideStep = function(stepIndex) {
         } else {
             /* 交互式步骤：检查条件 */
             if (step.interactive && step.checkFn) {
-                nextBtn.textContent = '✓ 已完成，下一步 →';
-                nextBtn.style.color = '#4caf50';
+                var condMet = step.checkFn.call(self);
+                nextBtn.textContent = condMet ? '✓ 已完成，下一步 →' : '下一步 →';
+                nextBtn.style.color = condMet ? '#4caf50' : '';
+                nextBtn.disabled = !condMet; /* R199-P1: 禁用按钮直到条件满足，防止跳过引导 */
             } else {
                 nextBtn.textContent = '下一步 →';
                 nextBtn.style.color = '';
+                nextBtn.disabled = false;
             }
         }
     }
@@ -126,7 +131,9 @@ Gp._showGuideStep = function(stepIndex) {
     /* R160-P0: autoAdvance 步骤无需交互，3秒后自动进入下一步，防止永久卡死 */
     else if (step.autoAdvance && stepIndex < steps.length - 1) {
         var _self2 = this;
-        setTimeout(function() {
+        if (this._guideAutoAdvanceTimer) { clearTimeout(this._guideAutoAdvanceTimer); this._guideAutoAdvanceTimer = null; }
+        this._guideAutoAdvanceTimer = setTimeout(function() {
+            _self2._guideAutoAdvanceTimer = null;
             _self2._currentGuideStep = stepIndex + 1;
             _self2._showGuideStep(stepIndex + 1);
         }, 3000);
@@ -136,14 +143,18 @@ Gp._showGuideStep = function(stepIndex) {
 Gp._completeGuide = function() {
     /* R46-P2: 清除检查timer，防止guide完成后interval泄漏 */
     if (this._guideCheckTimer) { clearInterval(this._guideCheckTimer); this._guideCheckTimer = null; }
+    if (this._guideAutoAdvanceTimer) { clearTimeout(this._guideAutoAdvanceTimer); this._guideAutoAdvanceTimer = null; }
     this._restoreOpacity();
     this._clearHighlightTimers();
-    this.guideOverlay.classList.remove('active');
+    if (this.guideOverlay) this.guideOverlay.classList.remove('active'); /* R199-P2: null guard */
     this._guideDismissed = true;
     var meta = window.saveManager && window.saveManager._metaCache;
     if (meta) {
         meta.hasSeenGuide = true;
-        if (window.saveManager) window.saveManager._saveMetaToStorage();
+        /* R199-P1: await save防止hasSeenGuide未持久化导致下次重放引导 */
+        if (window.saveManager && typeof window.saveManager._saveMetaToStorage === 'function') {
+            window.saveManager._saveMetaToStorage().catch(function(e) { console.warn('[Guide] hasSeenGuide save failed:', e); });
+        }
     }
     /* 延迟启动游戏循环 */
     var self = this;
