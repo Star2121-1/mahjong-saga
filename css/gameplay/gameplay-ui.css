@@ -426,6 +426,13 @@
     animation-play-state: running !important;
 }
 
+/* R188-P1: 成就弹出动画在时钟冻结期间也应播放（如奖励面板打开时解锁成就） */
+.game-clock-frozen .fct-achieve,
+.game-clock-frozen .achievePop {
+    animation-play-state: running !important;
+    transition-property: none !important;
+}
+
 /* ══════════════════════════════════════════════
    引导面板步骤导航 (Epoch 1)
    ══════════════════════════════════════════════ */
