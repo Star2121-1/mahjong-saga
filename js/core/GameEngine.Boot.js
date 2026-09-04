@@ -261,6 +261,7 @@ Gp._bindStage3Events = function() {
         var volMaster = this.pauseOverlay.querySelector('#vol-master');
         var volSfx = this.pauseOverlay.querySelector('#vol-sfx');
         var volMusic = this.pauseOverlay.querySelector('#vol-music');
+        var volFeedback = this.pauseOverlay.querySelector('#vol-feedback');
         var muteToggle = this.pauseOverlay.querySelector('#mute-toggle');
         if (volMaster) {
             volMaster.addEventListener('input', function() {
@@ -280,6 +281,13 @@ Gp._bindStage3Events = function() {
             volMusic.addEventListener('input', function() {
                 if (window.audioManager) window.audioManager.setCategoryVolume('music', this.value / 100);
                 var v = this.pauseOverlay.querySelector('#vol-music-val');
+                if (v) v.textContent = this.value + '%';
+            });
+        }
+        if (volFeedback) {
+            volFeedback.addEventListener('input', function() {
+                if (window.audioManager) window.audioManager.setCategoryVolume('feedback', this.value / 100);
+                var v = this.pauseOverlay.querySelector('#vol-feedback-val');
                 if (v) v.textContent = this.value + '%';
             });
         }

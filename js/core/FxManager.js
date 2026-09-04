@@ -178,7 +178,8 @@ Fp.cleanup = function() {
         var excess = this._pool.pop();
         if (excess && excess.parentNode) excess.parentNode.removeChild(excess);
     }
-    this._freeStack = []; /* R198-P0: 清理空闲栈，防止重启后借出已分离DOM节点导致飘字消失 */
+    /* R201-P0: 重建空闲栈，只保留仍在池中的节点，防止清理后_freeStack指向已移除DOM的孤儿节点 */
+    this._freeStack = this._pool.slice();
 };
 
 window.fxManager = new window.FxManager();

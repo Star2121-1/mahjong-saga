@@ -441,6 +441,15 @@
 .game-clock-frozen #world-layer.shake-active {
     animation-play-state: running !important;
 }
+/* R199-P1: 武器槽波纹动画在面板打开时不应冻结 */
+.game-clock-frozen .slot-ripple {
+    animation-play-state: running !important;
+}
+/* R199-P1: 雀魂胡牌闪光动画在面板打开时不应冻结 */
+.game-clock-frozen #hand-tile-bar.hu-flash,
+.game-clock-frozen #hand-tile-bar.hu-flash * {
+    animation-play-state: running !important;
+}
 
 /* ══════════════════════════════════════════════
    引导面板步骤导航 (Epoch 1)

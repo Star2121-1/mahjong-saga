@@ -150,6 +150,16 @@
             <div class="pause-title" id="pause-title">⏸ 游戏暂停</div>
                 <button id="pause-continue-btn">▶ 继续游戏</button>
                 <button id="pause-hub-btn">返回大本营</button>
+                <button id="pause-settings-btn">🎛 音量设置</button>
+                <div id="pause-settings-panel" class="settings-section" style="display:none;">
+                    <div class="settings-title">音量</div>
+                    <label>整体 <input type="range" id="vol-master" min="0" max="100" value="60"> <span id="vol-master-val">60%</span></label>
+                    <label>SFX <input type="range" id="vol-sfx" min="0" max="100" value="100"> <span id="vol-sfx-val">100%</span></label>
+                    <label>音乐 <input type="range" id="vol-music" min="0" max="100" value="80"> <span id="vol-music-val">80%</span></label>
+                    <label>反馈 <input type="range" id="vol-feedback" min="0" max="100" value="90"> <span id="vol-feedback-val">90%</span></label>
+                    <label><input type="checkbox" id="mute-toggle"> 静音</label>
+                    <button id="settings-close-btn">关闭</button>
+                </div>
             </div>
         </div>
 

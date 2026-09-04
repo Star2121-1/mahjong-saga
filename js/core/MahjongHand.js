@@ -202,6 +202,12 @@
         var t = tally(hand);
         var effective = t.total + t.jokers;
         if (effective < B.HUPAI_HAND_MAX) return null;
+        /* R199-P0: pre-consume jokers used by extractMelds so Pengpenghu doesn't double-count them */
+        var consumed = extractMelds(hand);
+        var jokersAfterMelds = t.jokers;
+        for (var ci = 0; ci < consumed.length; ci++) {
+            if (consumed[ci].tiles.length > 3) jokersAfterMelds--;
+        }
         /* 清一色：非癞子全部同花色（癞子视为该花色任意），字牌不计入花色 */
         var suitsPresent = {};
         var hasHonor = false; /* R188-P0: 追踪字牌存在性，防止字牌+单花色误判清一色 */
@@ -221,18 +227,16 @@
         var pairs = 0;
         for (var id2 in t.count) { pairs += Math.floor(t.count[id2] / 2); }
         /* R140-P0: 修正七对子判定 — 用maxPossiblePairs防止多刻+多对+多癞子误判 */
-        var maxPossiblePairs = pairs + Math.min(t.jokers, t.total - pairs * 2);
+        var maxPossiblePairs = pairs + Math.min(jokersAfterMelds, t.total - pairs * 2);
         if (maxPossiblePairs >= 7) {
             return { huType: 'qiduizi' };
         }
-        /* 碰碰胡：刻/杠组 ≥4（癞子可参与已在 extractMelds，但这里用计数快速判定） */
-        var triplets = 0;
-        for (var id3 in t.count) { triplets += Math.floor(t.count[id3] / 3); }
-        /* R166-P0: 修正碰碰胡判定 — 原公式高估癞子成刻能力，单张+1joker无法成刻需2joker */
-        var nonTrips = t.total - triplets * 3;
-        var maxExtraTrips = Math.floor((nonTrips + t.jokers) / 3);
-        var maxPossibleTrips = triplets + maxExtraTrips;
-        if (maxPossibleTrips >= 4) {
+        /* 碰碰胡：刻/杠组 ≥4 — 直接计数 extractMelds 已消耗癞子后的真实刻/杠组数，避免近似公式高估 */
+        var pengpenghu = 0;
+        for (var pi = 0; pi < consumed.length; pi++) {
+            if (consumed[pi].type === 'pung' || consumed[pi].type === 'kong') pengpenghu++;
+        }
+        if (pengpenghu >= 4) {
             return { huType: 'pengpenghu' };
         }
         /* D2 决策（v2.1 修正）：未成番型不自动屁胡 —— 返回 null，由 Spawn 进入打牌模式换张 */

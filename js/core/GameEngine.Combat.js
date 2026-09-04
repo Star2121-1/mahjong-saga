@@ -41,6 +41,8 @@ Gp._resumeAfterReward = function() {
 
     this._waveCount++;
     this.currentWaveSpawnedCount = 0;
+    /* R201-P0: 铁拳事件暴击加成单波有效 — 若波次清空时无击杀，buff 不应泄漏到下一波 */
+    this._tempCritBonus = 0;
     /* R137-P0: 同步SpawnSystem计数器，防止波次间空刷 */
     if (window.SpawnSystem) window.SpawnSystem.currentWaveSpawnedCount = 0;
     this._mutatorTriggered = false;

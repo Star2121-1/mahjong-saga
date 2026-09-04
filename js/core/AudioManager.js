@@ -20,6 +20,7 @@ window.AudioManager = function() {
             if (_amMeta.audioCategoryVolumes) {
                 if (_amMeta.audioCategoryVolumes.sfx != null) this._categoryVolumes.sfx = _amMeta.audioCategoryVolumes.sfx;
                 if (_amMeta.audioCategoryVolumes.music != null) this._categoryVolumes.music = _amMeta.audioCategoryVolumes.music;
+                if (_amMeta.audioCategoryVolumes.feedback != null) this._categoryVolumes.feedback = _amMeta.audioCategoryVolumes.feedback;
             }
             if (_amMeta.audioVolume != null) this._volume = _amMeta.audioVolume;
             if (_amMeta.audioMuted != null) this._muted = _amMeta.audioMuted;

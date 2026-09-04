@@ -178,7 +178,7 @@ Gp._updateProjectiles = function(dt) {
             var _dy = e.y - p.y;
             var _radiusSum = e.radius + p.radius;
             if (_dx * _dx + _dy * _dy < _radiusSum * _radiusSum) {
-                e.takeDamage(p.damage, p);
+                e.takeDamage(p.damage, p, p.x, p.y);
                 p.hitEnemies.add(e.id);
                 if (p.pierceCount > 0) {
                     p.pierceCount--;

@@ -448,11 +448,16 @@ window.Enemy = class Enemy {
             return;
         }
         /* 射程带内：开火计时 */
-        this._archerFireCd -= dt;
-        if (this._archerFireCd <= 0) {
-            this._archerFireCd = B.ENEMY_ARCHER_FIRE_INTERVAL;
-            this._archerCharging = B.ENEMY_ARCHER_CHARGE_TIME;
-            if (this.el) this.el.classList.add('draw-aim');
+        if (dist >= B.ENEMY_ARCHER_KITE_MIN && dist <= B.ENEMY_ARCHER_KITE_MAX) {
+            this._archerFireCd -= dt;
+            if (this._archerFireCd <= 0) {
+                this._archerFireCd = B.ENEMY_ARCHER_FIRE_INTERVAL;
+                this._archerCharging = B.ENEMY_ARCHER_CHARGE_TIME;
+                if (this.el) this.el.classList.add('draw-aim');
+            }
+        } else {
+            /* 不在射程带：冷却继续倒计时，确保回到范围后可立即开火 */
+            this._archerFireCd -= dt;
         }
     }
 
