@@ -107,7 +107,7 @@
 .frozen-crystal {
     background: linear-gradient(135deg, #70d6ff, #0077b6) !important;
     box-shadow: 0 0 10px #70d6ff, 0 0 4px rgba(112,214,255,0.5) !important;
-    will-change: box-shadow;
+    
     animation: iceShimmer 1s infinite alternate;
 }
 @keyframes iceShimmer {
