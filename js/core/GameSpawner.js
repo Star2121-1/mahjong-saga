@@ -63,6 +63,10 @@ Ss.update = function(dt, engine) {
     this._enemyTypeWeights = engine._enemyTypeWeights || this._enemyTypeWeights;
     /* R194-P1: 同步 SpawnSystem 副本的波次计数，防止 Splitter 分裂路径绕过此副本造成不同步 */
     this.currentWaveSpawnedCount = engine.currentWaveSpawnedCount || 0;
+    /* R196-P1: 同步生成间隔，防止深渊轮回后 SpawnSystem 使用过时间隔 */
+    this._spawnInterval = engine._spawnInterval || this._spawnInterval;
+    this._spawnIntervalMin = engine._spawnIntervalMin || this._spawnIntervalMin;
+    this._spawnIntervalDecay = engine._spawnIntervalDecay || this._spawnIntervalDecay;
 
     this._difficultyTimer += dt;
     if (this._difficultyTimer >= 10) {

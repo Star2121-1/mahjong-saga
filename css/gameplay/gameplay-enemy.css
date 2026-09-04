@@ -477,6 +477,10 @@
 }
 
 /* 冰冻效果 — 翡翠冰霜覆盖 */
+.elite-marker {
+    box-shadow: 0 0 0 3px #ffd700, 0 2px 0 #4dd0e1, 0 4px 0 #26c6da, 0 5px 0 #00bcd4, 0 6px 0 #00acc1, 0 7px 0 #0097a7, 0 8px 0 #00838f, 0 9px 0 #006064, 0 10px 14px rgba(255,215,0,0.5) !important;
+    border-color: #ffd700 !important;
+}
 .enemy.frozen {
     background: linear-gradient(135deg, #e0f7fa, #b2ebf2) !important;
     border-color: #4dd0e1 !important;

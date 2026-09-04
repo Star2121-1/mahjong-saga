@@ -78,7 +78,7 @@ window.proceduralLevelGenerator = {
         var base = window.levelConfig.level_procedural;
         var scaling = base.abyssScaling;
         var diffMult = Math.pow(scaling.enemyHpMult, abyssLevel);
-        var atkMult = Math.pow(scaling.enemyAtkMult, abyssLevel);
+        /* R196-P2: atkMult计算后未使用，移除死代码 */
         var spawnMult = Math.pow(scaling.spawnCountMult, abyssLevel);
         var intervalReduction = Math.max(0.3, base.spawnIntervalMin - abyssLevel * scaling.intervalReduce);
         var effectiveWaves = base.maxWaves + Math.floor(abyssLevel * scaling.maxWavesBonus);
