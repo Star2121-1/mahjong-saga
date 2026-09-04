@@ -300,3 +300,16 @@
     .damage-float { font-size: 10px; }
 }
 /* R158-P1: 移除未使用的.fct-overdrive/.fct-freeze — JS从未设置这两种类名 */
+/* R182-P1: 重新启用overdrive/freeze飘字类型（Enemy.js L1064-1065已使用） */
+.fct-overdrive {
+    font-size: calc(26 * var(--_fs, 1.4) * 1px);
+    color: #ff6600;
+    text-shadow: 0 0 12px rgba(255,102,0,0.9), 0 0 24px rgba(255,68,0,0.5);
+    animation: fctFloatUp 0.5s ease-out forwards;
+}
+.fct-freeze {
+    font-size: calc(22 * var(--_fs, 1.4) * 1px);
+    color: #88ddff;
+    text-shadow: 0 0 10px rgba(136,221,255,0.8), 0 0 20px rgba(100,181,246,0.4);
+    animation: fctFloatUp 0.5s ease-out forwards;
+}

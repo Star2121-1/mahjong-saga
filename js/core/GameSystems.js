@@ -45,7 +45,7 @@ Sys.triggerOverdrive = function(engine) {
     var flash = document.createElement('div');
     flash.id = 'overdrive-flash';
     engine.container.appendChild(flash);
-    setTimeout(function() { if (flash.parentNode) flash.remove(); }, 350);
+    setTimeout(function() { if (flash.parentNode) flash.remove(); }, 650); /* R182-P0: 从350ms延长至650ms，对齐CSS动画0.6s时长，防止闪白提前截断 */
 
     /* Visual Enhancement C: Overdrive 金色流光粒子爆发 */
     if (engine._worldLayer) {

@@ -497,7 +497,7 @@ class Player {
             _reviveCount: this._reviveCount || 0,
             _baseMaxHp: this._baseMaxHp || this.maxHp,
             _relicAffixes: this._relicAffixes ? { ...this._relicAffixes } : {},
-            _startsWithRelic: !!this._startsWithRelic,
+            /* R182-P1: _startsWithRelic已废弃，不再持久化 */
             /* R51-P0: 补充缺失的持久化字段 — 避免断点续玩后暴击/复活/秘密丢失 */
             critDamageBonus: this.critDamageBonus || 0,
             _hasRevive: !!this._hasRevive,
@@ -572,7 +572,7 @@ class Player {
         this._reviveCount = data._reviveCount || 0;
         this._baseMaxHp = data._baseMaxHp !== undefined ? data._baseMaxHp : this.maxHp;
         this._relicAffixes = data._relicAffixes ? { ...data._relicAffixes } : {};
-        this._startsWithRelic = !!data._startsWithRelic;
+        /* R182-P1: _startsWithRelic已废弃，不再从存档恢复 */
         this._hasRevive = this._reviveCount > 0; /* R159-P1: restore后由_reviveCount直接计算，与578行逻辑合并 */
         this.critDamageBonus = data.critDamageBonus || 0;
         this._discoveredSecrets = data._discoveredSecrets ? [...data._discoveredSecrets] : [];
@@ -680,7 +680,7 @@ class Player {
             this._hasRevive = true;
             this._reviveCount = perks.token_revive;
         }
-        if (perks.token_relic_start) this._startsWithRelic = true;
+        /* R182-P1: _startsWithRelic已无调用方，移除死代码 */
         this.mapAffinityLevel = perks.token_map_affinity || 0;
         /* Epoch 33: 应用圣物词条 — restore时跳过，snapshot已含最终值 */
         if (!this._skipRelicAffixes) this._applyRelicAffixes();
@@ -872,9 +872,7 @@ class Player {
             this._hasRevive = true;
             this._reviveCount = perks.token_revive;
         }
-        if (perks.token_relic_start) {
-            this._startsWithRelic = true;
-        }
+        /* R182-P1: _startsWithRelic已无调用方，移除死代码 */
         var mapAffinity = perks.token_map_affinity || 0;
         /* Epoch 16: 转生加成 */
         if (window.saveManager && window.saveManager.applyPrestigeBonus) {

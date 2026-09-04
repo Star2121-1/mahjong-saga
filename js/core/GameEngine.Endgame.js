@@ -44,7 +44,7 @@ Gp._onClick = function(e) {
     }
 
     var isCrit = Math.random() < (p.critRate + (this._tempCritBonus || 0));
-    if (this._tempCritBonus) this._tempCritBonus = 0;
+    /* R182-P0: 铁拳事件暴击加成不应首击后立即清零 — 整个波次期间都应有效 */
     /* Epoch 32: 临时攻击增益 */
     var atkMult = 1 + (p._tempAtkBoost || 0);
     var damage = isCrit ? Math.floor(p.atk * atkMult * (Balance.CRIT_BASE_MULT + (p.critDamageBonus || 0))) : Math.floor(p.atk * atkMult);

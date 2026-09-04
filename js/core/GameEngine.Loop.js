@@ -121,7 +121,7 @@ Gp._loop = function(timestamp) {
                 if (!_epG[_kg]) _epG[_kg] = [];
                 _epG[_kg].push(_ge);
             }
-            var _checked = [];
+            var _checked = new Set(); /* R182-P0: Set替代Array实现O(1)查找，消除indexOf的O(n)开销 */
             for (var _ci = 0; _ci < this.enemies.length; _ci++) {
                 var _a = this.enemies[_ci];
                 if (!_a || !_a.alive) continue;
@@ -135,8 +135,8 @@ Gp._loop = function(timestamp) {
                             var _b = _nb[_nj];
                             if (_b === _a || !_b.alive) continue;
                             var _pairKey = _a.id < _b.id ? _a.id + ',' + _b.id : _b.id + ',' + _a.id;
-                            if (_checked.indexOf(_pairKey) !== -1) continue;
-                            _checked.push(_pairKey);
+                            if (_checked.has(_pairKey)) continue; /* R182-P0: 改用Set.has()替代indexOf()，O(1)查找避免50敌时~10万次字符串比较 */
+                            _checked.add(_pairKey);
                             var _cdx = _b.x - _a.x, _cdy = _b.y - _a.y;
                             var _cd2 = _cdx * _cdx + _cdy * _cdy;
                             var _minD = _a.radius + _b.radius;

@@ -56,7 +56,7 @@ class RewardManager {
 
         this.sacrificeOptions = [
             { id: 'sacrifice_metatoken', name: '弃牌捐番', icon: '🀄', desc: '弃一张圣物牌，获得 3 元代币', type: 'metatoken', value: 3 },
-            { id: 'sacrifice_gold', name: '贪番夺金', icon: '💎', desc: '献祭一个圣物，获得当前等级 50% 的元宝', type: 'gold', value: 0.5 },
+            { id: 'sacrifice_gold', name: '贪番夺金', icon: '💎', desc: '献祭一个圣物，获得当前金币×50%的元宝', type: 'gold', value: 0.5 },
             { id: 'sacrifice_temp_atk', name: '血番战吼', icon: '⚡', desc: '献祭一个圣物，获得 +50% 攻击力临时增益（30秒）', type: 'temp_buff', buff: 'atkBoost', duration: 30, value: 0.5 },
             { id: 'sacrifice_temp_hp', name: '铁壁番护', icon: '🛡', desc: '献祭一个圣物，获得 +100 最大HP临时增益（30秒）', type: 'temp_buff', buff: 'tempHp', duration: 30, value: 100 },
             { id: 'sacrifice_double_coin', name: '翻倍宝牌', icon: '🪙', desc: '献祭一个圣物，下一波金币收益翻倍', type: 'double_coin', value: 1 }

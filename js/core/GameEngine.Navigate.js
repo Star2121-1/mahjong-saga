@@ -6,8 +6,8 @@ Gp._goToSaveSelect = async function() {
     this.running = false;
     this.gameOver = false;
     this._announcingWave = false; /* R128-P2: 防止导航后标志残留影响后续逻辑 */
-    this.gameOverOverlay.classList.remove('active');
-    this.victoryOverlay.classList.remove('active');
+    if (this.gameOverOverlay) this.gameOverOverlay.classList.remove('active');
+    if (this.victoryOverlay) this.victoryOverlay.classList.remove('active');
     if (window.rewardManager) window.rewardManager.hidePanel();
     /* P2: 清除所有残存定时器，防止导航后回调在旧引擎上执行 */
     if (this._gambleTimeout) { clearTimeout(this._gambleTimeout); this._gambleTimeout = null; }

@@ -253,7 +253,7 @@
     0% { filter: brightness(1); transform: translate(-50%, -50%) scale(1); }
     30% { filter: brightness(3) saturate(0); transform: translate(-50%, -50%) scale(1.08); }
     60% { filter: brightness(1.5); transform: translate(-50%, -50%) scale(0.95); opacity: 0.6; }
-    100% { filter: brightness(1); transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { filter: brightness(1); transform: translate(-50%, -50%) scale(1); opacity: 0; } /* R182-P0: 死亡动画结束后恢复opacity:0，防止碎裂后残留可见元素 */
 }
 
 /* 敌人碎裂粒子 */

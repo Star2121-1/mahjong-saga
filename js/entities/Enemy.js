@@ -786,16 +786,21 @@ window.Enemy = class Enemy {
                 this._bossSummonTimer = Balance.BOSS_PHASE3_SUMMON_INTERVAL * (this._abyssTier >= 3 ? 0.85 : 1);
                 var maxSummon = Balance.BOSS_PHASE3_SUMMON_MAX;
                 if (engine && typeof engine._spawnEnemyType === 'function' && this._summonCount < maxSummon) {
-                    var stalkerLeft = Math.max(0, Balance.BOSS_PHASE3_SUMMON_STALKER - this._summonCount);
+                    /* R182-P0: 修复Boss P3召唤逻辑 — 原代码用_summonCount同时追踪Stalker和Tanker导致第二次调用时stalkerLeft=tankLeft=0 */
+                    var _stalkersSpawned = this._summonStalkers || 0;
+                    var _tanksSpawned = this._summonTankers || 0;
+                    var stalkerLeft = Math.max(0, Balance.BOSS_PHASE3_SUMMON_STALKER - _stalkersSpawned);
                     for (var si = 0; si < stalkerLeft; si++) engine._spawnEnemyType('Stalker');
-                    var tankLeft = Math.max(0, Balance.BOSS_PHASE3_SUMMON_TANKER - this._summonCount - stalkerLeft);
+                    var tankLeft = Math.max(0, Balance.BOSS_PHASE3_SUMMON_TANKER - _tanksSpawned);
                     for (var ti = 0; ti < tankLeft; ti++) engine._spawnEnemyType('Tanker');
+                    this._summonStalkers = _stalkersSpawned + stalkerLeft;
+                    this._summonTankers = _tanksSpawned + tankLeft;
                     /* B4: 灭世巨神混编召唤 */
                     if (this._abyssTier >= Balance.BOSS_ABYSS_TIER_3) {
                         var abyssLeft = Math.max(0, maxSummon - this._summonCount - stalkerLeft - tankLeft);
                         var abyssCount = Math.min(2, abyssLeft);
                         for (var ai = 0; ai < abyssCount; ai++) engine._spawnEnemyType('Archer');
-                        var _shamanSpawned = (this._summonCount + 1 + abyssCount < maxSummon && abyssLeft > 0) ? 1 : 0;
+                        var _shamanSpawned = (this._summonCount + stalkerLeft + tankLeft + 1 + abyssCount < maxSummon && abyssLeft > 0) ? 1 : 0;
                         if (_shamanSpawned) engine._spawnEnemyType('Shaman');
                         this._summonCount += stalkerLeft + tankLeft + abyssCount + _shamanSpawned;
                     } else {
