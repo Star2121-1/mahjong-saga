@@ -83,6 +83,18 @@ Gp._spawnEliteEnemy = function() {
         this._tempEnemySpeedDebuff = 0;
     }
 
+    /* R194-P1: 精英怪也应用活跃突变效果，与_spawnEnemy保持一致 */
+    if (this._activeMutator) {
+        var _emut = this._activeMutator;
+        if (_emut === 'bloodmoon') {
+            enemy.maxHp = Math.floor(enemy.maxHp * Balance.MUTATOR_BLOODMOON_HP_MULT);
+            enemy.hp = enemy.maxHp;
+            enemy.atk = Math.floor(enemy.atk * Balance.MUTATOR_BLOODMOON_ATK_MULT);
+        } else if (_emut === 'frenzy') {
+            enemy.speed *= Balance.MUTATOR_FRENZY_SPEED_MULT;
+        }
+    }
+
     this.enemies.push(enemy);
     /* P1: 直接调用GameEngine原型方法，而非通过 Systems（不存在此方法） */
     if (this._applyAbyssVariant) this._applyAbyssVariant(enemy);

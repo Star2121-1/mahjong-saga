@@ -9,7 +9,8 @@ window.AudioManager = function() {
     /* Epoch 47: 分类音量控制 */
     this._categoryVolumes = {
         sfx: 1.0,    /* 攻击/暴击/受击等效果音 */
-        music: 0.8   /* 胜利/失败/升级等氛围音 */
+        music: 0.8,  /* 背景氛围音乐 */
+        feedback: 0.9  /* 胜利/失败/升级等关键UI反馈音 */
     };
     this._activeOscillators = []; /* R165-P1: 跟踪活跃振荡器，防止tryReinit时内存泄漏 */
     /* R165-P0: restore persisted category volumes from meta — write path exists but read was missing */
@@ -100,7 +101,10 @@ Ap.play = function(sound, opts) {
     opts = opts || {};
     /* P1: 应用分类音量 */
     /* R189-P1: boss音效归入sfx类别以获得更响亮的音量 */
-    var catKey = (sound === 'victory' || sound === 'gameover' || sound === 'levelup' || sound === 'overdrive') ? 'music' : 'sfx';
+    /* R194-P1: gameover/levelup/victory 归入feedback类别（默认0.9），
+       区别于music氛围层；overdrive保留music保持沉浸感 */
+    var catKey = (sound === 'victory' || sound === 'gameover' || sound === 'levelup') ? 'feedback' : 'sfx';
+    if (sound === 'overdrive') catKey = 'music';
     if (sound === 'boss') catKey = 'sfx';
     var vol = Math.min(1, (opts.volume != null ? opts.volume : 1) * this._volume * (this._categoryVolumes[catKey] || 1));
     switch (sound) {

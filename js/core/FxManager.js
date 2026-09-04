@@ -126,6 +126,8 @@ Fp._returnNode = function(node) {
     node.className = 'fct-node';
     node._fctActive = false;
     if (node._fctTimeout) { clearTimeout(node._fctTimeout); node._fctTimeout = null; }
+    /* R194-P1: 移除animationend监听器，防止临时节点复用后双重触发 */
+    if (node._fctOnEnd) { node.removeEventListener('animationend', node._fctOnEnd); node._fctOnEnd = null; }
     /* R131-P0: 入空闲栈替代后续线性扫描 */
     if (!this._freeStack) this._freeStack = [];
     this._freeStack.push(node);

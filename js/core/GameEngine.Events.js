@@ -469,6 +469,12 @@ Gp._spawnBossLordFromGamble = function() {
     this._enemyElements.set(id, el);
     lord.el = el;
 
+    /* R194-P1: 最终波龙王速度翻倍 + 花色偏转，从死代码路径迁移至此 */
+    if (this._waveCount >= this._getMaxWaves() - 1) {
+        lord.speed *= 2;
+        lord.hue = 30;
+    }
+
     if (this._bloodRageActive) {
         lord.speed = Math.floor(lord.speed * Balance.BOSS_BLOOD_RAGE_SPEED_MULT);
         lord.baseSpeed = lord.speed;

@@ -61,6 +61,8 @@ Ss.update = function(dt, engine) {
     this._waveCount = engine._waveCount || 0;
     this._currentLevelId = engine._currentLevelId || this._currentLevelId;
     this._enemyTypeWeights = engine._enemyTypeWeights || this._enemyTypeWeights;
+    /* R194-P1: 同步 SpawnSystem 副本的波次计数，防止 Splitter 分裂路径绕过此副本造成不同步 */
+    this.currentWaveSpawnedCount = engine.currentWaveSpawnedCount || 0;
 
     this._difficultyTimer += dt;
     if (this._difficultyTimer >= 10) {
@@ -179,11 +181,10 @@ Ss._spawnEnemy = function(engine, isBoss) {
             var _loopCount = (engine && engine.loopCount) || 0;
             /* R160-P0: 保留深渊缩放 — 构造器已应用，此处不覆盖 */
             enemy.hp = enemy.maxHp;
-        } else if (waveIdx === maxWaves - 1) {
-            enemy.speed *= 2;
-            enemy.hue = 30;
         }
     }
+    /* R194-P1: 最终波速度翻倍逻辑已移至 _spawnBossLordFromGamble，
+       此处为死代码（_showBossGamble 拦截后提前 return） */
 
     this.engine.enemies.push(enemy);
 
