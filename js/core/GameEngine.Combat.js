@@ -693,7 +693,7 @@ Gp._gameOver = async function() {
             this._overdriveCount || 0, this._totalDodgesThisRun || 0,
             this._totalCritsThisRun || 0, this._waveCount,
             this._bossKillsThisRun || 0, this.loopCount || 0,
-            !this.gameOver, this._playerHitCountThisRun || 0, uniqueRelics
+            this._won, this._playerHitCountThisRun || 0, uniqueRelics /* R188-P1: 使用this._won替代!this.gameOver消除歧义 */
         );
     }
 
@@ -963,9 +963,7 @@ Gp._checkAchievement = function(id) {
     if (meta.achievements[id]) return; /* 已解锁 */
     meta.achievements[id] = true;
     meta.achievements[id + '_at'] = Date.now();
-    /* R185-P1: 设置achievementFlags以便_flushAchievementsToMeta可持久化 */
-    this._achievementFlags = this._achievementFlags || {};
-    this._achievementFlags[id] = true;
+    /* R188-P0: _achievementFlags已移除 — _checkAchievement直接写meta并持久化 */
     /* R30-M-010: _saveMetaToStorage 现在是 async，加 catch 防止静默失败 */
     window.saveManager._saveMetaToStorage().catch(function(e) {
         console.warn('[Achievement] saveMetaToStorage failed:', e);
