@@ -125,7 +125,7 @@ Fp._returnNode = function(node) {
 
 /* R70-P1: 缩短健康检查阈值，减少僵死节点占用池容量的时间 */
 Fp._healthCheck = function() {
-    var now = Date.now();
+    var now = performance.now(); /* R177-P0: 统一时钟源为performance.now()，防止系统时间调整导致假阳性stale检测 */
     for (var i = 0; i < this._pool.length; i++) {
         var n = this._pool[i];
         if (n._fctActive && now - n._lastUsed > window.Balance.FCT_STALE_NODE_TIMEOUT_MS) {

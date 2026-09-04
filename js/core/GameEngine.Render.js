@@ -230,6 +230,19 @@ Gp._updateEnemyProjectiles = function(dt) {
         if (p.x < -100 || p.x > this._mapW + 100 || p.y < -100 || p.y > this._mapH + 100) {
             p.alive = false;
         }
+        /* R177-P0: 敌方弹道命中玩家检测 — 修复后Archer/Boss远程攻击才有效 */
+        if (p.alive && this.player) {
+            var pdx = this.player.x - p.x;
+            var pdy = this.player.y - p.y;
+            var sumR = this.player.radius + p.radius;
+            if (pdx * pdx + pdy * pdy <= sumR * sumR) {
+                p.alive = false;
+                if (p.el && p.el.parentNode) p.el.remove();
+                this.player.takeDamage(p.damage, { id: p._ownerId, x: p.x, y: p.y });
+                this._enemyProjectiles.splice(_i, 1);
+                continue;
+            }
+        }
         if (!p.alive && p.el && p.el.parentNode) {
             p.el.remove();
             this._enemyProjectiles.splice(_i, 1);

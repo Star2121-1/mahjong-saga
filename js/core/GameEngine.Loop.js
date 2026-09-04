@@ -111,24 +111,45 @@ Gp._loop = function(timestamp) {
                 if (!this.enemies[_ei]) continue;
                 this.enemies[_ei].update(dt, this.player, this);
             }
-            /* R30-H-015: 敌人间碰撞分离 — 防止堆叠穿模 */
+            /* R177-P0: 敌人间碰撞分离 — 使用Grid空间分割将O(n²)降至O(n)，防止>50敌时帧率暴跌 */
+            var _epG = {};
+            var _epGS = 36; /* enemy collision grid size ≈ 2×ENEMY_RADIUS(18) */
+            for (var _gi = 0; _gi < this.enemies.length; _gi++) {
+                var _ge = this.enemies[_gi];
+                if (!_ge || !_ge.alive) continue;
+                var _kg = Math.floor(_ge.x / _epGS) + ',' + Math.floor(_ge.y / _epGS);
+                if (!_epG[_kg]) _epG[_kg] = [];
+                _epG[_kg].push(_ge);
+            }
+            var _checked = [];
             for (var _ci = 0; _ci < this.enemies.length; _ci++) {
                 var _a = this.enemies[_ci];
-                if (!_a.alive) continue;
-                for (var _cj = _ci + 1; _cj < this.enemies.length; _cj++) {
-                    var _b = this.enemies[_cj];
-                    if (!_b.alive) continue;
-                    var _cdx = _b.x - _a.x, _cdy = _b.y - _a.y;
-                    var _cd2 = _cdx * _cdx + _cdy * _cdy;
-                    var _minD = _a.radius + _b.radius;
-                    if (_cd2 < _minD * _minD && _cd2 > 0.01) {
-                        var _cd = Math.sqrt(_cd2);
-                        var _push = (_minD - _cd) * 0.5;
-                        var _cnx = _cdx / _cd, _cny = _cdy / _cd;
-                        _a.x -= _cnx * _push; _a.y -= _cny * _push;
-                        _b.x += _cnx * _push; _b.y += _cny * _push;
-                        _a._clampPosition(this);
-                        _b._clampPosition(this);
+                if (!_a || !_a.alive) continue;
+                var _ak = Math.floor(_a.x / _epGS) + ',' + Math.floor(_a.y / _epGS);
+                for (var _dgi = -1; _dgi <= 1; _dgi++) {
+                    for (var _dgj = -1; _dgj <= 1; _dgj++) {
+                        var _nk = (Math.floor(_a.x / _epGS) + _dgi) + ',' + (Math.floor(_a.y / _epGS) + _dgj);
+                        var _nb = _epG[_nk];
+                        if (!_nb) continue;
+                        for (var _nj = 0; _nj < _nb.length; _nj++) {
+                            var _b = _nb[_nj];
+                            if (_b === _a || !_b.alive) continue;
+                            var _pairKey = _a.id < _b.id ? _a.id + ',' + _b.id : _b.id + ',' + _a.id;
+                            if (_checked.indexOf(_pairKey) !== -1) continue;
+                            _checked.push(_pairKey);
+                            var _cdx = _b.x - _a.x, _cdy = _b.y - _a.y;
+                            var _cd2 = _cdx * _cdx + _cdy * _cdy;
+                            var _minD = _a.radius + _b.radius;
+                            if (_cd2 < _minD * _minD && _cd2 > 0.01) {
+                                var _cd = Math.sqrt(_cd2);
+                                var _push = (_minD - _cd) * 0.5;
+                                var _cnx = _cdx / _cd, _cny = _cdy / _cd;
+                                _a.x -= _cnx * _push; _a.y -= _cny * _push;
+                                _b.x += _cnx * _push; _b.y += _cny * _push;
+                                _a._clampPosition(this);
+                                _b._clampPosition(this);
+                            }
+                        }
                     }
                 }
             }
@@ -683,10 +704,16 @@ Gp._renderActiveBuffs = function() {
         container.style.cssText = 'position:absolute;top:30px;right:10px;display:flex;flex-direction:column;gap:2px;z-index:50;pointer-events:none;';
         this.battlefield.appendChild(container);
     }
-    /* P1: 脏检查 — 仅在buff内容变化时重建DOM，避免每帧innerHTML全量重建 */
-    var buffStr = JSON.stringify(buffs);
-    if (this._lastBuffStr === buffStr) return;
-    this._lastBuffStr = buffStr;
+    /* R177-P1: 避免每帧JSON.stringify — 用哈希替代，仅含变化的字段 */
+    var _bKey =
+        (p._tempAtkBoost > 0 ? 'a' + Math.round(p._tempAtkBoost*100) : '') +
+        (p._tempHpBonus > 0 ? 'h' + Math.round(p._tempHpBonus) : '') +
+        (this._tempGoldMult > 1 ? 'g' + this._tempGoldMult : '') +
+        (this._tempBerserkBonus ? 'b' : '') +
+        (this._tempShield > 0 ? 's' + Math.round(this._tempShield) : '') +
+        (p._doubleCoinNextWave ? 'd' : '');
+    if (this._lastBuffKey === _bKey) return;
+    this._lastBuffKey = _bKey;
     container.innerHTML = '';
     for (var i = 0; i < buffs.length; i++) {
         var b = buffs[i];

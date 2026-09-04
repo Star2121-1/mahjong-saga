@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>点击肉鸽 - 选档</title>
+    <title>麻将江湖 - 选档</title>
     <meta name="theme-color" content="#0a1d12">
     <link rel="stylesheet" href="../css/common.css?v=20260829B">
     <link rel="stylesheet" href="../css/save_select.css?v=20260829B">
@@ -19,46 +19,47 @@
     <div id="save-select-screen">
         <div class="menu-content">
             <div class="tile-row" aria-hidden="true">
-                <span class="mini-tile t-zhong">涓?/span><span class="mini-tile t-fa">鐧?/span><span class="mini-tile t-bai">鐧?/span>
+                <span class="mini-tile t-zhong">中</span><span class="mini-tile t-fa">發</span><span class="mini-tile t-bai">發</span>
             </div>
-            <h1>楹诲皢姹熸箹</h1>
-            <p class="menu-subtitle">鐐瑰嚮 路 鐢熷瓨 路 鑳＄墝</p>
+            <h1>麻将江湖</h1>
+            <p class="menu-subtitle">点击 · 生存 · 胡牌</p>
             <div class="menu-buttons">
-                <button id="btn-newgame" class="menu-btn">寮€鍚柊寰佺▼</button>
-                <button id="btn-continue" class="menu-btn" disabled>缁х画娓告垙</button>
-                <button id="btn-import" class="menu-btn menu-btn-secondary">瀵煎叆鏈湴瀛樻。</button>
-                <button id="btn-export" class="menu-btn menu-btn-secondary">瀵煎嚭褰撳墠瀛樻。</button>
+                <button id="btn-newgame" class="menu-btn">开启新征程</button>
+                <button id="btn-continue" class="menu-btn" disabled>继续游戏</button>
+                <button id="btn-import" class="menu-btn menu-btn-secondary">导入本地存档</button>
+                <button id="btn-export" class="menu-btn menu-btn-secondary">导出当前存档</button>
             </div>
             <div class="menu-footer">
-                <button id="btn-settings" class="menu-btn menu-btn-secondary">娓告垙璁剧疆</button>
-                <div class="menu-stats" id="last-save-info" style="font-size:11px;margin-top:4px;">鏈€杩戝瓨妗? 鈥?/div>
+                <button id="btn-settings" class="menu-btn menu-btn-secondary">游戏设置</button>
+                <div class="menu-stats" id="last-save-info" style="font-size:11px;margin-top:4px;">最近存档: —</div>
             </div>
         </div>
     </div>
 
     <div id="settings-overlay" class="hidden">
         <div class="settings-content">
-            <h2>娓告垙璁剧疆</h2>
+            <h2>游戏设置</h2>
             <label>
-                闊虫晥寮€鍏?                <input type="checkbox" id="setting-sound" checked>
+                音效开关
+                <input type="checkbox" id="setting-sound" checked>
             </label>
             <label>
-                闅惧害缂╂斁
+                难度缩放
                 <input type="range" id="setting-difficulty" min="0.5" max="3" step="0.1" value="1">
             </label>
-            <button id="btn-settings-close" class="menu-btn">鍏抽棴</button>
+            <button id="btn-settings-close" class="menu-btn">关闭</button>
         </div>
     </div>
 
     <div id="save-warning-overlay" class="hidden">
         <div class="warning-content">
-            <div class="warning-icon">鈿狅笍</div>
-            <h2>纭寮€濮嬫柊寰佺▼</h2>
-            <p class="warning-desc">姝ゆ搷浣滃皢娓呴櫎鎵€鏈夎繘搴︼紙绉戞妧鏍戙€佽嫳闆勮В閿併€佹牳蹇冭揣甯併€佸綋鍓嶆垬灞€锛夛紝鍒涘缓涓€涓叏鏂扮殑鐙珛瀛樻。銆傛槸鍚﹀厛瀵煎嚭澶囦唤褰撳墠瀛樻。锛?/p>
+            <div class="warning-icon">⚠</div>
+            <h2>确认开始新征程</h2>
+            <p class="warning-desc">此操作将清除所有进度（科技树、英雄解锁、核心货币、当前战局），创建一个全新的独立存档。是否先导出备份当前存档？</p>
             <div class="warning-buttons">
-                <button id="btn-warning-export" class="menu-btn">瀵煎嚭澶囦唤鍚庣户缁?/button>
-                <button id="btn-warning-overwrite" class="menu-btn menu-btn-secondary" style="border-color:#ff1744;color:#ff1744;">纭鏂板缓锛堝皢娓呴櫎鐜版湁瀛樻。锛?/button>
-                <button id="btn-warning-cancel" class="menu-btn menu-btn-secondary">鍙栨秷</button>
+                <button id="btn-warning-export" class="menu-btn">导出备份后继续</button>
+                <button id="btn-warning-overwrite" class="menu-btn menu-btn-secondary" style="border-color:#ff1744;color:#ff1744;">确认新建（将清除现有存档）</button>
+                <button id="btn-warning-cancel" class="menu-btn menu-btn-secondary">取消</button>
             </div>
         </div>
     </div>
