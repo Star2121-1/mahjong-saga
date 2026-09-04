@@ -86,6 +86,7 @@ class Player {
         this.hue = cfg.hue;
         this.baseDodge = cfg.baseDodge || 0;
         this.dodgeRate = this.baseDodge;
+        this._baseMaxHp = this.maxHp; /* R197-P0: 构造函数路径初始化_baseMaxHp，防止临时增益过期后fallback到膨胀值 */
         /* 从 HeroConfig 读取英雄特有参数 */
         if (cfg.weaponSlots != null) this.maxWeaponSlots = cfg.weaponSlots;
         if (cfg.cdFloor != null) this.cdFloor = cfg.cdFloor;
@@ -282,6 +283,7 @@ class Player {
             this.hp += 10;
             /* H-031: _baseMaxHp 随升级同步增长，防止临时增益过期后 HP 丢失 */
             if (this._baseMaxHp) this._baseMaxHp += 10;
+            if (this._baseAtk) this._baseAtk += 2; /* R197-P1: 深渊轮回使用_baseAtk缩放，必须随升级更新 */
             leveled = true;
         }
         if (leveled && this.heroId === 'Mage') this._recalcThornsRate();

@@ -480,6 +480,13 @@ Gp._startNewRun = function(heroId, levelId) {
     this._tempShieldEnd = 0;
     this.playerHitCountInLevel1 = 0;
     this._playerHitCountThisRun = 0;
+    /* R197-P1: 防止断点续玩/新开局时闪避计数跨局残留 */
+    this._totalDodgesThisRun = 0;
+    /* R197-P0: 护盾状态跨局清零，防止新游戏护盾CD无法重置 */
+    this._shieldActive = false;
+    this._shieldTimer = 0;
+    /* R197-P1: 引力突变原始磁铁半径基准清零 */
+    this._origMagnetRadius = null;
     this.stalkersKilledInLevel2 = 0;
     this._interWaveEvent = null;
     this._interWaveTimer = 0;

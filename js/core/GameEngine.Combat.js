@@ -641,8 +641,14 @@ Gp._gameOver = async function() {
     meta.metaTokens = (meta.metaTokens || 0) + tokens;
     meta.totalRuns = (meta.totalRuns || 0) + 1;
     meta.totalKills = (meta.totalKills || 0) + this.kills;
-
-    /* ── Epoch 14: 挑战完成检查 ── */
+    /* R197-P0: 死亡路径补全meta累计字段，防止胜利路径独占统计 */
+    meta.overdriveCount = (meta.overdriveCount || 0) + (this._overdriveCount || 0);
+    meta.bossKills = (meta.bossKills || 0) + (this._bossKillsThisRun || 0);
+    meta.finalBossKills = (meta.finalBossKills || 0) + (this._finalBossKillsThisRun || 0);
+    meta.totalCrits = (meta.totalCrits || 0) + (this._totalCritsThisRun || 0);
+    meta.totalDodges = (meta.totalDodges || 0) + (this._totalDodgesThisRun || 0);
+    meta.maxGoldThisRun = Math.max(meta.maxGoldThisRun || 0, this._maxGoldThisRun || 0);
+    this._maxGoldThisRun = 0;
     var challengeResults = null;
     try {
         if (typeof window.mainHubCheckChallenge === 'function') {

@@ -773,6 +773,13 @@ window.Enemy = class Enemy {
 
         /* ── Phase 3：狂暴血海 ── */
         if (this._bossPhase === 3) {
+            /* R197-P0: P1→P3直接跳变时需重置P2预警状态，防止首帧误触发砸地攻击 */
+            this._bossWarningTimer = 0;
+            this._bossWarningActive = false;
+            if (this._bossWarningEl && this._bossWarningEl.parentNode) {
+                this._bossWarningEl.remove();
+                this._bossWarningEl = null;
+            }
             var dx = player.x - this.x;
             var dy = player.y - this.y;
             var dist = Math.sqrt(dx * dx + dy * dy);
@@ -1175,7 +1182,7 @@ window.Enemy = class Enemy {
                 for (var gi = 0; gi < cnt; gi++) {
                     var v = avg + (gi < rem ? 1 : 0);
                     var g = new window.ExpGem(this.x, this.y, v);
-                    if (window.gameEngine) g._gameBirth = window.gameEngine._elapsed; /* R136-P0: 游戏时钟记录 */
+                    g._gameBirth = (_engRef || window.gameEngine)?._elapsed; /* R197-P0: 使用实例引用优先，避免多引擎场景下计时错乱 */
                     arr.push(g);
                 }
             } else {
@@ -1183,7 +1190,7 @@ window.Enemy = class Enemy {
                 var gemVal = Math.floor((Balance.NORMAL_GEM_VALUE_BASE + level * Balance.GEM_LEVEL_SCALE) * diff * gemMul);
                 if (gemVal < 1) gemVal = 1;
                 var g = new window.ExpGem(this.x, this.y, gemVal);
-                if (window.gameEngine) g._gameBirth = window.gameEngine._elapsed; /* R136-P0: 游戏时钟记录 */
+                g._gameBirth = (_engRef || window.gameEngine)?._elapsed; /* R197-P0: 使用实例引用优先，避免多引擎场景下计时错乱 */
                 arr.push(g);
             }
             return true;
