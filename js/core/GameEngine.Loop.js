@@ -287,6 +287,8 @@ Gp._loop = function(timestamp) {
                     this.enemies.splice(_ri, 1);
                     if (isLord) {
                         this.triggerShake(3, 500);
+                        /* R190-P2: Boss Lord死亡时播放专属音效，区分Phase 3转场音效 */
+                        if (window.audioManager) window.audioManager.play('explode');
                         this._cleanEnemyProjectiles();
                         /* R30-H-016: Boss Lord死亡后清理金币/宝石，但不移除其他活敌 */
                         // 注：非Boss活敌由主死亡循环正常处理，此处仅清理掉落物和状态
