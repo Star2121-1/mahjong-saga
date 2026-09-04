@@ -190,8 +190,12 @@ class Player {
         /* L-008: 脆弱 — 突变+30% / 深渊+50% */
         if (this._frailtyDebuff) {
             /* R154-P0: _frailtyStored 由mutator设(true)，abyss不设；abyss用 _abyssFrailtyOrigAtk 标志 */
-            var _frailtyMult = (this._frailtyStored || (this._abyssFrailtyOrigAtk !== undefined))
-                ? Balance.MUTATOR_FRAILTY_DAMAGE_TAKEN_MULT : Balance.ABYSS_FRAILTY_DMG_MULT;
+            /* R189-P0: 修复 — abyss脆弱应使用1.5x而非mutator的1.3x */
+            var _frailtyMult = this._frailtyStored
+                ? Balance.MUTATOR_FRAILTY_DAMAGE_TAKEN_MULT  // 突变脆弱 +30%
+                : (this._abyssFrailtyOrigAtk !== undefined
+                    ? Balance.ABYSS_FRAILTY_DMG_MULT      // 深渊脆弱 +50%
+                    : 1.0);
             dmg = Math.floor(dmg * _frailtyMult);
         }
 
