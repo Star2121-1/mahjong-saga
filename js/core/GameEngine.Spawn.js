@@ -14,8 +14,8 @@ Gp._spawnCoinsAt = function(x, y, isBoss, level) {
 if (this._activeMutator === 'bloodmoon' || _vaultBlood) count *= 2;
     if (this._activeMutator === 'frenzy') count = Math.floor(count * Balance.MUTATOR_FRENZY_GOLD_MULT);
     for (var i = 0; i < count; i++) {
-        var cx = x + (Math.random() - 0.5) * 20;
-        var cy = y + (Math.random() - 0.5) * 20;
+        var cx = x + (Math.random() - 0.5) * Balance.COIN_SCATTER;
+        var cy = y + (Math.random() - 0.5) * Balance.COIN_SCATTER;
         var el = document.createElement('div');
         el.className = 'coin-placeholder';
         el.style.left = (cx - 6) + 'px';
@@ -142,7 +142,7 @@ Gp._spawnExpGemsAt = function(x, y, isBoss, level) {
     var bloodMul = (this._activeMutator === 'bloodmoon' || _vaultBloodGem) ? 2 : 1;
     var arr = this._pendingExpGems = this._pendingExpGems || [];
     if (isBoss) {
-        var cnt = 5 + Math.floor(Math.random() * 4);
+        var cnt = Balance.BOSS_MIN_GEM_COUNT + Math.floor(Math.random() * Balance.BOSS_EXTRA_GEM_COUNT);
         /* R139-P0: Boss EXP随等级/难度缩放，与Enemy.js onDeath路径保持一致 */
         var bossLevel = level || 1;
         var bossTotalExp = Math.floor(Balance.BOSS_TOTAL_EXP_GEMS * (1 + (bossLevel - 1) * 0.1) * diff * bloodMul);
@@ -156,7 +156,7 @@ Gp._spawnExpGemsAt = function(x, y, isBoss, level) {
         }
     } else {
         level = level || 1;
-        var gemVal = Math.floor((1 + level * Balance.GEM_LEVEL_SCALE) * diff * bloodMul);
+        var gemVal = Math.floor((Balance.NORMAL_GEM_VALUE_BASE + level * Balance.GEM_LEVEL_SCALE) * diff * bloodMul);
         if (gemVal < 1) gemVal = 1;
         var g = new window.ExpGem(x, y, gemVal);
         g._gameBirth = this._elapsed; /* R136-P0: 用游戏时钟记录出生时间 */

@@ -1176,7 +1176,7 @@ window.Enemy = class Enemy {
                 }
             } else {
                 /* R38-P1: 普通敌人EXP随等级/难度缩放 */
-                var gemVal = Math.floor((1 + level * Balance.GEM_LEVEL_SCALE) * diff * gemMul);
+                var gemVal = Math.floor((Balance.NORMAL_GEM_VALUE_BASE + level * Balance.GEM_LEVEL_SCALE) * diff * gemMul);
                 if (gemVal < 1) gemVal = 1;
                 var g = new window.ExpGem(this.x, this.y, gemVal);
                 if (window.gameEngine) g._gameBirth = window.gameEngine._elapsed; /* R136-P0: 游戏时钟记录 */
