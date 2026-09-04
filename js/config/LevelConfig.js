@@ -51,7 +51,6 @@ window.levelConfig = {
         enemyTypes: { Normal: 0.08, Tanker: 0.15, Stalker: 0.15, Archer: 0.20, Shaman: 0.14, Barrier: 0.16, Bomber: 0.12 },
         spawnIntervalMin: 0.8,
         spawnIntervalDecay: 0.05,
-        bossThreshold: 15,
         difficultyTier: 'extreme',
         /* 程序化参数 */
         abyssScaling: {
@@ -165,6 +164,9 @@ window.proceduralSeedGenerator = {
         if (typeBias < 0.33) { enemyTypes.Stalker += 0.1; enemyTypes.Normal = Math.max(0, enemyTypes.Normal - 0.1); }
         else if (typeBias < 0.66) { enemyTypes.Shaman += 0.1; enemyTypes.Tanker = Math.max(0, enemyTypes.Tanker - 0.1); }
         else { enemyTypes.Tanker += 0.1; enemyTypes.Shaman = Math.max(0, enemyTypes.Shaman - 0.1); }
+        /* R193-P1: 权重调整后归一化，防止weight和超过1.0导致概率分布偏移 */
+        var _wtSum = 0; for (var _wk in enemyTypes) _wtSum += enemyTypes[_wk];
+        if (_wtSum > 0 && Math.abs(_wtSum - 1.0) > 0.001) { for (var _wk2 in enemyTypes) enemyTypes[_wk2] /= _wtSum; }
 
         var seedHash = '';
         var hv = 0;
