@@ -8,7 +8,7 @@ window.Balance = {
     ABYSS_LOOP_HP_ATK_MULT: 1.08,   // 深渊轮回 HP/ATK 倍率 (Enemy.js)
     // ABYSS_SCALE_BASE removed: use ABYSS_LOOP_HP_ATK_MULT (1.08) as single source of truth
     ABYSS_LOOP_SPEED_MULT: 1.05,    // 深渊轮回 Speed 倍率 (Enemy.js)
-    ABYSS_SHOP_PRICE_MULT: 1.5,     // 深渊商店价格倍率
+    ABYSS_SHOP_PRICE_MULT: 1.0,     // R181-P0: 从1.5降至1.0，避免深渊经济崩溃（精英怪掉率低+高价商品=永远买不起）
     ABYSS_COMBO_UNLOCK_INTERVAL: 5, // 每 N 层解锁一个新深渊变异组合
     ABYSS_BLOODMOON_HP_MULT: 1.6,   // 深渊血月HP加成 (Abyss.js)
     ABYSS_BLOODMOON_ATK_MULT: 1.8,  // 深渊血月ATK加成 (Abyss.js)

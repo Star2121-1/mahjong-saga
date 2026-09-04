@@ -805,16 +805,13 @@ Gp._renderPlayerTile = function() {
     /* 设置 data-hero 属性，供 CSS 差异化样式匹配 */
     this.playerEl.setAttribute('data-hero', heroId || 'Hero');
     var heroCfg = heroId ? (window.heroConfig[heroId] || null) : null;
-    /* 雀牌 — 骨雕麻将质感，根据英雄调整样式（D1: 放大 60×80） */
-    this.playerEl.style.width = '60px';
-    this.playerEl.style.height = '80px';
+    /* R181-P0: 删除硬编码尺寸 — CSS #player 已定义响应式尺寸(60×80)及媒体查询断点，inline style会覆盖响应式 */
     this.playerEl.style.background = '#fbfbf7';
     this.playerEl.style.borderRadius = '7px';
     this.playerEl.style.boxShadow = '0 5px 0 #1a5336, 0 7px 0.5px #dfc590, 0 10px 12px rgba(0,0,0,0.5)';
     this.playerEl.style.display = 'flex';
     this.playerEl.style.alignItems = 'center';
     this.playerEl.style.justifyContent = 'center';
-    this.playerEl.style.fontSize = '30px';
     this.playerEl.style.fontWeight = '900';
     /* ── 查找或创建文字 span，避免 textContent 覆盖子元素（如 #player-hp-wrap） ── */
     var textSpan = this.playerEl.querySelector('.player-tile-text');

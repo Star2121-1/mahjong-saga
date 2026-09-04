@@ -408,6 +408,23 @@
     animation-play-state: running !important;
 }
 
+/* R181-P0: Boss P2砸地特效 — slam-flash/ground-crack/boss-slam-ring 在面板冻结期间应继续播放 */
+.game-clock-frozen .slam-flash,
+.game-clock-frozen .ground-crack,
+.game-clock-frozen .ground-crack::before,
+.game-clock-frozen .ground-crack::after,
+.game-clock-frozen .boss-slam-ring {
+    animation-play-state: running !important;
+}
+
+/* R181-P0: 敌方弹道弹幕动画 — bloodPulse等呼吸效果不应被冻结 */
+.game-clock-frozen .enemy-projectile,
+.game-clock-frozen .enemy-projectile::before,
+.game-clock-frozen .enemy-projectile::after,
+.game-clock-frozen .arrow-dart {
+    animation-play-state: running !important;
+}
+
 /* ══════════════════════════════════════════════
    引导面板步骤导航 (Epoch 1)
    ══════════════════════════════════════════════ */

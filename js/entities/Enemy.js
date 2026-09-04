@@ -58,11 +58,7 @@ window.Enemy = class Enemy {
         this._bossContactTimer = 0;
         this._bossContactThisFrame = false; /* R75-P1: 防止接触伤害单帧内重复触发 */
         this._comboCooldown = 0; /* K-030: 万子连击全局冷却 */
-
-        /* R148-P0: 图腾攻击增益 — _getEffectiveAtk() 在每次攻击时读取，避免修改 this.atk 影响存档 */
-        this._getEffectiveAtk = function() {
-            return this._totemBuffed ? Math.floor(this.atk * Balance.TOTEM_BUFF_ATK_MULT) : this.atk;
-        };
+        /* R181-P0: _getEffectiveAtk移为prototype方法，避免每敌构造闭包导致的GC压力 */
 
         if (this.type === 'Tanker') {
             this.speed = this.baseSpeed * Balance.TANKER_SPEED_MULT;
@@ -851,6 +847,11 @@ window.Enemy = class Enemy {
         } else {
             this._bossContactThisFrame = false;
         }
+    }
+
+    /* R181-P0: 图腾攻击增益 — 提取为prototype方法，避免每敌构造闭包 */
+    _getEffectiveAtk() {
+        return this._totemBuffed ? Math.floor(this.atk * Balance.TOTEM_BUFF_ATK_MULT) : this.atk;
     }
 
     _clampPosition(engine) {
