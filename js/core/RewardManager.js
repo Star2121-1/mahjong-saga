@@ -632,8 +632,12 @@ class RewardManager {
         p.relicLevels[bestRelic] = bestLevel - 1;
         if (p.relicLevels[bestRelic] <= 0) delete p.relicLevels[bestRelic];
         /* R146-P0: 圣物降级后重算词条效果，防止属性残留 */
-        p._relicAffixes = null;
-        if (!p._skipRelicAffixes) p._applyRelicAffixes();
+        /* R184-P0: 修复 — 原代码 p._relicAffixes = null 导致所有词条清零（_applyRelicAffixes的null guard直接return） */
+        if (p._relicAffixes && p._relicAffixes[bestRelic]) {
+            delete p._relicAffixes[bestRelic];
+            if (Object.keys(p._relicAffixes).length === 0) p._relicAffixes = {};
+            if (!p._skipRelicAffixes) p._applyRelicAffixes();
+        }
         if (p.heroId === 'Mage') p._recalcThornsRate();
 
         /* 应用奖励 */
