@@ -312,7 +312,7 @@ Sys.updateResonanceAuras = function(engine, dt) {
 Sys.updateWither = function(engine, dt) {
     if (engine._activeMutator === 'wither' && !engine._pendingReward) {
         engine._witherTimer += dt;
-        if (engine._witherTimer >= 5) {
+        if (engine._witherTimer >= Balance.MUTATOR_WITHER_TICK_INTERVAL) {
             engine._witherTimer = 0;
             for (var wi = 0; wi < engine.enemies.length; wi++) {
                 var we = engine.enemies[wi];

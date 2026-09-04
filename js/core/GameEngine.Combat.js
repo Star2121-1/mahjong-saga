@@ -225,6 +225,8 @@ Gp._enterAbyss = function() {
     this._tempShield = 0;
     this._tempShieldEnd = 0;
     this._extraEliteCount = 0;
+    /* R193-P1: 深渊轮回前结束Overdrive，防止武器伤害×2和敌人冻结跨层残留 */
+    if (this._overdriveActive) this._endOverdrive();
     /* P0: 应用深渊轮回属性缩放 — 基于原始基数锚点，防止跨轮复合累乘 */
     if (this._abyssLoopHpScale && this._abyssLoopHpScale > 1 && this.player) {
         var origMaxHp = this.player._baseMaxHp || this.player.maxHp;

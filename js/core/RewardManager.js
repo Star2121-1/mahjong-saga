@@ -355,8 +355,8 @@ class RewardManager {
         var player = window.gameEngine.player;
         var relic = item.cardData;
         if (!isFree && relic.cost > 0 && player.gold < relic.cost) return;
+        player.addRelic(relic.id); /* R193-P1: 先加圣物再扣金币，防止addRelic抛异常时金币已损失 */
         if (!isFree && relic.cost > 0) player.addGold(-relic.cost);
-        player.addRelic(relic.id);
         /* Epoch 32: 图鉴记录 */
         if (window.saveManager) window.saveManager.recordCompendiumEntry('relics', relic.id);
         /* 秘密检测 */

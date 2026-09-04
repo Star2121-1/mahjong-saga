@@ -1104,7 +1104,9 @@ window.Enemy = class Enemy {
                 this._splitDone = true;
                 var engRef = this._eng || window.gameEngine;
                 var childTypes = ['Normal', 'Normal', 'Normal', 'Tanker', 'Stalker', 'Archer', 'Barrier'];
-                for (var _sp = 0; _sp < 2; _sp++) {
+                /* R193-P1: 深渊渊分变体分裂数×2 */
+                var _childCount = (this._abyssVariant && this._abyssVariant.splitMult) ? 2 * this._abyssVariant.splitMult : 2;
+                for (var _sp = 0; _sp < _childCount; _sp++) {
                     var ct = childTypes[Math.floor(Math.random() * childTypes.length)];
                     var cid = ++engRef._enemyIdCounter;
                     var offsetX = (_sp === 0 ? -1 : 1) * 20;
