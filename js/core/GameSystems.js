@@ -356,6 +356,7 @@ Sys.updateShake = function(engine, dt) {
                 wl.classList.remove('shake-active');
                 wl.style.animationDuration = '';
                 /* R171-P1: 不清除transform，避免与camera lerp冲突造成闪屏 — 由Loop.js fallback统一处理 */
+                wl.style.transform = '';
                 wl.style.removeProperty('--sx');
                 wl.style.removeProperty('--sy');
             }
