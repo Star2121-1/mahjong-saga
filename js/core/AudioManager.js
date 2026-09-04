@@ -259,11 +259,10 @@ Ap.setMuted = function(muted) {
 /* R171-P1: 停止所有活跃振荡器，用于静音时强制静默 */
 Ap.stopAll = function() {
     for (var i = this._activeOscillators.length - 1; i >= 0; i--) {
-        try {
-            var o = this._activeOscillators[i];
-            if (o && o.stop) o.stop();
+        var o = this._activeOscillators[i];
+        if (o && o.stop) { try { o.stop(); } catch(e) {}
             try { o.disconnect(); } catch(e) {}
-        } catch(e) {}
+        }
     }
     this._activeOscillators = [];
 };

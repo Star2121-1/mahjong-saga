@@ -487,6 +487,7 @@ Gp._startNewRun = function(heroId, levelId) {
     this._shieldTimer = 0;
     /* R197-P1: 引力突变原始磁铁半径基准清零 */
     this._origMagnetRadius = null;
+    this._totalCritsThisRun = 0; /* R198-P0: _startNewRun路径清零，防止断点续玩残留跨局暴击计数 */
     this.stalkersKilledInLevel2 = 0;
     this._interWaveEvent = null;
     this._interWaveTimer = 0;
@@ -667,7 +668,7 @@ Gp._isPauseAllowed = function() {
     if (this._announcingWave) return false;
     if (this._pendingBossGamble) return false;
     var bgp = document.getElementById('boss-gamble-panel');
-    if (bgp && bgp.classList.contains('active')) return false;
+    if (bgp && bgp.parentNode) return false; /* R198-P1: panel存在即赌局进行中，而非检查active class */
     if (this.victoryOverlay && this.victoryOverlay.classList.contains('active')) return false;
     if (this.gameOverOverlay && this.gameOverOverlay.classList.contains('active')) return false;
     var ro = document.getElementById('reward-overlay');

@@ -227,6 +227,7 @@ Gp._enterAbyss = function() {
     this._extraEliteCount = 0;
     /* R193-P1: 深渊轮回前结束Overdrive，防止武器伤害×2和敌人冻结跨层残留 */
     if (this._overdriveActive) this._endOverdrive();
+    this._overdriveCount = 0; /* R198-P1: 深渊每轮回重置局内计数，防止跨层累积误触发成就 */
     /* P0: 应用深渊轮回属性缩放 — 基于原始基数锚点，防止跨轮复合累乘 */
     if (this._abyssLoopHpScale && this._abyssLoopHpScale > 1 && this.player) {
         var origMaxHp = this.player._baseMaxHp || this.player.maxHp;
@@ -467,9 +468,7 @@ Gp._settleRun = async function(tokens) {
     if ((meta.unlockedHeroes || []).length >= 4) this._checkAchievement('all_heroes');
     /* 套装共鸣 */
     if (meta.fullSetActivated) this._checkAchievement('full_set');
-    /* 金币 */
-    if ((meta.maxGoldThisRun || 0) >= 1000) this._checkAchievement('get_rich');
-    if ((meta.maxGoldThisRun || 0) >= 10000) this._checkAchievement('gold_10k');
+    /* 金币 — get_rich/gold_10k 是单局实时成就，通过 _syncUI inflight 检测，此处不应使用meta跨局值 */
     /* R136-P0: speed_demon 终局兜底 — 用_won替代!gameOver防止死代码 */
     /* R188-P1: 增加_bossLordSpawned检查，防止非最终Boss关卡提前触发极速通关成就 */
     if (this._won && this._bossLordSpawned && (this._elapsed || 0) <= 180) this._checkAchievement('speed_demon');
@@ -639,7 +638,8 @@ Gp._gameOver = async function() {
     if ((this._runSeq || 0) !== _seqGO) return;
     if (!meta || typeof meta.metaTokens === 'undefined') meta = { metaTokens: 0 };
     meta.metaTokens = (meta.metaTokens || 0) + tokens;
-    meta.totalRuns = (meta.totalRuns || 0) + 1;
+    /* R198-P1: totalRuns仅胜利路径累加，死亡不算通关，防止通关类成就门槛被稀释 */
+    if (this._won) meta.totalRuns = (meta.totalRuns || 0) + 1;
     meta.totalKills = (meta.totalKills || 0) + this.kills;
     /* R197-P0: 死亡路径补全meta累计字段，防止胜利路径独占统计 */
     meta.overdriveCount = (meta.overdriveCount || 0) + (this._overdriveCount || 0);

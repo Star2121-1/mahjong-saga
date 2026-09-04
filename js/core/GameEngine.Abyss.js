@@ -233,8 +233,8 @@ Gp._tryAbyssCoinDrop = function(enemy) {
         this._spawnCausalityText('🪙 获得 1 深渊币');
         return true;
     }
-    /* 普通精英怪也有小概率 */
-    if (Math.random() < 0.05) {
+    /* 普通精英怪也有小概率，排除Boss */
+    if (!enemy.isBoss && Math.random() < 0.05) {
         this._abyssCoins++;
         this._spawnCausalityText('🪙 获得 1 深渊币');
         return true;

@@ -72,6 +72,7 @@ Fp.spawnText = function(x, y, text, typeOrColor) {
         node._fctActive = false;
         self._returnNode(node);
     }, window.Balance.FCT_FALLBACK_TIMEOUT_MS);
+    return node; /* R198-P1: 返回节点引用，供调用方设置animationPlayState等 */
 };
 
 Fp._borrowNode = function() {
@@ -100,6 +101,7 @@ Fp._borrowNode = function() {
     el.style.left = '0px'; el.style.top = '0px';
     /* R187-P0: 标记为已激活并绑定清理回调，防止健康检查误扫和动画结束后内存泄漏 */
     el._fctActive = true;
+    el._lastUsed = performance.now(); /* R198-P0: overflow节点同步记录使用时间，防止stale检测误扫 */
     el._fctOnEnd = function() {
         if (!el || !el._fctActive) return;
         el.style.display = 'none';
@@ -176,6 +178,7 @@ Fp.cleanup = function() {
         var excess = this._pool.pop();
         if (excess && excess.parentNode) excess.parentNode.removeChild(excess);
     }
+    this._freeStack = []; /* R198-P0: 清理空闲栈，防止重启后借出已分离DOM节点导致飘字消失 */
 };
 
 window.fxManager = new window.FxManager();

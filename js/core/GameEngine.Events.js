@@ -318,17 +318,21 @@ Gp._showBossGamble = function() {
     var self = this;
     var panel; /* R96-P0: 提前声明避免setTimeout回调中ReferenceError */
     this._gambleTimeout = setTimeout(function() {
-        if (self._pendingBossGamble && panel && panel.parentNode) {
+        if (!self._pendingBossGamble) return; /* click handler已resolve，超时已过期 */
+        if (!panel || !panel.parentNode) {
+            /* Panel已被点击移除 — 手动路径已处理，跳过 */
             self._pendingBossGamble = false;
-            self._gambleActive = false;
-            self._gambleType = null;
-            self._gambleStaked = 0;
-            panel.remove();
-            /* P0-2: 超时路径必须生成领主，与手动选择路径一致 */
-            self._spawnBossLordFromGamble();
-            self._unfreezeClock();
-            self._beginLoop();
+            return;
         }
+        self._pendingBossGamble = false;
+        self._gambleActive = false;
+        self._gambleType = null;
+        self._gambleStaked = 0;
+        panel.remove();
+        /* P0-2: 超时路径必须生成领主，与手动选择路径一致 */
+        self._spawnBossLordFromGamble();
+        self._unfreezeClock();
+        self._beginLoop();
     }, 10000);
 
     var meta = window.saveManager._metaCache || {};

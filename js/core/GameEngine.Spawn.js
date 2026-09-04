@@ -127,16 +127,21 @@ Gp._tryDropEquipment = function(x, y, isBossLord) {
     window.saveManager._saveMetaToStorage().catch(function(e){ console.warn('[Spawn] saveMeta failed:', e); });
     var qualityLabel = { rare: '稀有', epic: '史诗', legendary: '传说' }[quality] || quality;
     this._spawnCausalityText('🎁 获得装备：' + item.name + ' (' + qualityLabel + ')');
-    /* Epoch 16: Abyss Gamble + 怪物潮双倍掉落 */
-    for (var _di = 0; _di < totalMult; _di++) {
-        var dropItem = (_di === 0) ? item : window.equipmentRegistry.createItem(protoId, quality);
+    /* Epoch 16: Abyss Gamble + 怪物潮双倍掉落 — 先保存原始item，循环生成额外副本 */
+    meta.equipments.push(item);
+    if (meta.equipments.length > 100) meta.equipments = meta.equipments.slice(-100);
+    window.saveManager._saveMetaToStorage().catch(function(e){ console.warn('[Spawn] saveMeta failed:', e); });
+    var qualityLabel = { rare: '稀有', epic: '史诗', legendary: '传说' }[quality] || quality;
+    this._spawnCausalityText('🎁 获得装备：' + item.name + ' (' + qualityLabel + ')');
+    /* 生成额外副本（totalMult-1 个） */
+    for (var _di = 1; _di < totalMult; _di++) {
+        var dropItem = window.equipmentRegistry.createItem(protoId, quality);
         if (dropItem) {
             meta.equipments.push(dropItem);
-            /* P1: 循环内追加也需检查容量上限 */
             if (meta.equipments.length > 100) meta.equipments = meta.equipments.slice(-100);
             window.saveManager._saveMetaToStorage().catch(function(e){ console.warn('[Spawn] saveMeta failed:', e); });
             var qLabel = { rare: '稀有', epic: '史诗', legendary: '传说' }[quality] || quality;
-            this._spawnCausalityText('🎁 获得装备：' + dropItem.name + ' (' + qLabel + ')' + (_di > 0 ? ' x' + (_di + 1) : ''));
+            this._spawnCausalityText('🎁 获得装备：' + dropItem.name + ' (' + qLabel + ' x' + (_di + 1) + ')');
         }
     }
     /* Consume Abyss Gamble bonus */
@@ -328,6 +333,8 @@ Gp._rewardKill = function(enemy) {
     this.player.addGold(goldAmt);
     this.player.rage = Math.min(this.player.maxRage, this.player.rage + 5 + (this._tempBerserkBonus ? 10 : 0));
     if (this._tempBerserkBonus) this._tempBerserkBonus = false;
+    /* R198-P0: 铁拳暴击加成对称消费 — 与点金术/狂战士相同模式，防止跨波累积永久DPS膨胀 */
+    if (this._tempCritBonus > 0) this._tempCritBonus = 0;
     /* R38-P0: EXP仅通过gem路径给予（Enemy.js onDeath已生成gem），避免双计数 */
     /* 雀魂系统：击杀掉牌（HUPAI_DESIGN.md v2.0） */
     this._tryTileDrop(enemy);
