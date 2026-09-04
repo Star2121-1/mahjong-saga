@@ -959,6 +959,9 @@ Gp._checkAchievement = function(id) {
     if (meta.achievements[id]) return; /* 已解锁 */
     meta.achievements[id] = true;
     meta.achievements[id + '_at'] = Date.now();
+    /* R185-P1: 设置achievementFlags以便_flushAchievementsToMeta可持久化 */
+    this._achievementFlags = this._achievementFlags || {};
+    this._achievementFlags[id] = true;
     /* R30-M-010: _saveMetaToStorage 现在是 async，加 catch 防止静默失败 */
     window.saveManager._saveMetaToStorage().catch(function(e) {
         console.warn('[Achievement] saveMetaToStorage failed:', e);

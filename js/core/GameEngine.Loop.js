@@ -654,6 +654,8 @@ Gp._loop = function(timestamp) {
         this._syncEntities();
         this._syncPlayerHP();
         this._syncUI();
+        /* R185-P1: 每帧刷新 active buff 图标，防止游戏中buff状态不更新 */
+        if (this._renderActiveBuffs) this._renderActiveBuffs();
 
         /* Epoch 47: 每3秒检查一次里程碑 */
         this._milestoneCheckTimer = (this._milestoneCheckTimer || 0) + dt;
@@ -695,6 +697,7 @@ Gp._renderActiveBuffs = function() {
     if (this._tempGoldMult > 1) buffs.push({ name: '💰 金币×' + this._tempGoldMult, timer: 1 }); /* 单波 */
     if (this._tempBerserkBonus) buffs.push({ name: '🩸 狂战士', timer: 1 });
     if (this._tempShield > 0) buffs.push({ name: '🛡 护盾' + Math.round(this._tempShield), timer: this._tempShieldEnd - this._elapsed });
+    if (this._tempCritBonus > 0) buffs.push({ name: '👊 铁拳+' + Math.round(this._tempCritBonus * 100) + '%', timer: 1 }); /* R185-P2: 显示铁拳暴击加成 */
     if (p._doubleCoinNextWave) buffs.push({ name: '🪙 双倍金币', timer: 1 });
 
     var container = document.getElementById('active-buffs-container');
@@ -711,6 +714,7 @@ Gp._renderActiveBuffs = function() {
         (this._tempGoldMult > 1 ? 'g' + this._tempGoldMult : '') +
         (this._tempBerserkBonus ? 'b' : '') +
         (this._tempShield > 0 ? 's' + Math.round(this._tempShield) : '') +
+        (this._tempCritBonus > 0 ? 'c' + Math.round(this._tempCritBonus*100) : '') + /* R185-P2: 铁拳buff纳入脏检查 */
         (p._doubleCoinNextWave ? 'd' : '');
     if (this._lastBuffKey === _bKey) return;
     this._lastBuffKey = _bKey;

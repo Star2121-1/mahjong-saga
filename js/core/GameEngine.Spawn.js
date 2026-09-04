@@ -735,10 +735,15 @@ Gp._confirmDiscard = function () {
 };
 
 Gp._bindHandTileClicks = function () {
-    if (!this._handTileGrid || this._handClicksBound) return;
+    if (!this._handTileGrid) return;
+    /* R185-P0: 移除旧监听器防止restart后累积 */
+    if (this._handTileClickListener) {
+        this._handTileGrid.removeEventListener('click', this._handTileClickListener);
+        this._handTileClickListener = null;
+    }
     this._handClicksBound = true;
     var self = this;
-    this._handTileGrid.addEventListener('click', function (e) {
+    var handler = function (e) {
         if (!self.running || self.gameOver || self._pendingReward) return;
         var slot = e.target.closest('.hand-tile-slot');
         if (!slot) { if (self._discardMode) self._exitDiscardMode(); return; }
@@ -755,7 +760,9 @@ Gp._bindHandTileClicks = function () {
         }
         if (idx === self._discardSel) self._confirmDiscard();
         else { self._discardSel = idx; self._renderHandTiles(); }
-    });
+    };
+    this._handTileClickListener = handler;
+    this._handTileGrid.addEventListener('click', handler);
 };
 
 /* ════ A6: 手牌状态进断点续玩快照 ════ */

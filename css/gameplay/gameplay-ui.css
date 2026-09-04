@@ -380,12 +380,8 @@
 .game-clock-frozen .boss-mist::after {
     animation-play-state: running !important;
 }
-/* R144-P1: weather-fog雾效在面板打开时应继续运行 */
-.game-clock-frozen .weather-fog,
-.game-clock-frozen .weather-fog::before,
-.game-clock-frozen .weather-fog::after {
-    animation-play-state: running !important;
-}
+/* R185-P1: 死代码 — JS从未创建weather-fog元素，此冻结规则无效 */
+/* .game-clock-frozen .weather-fog 规则已移除 */
 /* R144-P1: rage bar双动画在面板打开时应继续运行 */
 .game-clock-frozen #rage-bar-container.rage-full,
 .game-clock-frozen #rage-bar-fill {

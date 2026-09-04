@@ -416,77 +416,9 @@ Gp.restart = function() {
 };
 
 /* ══════════════════════════════════════════════
-   R168-P0: 胜利/失败结算 — 补全缺失的 _showVictory / _gameOver 方法
-   ══════════════════════════════════════════════ */
-
-Gp._showVictory = function() {
-    /* R168-P0: 刷新成 that 到 meta，防止跨局丢失 */
-    this._flushAchievementsToMeta();
-    /* R171-P0: speed_demon 成就应在通关时检查，而非运行中每帧误报 */
-    if (window.achievementConfig) {
-        var _sdConfig = window.achievementConfig.find(function(a) { return a.id === 'speed_demon'; });
-        if (_sdConfig && this._elapsed <= 180) {
-            this._checkAchievement('speed_demon', Math.floor(this._elapsed));
-        }
-    }
-    /* R170-P1: 隐藏可能残留的active overlays，防止与victory界面叠显示 */
-    if (window.rewardManager) window.rewardManager.hidePanel();
-    if (this.mutatorOverlay) this.mutatorOverlay.classList.remove('active');
-    if (this._bossGamblePanel && this._bossGamblePanel.parentNode) this._bossGamblePanel.remove();
-    if (window.saveManager && window.saveManager.recordRunStats) {
-        var meta = window.saveManager._metaCache || {};
-        window.saveManager.recordRunStats(
-            this.kills || 0,
-            this._elapsed || 0,
-            this.player ? (this.player.gold || 0) : 0,
-            this._overdriveCount || 0,
-            this._totalDodgesThisRun || 0,
-            this._totalCritsThisRun || 0,
-            this._waveCount || 0,
-            this._bossKillsThisRun || 0,
-            this.loopCount || 0,
-            true,
-            (this.player && this.player._tempShieldEnd > 0) ? (this._playerHitCountThisRun || 0) : (this.player ? this.player.hitCountThisRun : 0),
-            0
-        );
-    }
-    if (this.victoryOverlay) this.victoryOverlay.classList.add('active');
-    this._unfreezeClock();
-};
-
-Gp._gameOver = function() {
-    /* R168-P0: 刷新成就到 meta */
-    this._flushAchievementsToMeta();
-    /* R170-P0: 清理Boss Gamble状态，防止overlay残留叠加在game-over界面上 */
-    this._pendingBossGamble = false;
-    this._gambleActive = false;
-    this._gambleType = null;
-    this._gambleStaked = 0;
-    if (this._interWaveTimeout) { clearTimeout(this._interWaveTimeout); this._interWaveTimeout = null; }
-    /* R170-P1: 隐藏可能残留的active overlays，防止与game-over界面叠显示 */
-    if (window.rewardManager) window.rewardManager.hidePanel();
-    if (this.mutatorOverlay) this.mutatorOverlay.classList.remove('active');
-    if (this._bossGamblePanel && this._bossGamblePanel.parentNode) this._bossGamblePanel.remove();
-    if (window.saveManager && window.saveManager.recordRunStats) {
-        var meta = window.saveManager._metaCache || {};
-        window.saveManager.recordRunStats(
-            this.kills || 0,
-            this._elapsed || 0,
-            this.player ? (this.player.gold || 0) : 0,
-            this._overdriveCount || 0,
-            this._totalDodgesThisRun || 0,
-            this._totalCritsThisRun || 0,
-            this._waveCount || 0,
-            this._bossKillsThisRun || 0,
-            this.loopCount || 0,
-            false,
-            this._playerHitCountThisRun || 0,
-            0
-        );
-    }
-    if (this.gameOverOverlay) this.gameOverOverlay.classList.add('active');
-    this._unfreezeClock();
-};
+   R185-P0: 移除重复的 _showVictory / _gameOver 定义
+   Combat.js 中已有完整版本，此处仅为死代码覆盖
+   ================================================================== */
 
 /* ══════════════════════════════════════════════
    武器系统 — 初始化/更新/碰撞/清理
