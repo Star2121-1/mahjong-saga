@@ -14,7 +14,7 @@
     content: '●';
     position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
-    font-size: 7px; color: #0d47a1;
+    font-size: calc(7 * var(--_fs) * 1px); color: #0d47a1;
 }
 
 /* ══════════════════════════════════════════════
@@ -86,7 +86,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 8px;
+    font-size: calc(8 * var(--_fs) * 1px);
     color: #0d47a1;
 }
 
