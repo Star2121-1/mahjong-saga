@@ -169,8 +169,11 @@ Gp._clearMutatorEffects = function() {
         }
     }
     if (this._activeMutator === 'frailty') {
-        /* R202-P0: 使用_baseAtk动态计算恢复目标，避免因升级期间atk变化导致的恢复失真 */
-        if (this._frailtyBoost != null) {
+        /* R204-P1: 存储实际APK快照而非_baseAtk，避免升级后恢复失真 */
+        if (this._frailtyOrigPlayerAtk !== undefined) {
+            this.player.atk = this._frailtyOrigPlayerAtk;
+            this._frailtyOrigPlayerAtk = undefined;
+        } else if (this._frailtyBoost != null) {
             var _baseAtkVal = this.player._baseAtk || this.player.atk;
             this.player.atk = Math.floor(_baseAtkVal * (1 + this._frailtyBoost));
             this._frailtyBoost = null;
@@ -544,6 +547,20 @@ Gp._spawnEnemyType = function(type) {
     this.enemies.push(enemy);
     /* R37-P0: 深渊变体 — 与 _spawnEliteEnemy 保持一致 */
     if (this._applyAbyssVariant) this._applyAbyssVariant(enemy);
+    /* R204-P1: 应用活跃突变属性，与 GameSpawner._spawnEnemy 保持一致 */
+    if (this._activeMutator === 'bloodmoon') {
+        enemy._bloodmoonStored = true;
+        enemy._bloodmoonOrigAtk = enemy.atk;
+        enemy._bloodmoonOrigMaxHp = enemy.maxHp;
+        enemy._bloodmoonOrigHp = enemy.hp;
+        enemy.maxHp = Math.floor(enemy.maxHp * Balance.MUTATOR_BLOODMOON_HP_MULT);
+        enemy.hp = enemy.maxHp;
+        enemy.atk = Math.floor(enemy.atk * Balance.MUTATOR_BLOODMOON_ATK_MULT);
+    } else if (this._activeMutator === 'frenzy') {
+        enemy._frenzyStored = true;
+        enemy._frenzyOrigSpeed = enemy.speed;
+        enemy.speed *= Balance.MUTATOR_FRENZY_SPEED_MULT;
+    }
 
     var el = document.createElement('div');
     el.className = 'enemy';

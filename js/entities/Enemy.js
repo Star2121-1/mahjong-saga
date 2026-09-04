@@ -562,7 +562,12 @@ window.Enemy = class Enemy {
                     player.takeDamage(this._getEffectiveAtk(), this, this.x, this.y); /* R144-P2: 传递爆炸源位置防止Barrier无敌判定错误 */
                 }
             }
-            if (this.el && this.el.parentNode) this.el.remove();
+            var engRef = this._eng || window.gameEngine;
+            if (engRef && typeof engRef._removeEnemyDOM === 'function') {
+                engRef._removeEnemyDOM(this);
+            } else if (this.el && this.el.parentNode) {
+                this.el.remove();
+            }
         }
     }
 

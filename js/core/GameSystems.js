@@ -185,6 +185,8 @@ Sys.applyMutator = function(engine, mutatorId) {
         /* L-008: 脆弱突变不再双向增益 — 玩家 +80% ATK 但受击伤害 +30% */
         /* R202-P0: 改为存储ATK倍增系数而非绝对值，解决升级期间atk变化导致恢复失真问题 */
         engine._frailtyBoost = Balance.MUTATOR_FRAILTY_PLAYER_ATK_MULT - 1;
+        /* R204-P1: 存储实际APK快照，优先于_boost路径，避免_baseAtk滞后导致的恢复失真 */
+        engine._frailtyOrigPlayerAtk = engine.player.atk;
         /* R143-P0: 修复脆弱突变防重入守卫 — 使用player级标志而非engine级，防止跨局重复叠乘ATK */
         if (!engine.player._frailtyStored) {
             engine.player._frailtyStored = true;

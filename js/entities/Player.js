@@ -910,11 +910,8 @@ class Player {
         this.critDamageBonus = 0; /* C2: 暴击伤害加成初始化为0 */
         this.huQingyise = false; /* R52-P1: 胡清一色状态重置 */
         if (this.heroId === 'Mage') this._recalcThornsRate();
-        /* 从 HeroConfig 重置英雄特有参数 */
+        /* R204-P0: maxWeaponSlots 从 HeroConfig 重置（无 post-reset 修改器，安全） */
         const cfg = window.heroConfig[this.heroId];
-        if (cfg) {
-            if (cfg.weaponSlots != null) this.maxWeaponSlots = cfg.weaponSlots;
-            if (cfg.cdFloor != null) this.cdFloor = cfg.cdFloor;
-        }
+        if (cfg && cfg.weaponSlots != null) this.maxWeaponSlots = cfg.weaponSlots;
     }
 }
