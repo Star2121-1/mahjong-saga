@@ -998,7 +998,8 @@
             if (c.id === 'hundred_kills' || c.id === 'thousand_kills' || c.id === 'ten_thousand_kills') {
                 currentVal = meta.totalKills || 0;
             } else if (c.id === 'first_victory' || c.id === 'victory_10' || c.id === 'victory_50') {
-                currentVal = (meta.runStats && meta.runStats.wins) || 0;
+                /* R188-P0: 统一使用totalRuns与成就条件一致，避免失败局误导进度显示 */
+                currentVal = meta.totalRuns || 0;
             } else if (c.id === 'deep_abyss' || c.id === 'deep_abyss_10' || c.id === 'deep_abyss_20') {
                 currentVal = meta.highestEndlessLoop || 0;
             } else if (c.id === 'overdrive_1' || c.id === 'overdrive_10' || c.id === 'overdrive_50') {

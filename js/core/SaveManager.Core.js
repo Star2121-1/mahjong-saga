@@ -373,6 +373,10 @@
             heroId: heroId, levelId: levelId, mode: 'new',
             player: null, kills: 0, elapsed: 0
         });
+        /* R188-P1: 更新lastSaveTimestamp，防止存档选择器显示过期时间 */
+        var meta = await this.getMeta();
+        meta.lastSaveTimestamp = Date.now();
+        await this.saveMeta(meta);
     };
 
     /* ── 快照/恢复 ── */

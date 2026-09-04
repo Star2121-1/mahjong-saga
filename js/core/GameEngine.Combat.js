@@ -360,6 +360,8 @@ Gp._settleRun = async function(tokens) {
     meta.totalCrits = (meta.totalCrits || 0) + (this._totalCritsThisRun || 0);
     meta.totalDodges = (meta.totalDodges || 0) + (this._totalDodgesThisRun || 0);
     meta.maxGoldThisRun = Math.max(meta.maxGoldThisRun || 0, this._maxGoldThisRun || 0);
+    /* R188-P0: 重置单局最高金币，防止跨局累加导致gold_10k名不副实 */
+    this._maxGoldThisRun = 0;
     /* 检查套装共鸣成就 — 需同时激活炎痕+永冻番印 (R147-P1: ||→&& 对齐设计文档) */
     if (this.player && this.player.setResonanceSpeed && this.player.setResonanceIce) {
         meta.fullSetActivated = true;
