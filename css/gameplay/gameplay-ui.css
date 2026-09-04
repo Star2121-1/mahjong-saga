@@ -226,10 +226,6 @@
     animation-play-state: paused !important;
     transition-property: none !important;
 }
-/* R188-P1: 成就弹出动画豁免时钟冻结 */
-.game-clock-frozen .fct-achieve,
-.game-clock-frozen .achievePop {
-    animation-play-state: running !important;
 }
 .game-clock-frozen #reward-overlay,
 .game-clock-frozen #reward-overlay *,
