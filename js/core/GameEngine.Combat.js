@@ -1035,13 +1035,22 @@ Gp._syncUI = function() {
         this.rageDisplay.style.width = Math.min(100, Math.max(0, ragePct)) + '%';
         /* 怒气全满 → 呼吸金光提示可触发 Overdrive（纯视觉 class 钩子，不影响逻辑） */
         if (this.rageContainer) this.rageContainer.classList.toggle('rage-full', ragePct >= 100);
-        if (this.rageText) this.rageText.textContent = '怒气 ' + this.player.rage + ' / ' + this.player.maxRage;
+        if (this.rageText) {
+            /* R183-P0: Overdrive期间显示剩余时间而非怒气值 */
+            if (this._overdriveActive) {
+                this.rageText.textContent = 'Overdrive ' + this._overdriveTimer.toFixed(1) + 's';
+            } else {
+                this.rageText.textContent = '怒气 ' + this.player.rage + ' / ' + this.player.maxRage;
+            }
+        }
     }
 
     /* ── Boss Lord 血条同步 ── */
     if (this._bossLord && this._bossLord.alive && this.bossHpFill) {
-        var pct = (this._bossLord.maxHp > 0 ? this._bossLord.hp / this._bossLord.maxHp : 0) * 100;
-        this.bossHpFill.style.width = Math.max(0, pct) + '%';
+        /* R183-P1: NaN防护 — maxHp为0或NaN时避免显示- Infinity% */
+        var _maxHp = this._bossLord.maxHp || 1;
+        var pct = Math.max(0, Math.min(100, (this._bossLord.hp / _maxHp) * 100));
+        this.bossHpFill.style.width = pct + '%';
     }
 
     /* Epoch 38: 共振指示 */

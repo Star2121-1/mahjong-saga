@@ -374,14 +374,16 @@
     /* ── 快照/恢复 ── */
 
     SaveManager.prototype.snapshotForRun = function(engine) {
-        var heroCfg = window.heroConfig[engine.player.heroId];
-        var levelCfg = window.levelConfig[engine._currentLevelId];
+        /* R183-P0: 防御性null检查 — engine.player可能尚未初始化 */
+        var heroId = (engine && engine.player) ? engine.player.heroId : null;
+        var heroCfg = window.heroConfig[heroId];
+        var levelCfg = window.levelConfig[engine ? engine._currentLevelId : ''];
         var now = new Date();
         return {
             saveName: 'save_' + this._formatTimestamp(now),
             timestamp: now.getTime(), dateString: this._formatDateString(now),
-            heroName: heroCfg ? heroCfg.name : engine.player.heroId,
-            heroId: engine.player.heroId,
+            heroName: heroCfg ? heroCfg.name : heroId,
+            heroId: heroId,
             levelName: levelCfg ? levelCfg.name : engine._currentLevelId,
             levelId: engine._currentLevelId,
             waveCount: engine._waveCount, elapsed: engine._elapsed,
@@ -589,14 +591,13 @@
             if (!this._validateImportData(data)) {
                 return { success: false, error: '存档格式不合法，拒绝导入' };
             }
-            this._writeJSON('meta.json', data.meta);
+            /* R183-P0: 移除重复写入 — 第一次写入后直接检查返回值，不再第二次写入 */
+            var metaWriteOk = this._writeJSON('meta.json', data.meta);
             var metaOk = this._writeJSON('active_run.json', data.activeRun);
             this._metaCache = null;
             /* R30-H-003: 导入成功后清除 .bak 防止回滚到旧数据 */
             try { localStorage.removeItem('cr_meta.json.bak'); } catch(e) {}
             try { localStorage.removeItem('cr_active_run.json.bak'); } catch(e) {}
-            /* R174-P0: 同时检查meta.json写入结果，防止quota满时误报成功 */
-            var metaWriteOk = this._writeJSON('meta.json', data.meta);
             return { success: metaWriteOk && metaOk }; /* R136-P0: 传播_writeJSON返回值 */
         } catch (e) {
             return { success: false, error: (e && (e.message || String(e))) || '未知错误' };
