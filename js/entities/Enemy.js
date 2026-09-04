@@ -136,7 +136,7 @@ window.Enemy = class Enemy {
             this._bossEnraged = false;
             this._bossSummonTimer = Balance.BOSS_PHASE3_SUMMON_INTERVAL; /* R145-P1: 使用Balance常量替代硬编码4 */
             this._summonCount = 0; /* Boss P3召唤计数，防止无限召唤 */
-            this._bossContactTimer = 0;
+            this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN; /* R192-P1: 初始化为CD值，防止Phase 1开场无冷却接触伤害 */
             this._comboCooldown = 0; /* K-030: 万子连击冷却 */
             /* R29-H-006: Boss_Lord 也需要应用 Abyss 倍增 */
             /* R124-P1: Boss_Lord已在上文通用区块应用深渊缩放，此处不再重复 */
@@ -1123,6 +1123,8 @@ window.Enemy = class Enemy {
                     child._clampPosition(engRef);
                     /* R170-P1: 设置子体引擎引用，防止回退到全局gameEngine导致异常 */
                     child._eng = engRef;
+                    /* R192-P1: 深渊变体应用于Splitter子体，与父体逻辑一致 */
+                    if (engRef && engRef._applyAbyssVariant) engRef._applyAbyssVariant(child);
                     child.maxHp = Math.floor(child.maxHp * Balance.SPLITTER_CHILD_HP_MULT);
                     child.hp = child.maxHp;
                     child.atk = Math.floor(child.atk * Balance.SPLITTER_CHILD_ATK_MULT);

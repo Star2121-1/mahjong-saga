@@ -570,6 +570,8 @@ Gp._triggerHonorMeld = function (meld) {
                     var dx = e1.x - p.x, dy = e1.y - p.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
                     e1.x += (dx / d) * B.HUPAI_ZI_EAST_KNOCKBACK;
                     e1.y += (dy / d) * B.HUPAI_ZI_EAST_KNOCKBACK;
+                    /* R192-P1: 击退后边界钳制，防止敌人推出地图 */
+                    if (e1._clampPosition) e1._clampPosition(this);
                     e1.frozen = true; e1.frozenTimer = B.FROZEN_TIMER_ZI_EAST;
                 }
                 break;
