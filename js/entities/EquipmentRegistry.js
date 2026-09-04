@@ -26,6 +26,7 @@ window.equipmentRegistry = {
 
     /** 创建装备实例 */
     createItem: function(protoId, quality) {
+        this._instanceCounter = (this._instanceCounter || 0) + 1;
         var proto = this.equipPool[protoId];
         if (!proto) return null;
         quality = quality || 'rare';
@@ -44,7 +45,7 @@ window.equipmentRegistry = {
         }
         /* R65-P1: 深拷贝base属性，防止多实例共享同一引用导致污染 */
         return {
-            instanceId: 'eq_' + Date.now() + '_' + Math.floor(Math.random() * 99999),
+            instanceId: 'eq_' + (this._instanceCounter || 0) + '_' + Math.floor(Math.random() * 99999),
             protoId: protoId,
             slot: proto.slot,
             name: proto.name,
