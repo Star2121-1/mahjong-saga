@@ -461,7 +461,7 @@ Gp._triggerFlowerEvent = function (id) {
             case 'hua_xia': p._tempAtkBoost = (p._tempAtkBoost || 0) + Balance.HUPAI_HUA_XIA_ATK_BOOST; p._tempBuffTimeLeft = Math.max(p._tempBuffTimeLeft || 0, Balance.HUPAI_HUA_XIA_BUFF_DURATION); break; /* P2-6: 5s 对齐设计表 */
             case 'hua_qiu': p.addGold(20 * Math.max(1, this._waveCount)); break;
             case 'hua_dongJ':
-                for (var i = 0; i < this.enemies.length; i++) { this.enemies[i].frozen = true; this.enemies[i].frozenTimer = B.FROZEN_TIMER_BONUS_BASE; }
+                for (var i = 0; i < this.enemies.length; i++) { this.enemies[i].frozen = true; this.enemies[i].frozenTimer = B.FROZEN_TIMER_BONUS_BASE + (this.player.iceDurationBonus || 0); }
                 break;
             case 'hua_mei': {
                 var ws = this._activeWeapons || [];
@@ -599,7 +599,7 @@ Gp._triggerHonorMeld = function (meld) {
                     e1.y += (dy / d) * B.HUPAI_ZI_EAST_KNOCKBACK;
                     /* R192-P1: 击退后边界钳制，防止敌人推出地图 */
                     if (e1._clampPosition) e1._clampPosition(this);
-                    e1.frozen = true; e1.frozenTimer = B.FROZEN_TIMER_ZI_EAST;
+                    e1.frozen = true; e1.frozenTimer = B.FROZEN_TIMER_ZI_EAST + (this.player.iceDurationBonus || 0);
                 }
                 break;
             case 'feng_nan': /* 离火燎原：全场灼烧（MVP 即时 8%×kongMult maxHp） */
@@ -610,12 +610,12 @@ Gp._triggerHonorMeld = function (meld) {
                 break;
             case 'feng_xi': /* 肃杀之风：全场迟滞（MVP 冰封0.8s代理） */
                 for (var k = 0; k < this.enemies.length; k++) {
-                    if (this.enemies[k].alive) { this.enemies[k].frozen = true; this.enemies[k].frozenTimer = B.FROZEN_TIMER_FENG_XI; }
+                    if (this.enemies[k].alive) { this.enemies[k].frozen = true; this.enemies[k].frozenTimer = B.FROZEN_TIMER_FENG_XI + (this.player.iceDurationBonus || 0); }
                 }
                 break;
             case 'feng_bei': /* 北冥冻结：全场冰冻2s */
                 for (var m = 0; m < this.enemies.length; m++) {
-                    if (this.enemies[m].alive) { this.enemies[m].frozen = true; this.enemies[m].frozenTimer = B.FROZEN_TIMER_FENG_BEI; }
+                    if (this.enemies[m].alive) { this.enemies[m].frozen = true; this.enemies[m].frozenTimer = B.FROZEN_TIMER_FENG_BEI + (this.player.iceDurationBonus || 0); }
                 }
                 break;
             case 'jian_zhong': /* 红中贯日：全屏冲击波 atk×4×kongMult + 怒气+30 */

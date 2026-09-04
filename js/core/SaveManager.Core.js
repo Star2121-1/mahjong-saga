@@ -413,6 +413,7 @@
             gambleStaked: engine._gambleStaked || 0,
             shieldActive: engine._shieldActive || false,
             shieldTimer: engine._shieldTimer || 0,
+            tempShieldEnd: engine._tempShieldEnd || 0,
             eliteModeActive: engine._eliteModeActive || false,
             eliteMultiplier: engine._eliteMultiplier || null,
             activeMutator: engine._activeMutator || null,
@@ -474,6 +475,7 @@
         engine._gambleStaked = _posOrZero(data.gambleStaked, 0);
         engine._shieldActive = data.shieldActive || false;
         engine._shieldTimer = data.shieldTimer || 0;
+        engine._tempShieldEnd = data.tempShieldEnd || 0;
         engine._eliteModeActive = data.eliteModeActive || false;
         engine._eliteMultiplier = data.eliteMultiplier || null;
         engine._activeMutator = data.activeMutator || null;
