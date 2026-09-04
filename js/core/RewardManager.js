@@ -421,6 +421,7 @@ class RewardManager {
         if (!newWeaponId) return;
         eng._replaceWeapon(oldIndex, newWeaponId);
         this._replaceWeaponId = null;
+        this._pendingWeapon = null; /* R206-P1: 清除暂存ID，防止下次升级重复加入武器池 */
         this.hidePanel();
         eng._syncUI();
         if (eng._levelUpPending) {

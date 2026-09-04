@@ -291,9 +291,7 @@ window.Balance = {
     GEM_LEVEL_SCALE: 0.5,
 
     /* ── 震动 ── */
-    SHAKE_INTENSITY_STEP: 8,
-    SHAKE_MAX_DISPLACEMENT: 24,
-    SHAKE_MAX_DURATION_MS: 3000,
+    // SHAKE_* constants removed (R206-P2): GameSystems.js hardcodes intensity*8 and min(duration,3000) inline
 
     /* ── Boss 深渊阈值 ── */
     BOSS_ABYSS_TIER_1: 1,             // 龙王第一阶段深渊阈值 (Enemy.js)
@@ -338,7 +336,6 @@ window.Balance = {
     MILESTONE_CHECK_INTERVAL: 3,        // 里程碑检查间隔(s) (Loop.js _milestoneCheckTimer)
 
     /* ── 工具 ── */
-    BARRIER_ANGLE_HALF_WIDTH: Math.PI / 3,  // 屏障怪正面无敌扇区半角 60° (Enemy.js)
 
     /* ── HUPAI / MahjongHand.js + GameEngine.Spawn.js + Player.js ── */
     HUPAI_DROP_CHANCE: 0.06,

@@ -353,8 +353,13 @@ class Player {
                 break;
             case 'wind_walker':
                 /* R187-P1: += 而非 *=lv，防止每次升级累加 lv 倍导致速度溢出（Lv.5 时 280% vs 设计 160%） */
-                this.speedMultiplier += Balance.RELIC_WW_SPEED_PER_LEVEL;
-                this.speed = this.baseSpeed * this.speedMultiplier;
+                /* R206-P1: _rollRelicAffix 已应用 ww_speed 词条时跳过重复加速 */
+                var _hasWwSpeed = this._relicAffixes && this._relicAffixes['wind_walker'] &&
+                    this._relicAffixes['wind_walker'].indexOf('ww_speed') !== -1;
+                if (!_hasWwSpeed) {
+                    this.speedMultiplier += Balance.RELIC_WW_SPEED_PER_LEVEL;
+                    this.speed = this.baseSpeed * this.speedMultiplier;
+                }
                 break;
             case 'vamp_ring':
                 this.lifestealRate = Math.min(Balance.MAX_LIFESTEAL_RATE, lv * Balance.LIFESTEAL_PER_VAMP_LEVEL);
