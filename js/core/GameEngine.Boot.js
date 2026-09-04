@@ -12,6 +12,7 @@ Gp.init = async function() {
     /* R137-P0: 恢复难度倍率，防止跨页面丢失设置 */
     var savedDiff = localStorage.getItem('cr_difficulty');
     if (savedDiff) {
+        window.difficultyScale = 1; /* R188-P1: 统一默认值，防止undefined导致下游||1分散防御 */
         try { window.difficultyScale = JSON.parse(savedDiff); } catch(e) { console.warn('Boot: invalid cr_difficulty', e); }
     }
     this._cacheStage3DOM();

@@ -788,6 +788,7 @@ Gp._clearHandTile = function(index) {
 Gp._syncPlayerHP = function() {
     if (!this.player || !this.playerHpFill || !this.playerHpText) return;
     if (isNaN(this.player.hp) || isNaN(this.player.maxHp)) { this.player.hp = 0; this.player.maxHp = 1; } /* R129-P0: 防护NaN透传到DOM */
+    if (!this.player.maxHp || this.player.maxHp <= 0) this.player.maxHp = 1; /* R188-P1: 防止maxHp=0导致pct=Infinity */
     var pct = (this.player.hp / this.player.maxHp) * 100;
     this.playerHpFill.style.width = Math.max(0, pct) + '%';
     this.playerHpText.textContent = Math.max(0, Math.floor(this.player.hp)) + '/' + this.player.maxHp;
