@@ -16,7 +16,7 @@
             if (!_compSaveTimer) {
                 _compSaveTimer = setTimeout(function() {
                     _compSaveTimer = null;
-                    this._saveMetaToStorage();
+                    this._saveMetaToStorage().catch(function(e) { console.warn('[Compendium] save failed:', e); });
                 }.bind(this), 200);
             }
         }
