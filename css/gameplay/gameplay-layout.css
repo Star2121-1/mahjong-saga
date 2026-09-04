@@ -210,10 +210,10 @@
 /* 响应式: 小高度视口缩减顶部栏 */
 @media (max-height: 600px) {
     #top-bar { height: 28px; gap: 10px; padding-left: 8px; }
-    .stat { font-size: 11px; }
+    .stat { font-size: calc(11 * var(--_fs) * 1px); }
     #rage-bar-container { height: 12px; }
-    #rage-bar-text { font-size: 9px; }
+    #rage-bar-text { font-size: calc(9 * var(--_fs) * 1px); }
     #boss-hp-bar { height: 16px; padding: 0 6px; gap: 4px; }
     #boss-hp-bar .hp-bar-track { height: 6px; }
-    #boss-hp-label { font-size: 9px; }
+    #boss-hp-label { font-size: calc(9 * var(--_fs) * 1px); }
 }

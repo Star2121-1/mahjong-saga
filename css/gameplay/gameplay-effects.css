@@ -290,14 +290,14 @@
 
 /* 响应式: 飘字 */
 @media (max-height: 768px) {
-    .damage-float { font-size: 14px; }
+    .damage-float { font-size: calc(14 * var(--_fs) * 1px); }
     /* R156-P0: 移除.heal-float/.crit-float — 这两种类名从未存在，JS使用fct-heal/fct-crit */
 }
 @media (max-height: 600px) {
-    .damage-float { font-size: 12px; }
+    .damage-float { font-size: calc(12 * var(--_fs) * 1px); }
 }
 @media (max-height: 480px) {
-    .damage-float { font-size: 10px; }
+    .damage-float { font-size: calc(10 * var(--_fs) * 1px); }
 }
 /* R158-P1: 移除未使用的.fct-overdrive/.fct-freeze — JS从未设置这两种类名 */
 /* R182-P1: 重新启用overdrive/freeze飘字类型（Enemy.js L1064-1065已使用） */

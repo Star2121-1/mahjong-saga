@@ -217,19 +217,19 @@
    响应式: 小视口玩家尺寸
    ══════════════════════════════════════════════ */
 @media (max-height: 768px) {
-    #player { width: 50px; height: 68px; font-size: 26px; }
+    #player { width: 50px; height: 68px; font-size: calc(26 * var(--_fs) * 1px); }
     #player-hp-wrap { width: 60px; }
     #player-hp-bar { height: 5px; }
     #player-hp-text { font-size: calc(11 * var(--_fs) * 1px); }
 }
 @media (max-height: 600px) {
-    #player { width: 40px; height: 56px; font-size: 21px; }
+    #player { width: 40px; height: 56px; font-size: calc(21 * var(--_fs) * 1px); }
     #player-hp-wrap { width: 50px; }
     #player-hp-bar { height: 4px; }
     #player-hp-text { font-size: calc(10 * var(--_fs) * 1px); }
 }
 @media (max-height: 480px) {
-    #player { width: 36px; height: 48px; font-size: 18px; }
+    #player { width: 36px; height: 48px; font-size: calc(18 * var(--_fs) * 1px); }
     #player-hp-wrap { width: 40px; } /* R133-P0: 同步缩小HP条宽度，防止溢出battlefield被clip */
     #player-hp-text { font-size: calc(9 * var(--_fs) * 1px); }
 }

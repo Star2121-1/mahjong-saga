@@ -630,6 +630,8 @@ window.Enemy = class Enemy {
                 this.speed = this.baseSpeed * Balance.BOSS_PHASE3_SPEED_MULT;
                 /* R33-E-001: 重置接触伤害CD，防止首帧接触秒杀 */
                 this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
+                /* R187-P1: 重置辐射弹道计时器，防止转场瞬间触发弹幕 */
+                this._bossRadiationTimer = 0;
                 if (this.el) this.el.classList.add('boss-enraged');
                 /* B4: 血海沸腾 — 全场红雾 12s + Boss 血渍滴落 */
                 if (engine && engine.battlefield && !engine._bossMistEl) {
