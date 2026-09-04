@@ -83,7 +83,6 @@ window.Enemy = class Enemy {
             this.speed = this.baseSpeed * Balance.BARRIER_SPEED_MULT;
             this.baseSpeed = this.speed;
             this.hue = 200;
-            this._barrierAngle = 0;
             this._barrierFacing = 0; /* R47-P0: 初始化朝向，防止首次受击时NaN */
         } else if (this.type === 'Bomber') {
             /* 自爆怪 — 接近玩家后爆炸 */
@@ -468,8 +467,6 @@ window.Enemy = class Enemy {
         var dist = Math.sqrt(dx * dx + dy * dy);
         var attackRange = Balance.ENEMY_ATTACK_RANGE_OFFSET + this.radius;
 
-        /* 屏障朝向玩家 */
-        this._barrierAngle = Math.atan2(dy, dx);
         /* R37-P0: 更新屏障独立朝向 — 仅在移动方向显著变化时更新 */
         var moveAngle = Math.atan2(dy, dx);
         var angleDiff = Math.abs(moveAngle - this._barrierFacing);
