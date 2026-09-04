@@ -104,9 +104,8 @@ Gp._continueAfterInterWave = function() {
     this._monsterSurgeDoubleDrops = false;
     this._tempEnemyAtkDebuff = 0;
     this._tempEnemySpeedDebuff = 0;
-    this._tempBerserkBonus = false;
-    this._tempGoldMult = 1;
-    this._tempCritBonus = 0;
+    /* R194-P1: 不清除下波增益(_tempBerserkBonus/_tempGoldMult/_tempCritBonus)，
+       它们在 Spawn.js 中下一波首次击杀/拾取时被消费后清零 */
     /* R152-F2: 波次间事件临时增益在 _continueAfterInterWave 中不清除，
        等待 Spawn.js 下一波生成时由 applySpawnModifiers 消费后清零，
        确保冥想/时光缓流等 debuff 能正确应用到下一波敌人 */
