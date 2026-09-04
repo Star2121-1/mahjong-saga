@@ -196,6 +196,7 @@ window.Balance = {
     SPLITTER_HP_MULT: 1.2,           // 分身怪HP倍率 (Enemy.js)
     SPLITTER_CHILD_HP_MULT: 0.5,     // 分身怪子体HP倍率 (Enemy.js)
     SPLITTER_CHILD_ATK_MULT: 0.5,    // 分身怪子体ATK倍率 (Enemy.js)
+    SPLITTER_CHILD_SPEED_MULT: 1.2,  // 分身怪子体速度倍率 (Enemy.js)
     BOSS_NONLORD_SPEED_MULT: 0.7,    // 非龙王Boss速度倍率 (Enemy.js)
     BOSS_NONLORD_ATK_MULT: 3,        // 非龙王Boss攻击倍率 (Enemy.js) — 替代BOMBER_ATK_MULT
     BOSS_NONLORD_HP_MULT: 6,          // R159-P1: 非龙王Boss HP倍率（原硬编码6）

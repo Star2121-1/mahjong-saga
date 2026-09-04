@@ -1126,7 +1126,11 @@ window.Enemy = class Enemy {
                     child.maxHp = Math.floor(child.maxHp * Balance.SPLITTER_CHILD_HP_MULT);
                     child.hp = child.maxHp;
                     child.atk = Math.floor(child.atk * Balance.SPLITTER_CHILD_ATK_MULT);
-                    child.speed = child.baseSpeed * 1.2;
+                    /* R189-P1: 应用难度系数，与Spawn.js普通敌人生成路径一致 */
+                    var _childDiff = (engRef && engRef.levelConfig && engRef.levelConfig[engRef._currentLevelId] && engRef.levelConfig[engRef._currentLevelId].difficultyFactor) || 1;
+                    child.maxHp = Math.floor(child.maxHp * _childDiff);
+                    child.atk = Math.floor(child.atk * _childDiff);
+                    child.speed = child.baseSpeed * Balance.SPLITTER_CHILD_SPEED_MULT;
                     child.baseSpeed = child.speed;
                     engRef.enemies.push(child);
                     /* R119-P1: Splitter子体计入波次计数，防止绕过波次上限 */
