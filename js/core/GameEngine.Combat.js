@@ -467,7 +467,8 @@ Gp._settleRun = async function(tokens) {
     if ((meta.maxGoldThisRun || 0) >= 1000) this._checkAchievement('get_rich');
     if ((meta.maxGoldThisRun || 0) >= 10000) this._checkAchievement('gold_10k');
     /* R136-P0: speed_demon 终局兜底 — 用_won替代!gameOver防止死代码 */
-    if (this._won && (this._elapsed || 0) <= 180) this._checkAchievement('speed_demon');
+    /* R188-P1: 增加_bossLordSpawned检查，防止非最终Boss关卡提前触发极速通关成就 */
+    if (this._won && this._bossLordSpawned && (this._elapsed || 0) <= 180) this._checkAchievement('speed_demon');
 
     /* ── 变异保险库：20%概率解锁新突变 ── */
     if (Math.random() < Balance.VAULT_MUTATION_UNLOCK_CHANCE) {

@@ -399,7 +399,7 @@ Gp._resolveGambleChoice = function(choice) {
             this._gambleStaked = 1;
             meta.metaTokens -= 1;
             window.saveManager._metaCache = meta;
-            window.saveManager._saveMetaToStorage();
+            window.saveManager._saveMetaToStorage().catch(function(e) { /* R188-P1: 记录保存失败但不阻塞Gamble流程 */ console.warn('Boss Gamble save failed:', e); });
         } else {
             this._gambleActive = false;
         }

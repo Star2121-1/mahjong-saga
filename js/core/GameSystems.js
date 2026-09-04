@@ -64,9 +64,10 @@ Sys.triggerOverdrive = function(engine) {
 
     /* 成就：Overdrive 计数 */
     engine._overdriveCount = (engine._overdriveCount || 0) + 1;
-    if (engine._overdriveCount >= 1) engine._checkAchievement('overdrive_1');
-    if (engine._overdriveCount >= 10) engine._checkAchievement('overdrive_10');
-    if (engine._overdriveCount >= 50) engine._checkAchievement('overdrive_50');
+    /* R188-P1: 统一使用_inflight机制，与crit_master/dodge_king保持一致 */
+    if (engine._overdriveCount >= 1) engine._checkAchievementInflight('overdrive_1', engine._overdriveCount);
+    if (engine._overdriveCount >= 10) engine._checkAchievementInflight('overdrive_10', engine._overdriveCount);
+    if (engine._overdriveCount >= 50) engine._checkAchievementInflight('overdrive_50', engine._overdriveCount);
 };
 
 Sys.endOverdrive = function(engine) {
