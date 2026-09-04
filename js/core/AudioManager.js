@@ -99,7 +99,9 @@ Ap.play = function(sound, opts) {
     if (this._ctx && (this._ctx.state === 'suspended' || this._ctx.state === 'closed')) return;
     opts = opts || {};
     /* P1: 应用分类音量 */
+    /* R189-P1: boss音效归入sfx类别以获得更响亮的音量 */
     var catKey = (sound === 'victory' || sound === 'gameover' || sound === 'levelup' || sound === 'overdrive') ? 'music' : 'sfx';
+    if (sound === 'boss') catKey = 'sfx';
     var vol = Math.min(1, (opts.volume != null ? opts.volume : 1) * this._volume * (this._categoryVolumes[catKey] || 1));
     switch (sound) {
         case 'attack': this._sine(300, 0.06, vol, -0.3); break;
