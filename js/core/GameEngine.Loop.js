@@ -769,20 +769,6 @@ Gp._checkMilestones = function() {
     }
 };
 
-/* ══════════════════════════════════════════════
-   R168-P0: 成就检测系统
-   _checkAchievement 权威实现在 GameEngine.Combat.js（后加载覆盖）
-   此处仅保留 _flushAchievementsToMeta 辅助方法
-   ══════════════════════════════════════════════ */
-
-Gp._flushAchievementsToMeta = function() {
-    if (!this._achievementFlags || !window.saveManager) return;
-    var meta = window.saveManager._metaCache || {};
-    if (!meta.achievements) meta.achievements = {};
-    for (var id in this._achievementFlags) {
-        if (this._achievementFlags[id]) meta.achievements[id] = true;
-    }
-    window.saveManager._metaCache = meta;
-};
+/* R188-P0: 移除死代码 _flushAchievementsToMeta — _checkAchievement 直接写入 meta，无需额外flush */
 
 })();

@@ -407,8 +407,7 @@ Gp.restart = function() {
     this._playerHitCountThisRun = 0; /* R96-P1: 防止无伤成就被护盾吸收的伤害错误计数 */
     /* R82-P1: 清理战场深渊深度class */
     if (this._battlefield) this._battlefield.classList.remove('abyss-depth-1', 'abyss-depth-2', 'abyss-depth-3', 'abyss-depth-n');
-    /* R168-P0: 重置成就标志，防止跨局误报 */
-    this._achievementFlags = {};
+    /* R188-P0: _achievementFlags已移除 — 不再需要重置 */
 
     var heroId = this.player ? this.player.heroId : 'Hero';
     var levelId = this._currentLevelId || 'level_1';
