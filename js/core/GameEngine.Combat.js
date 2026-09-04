@@ -1028,6 +1028,7 @@ Gp._syncUI = function() {
     if (this.player && this.player.gold > (this._maxGoldThisRun || 0)) {
         this._maxGoldThisRun = this.player.gold;
         if (this._maxGoldThisRun >= 1000) this._checkAchievement('get_rich');
+        if (this._maxGoldThisRun >= 10000) this._checkAchievement('gold_10k');
     }
     this._syncExpBar();
     this._syncWeaponSlotBar();

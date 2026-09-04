@@ -78,17 +78,28 @@ Gp._loop = function(timestamp) {
                 while (this.player.droneTimer >= interval) {
                     this.player.droneTimer -= interval;
                     if (this.player.evolvedDrone) {
-                        var withDist = [];
+                        /* R187-P1: 使用O(n)选择而非O(n log n)排序取top-3 */
+                        var _top3 = [];
                         for (var _di = 0; _di < this.enemies.length; _di++) {
                             var _e = this.enemies[_di];
                             if (!_e.alive) continue;
                             var _dx = _e.x - this.player.x;
                             var _dy = _e.y - this.player.y;
-                            withDist.push({ e: _e, d: _dx * _dx + _dy * _dy });
+                            var _dist2 = _dx * _dx + _dy * _dy;
+                            /* 插入已排序的_top3数组（最多3个） */
+                            var _inserted = false;
+                            for (var _ti = 0; _ti < _top3.length; _ti++) {
+                                if (_dist2 < _top3[_ti].d) {
+                                    _top3.splice(_ti, 0, { e: _e, d: _dist2 });
+                                    _inserted = true;
+                                    break;
+                                }
+                            }
+                            if (!_inserted && _top3.length < 3) {
+                                _top3.push({ e: _e, d: _dist2 });
+                            }
                         }
-                        withDist.sort(function(a,b) { if (a.d !== b.d) return a.d - b.d; return a.e.id - b.e.id; });
-                        var targets = withDist.slice(0, 3);
-                        for (var _ti = 0; _ti < targets.length; _ti++) targets[_ti].e.takeDamage(Math.max(1, Math.floor(this.player.atk * 0.6 * (1 + (this.player._tempAtkBoost || 0)))));
+                        for (var _ti = 0; _ti < _top3.length; _ti++) _top3[_ti].e.takeDamage(Math.max(1, Math.floor(this.player.atk * 0.6 * (1 + (this.player._tempAtkBoost || 0)))));
                     } else {
                         var nearest = null;
                         var nearestDist = Infinity;
@@ -114,6 +125,7 @@ Gp._loop = function(timestamp) {
             /* R177-P0: 敌人间碰撞分离 — 使用Grid空间分割将O(n²)降至O(n)，防止>50敌时帧率暴跌 */
             var _epG = {};
             var _epGS = 36; /* enemy collision grid size ≈ 2×ENEMY_RADIUS(18) */
+            /* R187-P0: 每格只加入一次，避免同一敌人在多格重复计算 */
             for (var _gi = 0; _gi < this.enemies.length; _gi++) {
                 var _ge = this.enemies[_gi];
                 if (!_ge || !_ge.alive) continue;
@@ -121,7 +133,7 @@ Gp._loop = function(timestamp) {
                 if (!_epG[_kg]) _epG[_kg] = [];
                 _epG[_kg].push(_ge);
             }
-            var _checked = new Set(); /* R182-P0: Set替代Array实现O(1)查找，消除indexOf的O(n)开销 */
+            var _checked = new Set(); /* R182-P0: Set替代Array实现O(1)查找 */
             for (var _ci = 0; _ci < this.enemies.length; _ci++) {
                 var _a = this.enemies[_ci];
                 if (!_a || !_a.alive) continue;
@@ -131,11 +143,12 @@ Gp._loop = function(timestamp) {
                         var _nk = (Math.floor(_a.x / _epGS) + _dgi) + ',' + (Math.floor(_a.y / _epGS) + _dgj);
                         var _nb = _epG[_nk];
                         if (!_nb) continue;
+                        /* R187-P0: 仅检查j>i避免同一格内重复比较 */
                         for (var _nj = 0; _nj < _nb.length; _nj++) {
                             var _b = _nb[_nj];
                             if (_b === _a || !_b.alive) continue;
                             var _pairKey = _a.id < _b.id ? _a.id + ',' + _b.id : _b.id + ',' + _a.id;
-                            if (_checked.has(_pairKey)) continue; /* R182-P0: 改用Set.has()替代indexOf()，O(1)查找避免50敌时~10万次字符串比较 */
+                            if (_checked.has(_pairKey)) continue;
                             _checked.add(_pairKey);
                             var _cdx = _b.x - _a.x, _cdy = _b.y - _a.y;
                             var _cd2 = _cdx * _cdx + _cdy * _cdy;
@@ -734,7 +747,7 @@ Gp._renderActiveBuffs = function() {
 
 /* Epoch 47: 局内里程碑提示 */
 Gp._checkMilestones = function() {
-    var shown = this._milestonesShown || [];
+    var shown = this._milestonesShown || new Set(); /* R187-P2: Set替代Array实现O(1)查找 */
     var milestones = [
         { id: 'kill_50', check: function() { return this.kills >= 50; }, msg: '🎯 击杀 50 — 势不可挡！' },
         { id: 'kill_100', check: function() { return this.kills >= 100; }, msg: '💀 击杀 100 — 传奇猎手！' },
@@ -747,9 +760,9 @@ Gp._checkMilestones = function() {
     ];
     for (var i = 0; i < milestones.length; i++) {
         var m = milestones[i];
-        if (shown.indexOf(m.id) !== -1) continue;
+        if (shown.has(m.id)) continue;
         if (m.check.call(this)) {
-            shown.push(m.id);
+            shown.add(m.id);
             this._milestonesShown = shown;
             this._spawnCausalityText(m.msg);
         }

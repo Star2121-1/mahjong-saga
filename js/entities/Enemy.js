@@ -531,12 +531,13 @@ window.Enemy = class Enemy {
             }
             /* 爆炸伤害 */
             if (engine && engine._worldLayer) {
+                /* R187-P0: 爆炸视觉半径需与实际伤害半径(_explodeRadius=60px)匹配，DOM尺寸=直径120px */
                 var boom = document.createElement('div');
                 boom.className = 'explosion-effect';
-                boom.style.left = (this.x - 30) + 'px';
-                boom.style.top = (this.y - 30) + 'px';
-                boom.style.width = '60px';
-                boom.style.height = '60px';
+                boom.style.left = (this.x - this._explodeRadius) + 'px';
+                boom.style.top = (this.y - this._explodeRadius) + 'px';
+                boom.style.width = (this._explodeRadius * 2) + 'px';
+                boom.style.height = (this._explodeRadius * 2) + 'px';
                 engine._worldLayer.appendChild(boom);
                 setTimeout(function(el) { if (el && el.parentNode) el.remove(); }, Balance.EXPLOSION_EFFECT_TIMEOUT, boom);
             }
@@ -649,9 +650,7 @@ window.Enemy = class Enemy {
                     this._bossWarningEl = null;
                     this._bossWarningActive = false;
                 }
-            }
-            if (this._bossPhase === 3) {
-                if (window.audioManager) window.audioManager.play('boss');
+                /* R187-P0: Phase 3转场只播放一次音频，移除第654行重复的 play('boss') */
             }
             if (this._bossPhase === 2) {
                 this._bossAbilityTimer = Balance.BOSS_PHASE2_ABILITY_INTERVAL;

@@ -219,7 +219,10 @@ window.ShotgunBurst = class extends window.Weapon {
     }
     fireAt(targetX, targetY, player, engine) {
         if (this.cooldownTimer > 0) return;
-        this.cooldownTimer = this.cd;
+        /* R187-P1: 应用cdFloor保护，防止weapon_amplify圣物绕过上限导致CD异常 */
+        var playerCdFloor = (window.gameEngine && window.gameEngine.player) ? window.gameEngine.player.cdFloor : null;
+        var floor = (playerCdFloor != null) ? playerCdFloor : Balance.DEFAULT_CD_FLOOR;
+        this.cooldownTimer = Math.max(floor, this.cd);
         this._justFired = true;
         var baseAngle = Math.atan2(targetY - player.y, targetX - player.x);
         var speed = 250 + this.level * 10;

@@ -343,8 +343,8 @@ class Player {
                 this._recalcThornsRate();
                 break;
             case 'wind_walker':
-                /* R156-P0: += 而非 =，防止覆盖其他速度加成(assassin/passive/relic affix) */
-                this.speedMultiplier += lv * Balance.RELIC_WW_SPEED_PER_LEVEL;
+                /* R187-P1: += 而非 *=lv，防止每次升级累加 lv 倍导致速度溢出（Lv.5 时 280% vs 设计 160%） */
+                this.speedMultiplier += Balance.RELIC_WW_SPEED_PER_LEVEL;
                 this.speed = this.baseSpeed * this.speedMultiplier;
                 break;
             case 'vamp_ring':
@@ -380,7 +380,9 @@ class Player {
                 this.evolvedVamp = true;
                 break;
             case 'gravity_core':
-                this.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, (this.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT) + 40);
+                /* R187-P1: 使用 _baseMagnetRadius 而非当前值累加，防止磁铁半径逐级溢出（Lv.5 时 200px 提前达到上限） */
+                var _baseMag = this._baseMagnetRadius || Balance.MAGNET_RADIUS_DEFAULT;
+                this.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, _baseMag + lv * 40);
                 break;
             case 'weapon_amplify': {
                 this.atk += 3;

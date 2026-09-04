@@ -354,6 +354,10 @@
             dateString: this._formatDateString(new Date()),
             waveCount: 0, heroId: '', levelId: '', player: null, kills: 0, elapsed: 0
         });
+        /* R187-P1: 更新lastSaveTimestamp，防止存档选择器显示过期时间 */
+        var meta = await this.getMeta();
+        meta.lastSaveTimestamp = Date.now();
+        await this.saveMeta(meta);
     };
 
     SaveManager.prototype.hasContinueData = async function() {

@@ -25,7 +25,7 @@ window.Balance = {
     ENEMY_ATTACK_COOLDOWN: 1.5,      // 敌人攻击冷却 (Enemy.js)
     ENEMY_ATTACK_RANGE_OFFSET: 30,   // 攻击范围偏移 (Enemy.js)
     ENEMY_ATTACK_PADDING: 5,         // 攻击判定内缩 (Enemy.js)
-    FLASH_DURATION: 0.12,            // 受击闪烁持续时间 (Enemy.js)
+    FLASH_DURATION: 0.18,            // 受击闪烁持续时间 (Enemy.js) — 与CSS flashHit动画0.18s对齐
 
     /* ── Weapon (武器升级 / 弹道) ── */
     WEAPON_UPGRADE_ATK_INC: 0.15,    // 武器升级 ATK 因子增量 (Weapon.js)
@@ -123,7 +123,7 @@ window.Balance = {
     FCT_POOL_SIZE_INIT: 50,
     FCT_POOL_MAX_GROWTH: 200,
     FCT_FALLBACK_TIMEOUT_MS: 5000,
-    FCT_HEALTHCHECK_MODULO: 50,
+    FCT_HEALTHCHECK_MODULO: 500, /* R187-P1: 从50提升到500，减少激烈战斗中的全池扫描频率 */
     FCT_STALE_NODE_TIMEOUT_MS: 5000,
 
     /* ── 成就/文本 ── */

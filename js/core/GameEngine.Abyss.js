@@ -336,6 +336,8 @@ Gp._enterAbyss = function() {
     var savedCombos = this._abyssUnlockedCombos.slice();
     /* R46-P1: 重置active combo，防止跨层继承上一轮状态 */
     this._abyssActiveCombo = null;
+    /* R187-P0: 重置combo激活标志，允许每轮回重新激活深渊combo */
+    this._abyssComboActivated = false;
     _origEnterAbyss.call(this);
     this._abyssCoins = savedCoins;
     this._abyssUnlockedCombos = savedCombos;

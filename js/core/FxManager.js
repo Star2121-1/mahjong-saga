@@ -93,11 +93,24 @@ Fp._borrowNode = function() {
         this._pool.push(el);
         return el;
     }
-    /* R165-P0: 池已满(≥MAX_GROWTH)，创建不受池管理的临时节点保底 */
+    /* R187-P0: 池已满(≥MAX_GROWTH)，创建不受池管理的临时节点保底 */
     var el = document.createElement('div');
     el.className = 'fct-node';
     el.style.display = '';
     el.style.left = '0px'; el.style.top = '0px';
+    /* R187-P0: 标记为已激活并绑定清理回调，防止健康检查误扫和动画结束后内存泄漏 */
+    el._fctActive = true;
+    el._fctOnEnd = function() {
+        if (!el || !el._fctActive) return;
+        el.style.display = 'none';
+        el.textContent = '';
+        el.className = 'fct-node';
+        el._fctActive = false;
+        if (el._fctTimeout) { clearTimeout(el._fctTimeout); el._fctTimeout = null; }
+        if (!self._freeStack) self._freeStack = [];
+        self._freeStack.push(el);
+    };
+    el.addEventListener('animationend', el._fctOnEnd);
     if (this._layer && this._layer.parentNode) {
         this._layer.appendChild(el);
     }

@@ -413,6 +413,8 @@ Gp.restart = function() {
     var heroId = this.player ? this.player.heroId : 'Hero';
     var levelId = this._currentLevelId || 'level_1';
     this._startNewRun(heroId, levelId);
+    /* R187-P1: restart后重新注册beforeunload，防止第二次restart后自动存档失效 */
+    this._initBeforeUnload();
 };
 
 /* ══════════════════════════════════════════════
