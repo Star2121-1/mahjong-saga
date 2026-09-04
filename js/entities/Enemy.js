@@ -557,7 +557,11 @@ window.Enemy = class Enemy {
                         e.takeDamage(Math.floor(this._getEffectiveAtk() * Balance.BOMBER_EXPLODE_DAMAGE_MULT), this, this.x, this.y);
                     }
                 }
-                player.takeDamage(this._getEffectiveAtk(), this, this.x, this.y); /* R144-P2: 传递爆炸源位置防止Barrier无敌判定错误 */
+                /* R175-P0: Bomber玩家伤害应检查爆炸半径，防止玩家在范围外仍受到伤害 */
+                var _pDist2 = (player.x - this.x) * (player.x - this.x) + (player.y - this.y) * (player.y - this.y);
+                if (_pDist2 <= explodeR2) {
+                    player.takeDamage(this._getEffectiveAtk(), this, this.x, this.y); /* R144-P2: 传递爆炸源位置防止Barrier无敌判定错误 */
+                }
             }
             if (this.el && this.el.parentNode) this.el.remove();
         }
@@ -1144,7 +1148,6 @@ window.Enemy = class Enemy {
             var arr = _engRef._pendingExpGems = _engRef._pendingExpGems || [];
             var diff = 1;
             try { diff = window.levelConfig[(this._eng || window.gameEngine)._currentLevelId].difficultyFactor || 1; } catch(e) { console.warn('diff config read error', e); }
-            var _engRef = this._eng || window.gameEngine;
             var _vaultBlood = _engRef && _engRef._vaultMutations && _engRef._vaultMutations.indexOf('bloodmoon') !== -1;
             var gemMul = (_engRef && _engRef._activeMutator === 'bloodmoon' || _vaultBlood) ? 2 : 1;
             var level = this.level || 1;
