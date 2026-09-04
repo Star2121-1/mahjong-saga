@@ -300,6 +300,12 @@ Gp._endOverdrive = function() {
     }
 
     if (this.container) this.container.classList.remove('overdrive-active');
+    /* R171-P0: 补齐Sys.endOverdrive的定时器清理，防止overdrive结束后状态泄漏 */
+    if (this._flameHideTimer) { clearTimeout(this._flameHideTimer); this._flameHideTimer = null; }
+    if (this._iceHideTimer) { clearTimeout(this._iceHideTimer); this._iceHideTimer = null; }
+    /* R171-P1: 隐藏可能可见的共振光环元素 */
+    if (this._flameAuraEl && this._flameAuraEl.style) this._flameAuraEl.style.visibility = 'hidden';
+    if (this._iceAuraEl && this._iceAuraEl.style) this._iceAuraEl.style.visibility = 'hidden';
 };
 
 /* ══════════════════════════════════════════════

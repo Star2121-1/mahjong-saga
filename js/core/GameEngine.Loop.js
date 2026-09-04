@@ -29,12 +29,7 @@ Gp._loop = function(timestamp) {
         }
         this._elapsed += dt;
 
-        /* R29-H-005: speed_demon 成就 — 3分钟内通关 */
-        /* R168-P0: _checkAchievementInflight 从未定义，替换为内联检查防止ReferenceError崩溃 */
-        if (this._elapsed > 0 && this._elapsed <= 180 && window.achievementConfig) {
-            var _sd = window.achievementConfig.find(function(a) { return a.id === 'speed_demon'; });
-            if (_sd) { this._checkAchievement('speed_demon', Math.max(0, 180 - Math.floor(this._elapsed))); }
-        }
+        /* R171-P0: speed_demon 成就应在通关时检查，而非运行中每帧误报 — 移至_showVictory处理 */
 
         /* Epoch 32: 临时增益过期检查 — 使用游戏时间而非墙钟时间，避免面板冻结导致意外过期 */
         var p = this.player;
@@ -626,8 +621,14 @@ Gp._loop = function(timestamp) {
         var targetCamX = Math.max(0, Math.min(this._mapW - vpW, this.player.x - vpW / 2));
         var targetCamY = Math.max(0, Math.min(this._mapH - vpH, this.player.y - vpH / 2));
         var lerpFactor = 1 - Math.exp(-10 * dt);
-        this.cameraX += (targetCamX - this.cameraX) * lerpFactor;
-        this.cameraY += (targetCamY - this.cameraY) * lerpFactor;
+        /* R171-P0: 长时间tab暂停后dt被cap在0.05，camera严重滞后 — 超过阈值直接snap */
+        if (dt >= 0.048) {
+            this.cameraX = targetCamX;
+            this.cameraY = targetCamY;
+        } else {
+            this.cameraX += (targetCamX - this.cameraX) * lerpFactor;
+            this.cameraY += (targetCamY - this.cameraY) * lerpFactor;
+        }
 
         this._syncEntities();
         this._syncPlayerHP();

@@ -99,6 +99,9 @@ Sys.endOverdrive = function(engine) {
     /* R170-P1: 清除残存定时器，防止overdrive结束后状态泄漏 */
     if (engine._flameHideTimer) { clearTimeout(engine._flameHideTimer); engine._flameHideTimer = null; }
     if (engine._iceHideTimer) { clearTimeout(engine._iceHideTimer); engine._iceHideTimer = null; }
+    /* R171-P1: 确保共振光环元素被隐藏，防止overdrive结束后仍可见 */
+    if (engine._flameAuraEl && engine._flameAuraEl.style) engine._flameAuraEl.style.visibility = 'hidden';
+    if (engine._iceAuraEl && engine._iceAuraEl.style) engine._iceAuraEl.style.visibility = 'hidden';
 };
 
 /* ── 突变系统 ── */
@@ -351,7 +354,7 @@ Sys.updateShake = function(engine, dt) {
             if (wl) {
                 wl.classList.remove('shake-active');
                 wl.style.animationDuration = '';
-                wl.style.transform = '';
+                /* R171-P1: 不清除transform，避免与camera lerp冲突造成闪屏 — 由Loop.js fallback统一处理 */
                 wl.style.removeProperty('--sx');
                 wl.style.removeProperty('--sy');
             }

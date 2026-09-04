@@ -267,6 +267,9 @@ Gp.restart = function() {
     /* R170-P1: 清理Overdrive金色流光粒子，防止重启后DOM泄漏 */
     var _bursts = document.querySelectorAll('.legendary-burst');
     for (var _bi = 0; _bi < _bursts.length; _bi++) { if (_bursts[_bi].parentNode) _bursts[_bi].remove(); }
+    /* R171-P1: 清理Boss Gamble面板DOM，防止重启后面板残留 */
+    var _bgp = document.getElementById('boss-gamble-panel');
+    if (_bgp && _bgp.parentNode) _bgp.remove();
     /* R118-P0: 清理FxManager对象池，防止飘字节点跨局泄漏 */
     if (window.fxManager) window.fxManager.cleanup();
     /* R165-P0: 清理ToastSystem活跃节点，防止restart后toast DOM残留 */
@@ -300,6 +303,11 @@ Gp.restart = function() {
     }
     this._pendingReward = false;
     this._pendingBossGamble = false; /* H-017: 防止 Boss Gamble 状态永久挂起 */
+    /* R171-P1: 清理Boss Gamble完整状态，防止restart后残留导致误触发 */
+    this._gambleActive = false;
+    this._gambleType = null;
+    this._gambleStaked = 0;
+    this._gambleAbyssBonus = false;
     this._bossTimer = 0;
     this._waveCount = 0;
     this.currentWaveSpawnedCount = 0;
@@ -377,7 +385,13 @@ Gp.restart = function() {
     this._shakeTimer = 0;
     this._shakeIntensity = 0;
     var wl = this._worldLayer || document.getElementById('world-layer');
-    if (wl) wl.classList.remove('shake-active');
+    if (wl) {
+        wl.classList.remove('shake-active');
+        /* R171-P1: 清理shake残留的CSS自定义属性，防止重启后相机位置偏移 */
+        wl.style.removeProperty('--sx');
+        wl.style.removeProperty('--sy');
+        wl.style.transform = '';
+    }
     this._spawnTimer = 0;
     this._spawnInterval = Balance.DEFAULT_SPAWN_INTERVAL;
     this._difficultyTimer = 0;
@@ -407,6 +421,13 @@ Gp.restart = function() {
 Gp._showVictory = function() {
     /* R168-P0: 刷新成 that 到 meta，防止跨局丢失 */
     this._flushAchievementsToMeta();
+    /* R171-P0: speed_demon 成就应在通关时检查，而非运行中每帧误报 */
+    if (window.achievementConfig) {
+        var _sdConfig = window.achievementConfig.find(function(a) { return a.id === 'speed_demon'; });
+        if (_sdConfig && this._elapsed <= 180) {
+            this._checkAchievement('speed_demon', Math.floor(this._elapsed));
+        }
+    }
     /* R170-P1: 隐藏可能残留的active overlays，防止与victory界面叠显示 */
     if (window.rewardManager) window.rewardManager.hidePanel();
     if (this.mutatorOverlay) this.mutatorOverlay.classList.remove('active');

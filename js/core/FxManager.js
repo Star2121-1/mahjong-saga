@@ -39,7 +39,8 @@ Fp.spawnText = function(x, y, text, typeOrColor) {
         x = Math.max(0, Math.min(x, w - 40));
         y = Math.max(0, Math.min(y, h - 20));
     }
-    node._lastUsed = Date.now();
+    node._lastUsed = performance.now(); /* R171-P1: 使用monotonic clock防止系统时间调整导致假阳性的stale检测 */
+    if (!this._freeStack) this._freeStack = [];
     var type = (typeof typeOrColor === 'string' && typeOrColor.startsWith('#')) ? 'normal' : typeOrColor;
     var color = typeOrColor;
     if (typeof typeOrColor === 'string' && typeOrColor.startsWith('#')) color = typeOrColor;
@@ -115,6 +116,9 @@ Fp._returnNode = function(node) {
     /* R131-P0: 入空闲栈替代后续线性扫描 */
     if (!this._freeStack) this._freeStack = [];
     this._freeStack.push(node);
+    /* R171-P1: 从_pool中移除，防止_freeStack和_pool双持有同一节点导致索引不一致 */
+    var _pi = this._pool.indexOf(node);
+    if (_pi !== -1) this._pool.splice(_pi, 1);
     /* 健康检查：每 50 次归还扫描一次，强制回收超过 5s 未归还的节点 */
     if (++this._returnCount % Balance.FCT_HEALTHCHECK_MODULO === 0) this._healthCheck();
 };

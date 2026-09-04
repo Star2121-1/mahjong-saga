@@ -419,6 +419,19 @@
             jokersDropped: engine._jokersDropped || 0,
             mainSuit: engine._mainSuit || 'wan',
             player: engine.player.snapshot()
+            /* R171-P1: 保存武器状态到快照，防止断点恢复后武器重置为默认 */
+            , weapons: engine._activeWeapons ? engine._activeWeapons.map(function(w) {
+                return {
+                    id: w.id,
+                    level: w.level,
+                    cooldownTimer: w.cooldownTimer,
+                    atkFactor: w.atkFactor,
+                    baseCd: w._baseCd,
+                    origBaseCd: w._origBaseCd,
+                    cd: w.cd,
+                    rawBaseCd: w._rawBaseCd
+                };
+            }) : []
         };
     };
 
@@ -499,6 +512,7 @@
                     if (_wd.cd != null) _wInst.cd = _wd.cd;
                     else if (_wInst.cd == null) _wInst.cd = _wInst._baseCd || _wInst.cd;
                     if (_wd.rawBaseCd != null) _wInst._rawBaseCd = _wd.rawBaseCd; /* R167-P0: 恢复原始基线CD，防止reset时回退到错误值 */
+                    else if (_wInst._rawBaseCd == null) _wInst._rawBaseCd = _wInst._baseCd || _wInst.cd; /* R171-P1: 缺少rawBaseCd时初始化，防止undefined导致CD计算NaN */
                     engine._activeWeapons.push(_wInst);
                 }
                 if (engine._activeWeapons.length === 0) {

@@ -47,6 +47,8 @@ Ap._ensureContext = function() {
                 if (!document.hidden && self._ctx) {
                     /* R159-P0: 恢复对'closed'状态的处理，extended tab switch后AudioContext可能变为closed */
                     if (self._ctx.state === 'suspended' || self._ctx.state === 'closed') {
+                        /* R171-P1: 清空振荡器数组，防止挂起的context中onended永不触发导致泄漏 */
+                        self._activeOscillators = [];
                         self.tryReinit();
                     }
                 }
@@ -235,13 +237,26 @@ Ap._wall = function(vol) {
 
 Ap.setMuted = function(muted) {
     this._muted = !!muted;
-    /* 取消静音时尝试重新初始化 context */
-    if (!this._muted) this.tryReinit();
+    /* R171-P1: 静音时立即停止所有在途振荡器，防止静音后仍有声音 */
+    if (this._muted) this.stopAll();
+    else this.tryReinit();
     /* P1: 持久化静音状态到 meta */
     try {
         var m = window.saveManager && window.saveManager._metaCache;
         if (m) { m.audioMuted = this._muted; window.saveManager._saveMetaToStorage().catch(function(e) { console.warn('[Audio] muted save failed:', e); }); }
     } catch(e) {}
+};
+
+/* R171-P1: 停止所有活跃振荡器，用于静音时强制静默 */
+Ap.stopAll = function() {
+    for (var i = this._activeOscillators.length - 1; i >= 0; i--) {
+        try {
+            var o = this._activeOscillators[i];
+            if (o && o.stop) o.stop();
+            try { o.disconnect(); } catch(e) {}
+        } catch(e) {}
+    }
+    this._activeOscillators = [];
 };
 
 Ap.setVolume = function(v) {
