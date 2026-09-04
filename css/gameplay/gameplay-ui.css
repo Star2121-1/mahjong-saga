@@ -354,9 +354,9 @@
     transition-property: width !important;
 }
 /* R116-P1: 持续状态动画在面板打开时应继续运行 */
-.game-clock-frozen .enemy.frozen,
-.game-clock-frozen .enemy.frozen::before,
-.game-clock-frozen .enemy.frozen::after,
+.game-clock-frozen .enemy.frozen-crystal,
+.game-clock-frozen .enemy.frozen-crystal::before,
+.game-clock-frozen .enemy.frozen-crystal::after,
 .game-clock-frozen .boss-enraged,
 .game-clock-frozen .boss-enraged::before,
 .game-clock-frozen .boss-enraged::after,
@@ -435,6 +435,10 @@
 .game-clock-frozen .orbit-shield-orb,
 .game-clock-frozen .orbit-shield-orb::after,
 .game-clock-frozen .projectile {
+    animation-play-state: running !important;
+}
+/* R196-P1: 屏幕震动在面板打开时也应继续播放 */
+.game-clock-frozen #world-layer.shake-active {
     animation-play-state: running !important;
 }
 
