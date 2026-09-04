@@ -550,6 +550,18 @@ Gp._spawnEnemyType = function(type) {
 };
 
 Gp._updateEnemyProjectiles = function(dt) {
+    /* R187-P1: 敌方弹道碰撞使用空间分区，避免O(np*ne)全量遍历 */
+    var EP_GRID = 80;
+    var _epGrid = {};
+    if (this.enemies) {
+        for (var _egi = 0; _egi < this.enemies.length; _egi++) {
+            var _ge = this.enemies[_egi];
+            if (!_ge || !_ge.alive) continue;
+            var _gk = Math.floor(_ge.x / EP_GRID) + ',' + Math.floor(_ge.y / EP_GRID);
+            if (!_epGrid[_gk]) _epGrid[_gk] = [];
+            _epGrid[_gk].push(_ge);
+        }
+    }
     for (var i = this._enemyProjectiles.length - 1; i >= 0; i--) {
         var p = this._enemyProjectiles[i];
         p.x += p.vx * dt;
@@ -590,27 +602,39 @@ Gp._updateEnemyProjectiles = function(dt) {
             }
         }
 
-        /* R37-P1: 弹道穿敌检测 — 击中其他敌人则销毁 */
-        if (p.alive && this.enemies) {
-            for (var _pj = 0; _pj < this.enemies.length; _pj++) {
-                var _pe = this.enemies[_pj];
-                if (!_pe.alive || _pe.id === p._ownerId) continue;
-                var edx = _pe.x - p.x;
-                var edy = _pe.y - p.y;
-                if (edx * edx + edy * edy < (_pe.radius + p.radius) * (_pe.radius + p.radius)) {
-                    if (!p._hitEnemy) {
-                        p._hitEnemy = true;
-                        var projDmg = p.damage;
-                        /* R129-P0: 敌方弹道击中敌人时也应用关卡亲和减伤 */
-                        if (this._mapAffinityReduction) {
-                            projDmg = Math.max(1, Math.floor(projDmg * (1 - this._mapAffinityReduction)));
+        /* R187-P1: 空间分区弹道碰撞 — 仅查询周围9格 */
+        if (p.alive && this.enemies && _epGrid) {
+            var pgx = Math.floor(p.x / EP_GRID);
+            var pgy = Math.floor(p.y / EP_GRID);
+            var _hitAny = false;
+            for (var _dgx = -1; _dgx <= 1; _dgx++) {
+                for (var _dgy = -1; _dgy <= 1; _dgy++) {
+                    var _nk = (pgx + _dgx) + ',' + (pgy + _dgy);
+                    var _nb = _epGrid[_nk];
+                    if (!_nb) continue;
+                    for (var _pj = 0; _pj < _nb.length; _pj++) {
+                        var _pe = _nb[_pj];
+                        if (!_pe.alive || _pe.id === p._ownerId) continue;
+                        var edx = _pe.x - p.x;
+                        var edy = _pe.y - p.y;
+                        if (edx * edx + edy * edy < (_pe.radius + p.radius) * (_pe.radius + p.radius)) {
+                            if (!p._hitEnemy) {
+                                p._hitEnemy = true;
+                                var projDmg = p.damage;
+                                if (this._mapAffinityReduction) {
+                                    projDmg = Math.max(1, Math.floor(projDmg * (1 - this._mapAffinityReduction)));
+                                }
+                                if (_pe.takeDamage) _pe.takeDamage(projDmg, p._owner || this);
+                            }
+                            _hitAny = true;
+                            break;
                         }
-                        if (_pe.takeDamage) _pe.takeDamage(projDmg, p._owner || this);
                     }
-                    p.alive = false;
-                    break;
+                    if (_hitAny) break;
                 }
+                if (_hitAny) break;
             }
+            if (_hitAny) p.alive = false;
         }
 
         if (!p.alive) {
