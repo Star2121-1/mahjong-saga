@@ -170,7 +170,7 @@
    ══════════════════════════════════════════════ */
 
 #world-layer.shake-active {
-    animation: shakeEffect linear;
+    animation: shakeEffect linear 0.15s; /* R205-P0: 添加默认持续时间，防止CSS未触发时animationDuration为空导致瞬移抖动 */
     animation-fill-mode: forwards;
 }
 @keyframes shakeEffect {

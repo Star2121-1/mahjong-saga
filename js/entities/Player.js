@@ -514,6 +514,7 @@ class Player {
             damageReduction: this.damageReduction,
             _reviveCount: this._reviveCount || 0,
             _baseMaxHp: this._baseMaxHp || this.maxHp,
+            _baseAtk: this._baseAtk || this.atk,
             _relicAffixes: this._relicAffixes ? { ...this._relicAffixes } : {},
             /* R182-P1: _startsWithRelic已废弃，不再持久化 */
             /* R51-P0: 补充缺失的持久化字段 — 避免断点续玩后暴击/复活/秘密丢失 */
@@ -590,6 +591,7 @@ class Player {
         this.damageReduction = data.damageReduction || 0;
         this._reviveCount = data._reviveCount || 0;
         this._baseMaxHp = data._baseMaxHp !== undefined ? data._baseMaxHp : this.maxHp;
+        this._baseAtk = data._baseAtk !== undefined ? data._baseAtk : this.atk;
         this._relicAffixes = data._relicAffixes ? { ...data._relicAffixes } : {};
         /* R182-P1: _startsWithRelic已废弃，不再从存档恢复 */
         this._hasRevive = this._reviveCount > 0; /* R159-P1: restore后由_reviveCount直接计算，与578行逻辑合并 */

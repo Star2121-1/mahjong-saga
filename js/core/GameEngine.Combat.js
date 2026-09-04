@@ -291,6 +291,8 @@ Gp._enterAbyss = function() {
     this._syncPlayerHP();
     this._syncUI();
     this._announceWave(0);
+    /* R205-P0: 深渊战斗开始后清除面板可见标志，恢复暂停功能 */
+    this._abyssPanelVisible = false;
 };
 
 Gp._showVictoryOverlay = function() {
@@ -877,8 +879,9 @@ Gp._syncEntities = function() {
     if (!this._worldLayer || !this.player) return; /* R131-P0: null guard防止DOM缺失时崩溃 */
     var _z = this._zoomLevel || 1;
     if (_z !== 1) {
-        var _vw = (this.battlefield ? this.battlefield.clientWidth : 960) || 960;
-        var _vh = (this.battlefield ? this.battlefield.clientHeight : 540) || 540;
+        /* R205-P1: 使用缓存视口尺寸替代每帧同步layout read，防止缩放模式rAF jank */
+        var _vw = (this._vpW || (this.battlefield ? this.battlefield.clientWidth : 960)) || 960;
+        var _vh = (this._vpH || (this.battlefield ? this.battlefield.clientHeight : 540)) || 540;
         var _tx = _vw * (1 - _z) / 2 - _z * this.cameraX;
         var _ty = _vh * (1 - _z) / 2 - _z * this.cameraY;
         this._worldLayer.style.transformOrigin = '0 0';

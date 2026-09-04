@@ -974,6 +974,9 @@ Gp._bindAudioButton = function() {
         window.audioManager.setMuted(muted);
         btn.textContent = muted ? '🔇' : '🔊';
         btn.title = muted ? '点击开启声音' : '点击静音';
+        /* P1: 同步静音切换框，防止点击audio-btn后暂停面板显示错误状态 */
+        var _mt = document.getElementById('mute-toggle');
+        if (_mt) _mt.checked = muted;
         /* 持久化到 meta */
         try {
             var meta = window.saveManager && window.saveManager._metaCache;
@@ -987,15 +990,40 @@ Gp._bindAudioButton = function() {
             if (window.audioManager) window.audioManager.setMuted(true);
             btn.textContent = '🔇';
             btn.title = '点击开启声音';
+            var _mtR = document.getElementById('mute-toggle');
+            if (_mtR) _mtR.checked = true;
         }
         /* P1: 恢复上次音量设置 */
         if (meta && meta.audioVolume != null && window.audioManager) {
             window.audioManager.setVolume(meta.audioVolume);
+            var _vm = document.getElementById('vol-master');
+            if (_vm) _vm.value = Math.round(meta.audioVolume * 100);
+            var _vmv = document.getElementById('vol-master-val');
+            if (_vmv) _vmv.textContent = Math.round(meta.audioVolume * 100) + '%';
         }
         if (meta && meta.audioCategoryVolumes && window.audioManager) {
             var _cvKeys = Object.keys(meta.audioCategoryVolumes);
             for (var _ci = 0; _ci < _cvKeys.length; _ci++) {
                 window.audioManager.setCategoryVolume(_cvKeys[_ci], meta.audioCategoryVolumes[_cvKeys[_ci]]);
+            }
+            /* P1: 同步分类音量滑块和显示值到DOM */
+            if (meta.audioCategoryVolumes.sfx != null) {
+                var _vs = document.getElementById('vol-sfx');
+                if (_vs) _vs.value = Math.round(meta.audioCategoryVolumes.sfx * 100);
+                var _vsV = document.getElementById('vol-sfx-val');
+                if (_vsV) _vsV.textContent = Math.round(meta.audioCategoryVolumes.sfx * 100) + '%';
+            }
+            if (meta.audioCategoryVolumes.music != null) {
+                var _vv = document.getElementById('vol-music');
+                if (_vv) _vv.value = Math.round(meta.audioCategoryVolumes.music * 100);
+                var _vvV = document.getElementById('vol-music-val');
+                if (_vvV) _vvV.textContent = Math.round(meta.audioCategoryVolumes.music * 100) + '%';
+            }
+            if (meta.audioCategoryVolumes.feedback != null) {
+                var _vf = document.getElementById('vol-feedback');
+                if (_vf) _vf.value = Math.round(meta.audioCategoryVolumes.feedback * 100);
+                var _vfV = document.getElementById('vol-feedback-val');
+                if (_vfV) _vfV.textContent = Math.round(meta.audioCategoryVolumes.feedback * 100) + '%';
             }
         }
     } catch(e) {}

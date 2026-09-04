@@ -338,10 +338,12 @@ Gp._enterAbyss = function() {
     this._abyssActiveCombo = null;
     /* R187-P0: 重置combo激活标志，允许每轮回重新激活深渊combo */
     this._abyssComboActivated = false;
+    /* R205-P0: 先更新缩放倍率再调用_origEnterAbyss，确保玩家HP/ATK使用正确的深渊层数缩放 */
+    this._updateAbyssScaling();
     _origEnterAbyss.call(this);
     this._abyssCoins = savedCoins;
     this._abyssUnlockedCombos = savedCombos;
-    this._updateAbyssScaling();
+    /* 移除_post-call _updateAbyssScaling()，已在前置调用 */
 };
 
 })();
