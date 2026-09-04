@@ -69,8 +69,15 @@ Gp._resetAllWeapons = function() {
 };
 
 Gp._updateWeapons = function(dt) {
-    /* P1: 统一初始化协同标志，避免帧顺序依赖 */
+    /* R188-P0: 预扫描NovaPulse确保协同标志在武器更新前正确设置，避免帧内时序依赖 */
     this._synNovaLaserActive = false;
+    for (var _ni = 0; _ni < this._activeWeapons.length; _ni++) {
+        var _nw = this._activeWeapons[_ni];
+        if (_nw instanceof window.NovaPulse && _nw.activePulses && _nw.activePulses.length > 0) {
+            this._synNovaLaserActive = true;
+            break;
+        }
+    }
     if (this._pendingReward) return;
     /* 雀魂·疾风连打：临时攻速（只加速冷却流转，到期衰减） */
     if (this._tempAspdT > 0) {

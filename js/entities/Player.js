@@ -391,6 +391,8 @@ class Player {
                     for (var _wi = 0; _wi < eng._activeWeapons.length; _wi++) {
                         var w = eng._activeWeapons[_wi];
                         w.atkFactor += Balance.WEAPON_AMPLIFY_ATK_FACTOR_INC;
+                        /* R188-P0: 同步更新_odOrigAtk防止overdrive结束后恢复错误值 */
+                        if (w._odOrigAtk !== undefined) w._odOrigAtk += Balance.WEAPON_AMPLIFY_ATK_FACTOR_INC;
                         w.cd = Math.max(this.cdFloor || Balance.DEFAULT_CD_FLOOR, (w._baseCd || w.cd) * Balance.WEAPON_UPGRADE_CD_MULT); /* R145-P1: 使用Balance常量替代硬编码0.9 */
                     }
                 }
