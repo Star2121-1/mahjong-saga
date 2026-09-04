@@ -169,7 +169,12 @@ Gp._clearMutatorEffects = function() {
         }
     }
     if (this._activeMutator === 'frailty') {
-        if (this._frailtyOrigPlayerAtk != null) this.player.atk = this._frailtyOrigPlayerAtk;
+        /* R202-P0: 使用_baseAtk动态计算恢复目标，避免因升级期间atk变化导致的恢复失真 */
+        if (this._frailtyBoost != null) {
+            var _baseAtkVal = this.player._baseAtk || this.player.atk;
+            this.player.atk = Math.floor(_baseAtkVal * (1 + this._frailtyBoost));
+            this._frailtyBoost = null;
+        }
         this.player._frailtyDebuff = false; /* P0: 清除脆弱debuff状态 */
         this.player._frailtyStored = false; /* R143-P0: 清除防重入标志，允许新局重新应用脆弱突变 */
         for (var i = 0; i < this.enemies.length; i++) {
@@ -270,7 +275,7 @@ Gp._endOverdrive = function() {
     this._overdriveActive = false;
     this._overdriveTimer = 0;
 
-    if (this.player) this.player.cdFloor = this._origCdFloor || Balance.DEFAULT_CD_FLOOR;
+    if (this.player) this.player.cdFloor = this._origCdFloor !== undefined ? this._origCdFloor : Balance.DEFAULT_CD_FLOOR;
     this._origCdFloor = null; /* P1: 清除跨局残留 */
 
     /* P0: 恢复武器原始伤害（Sys.endOverdrive已实现，此处补齐） */

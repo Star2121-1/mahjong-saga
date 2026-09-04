@@ -87,11 +87,19 @@ Gp._spawnEliteEnemy = function() {
     if (this._activeMutator) {
         var _emut = this._activeMutator;
         if (_emut === 'bloodmoon') {
+            /* R202-P0: 为新刷精英敌人设置stored标志 */
+            enemy._bloodmoonStored = true;
+            enemy._bloodmoonOrigAtk = enemy.atk;
+            enemy._bloodmoonOrigMaxHp = enemy.maxHp;
+            enemy._bloodmoonOrigHp = enemy.hp;
             enemy.maxHp = Math.floor(enemy.maxHp * Balance.MUTATOR_BLOODMOON_HP_MULT);
             enemy.hp = enemy.maxHp;
             enemy.atk = Math.floor(enemy.atk * Balance.MUTATOR_BLOODMOON_ATK_MULT);
         } else if (_emut === 'frenzy') {
-            enemy.speed *= Balance.MUTATOR_FRENZY_SPEED_MULT;
+            /* R202-P0: 为新刷精英敌人设置stored标志 */
+            enemy._frenzyStored = true;
+            enemy._frenzyOrigSpeed = enemy.speed;
+            enemy.speed = Math.round(enemy.speed * Balance.MUTATOR_FRENZY_SPEED_MULT);
         }
     }
 

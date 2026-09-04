@@ -36,7 +36,7 @@ Sys.triggerOverdrive = function(engine) {
     /* Overdrive: 武器伤害倍增 +100% */
     for (var _wi = 0; _wi < (engine._activeWeapons || []).length; _wi++) {
         var _w = engine._activeWeapons[_wi];
-        if (_w && !_w._odOrigAtk) _w._odOrigAtk = _w.atkFactor;
+        if (_w && _w._odOrigAtk === undefined) _w._odOrigAtk = _w.atkFactor;
         if (_w) _w.atkFactor = (_w._odOrigAtk || _w.atkFactor) * 2;
     }
     if (engine.container) engine.container.classList.add('overdrive-active');
@@ -183,7 +183,8 @@ Sys.applyMutator = function(engine, mutatorId) {
         }
     } else if (mutatorId === 'frailty') {
         /* L-008: 脆弱突变不再双向增益 — 玩家 +80% ATK 但受击伤害 +30% */
-        engine._frailtyOrigPlayerAtk = engine.player.atk;
+        /* R202-P0: 改为存储ATK倍增系数而非绝对值，解决升级期间atk变化导致恢复失真问题 */
+        engine._frailtyBoost = Balance.MUTATOR_FRAILTY_PLAYER_ATK_MULT - 1;
         /* R143-P0: 修复脆弱突变防重入守卫 — 使用player级标志而非engine级，防止跨局重复叠乘ATK */
         if (!engine.player._frailtyStored) {
             engine.player._frailtyStored = true;

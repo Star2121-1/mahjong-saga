@@ -211,6 +211,7 @@ Gp.restart = function() {
     }
     /* R37-P1: 确保frailtyDebuff在所有重启路径下被清除 */
     if (this.player) this.player._frailtyDebuff = false;
+    this._frailtyBoost = null; /* R202-P0: 脆弱突变ATK倍率基准在重启路径清零 */
     /* P1: 清除残留定时器，防止导航后回调在旧引擎上执行 */
     if (this._gambleTimeout) { clearTimeout(this._gambleTimeout); this._gambleTimeout = null; }
     if (this._interWaveTimeout) { clearTimeout(this._interWaveTimeout); this._interWaveTimeout = null; }

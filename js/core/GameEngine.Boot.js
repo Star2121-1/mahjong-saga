@@ -418,7 +418,7 @@ Gp._startNewRun = function(heroId, levelId) {
     this._tempAspdT = 0;
     /* R199-P0: 重置玩家级临时buff计时，防止跨局残留 */
     if (this.player) { this.player._tempBuffTimeLeft = 0; this.player._tempAtkBoost = 0; this.player._tempHpBonus = 0; }
-    this._frailtyOrigPlayerAtk = null; /* R146-P1: 脆弱突变基线清零，防止跨续玩周期残留旧局值 */
+    this._frailtyBoost = null; /* R202-P0: 脆弱突变ATK倍率基准清零，防止跨局残留 */
     /* R38-P1: 重置满手牌Toast计时器，防止新游戏误触发 */
     this._handFullToastAt = 0;
     /* R30-H-017: 重置深渊combo状态，防止跨局污染 */
