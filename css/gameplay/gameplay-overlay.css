@@ -510,7 +510,7 @@
 
 /* 深渊面板增强 */
 .abyss-panel {
-    animation: abyssPanelIn 0.5s ease-out;
+    animation: abyssPanelIn 0.5s ease-out forwards, abyssBloodPulse 2s infinite;
 }
 @keyframes abyssPanelIn {
     0% { opacity: 0; transform: scale(0.8); }

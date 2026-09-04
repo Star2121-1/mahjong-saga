@@ -164,7 +164,7 @@
     text-shadow: 0 0 40px rgba(255,215,0,0.5);
     letter-spacing: 4px;
 }
-#wave-announce.active { animation: waveAnnounce 1.5s ease-out forwards; }
+#wave-announce.active { animation: waveAnnounce 1.5s ease-out both; }
 
 /* Mutator badge + Resonance pills */
 .mutator-badge {

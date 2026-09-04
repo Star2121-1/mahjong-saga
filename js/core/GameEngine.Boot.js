@@ -610,6 +610,9 @@ Gp._announceWave = function(waveIdx) {
     /* R168-P0: 防御性null检查 — wave-announce元素不存在时跳过，防止TypeError崩溃 */
     if (!wa) { this._announcingWave = false; return; }
     wa.textContent = '第 ' + (waveIdx + 1) + ' 波';
+    /* R180-P1: 强制回流确保动画每次重触发 — 避免forwards fill-mode残留导致动画失效 */
+    wa.classList.remove('active');
+    void wa.offsetWidth;
     wa.classList.add('active');
     /* R115-P0: 屏幕阅读器播报波次公告 */
     this._announceToSR('第 ' + (waveIdx + 1) + ' 波开始');
