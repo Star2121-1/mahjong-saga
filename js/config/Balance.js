@@ -181,6 +181,8 @@ window.Balance = {
     BOSS_PHASE2_ABILITY_INTERVAL: 2.0,  // 龙王二阶段技能间隔 (Enemy.js)
     EQUIPMENT_DROPS_BOSS_LORD: 1.0,  // 龙王装备掉落概率 (GameEngine.Spawn.js)
     EQUIPMENT_DROPS_NORMAL: 0.25,    // 普通怪物装备掉落概率 (GameEngine.Spawn.js)
+    EQUIPMENT_QUALITY_LEGENDARY_CHANCE: 0.15,  // 传说品质阈值 (roll < 0.15) (Spawn.js _tryDropEquipment)
+    EQUIPMENT_QUALITY_EPIC_CHANCE: 0.50,       // 史诗品质阈值 (roll < 0.50) (Spawn.js _tryDropEquipment)
     BARRIER_HP_MULT: 1.5,            // 屏障怪HP倍率 (Enemy.js)
     BARRIER_ATK_MULT: 0.7,           // 屏障怪ATK倍率 (Enemy.js)
     BARRIER_SPEED_MULT: 0.8,         // 屏障怪速度倍率 (Enemy.js)
@@ -273,8 +275,10 @@ window.Balance = {
     NORMAL_GEM_VALUE_BASE: 1,
     COIN_COUNT_BOSS_BASE: 5,
     COIN_COUNT_BOSS_PER_LVL: 0.5,
+    COIN_COUNT_BOSS_RANDOM_MAX: 4,        // Boss金币随机范围上限 (Spawn.js _spawnCoinsAt / _rewardKill)
     COIN_COUNT_NORMAL_BASE: 3,
     COIN_COUNT_NORMAL_PER_LVL: 0.3,
+    COIN_COUNT_NORMAL_RANDOM_MAX: 3,       // 普通金币随机范围上限 (Spawn.js _spawnCoinsAt / _rewardKill)
     COIN_SCATTER: 20,
     /* ── Coin/Gem 拾取 ── */
     COIN_VISUAL_OFFSET: 6,            // 金币视觉偏移 (GameEngine.Spawn.js)
@@ -306,12 +310,27 @@ window.Balance = {
     DEATH_REWARD_FAST_TIME_THRESHOLD: 60, // 快速死亡阈值秒 (SaveManager.RunStats.js)
     DEATH_REWARD_FAST_TOKEN_MULT: 0.5,  // 快速死亡代币减半倍数 (SaveManager.RunStats.js)
 
+    /* ── 深渊组合惩罚 ── */
+    ABYSS_GRAVITY_COIN_REDUCTION: 0.5, // 深渊引力金币-50%惩罚 (Spawn.js _updateCoins)
+
+    /* ── 深渊狂乱 ── */
+    ABYSS_FRENZY_HEAL_PCT: 0.10,       // 深渊狂乱击杀回血比例（玩家ATK×此值）(Spawn.js _rewardKill)
+
     /* ── Timeout/Durations ── */
     TIMEOUT_DECAY_DRAIN_MS: 3000,     // 腐蚀效果超时 (Enemy.js)
     TIMEOUT_BANG_REMOVE_MS: 1600,     // 花牌移除超时 (Spawn.js)
     TIMEOUT_NOTIF_REMOVE_MS: 3000,    // 通知移除超时 (Combat.js)
     TIMEOUT_TRAIL_REMOVE_MS: 400,     // 拖尾移除超时 (Combat.js)
     TIMEOUT_FLICKER_REMOVE_MS: 2600,  // 闪烁移除超时 (Combat.js)
+
+    /* ── 天气/环境 ── */
+    WEATHER_RAIN_TRIGGER_WAVE: 5,       // 雨滴天气触发波次门槛 (Loop.js)
+    WEATHER_RAIN_INTERVAL: 0.05,        // 雨滴生成间隔(s) (Loop.js _rainTimer)
+    /* ── 突变 ── */
+    MUTATOR_WITHER_TICK_INTERVAL: 5,    // 枯萎突变伤害间隔(s) (Loop.js _witherTimer)
+    ABYSS_WITHER_TICK_INTERVAL: 1,      // 深渊凋零伤害间隔(s) (Loop.js _witherAbyssTimer)
+    /* ── 里程碑 ── */
+    MILESTONE_CHECK_INTERVAL: 3,        // 里程碑检查间隔(s) (Loop.js _milestoneCheckTimer)
 
     /* ── 工具 ── */
     BARRIER_ANGLE_HALF_WIDTH: Math.PI / 3,  // 屏障怪正面无敌扇区半角 60° (Enemy.js)
@@ -343,11 +362,27 @@ window.Balance = {
     HU_QIDUI_SPD: 0.15,
     /* R133-P2: 刪除重複定義（原 0.20 為草稿，最終值 0.80 在第329行） */
     /* R130-P0: 竹牌花牌护盾常量 — 护盾值 = 玩家 ATK × 此倍率 (Spawn.js:439) */
-    HUPAI_HUA_ZHU_SHIELD: 30,
+    HUPAI_HUA_ZHU_SHIELD: 0.30,
     HUPAI_HUA_ZHU_SHIELD_DUR: 8,    /* 护盾持续秒数 */
     HU_QIDUI_MAGNET: 0.80,
     ATK_MAX_CAP: 9999, /* R56-P1: 玩家攻击力上限保护，防止胡牌增益无限叠加 */
     HUPAI_ZI_EAST_KNOCKBACK: 250,
+
+    /* ── 花牌效果数值（Spawn.js _triggerFlowerEvent）── */
+    HUPAI_HUA_CHUN_HEAL_PCT: 0.30,        // 花春回复HP比例 (Spawn.js hua_chun)
+    HUPAI_HUA_XIA_ATK_BOOST: 0.30,        // 花夏攻击临时加成 (Spawn.js hua_xia)
+    HUPAI_HUA_XIA_BUFF_DURATION: 5,       // 花夏增益持续时间(s) (Spawn.js hua_xia)
+    HUPAI_HUA_LAN_CRIT_INC: 0.10,         // 花兰暴击率加成 (Spawn.js hua_lan)
+    HUPAI_HUA_ZHU_HEAL_PCT: 0.15,         // 花竹回复HP比例 (Spawn.js hua_zhu)
+    /* ── 字牌刻子效果（Spawn.js _triggerHonorMeld）── */
+    HUPAI_FENG_NAN_HP_DMG_PCT: 0.08,      // 南火燎原伤害比例 maxHp×此值 (Spawn.js feng_nan)
+    HUPAI_JIAN_BAI_HP_RESTORE_PCT: 0.20,  // 白板归真回血比例 (Spawn.js jian_bai)
+    /* ── 九筒连环弹幕（Spawn.js _triggerMeld）── */
+    HUPAI_PUNG_TONG_PROJ_SPEED: 280,      // 九筒连环投射物速度 px/s (Spawn.js)
+    HUPAI_PUNG_TONG_PROJ_RADIUS: 4,       // 九筒连环投射物碰撞半径 px (Spawn.js)
+    /* ── 经验宝石视觉（Spawn.js _updateExpGems）── */
+    EXP_GEM_SIZE_BASE: 4,                 // 经验宝石基础尺寸 px (Spawn.js sz=4+min(gem.value,8))
+    EXP_GEM_SIZE_MAX_VAL: 8,              // 经验宝石尺寸上限参数 min(gem.value, N) (Spawn.js)
 
     /* ── Archer 一索箭妖 ── */
     ENEMY_ARCHER_HP_MULT: 0.7,

@@ -347,9 +347,9 @@ Gp._loop = function(timestamp) {
             }
 
             /* Weather: 雨滴粒子 (每波 5+ 触发) */
-            if (this._waveCount >= 5 && !this._pendingReward) {
+            if (this._waveCount >= Balance.WEATHER_RAIN_TRIGGER_WAVE && !this._pendingReward) {
                 this._rainTimer = (this._rainTimer || 0) + dt;
-                if (this._rainTimer >= 0.05) {
+                if (this._rainTimer >= Balance.WEATHER_RAIN_INTERVAL) {
                     this._rainTimer = 0;
                     if (this._rainDrops && this._rainDrops.length < 30) {
                         var drop = document.createElement('div');
@@ -501,7 +501,7 @@ Gp._loop = function(timestamp) {
                 this._systems.updateWither(this, dt);
             } else {
                 this._witherTimer += dt;
-                if (this._witherTimer >= 5) {
+                if (this._witherTimer >= Balance.MUTATOR_WITHER_TICK_INTERVAL) {
                     this._witherTimer = 0;
                     for (var _wi = 0; _wi < this.enemies.length; _wi++) {
                         var _we = this.enemies[_wi];
@@ -566,7 +566,7 @@ Gp._loop = function(timestamp) {
             } else if (_abyssCombo === 'abyss_wither') {
                 /* 深渊凋零: 每秒损失2%HP但生成等量护盾 */
                 this._witherAbyssTimer = (this._witherAbyssTimer || 0) + dt;
-                if (this._witherAbyssTimer >= 1) {
+                if (this._witherAbyssTimer >= Balance.ABYSS_WITHER_TICK_INTERVAL) {
                     this._witherAbyssTimer = 0;
                     var drainPct = 0.02;
                     var maxHp = this.player.maxHp;
@@ -657,7 +657,7 @@ Gp._loop = function(timestamp) {
 
         /* Epoch 47: 每3秒检查一次里程碑 */
         this._milestoneCheckTimer = (this._milestoneCheckTimer || 0) + dt;
-        if (this._milestoneCheckTimer >= 3) {
+        if (this._milestoneCheckTimer >= Balance.MILESTONE_CHECK_INTERVAL) {
             this._milestoneCheckTimer = 0;
             if (this._checkMilestones) this._checkMilestones();
         }

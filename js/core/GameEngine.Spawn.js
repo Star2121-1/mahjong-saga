@@ -9,7 +9,7 @@ Gp._spawnCoinsAt = function(x, y, isBoss, level) {
         return this._combat.spawnCoinsAt(this, x, y, isBoss, level);
     }
     level = level || 1;
-    var count = isBoss ? Math.floor(5 + level * 0.5 + Math.random() * 4) : Math.floor(3 + level * 0.3 + Math.random() * 3);
+    var count = isBoss ? Math.floor(Balance.COIN_COUNT_BOSS_BASE + level * Balance.COIN_COUNT_BOSS_PER_LVL + Math.random() * Balance.COIN_COUNT_BOSS_RANDOM_MAX) : Math.floor(Balance.COIN_COUNT_NORMAL_BASE + level * Balance.COIN_COUNT_NORMAL_PER_LVL + Math.random() * Balance.COIN_COUNT_NORMAL_RANDOM_MAX);
     var _vaultBlood = this._vaultMutations && this._vaultMutations.indexOf('bloodmoon') !== -1;
 if (this._activeMutator === 'bloodmoon' || _vaultBlood) count *= 2;
     if (this._activeMutator === 'frenzy') count = Math.floor(count * Balance.MUTATOR_FRENZY_GOLD_MULT);
@@ -100,7 +100,7 @@ Gp._tryDropEquipment = function(x, y, isBossLord) {
     var totalMult = abyssMult * surgeMult;
     if (Math.random() > chance) return;
     var roll = Math.random();
-    var quality = roll < 0.15 ? 'legendary' : roll < 0.50 ? 'epic' : 'rare';
+    var quality = roll < Balance.EQUIPMENT_QUALITY_LEGENDARY_CHANCE ? 'legendary' : roll < Balance.EQUIPMENT_QUALITY_EPIC_CHANCE ? 'epic' : 'rare';
     var protoIds = Object.keys(window.equipmentRegistry.equipPool);
     var protoId = protoIds[Math.floor(Math.random() * protoIds.length)];
     var item = window.equipmentRegistry.createItem(protoId, quality);
@@ -201,7 +201,7 @@ Gp._updateCoins = function(dt) {
         }
         /* R31-E-004: 深渊引力组合金币-50%惩罚 */
         if (this._abyssActiveCombo === 'abyss_gravity') {
-            collected = Math.floor(collected * 0.5);
+            collected = Math.floor(collected * Balance.ABYSS_GRAVITY_COIN_REDUCTION);
         }
         player.addGold(collected);
         player.rage = Math.min(player.maxRage, player.rage + 2 * collected);
@@ -230,7 +230,7 @@ Gp._updateExpGems = function(dt) {
         if (!gem.el) {
             var el = document.createElement('div');
             el.className = 'exp-gem';
-            var sz = 4 + Math.min(gem.value, 8);
+            var sz = Balance.EXP_GEM_SIZE_BASE + Math.min(gem.value, Balance.EXP_GEM_SIZE_MAX_VAL);
             el.style.width = sz + 'px';
             el.style.height = sz + 'px';
             this._worldLayer.appendChild(el);
@@ -287,7 +287,7 @@ Gp._rewardKill = function(enemy) {
     this.kills++;
     /* R58-P0: 深渊狂乱combo击杀回血 — 从Loop每帧移到击杀时触发 */
     if (this._abyssFrenzyLifestealSet) {
-        var frenzyHeal = Math.floor(this.player.atk * 0.10);
+        var frenzyHeal = Math.floor(this.player.atk * Balance.ABYSS_FRENZY_HEAL_PCT);
         if (frenzyHeal > 0) {
             this.player.hp = Math.min(this.player.maxHp, this.player.hp + frenzyHeal);
         }
@@ -307,7 +307,7 @@ Gp._rewardKill = function(enemy) {
         this.stalkersKilledInLevel2++;
     }
     /* 直接给金币（自动吸取，不创建 DOM） */
-    var goldAmt = (enemy.isBoss ? Math.floor(5 + (enemy.level || 1) * 0.5 + Math.random() * 4) : Math.floor(3 + (enemy.level || 1) * 0.3 + Math.random() * 3));
+    var goldAmt = (enemy.isBoss ? Math.floor(Balance.COIN_COUNT_BOSS_BASE + (enemy.level || 1) * Balance.COIN_COUNT_BOSS_PER_LVL + Math.random() * Balance.COIN_COUNT_BOSS_RANDOM_MAX) : Math.floor(Balance.COIN_COUNT_NORMAL_BASE + (enemy.level || 1) * Balance.COIN_COUNT_NORMAL_PER_LVL + Math.random() * Balance.COIN_COUNT_NORMAL_RANDOM_MAX));
     /* R140-P1: Boss击杀金币也应受点金术等_tempGoldMult加成，与拾取路径一致 */
     if (this._tempGoldMult > 1) {
         goldAmt = Math.floor(goldAmt * this._tempGoldMult);
@@ -431,8 +431,8 @@ Gp._triggerFlowerEvent = function (id) {
     var p = this.player;
     try {
         switch (id) {
-            case 'hua_chun': p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.30); break;
-            case 'hua_xia': p._tempAtkBoost = (p._tempAtkBoost || 0) + 0.30; p._tempBuffTimeLeft = Math.max(p._tempBuffTimeLeft || 0, 5); break; /* P2-6: 5s 对齐设计表 */
+            case 'hua_chun': p.hp = Math.min(p.maxHp, p.hp + p.maxHp * Balance.HUPAI_HUA_CHUN_HEAL_PCT); break;
+            case 'hua_xia': p._tempAtkBoost = (p._tempAtkBoost || 0) + Balance.HUPAI_HUA_XIA_ATK_BOOST; p._tempBuffTimeLeft = Math.max(p._tempBuffTimeLeft || 0, Balance.HUPAI_HUA_XIA_BUFF_DURATION); break; /* P2-6: 5s 对齐设计表 */
             case 'hua_qiu': p.addGold(20 * Math.max(1, this._waveCount)); break;
             case 'hua_dongJ':
                 for (var i = 0; i < this.enemies.length; i++) { this.enemies[i].frozen = true; this.enemies[i].frozenTimer = B.FROZEN_TIMER_BONUS_BASE; }
@@ -442,10 +442,10 @@ Gp._triggerFlowerEvent = function (id) {
                 if (ws.length > 0) ws[Math.floor(Math.random() * ws.length)].upgrade();
                 break;
             }
-            case 'hua_lan': p.critRate = Math.min(1, (p.critRate || 0) + 0.10); break;
+            case 'hua_lan': p.critRate = Math.min(1, (p.critRate || 0) + Balance.HUPAI_HUA_LAN_CRIT_INC); break;
             case 'hua_zhu':
                 /* R130-P0: 竹牌 = 回15%HP + 护盾（设计文档 §4.4） */
-                p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.15);
+                p.hp = Math.min(p.maxHp, p.hp + p.maxHp * Balance.HUPAI_HUA_ZHU_HEAL_PCT);
                 this._tempShield = Math.floor(p.atk * B.HUPAI_HUA_ZHU_SHIELD);
                 this._tempShieldEnd = this._elapsed + B.HUPAI_HUA_ZHU_SHIELD_DUR;
                 break;
@@ -496,7 +496,7 @@ Gp._triggerMeld = function (meld) {
         var pdmg = Math.floor(p.atk * B.HUPAI_PUNG_TONG_PROJ_ATK * mult);
         for (var a = 0; a < 9; a++) {
             var ang = (Math.PI * 2 / 9) * a;
-            var proj = new window.Projectile(p.x, p.y, Math.cos(ang) * 280, Math.sin(ang) * 280, 4, pdmg, 1, 1.2);
+            var proj = new window.Projectile(p.x, p.y, Math.cos(ang) * Balance.HUPAI_PUNG_TONG_PROJ_SPEED, Math.sin(ang) * Balance.HUPAI_PUNG_TONG_PROJ_SPEED, Balance.HUPAI_PUNG_TONG_PROJ_RADIUS, pdmg, 1, 1.2);
             var el = document.createElement('div');
             el.className = 'projectile tong-ring-pellet';
             if (this._worldLayer) this._worldLayer.appendChild(el);
@@ -576,7 +576,7 @@ Gp._triggerHonorMeld = function (meld) {
             case 'feng_nan': /* 离火燎原：全场灼烧（MVP 即时 8%×kongMult maxHp） */
                 for (var j = 0; j < this.enemies.length; j++) {
                     var e2 = this.enemies[j];
-                    if (e2.alive) e2.takeDamage(Math.floor(e2.maxHp * 0.08 * kongMult), 'player');
+                    if (e2.alive) e2.takeDamage(Math.floor(e2.maxHp * Balance.HUPAI_FENG_NAN_HP_DMG_PCT * kongMult), 'player');
                 }
                 break;
             case 'feng_xi': /* 肃杀之风：全场迟滞（MVP 冰封0.8s代理） */
@@ -608,7 +608,7 @@ Gp._triggerHonorMeld = function (meld) {
                     this._enemyProjectiles.length = 0;
                 }
                 if (this._clearTotems) this._clearTotems();
-                p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.20);
+                p.hp = Math.min(p.maxHp, p.hp + p.maxHp * Balance.HUPAI_JIAN_BAI_HP_RESTORE_PCT);
                 break;
         }
     } catch (err) { console.warn('honor meld error:', err); }
