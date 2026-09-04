@@ -79,7 +79,10 @@ Gp._loop = function(timestamp) {
                     this.player.droneTimer -= interval;
                     if (this.player.evolvedDrone) {
                         /* R187-P1: 使用O(n)选择而非O(n log n)排序取top-3 */
-                        var _top3 = [];
+                        /* R195-P2: 复用数组避免per-frame allocation */
+                        if (!this._droneTop3) this._droneTop3 = [];
+                        this._droneTop3.length = 0;
+                        var _top3 = this._droneTop3;
                         for (var _di = 0; _di < this.enemies.length; _di++) {
                             var _e = this.enemies[_di];
                             if (!_e.alive) continue;
@@ -133,7 +136,9 @@ Gp._loop = function(timestamp) {
                 if (!_epG[_kg]) _epG[_kg] = [];
                 _epG[_kg].push(_ge);
             }
-            var _checked = new Set(); /* R182-P0: Set替代Array实现O(1)查找 */
+            if (!this._collisionChecked) this._collisionChecked = new Set(); /* R195-P2: 复用Set避免per-frame allocation */
+            this._collisionChecked.clear();
+            var _checked = this._collisionChecked;
             for (var _ci = 0; _ci < this.enemies.length; _ci++) {
                 var _a = this.enemies[_ci];
                 if (!_a || !_a.alive) continue;
