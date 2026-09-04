@@ -825,7 +825,7 @@ window.Enemy = class Enemy {
             }
             /* P3: 全屏辐射弹幕 — 每隔1.5秒向8方向发射 */
             this._bossRadiationTimer = (this._bossRadiationTimer || 0) + dt;
-            if (this._bossRadiationTimer >= 1.5) {
+            if (this._bossRadiationTimer >= Balance.BOSS_P3_RADIATION_INTERVAL) {
                 this._bossRadiationTimer = 0;
                 if (engine && engine._enemyProjectiles) {
                     var radDmg = Math.floor(this._getEffectiveAtk() * Balance.BOSS_P3_RAD_DMG_MULT);

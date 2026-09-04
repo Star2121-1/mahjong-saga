@@ -95,6 +95,15 @@ Sys.endOverdrive = function(engine) {
             oe._overdriveOrigSpeed = undefined;
         }
     }
+    /* R205-P0: 二次扫描清除过驱动期间新刷出敌人的残留冻结状态 — 首次迭代时不在数组中的敌人未被恢复 */
+    for (var oi2 = 0; oi2 < engine.enemies.length; oi2++) {
+        var oe2 = engine.enemies[oi2];
+        if (oe2 && oe2._overdriveStored) {
+            oe2.speed = oe2._overdriveOrigSpeed !== undefined ? oe2._overdriveOrigSpeed : oe2.baseSpeed;
+            oe2._overdriveStored = false;
+            oe2._overdriveOrigSpeed = undefined;
+        }
+    }
 
     if (engine.container) engine.container.classList.remove('overdrive-active');
     /* R170-P1: 清除残存定时器，防止overdrive结束后状态泄漏 */

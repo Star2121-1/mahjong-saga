@@ -211,6 +211,7 @@ window.Balance = {
     BOSS_P3_RADIATION_COUNT: 6,     // P3辐射弹幕数量 (Enemy.js)
     BOSS_P3_RADIATION_SPEED: 80,    // P3辐射弹幕速度 (Enemy.js)
     BOSS_P3_RADIATION_LIFE: 3,      // P3辐射弹幕生命(s) (Enemy.js)
+    BOSS_P3_RADIATION_INTERVAL: 1.5, // P3辐射弹幕间隔(s) (Enemy.js)
     BOSS_PHASE3_SUMMON_STALKER: 4,
     BOSS_PHASE3_SUMMON_TANKER: 2,
     BOSS_PHASE3_SUMMON_MAX: 10,          // P3单次召唤上限 (Enemy.js)
