@@ -477,6 +477,7 @@ class Player {
             explosionChance: this.explosionChance,
             freezeChance: this.freezeChance,
             thornsRate: this.thornsRate,
+            _thornsAffixBonus: this._thornsAffixBonus || 0,
             hasDrone: this.hasDrone,
             droneTimer: this.droneTimer, droneInterval: this.droneInterval,
             evolvedDrone: this.evolvedDrone,
@@ -532,6 +533,7 @@ class Player {
         this.explosionChance = data.explosionChance || 0;
         this.freezeChance = data.freezeChance || 0;
         this.thornsRate = data.thornsRate || 0;
+        this._thornsAffixBonus = data._thornsAffixBonus || 0; /* R193-P1: 恢复反伤词条加成，防止gf_thorns效果丢失 */
         this.hasDrone = !!data.hasDrone;
         this.droneTimer = data.droneTimer || 0; this.droneInterval = data.droneInterval || 0;
         this.evolvedDrone = !!data.evolvedDrone;
