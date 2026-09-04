@@ -94,7 +94,9 @@ Gp._updateWeapons = function(dt) {
             var cdBase = w._baseCd || w._origBaseCd || w.cd; /* R157-P0: 优先读_baseCd（含筒顺），确保筒顺减CD不被秘密宝牌吞没 */
             w.cd = Math.max(this.player.cdFloor || Balance.DEFAULT_CD_FLOOR, cdBase * (1 - cdReduction));
         } else {
-            w.cd = w._baseCd || w._origBaseCd || w.cd; /* R157-P0: cdReduction移除后恢复正确基准 */
+            /* R176-P0: 确保cd不会被重置为低于floor的值 */
+            var floor = this.player.cdFloor || Balance.DEFAULT_CD_FLOOR;
+            w.cd = Math.max(floor, w._baseCd || w._origBaseCd || w.cd);
         }
         w.update(wdt, this.player, this.enemies, this);
     }

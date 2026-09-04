@@ -753,6 +753,7 @@ Gp._removeEnemyDOM = function(enemy) {
     if (el && el.parentNode) el.remove();
     this._enemyElements.delete(enemy.id);
     enemy._hpFill = null; /* R38-P2: 清除stale DOM引用 */
+    enemy.el = null; /* R176-P0: 清除敌人士兵DOM引用，防止内存泄漏 */
 };
 
 Gp._initHandTiles = function() {
