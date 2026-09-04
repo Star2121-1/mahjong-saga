@@ -354,8 +354,10 @@
             dateString: this._formatDateString(new Date()),
             waveCount: 0, heroId: '', levelId: '', player: null, kills: 0, elapsed: 0
         });
-        /* R187-P1: 更新lastSaveTimestamp，防止存档选择器显示过期时间 */
+        /* R187-P1 + R189-P0: 先持久化再更新时间戳，防止saveMeta失败时_metaCache持有虚假时间 */
         var meta = await this.getMeta();
+        await this.saveMeta(meta);
+        meta = await this.getMeta(); /* R189-P0: 重新读取确保一致性 */
         meta.lastSaveTimestamp = Date.now();
         await this.saveMeta(meta);
     };
@@ -648,6 +650,11 @@
             var _validS = ['weapon', 'armor', 'talisman'];
             for (var _eqi = 0; _eqi < data.meta.equipments.length; _eqi++) {
                 var _eq = data.meta.equipments[_eqi];
+                /* R189-P1: 深度验证装备结构，防止恶意导入注入非法数据 */
+                if (!_eq || typeof _eq !== 'object') return false;
+                if (!_eq.instanceId || typeof _eq.instanceId !== 'string') return false;
+                if (!_eq.protoId || typeof _eq.protoId !== 'string') return false;
+                if (!_eq.affixes || !Array.isArray(_eq.affixes)) return false;
                 if (typeof _eq !== 'object' || Array.isArray(_eq)) return false;
                 if (typeof _eq.instanceId !== 'string' || !_eq.instanceId) return false;
                 if (!_eq.protoId) return false;

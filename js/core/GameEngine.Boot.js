@@ -72,6 +72,8 @@ Gp.init = async function() {
             if (window.rewardManager) window.rewardManager.hidePanel();
             /* R132-P1: resume路径统一调用reset()即可，init()的赋值会被reset()覆盖且语义冗余 */
             if (window.SpawnSystem) window.SpawnSystem.reset(this);
+            /* R189-P1: 重置_announcingWave，防止崩溃时处于wave公告状态导致resume后死锁 */
+            this._announcingWave = false;
             this._syncEntities();
             this._syncPlayerHP();
             this._renderWeaponSlots();
