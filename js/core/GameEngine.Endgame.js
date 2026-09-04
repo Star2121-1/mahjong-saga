@@ -232,6 +232,8 @@ Gp.restart = function() {
         clearInterval(this._guideCheckTimer);
         this._guideCheckTimer = null;
     }
+    /* R207-P0: 清理引导自动推进定时器，防止restart后旧定时器触发导致新游戏引导步骤错乱 */
+    if (this._guideAutoAdvanceTimer) { clearTimeout(this._guideAutoAdvanceTimer); this._guideAutoAdvanceTimer = null; }
     /* R101-P1: 清理引导完成定时器 */
     if (this._completeGuideTimer) { clearTimeout(this._completeGuideTimer); this._completeGuideTimer = null; }
     /* R154-P0: 清除引导透明度Map，防止跨局战场元素错误褪色 */

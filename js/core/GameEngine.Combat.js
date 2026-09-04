@@ -43,6 +43,11 @@ Gp._resumeAfterReward = function() {
     this.currentWaveSpawnedCount = 0;
     /* R201-P0: 铁拳事件暴击加成单波有效 — 若波次清空时无击杀，buff 不应泄漏到下一波 */
     this._tempCritBonus = 0;
+    /* R207-P1: 临时护盾/狂暴/金币加成单波有效 — 防止跨波残留 */
+    this._tempShield = 0;
+    this._tempShieldEnd = 0;
+    this._tempBerserkBonus = false;
+    this._tempGoldMult = 1;
     /* R137-P0: 同步SpawnSystem计数器，防止波次间空刷 */
     if (window.SpawnSystem) window.SpawnSystem.currentWaveSpawnedCount = 0;
     this._mutatorTriggered = false;
@@ -117,6 +122,10 @@ Gp._checkQqueenShield = function() {
 };
 
 Gp._showVictory = function() {
+    /* R207-P1: 确保胜利时引导覆盖层已关闭，防止z-index冲突阻塞交互 */
+    if (this.guideOverlay && this.guideOverlay.classList.contains('active')) {
+        this._completeGuide();
+    }
     window.audioManager && window.audioManager.play('victory');
     this._freezeClock();
     this.victoryTime.textContent = this._formatTime(this._elapsed);
@@ -494,7 +503,8 @@ Gp._settleRun = async function(tokens) {
     if (this._won && this._bossLordSpawned && (this._elapsed || 0) <= 180) this._checkAchievement('speed_demon');
 
     /* ── 变异保险库：20%概率解锁新突变 ── */
-    if (Math.random() < Balance.VAULT_MUTATION_UNLOCK_CHANCE) {
+    /* R207-P0: 仅深渊轮回允许解锁突变，防止非深渊局误触发 */
+    if (this.loopCount > 0 && Math.random() < Balance.VAULT_MUTATION_UNLOCK_CHANCE) {
         var _allMuts = ['gravity', 'bloodmoon', 'frenzy', 'frailty', 'wither'];
         var _unlocked = meta.unlockedMutations || [];
         var _avail = [];

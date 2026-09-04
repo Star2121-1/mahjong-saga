@@ -362,13 +362,16 @@ class Player {
                 }
                 break;
             case 'vamp_ring':
-                this.lifestealRate = Math.min(Balance.MAX_LIFESTEAL_RATE, lv * Balance.LIFESTEAL_PER_VAMP_LEVEL);
+                /* R207-P0: 增量而非覆盖 — 防止gf_lifesteal等affix增益被重置 */
+                this.lifestealRate = Math.min(Balance.MAX_LIFESTEAL_RATE, this.lifestealRate - (Math.max(0, lv - 1) * Balance.LIFESTEAL_PER_VAMP_LEVEL) + lv * Balance.LIFESTEAL_PER_VAMP_LEVEL);
                 break;
             case 'explosive_core':
-                this.explosionChance = Math.min(Balance.MAX_EXPLOSION_CHANCE, lv * Balance.EXPLOSION_PER_LEVEL);
+                /* R207-P0: 增量而非覆盖 — 防止se_splash等affix增益被重置 */
+                this.explosionChance = Math.min(Balance.MAX_EXPLOSION_CHANCE, this.explosionChance - (Math.max(0, lv - 1) * Balance.EXPLOSION_PER_LEVEL) + lv * Balance.EXPLOSION_PER_LEVEL);
                 break;
             case 'frost_core':
-                this.freezeChance = Math.min(Balance.MAX_FREEZE_CHANCE, lv * Balance.FREEZE_PER_LEVEL);
+                /* R207-P0: 增量而非覆盖 — 防止fc_chance等affix增益被重置 */
+                this.freezeChance = Math.min(Balance.MAX_FREEZE_CHANCE, this.freezeChance - (Math.max(0, lv - 1) * Balance.FREEZE_PER_LEVEL) + lv * Balance.FREEZE_PER_LEVEL);
                 break;
             case 'evolved_drone':
                 this.evolvedDrone = true;

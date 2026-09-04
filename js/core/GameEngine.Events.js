@@ -127,7 +127,7 @@ Gp._spawnCoinBurst = function(count) {
     var py = this.player.y;
     /* L-022: 通过 spawnCoinsAt 生成可拾取金币，避免 addGold 直接加钱导致双倍 */
     if (this._combat && this._combat.spawnCoinsAt) {
-        this._combat.spawnCoinsAt(this, px, py, false, count);
+        this._combat.spawnCoinsAt(this, px, py, false, 1); /* R207-P1: count应作为金币数量而非关卡等级传入 */
     }
     if (window.fxManager) window.fxManager.spawnText(px, py, '+' + count + ' 🪙', '#ffd700', 24);
 };

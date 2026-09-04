@@ -298,14 +298,19 @@ Gp._loop = function(timestamp) {
                         /* R30-H-016: Boss Lord死亡后清理金币/宝石，但不移除其他活敌 */
                         // 注：非Boss活敌由主死亡循环正常处理，此处仅清理掉落物和状态
                         /* R199-P0: Boss死亡时归还未拾取金币，防止丢失 */
-                        for (var _lci = 0; _lci < this._activeCoins.length; _lci++) this.player.addGold(1);
-                        for (var _lci = 0; _lci < this._activeCoins.length; _lci++) this._activeCoins[_lci].el.remove();
+                        /* R207-P0: 单次遍历同时处理加钱和DOM移除，防止addGold触发事件后_activeCoins未清空导致死循环 */
+                        for (var _lci = this._activeCoins.length - 1; _lci >= 0; _lci--) {
+                            this.player.addGold(1);
+                            this._activeCoins[_lci].el.remove();
+                        }
                         this._activeCoins = [];
                         if (this.bossHpBar) this.bossHpBar.classList.remove('active');
                         if (this.bossHpFill) this.bossHpFill.style.width = '0%';
                         if (this._expGems.length > 0) {
                             this._pendingBossLordSettle = true;
                         } else {
+                            /* R207-P1: 胜利结算前主动存档，防止crash/tab关闭时进度丢失（与_gameOver的autoSave('death')对称） */
+                            this._autoSave('victory');
                             this.running = false;
                             this.gameOver = true;
                             this._won = true; /* R136-P0: 标记胜利，供_settleRun中flawless/speed_demon使用 */
@@ -437,6 +442,8 @@ Gp._loop = function(timestamp) {
                 return;
             }
             this._pendingBossLordSettle = false;
+            /* R207-P1: 胜利结算前主动存档，防止crash/tab关闭时进度丢失 */
+            this._autoSave('victory');
             this.running = false;
             this.gameOver = true;
             this._won = true; /* R136-P0: 标记胜利，供_settleRun中flawless/speed_demon使用 */

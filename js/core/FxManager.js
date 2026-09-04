@@ -109,7 +109,7 @@ Fp._borrowNode = function() {
         el.className = 'fct-node';
         el._fctActive = false;
         if (el._fctTimeout) { clearTimeout(el._fctTimeout); el._fctTimeout = null; }
-        self._returnNode(el); /* R204-P1: 使用_returnNode替代直接push到_freeStack，确保幂等性防止overflow节点在cleanup时重复入栈 */
+        this._returnNode(el); /* R207-P0: 使用this替代self — _borrowNode内未声明self变量，overflow节点animationend回调会抛ReferenceError导致节点无法回收 */
     };
     el.addEventListener('animationend', el._fctOnEnd);
     if (this._layer && this._layer.parentNode) {
