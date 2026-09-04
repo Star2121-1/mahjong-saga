@@ -237,7 +237,7 @@ window.ShotgunBurst = class extends window.Weapon {
             n += 4;
         }
         for (var i = 0; i < n; i++) {
-            var offset = (i - (n - 1) / 2) * this.spreadAngle; /* R161-P1c: 移除/n-1除法，spreadAngle是总扩散角 */
+            var offset = (i - (n - 1) / 2) * this.spreadAngle / Math.max(n - 1, 1); /* R204-P1: 恢复/n-1除法，spreadAngle是总扩散角（R161误删） */
             var angle = baseAngle + offset;
             var proj = new window.Projectile(
                 player.x, player.y,

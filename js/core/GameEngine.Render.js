@@ -104,7 +104,12 @@ Gp._updateWeapons = function(dt) {
             /* R176-P0: 确保cd不会被重置为低于floor的值 */
             var floor = this.player.cdFloor || Balance.DEFAULT_CD_FLOOR;
             /* R199-P0: 恢复_baseCd为_origBaseCd（已含筒顺修改），避免除法恢复导致数值膨胀 */
-            w._baseCd = w._origBaseCd;
+            /* R204-P0: _tongCdReduction非零时需保留筒顺降幅，直接恢复_origBaseCd会清掉筒顺记录 */
+            if (w._tongCdReduction > 0) {
+                w._baseCd = Math.max(floor, w._origBaseCd * (1 - w._tongCdReduction));
+            } else {
+                w._baseCd = w._origBaseCd;
+            }
             w.cd = Math.max(floor, w._baseCd || w._origBaseCd || w.cd);
         }
         w.update(wdt, this.player, this.enemies, this);
