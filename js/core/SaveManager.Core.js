@@ -595,7 +595,9 @@
             /* R30-H-003: 导入成功后清除 .bak 防止回滚到旧数据 */
             try { localStorage.removeItem('cr_meta.json.bak'); } catch(e) {}
             try { localStorage.removeItem('cr_active_run.json.bak'); } catch(e) {}
-            return { success: metaOk }; /* R136-P0: 传播_writeJSON返回值，防止quota满时误报成功 */
+            /* R174-P0: 同时检查meta.json写入结果，防止quota满时误报成功 */
+            var metaWriteOk = this._writeJSON('meta.json', data.meta);
+            return { success: metaWriteOk && metaOk }; /* R136-P0: 传播_writeJSON返回值 */
         } catch (e) {
             return { success: false, error: (e && (e.message || String(e))) || '未知错误' };
         }
