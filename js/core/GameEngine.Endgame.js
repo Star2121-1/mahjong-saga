@@ -41,6 +41,7 @@ Gp._onClick = function(e) {
         enemy.frozen = true;
         enemy.frozenTimer = Balance.FROZEN_TIMER_BONUS_BASE + (p.iceDurationBonus || 0);
         if (enemy.el) enemy.el.classList.add('frozen-crystal');
+        window.audioManager && window.audioManager.play('freeze'); /* R204-P1: 将音效移至冻结判定内，消除双随机数导致的音画不同步 */
     }
 
     var isCrit = Math.random() < (p.critRate + (this._tempCritBonus || 0));
@@ -54,9 +55,7 @@ Gp._onClick = function(e) {
     /* Epoch 36: 攻击音效 */
     if (isCrit) window.audioManager && window.audioManager.play('crit');
     else window.audioManager && window.audioManager.play('attack');
-    if (!enemy.frozen && p.freezeChance > 0 && Math.random() < p.freezeChance) {
-        window.audioManager && window.audioManager.play('freeze');
-    }
+    /* R204-P1: freeze 音效已在上方冻结判定块内播放，移除冗余双随机检查 */
 
     /* Epoch 3: 暴击计数 */
     if (isCrit) {

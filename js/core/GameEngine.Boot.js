@@ -368,8 +368,9 @@ Gp._initBeforeUnload = function() {
 Gp._initViewportResize = function() {
     var self = this;
     function _invalidateVp() {
-        self._vpW = 0;
-        self._vpH = 0;
+        /* R204-P1: 在resize事件中同步读取尺寸，避免rAF中同步reflow导致的jank */
+        self._vpW = self.battlefield.clientWidth;
+        self._vpH = self.battlefield.clientHeight;
     }
     /* R151-P2: 存储handler引用以便restart()时移除，防止多次restart累积监听器 */
     this._vpResizeHandler = _invalidateVp;

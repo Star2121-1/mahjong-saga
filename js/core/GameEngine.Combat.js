@@ -183,10 +183,11 @@ Gp._showAbyssPanel = function() {
     this.battlefield.appendChild(panel);
     this._abyssPanelVisible = true;
 
-    panel.querySelector('.abyss-btn-retreat').addEventListener('click', function() {
+    panel.querySelector('.abyss-btn-retreat').addEventListener('click', async function() {
         if (panel.parentNode) panel.remove();
         self._abyssPanelVisible = false;
-        self._settleRun(window.saveManager.calcMetaTokens(self.kills, self._elapsed));
+        var tokens = window.saveManager.calcMetaTokens(self.kills, self._elapsed);
+        await self._settleRun(tokens); /* R204-P1: 等待结算完成后再显示胜利覆盖层，确保周常/每日任务奖励已计入 */
         self._showVictoryOverlay();
     });
     panel.querySelector('.abyss-btn-enter').addEventListener('click', function() {
@@ -204,6 +205,8 @@ Gp._enterAbyss = function() {
     if (bc) bc.remove();
     /* R138-P0: 清一色金光环在进入深渊前重置，防止视觉残留误导 */
     if (this.playerEl) this.playerEl.classList.remove('hu-qingyise');
+    /* R204-P1: 重置胜利标记，防止深渊死亡被错误计入总胜场 */
+    this._won = false;
     this.loopCount++;
     this._waveCount = 0;
     this.currentWaveSpawnedCount = 0;
