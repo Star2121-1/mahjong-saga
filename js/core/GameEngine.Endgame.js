@@ -333,6 +333,7 @@ Gp.restart = function() {
     this._tempGoldMult = 1;
     this._tempCritBonus = 0;
     this._overdriveCount = 0; /* R131-P0: 重置Overdrive计数，防止跨restart积累误报成就 */
+    this._abyssComboActivated = false; /* R173-P0: 重置深渊combo激活标志，防止跨局永久失效 */
     this._origCdFloor = null; /* R158-P1: 清除过驱动CD基准残留，防止跨局速度异常 */
     this._extraEliteCount = 0;
     /* R134-P1: 重置奖励面板置换状态，防止跨局残留 */

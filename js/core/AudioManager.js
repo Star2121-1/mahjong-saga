@@ -140,6 +140,7 @@ Ap.getCategoryVolume = function(category) {
 /* ── 合成原语 ── */
 
 Ap._osc = function(type, freq, startTime, duration, vol, rampEndFreq) {
+    var self = this; /* R173-P0: capture this to avoid self resolving to window.self in onended closure */
     try {
         var o = this._ctx.createOscillator();
         var g = this._ctx.createGain();
@@ -169,6 +170,7 @@ Ap._saw = function(freq, dur, vol) {
     this._osc('sawtooth', freq, this._ctx.currentTime, dur, vol);
 };
 Ap._noise = function(dur, vol) {
+    var self = this; /* R173-P0: capture this to avoid self resolving to window.self in onended closure */
     try {
         var bufSize = this._ctx.sampleRate * dur;
         var buf = this._ctx.createBuffer(1, bufSize, this._ctx.sampleRate);
@@ -199,6 +201,7 @@ Ap._noise = function(dur, vol) {
     } catch(e) { console.warn('[AudioManager] _noise error:', e); }
 };
 Ap._sweep = function(from, to, dur, vol) {
+    var self = this; /* R173-P0: capture this to avoid self resolving to window.self in onended closure */
     try {
         var o = this._ctx.createOscillator();
         var g = this._ctx.createGain();
