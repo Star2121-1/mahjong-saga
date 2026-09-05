@@ -394,7 +394,8 @@ Gp._settleRun = async function(tokens) {
     /* 再次检查 — await 后可能已 restart */
     if ((this._runSeq || 0) !== _seq) return;
     meta.metaTokens = (meta.metaTokens || 0) + tokens;
-    meta.totalRuns = (meta.totalRuns || 0) + 1;
+    /* R233-P0: 移除settleRun中的totalRuns无条件递增 — _gameOver已负责胜利路径累加，避免双重计数 */
+    /* meta.totalRuns = (meta.totalRuns || 0) + 1; */
     meta.totalKills = (meta.totalKills || 0) + this.kills;
     /* Epoch 3: 保存局内成就计数器到 meta */
     meta.overdriveCount = (meta.overdriveCount || 0) + (this._overdriveCount || 0);
@@ -579,6 +580,7 @@ Gp._settleRun = async function(tokens) {
 };
 
 Gp._gameOver = async function() {
+    var weeklyCompleted = []; /* R233-P0: 声明周常完成列表，防止引用_settleRun作用域变量报ReferenceError */
     /* P1: 防御性清除 victoryOverlay，防止叠加残留 */
     if (this.victoryOverlay) this.victoryOverlay.classList.remove('active');
     /* R230-P0: 引导进行中死亡时必须关闭引导，防止覆盖层永久阻塞结算界面
