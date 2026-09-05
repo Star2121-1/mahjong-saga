@@ -337,6 +337,9 @@ Gp.restart = function() {
     this._mutatorTriggered = false;
     this._clearMutatorEffects();
     this._clearTotems();
+    /* R240-P0: 重置共鸣计时器，防止restart后残留导致提前触发 */
+    this._flameAuraTimer = 0;
+    this._iceAuraTimer = 0;
     if (window.rewardManager) window.rewardManager.hidePanel();
     /* R31-E-001: 局内成就计数器重置（修复跨重启泄漏） */
     this._totalCritsThisRun = 0;

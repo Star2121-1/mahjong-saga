@@ -651,6 +651,17 @@ Gp._gameOver = async function() {
     this._clearTotems();
     this._mutatorTriggered = false;
     this._clearMutatorEffects();
+    /* R240-P0: 清理深渊combo玩家字段，防止死亡后跨局残留buff */
+    if (this.player) {
+        if (this.player._abyssFrailtyOrigAtk !== undefined) {
+            this.player.atk = this.player._abyssFrailtyOrigAtk;
+            this.player._abyssFrailtyOrigAtk = undefined;
+        }
+        this.player._abyssFrailtyAtk = undefined;
+        this.player._abyssBloodmoonApplied = false;
+        this.player._abyssBloodmoonAtkBonus = undefined;
+        this.player._abyssBloodmoonOrigMaxHp = undefined;
+    }
     if (this.mutatorOverlay) this.mutatorOverlay.classList.remove('active');
     if (this.bossHpBar) this.bossHpBar.classList.remove('active');
     /* Epoch 46: 死亡时清理波次横幅 */
@@ -668,6 +679,9 @@ Gp._gameOver = async function() {
         }
         this._rainDrops = [];
     }
+    /* R240-P0: 重置共鸣计时器，防止跨局残留导致提前触发 */
+    this._flameAuraTimer = 0;
+    this._iceAuraTimer = 0;
     /* P0: 清理日夜叠加和深渊红雾DOM，防止重开时残留 */
     if (this._dayNightEl && this._dayNightEl.parentNode) this._dayNightEl.remove();
     this._dayNightEl = null;
