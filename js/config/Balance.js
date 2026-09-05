@@ -41,7 +41,6 @@ window.Balance = {
     PLAYER_INVULN_ON_HIT: 0.35,      // 受击无敌帧时长 (Player.js)
     PLAYER_HITFLASH_DURATION: 0.3,   // 受击闪烁时长 + Combat.js 归一化分母 (Player.js + Combat.js)
     HERO_ASPD_BONUS: 0.15,           // 雀灵流转攻击速度加成 (Player.js Hero) — 实际增加_weaponCdReduction而非移速
-    HERO_SPEED_BONUS: 1.15,          // [保留]雀灵流转移速加成 — 旧代码残留，已被HERO_ASPD_BONUS替代
     HERO_ASSASSIN_SPEED_MULT: 1.10,  // 暗影步移速加成 (Player.js Assassin)
     HERO_ASSASSIN_DODGE_ASPD_MULT: 1.20,  // 暗影步闪避后攻速加成 (Player.js Assassin)
     HERO_ASSASSIN_DODGE_ASPD_DURATION: 5.0,  // 闪避后攻速加成持续时间 (Player.js)

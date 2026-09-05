@@ -571,7 +571,6 @@ Gp._applyRunBonus = function (suit, tierMult) {
             /* R38-P0: 累计筒顺减CD上限 HUPAI_RUN_TONG_CD_CAP，防止复利累积超限 */
             if (!w._tongCdReduction) w._tongCdReduction = 0;
             var newReduction = Math.min(B.HUPAI_RUN_TONG_CD_CAP, w._tongCdReduction + red);
-            var deltaRed = newReduction - w._tongCdReduction;
             w._tongCdReduction = newReduction;
             w._baseCd = Math.max(floor, w._origBaseCd * (1 - newReduction)); /* R231-P1: 从_origBaseCd计算避免多次筒顺叠加时_compound压缩 */
             w.cd = w._baseCd;
