@@ -161,6 +161,14 @@ window.Enemy = class Enemy {
     update(dt, player, engine) {
         if (!this.alive) return;
         this._freezeHitDecayed = false;
+        /* R236-P0: GroundSlammer knockback位移 — 设置速度分量供movement消费 */
+        if (this._knockbackVelocity > 0) {
+            this.x += (this._knockbackVelocityX || 0) * dt;
+            this.y += (this._knockbackVelocityY || 0) * dt;
+            this._knockbackVelocity = Math.max(0, this._knockbackVelocity - dt * Balance.KNOCKBACK_DECAY_RATE);
+            this._clampPosition(engine);
+            return;
+        }
         this._knockbackVelocity = Math.max(0, this._knockbackVelocity - dt * Balance.KNOCKBACK_DECAY_RATE);
         this.flashTimer = Math.max(0, this.flashTimer - dt);
         this._comboCooldown = Math.max(0, (this._comboCooldown || 0) - dt); /* K-030: 冷却倒计时 */

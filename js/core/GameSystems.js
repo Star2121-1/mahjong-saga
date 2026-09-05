@@ -155,6 +155,7 @@ Sys.showMutatorPanel = function(engine) {
 };
 
 Sys.applyMutator = function(engine, mutatorId) {
+    window.audioManager && window.audioManager.play('reward'); /* R236-P0: 突变选择音频反馈 */
     engine._activeMutator = mutatorId;
     engine.mutatorOverlay.classList.remove('active');
     if (mutatorId === 'gravity') {

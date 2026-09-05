@@ -499,6 +499,7 @@ Gp._spawnBossLordFromGamble = function() {
     }
 
     if (this.bossHpBar) this.bossHpBar.classList.add('active');
+    window.audioManager && window.audioManager.play('boss'); /* R236-P0: boss生成音频提示，防止玩家无音效感知boss到达 */
     this._screenShake();
 };
 

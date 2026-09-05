@@ -398,8 +398,8 @@ Gp._settleRun = async function(tokens) {
     /* 再次检查 — await 后可能已 restart */
     if ((this._runSeq || 0) !== _seq) return;
     meta.metaTokens = (meta.metaTokens || 0) + tokens;
-    /* R233-P0: 移除settleRun中的totalRuns无条件递增 — _gameOver已负责胜利路径累加，避免双重计数 */
-    /* meta.totalRuns = (meta.totalRuns || 0) + 1; */
+    /* R236-P0: totalRuns在胜利路径累加 — _gameOver仅处理死亡，_settleRun需负责胜利计数 */
+    if (this._won) meta.totalRuns = (meta.totalRuns || 0) + 1;
     meta.totalKills = (meta.totalKills || 0) + this.kills;
     /* Epoch 3: 保存局内成就计数器到 meta */
     meta.overdriveCount = (meta.overdriveCount || 0) + (this._overdriveCount || 0);
