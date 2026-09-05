@@ -51,7 +51,7 @@ Gp._onClick = function(e) {
     var damage = isCrit ? Math.floor(p.atk * atkMult * (Balance.CRIT_BASE_MULT + (p.critDamageBonus || 0))) : Math.floor(p.atk * atkMult);
     if (damage === 0) return;
 
-    enemy.takeDamage(damage, this.player, undefined, undefined, isCrit ? 'crit' : undefined);
+    enemy.takeDamage(damage, this.player, this.player.x, this.player.y, isCrit ? 'crit' : undefined);
     /* Epoch 36: 攻击音效 */
     if (isCrit) window.audioManager && window.audioManager.play('crit');
     else window.audioManager && window.audioManager.play('attack');

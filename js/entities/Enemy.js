@@ -859,7 +859,7 @@ window.Enemy = class Enemy {
         var pdy = player.y - this.y;
         var pDist = Math.sqrt(pdx * pdx + pdy * pdy);
         var totalR = player.radius + this.radius;
-        if (pDist < totalR && !this._bossContactThisFrame) {
+        if (pDist <= totalR && !this._bossContactThisFrame) {
             this._bossContactThisFrame = true;
             if (pDist > 0.01) {
                 /* M-029: 推挤与 dt 成比例，不再 FPS 依赖 */

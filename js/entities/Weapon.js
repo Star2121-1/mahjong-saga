@@ -304,7 +304,7 @@ window.GroundSlammer = class extends window.Weapon {
                 var swdx = e.x - sw.x;
                 var swdy = e.y - sw.y;
                 var swdist = Math.sqrt(swdx * swdx + swdy * swdy);
-                if (swdist < e.radius + radius) {
+                if (swdist <= e.radius + radius) {
                     sw.hitEnemies.add(e.id);
                     e.takeDamage(dmg, 'player', sw.x, sw.y);
                     /* R199-P1: 击退只应用一次，防止每帧叠加导致敌人被推出地图 */
@@ -459,7 +459,7 @@ window.NovaPulse = class extends window.Weapon {
                 if (!e.alive) continue;
                 var dx = e.x - p.x;
                 var dy = e.y - p.y;
-                if (dx * dx + dy * dy < (e.radius + radius) * (e.radius + radius)) {
+                if (dx * dx + dy * dy <= (e.radius + radius) * (e.radius + radius)) {
                     if (!p.hitEnemies.has(e.id)) {
                         p.hitEnemies.add(e.id);
                         e.takeDamage(dmg, 'player', p.x, p.y);
