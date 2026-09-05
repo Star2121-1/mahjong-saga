@@ -400,6 +400,7 @@
             difficultyTimer: engine._difficultyTimer,
             bossTimer: engine._bossTimer, spawnTimer: engine._spawnTimer,
             loopCount: engine.loopCount || 0,
+            totalWaves: engine._totalWaves || 0, /* R228-P0: 保存总波次，断点恢复时无需从levelConfig兜底 */
             totalCritsThisRun: engine._totalCritsThisRun || 0,
             totalDodgesThisRun: engine._totalDodgesThisRun || 0,
             bossKillsThisRun: engine._bossKillsThisRun || 0,
@@ -426,6 +427,7 @@
             abyssCoins: engine._abyssCoins || 0,
             abyssUnlockedCombos: engine._abyssUnlockedCombos || [],
             abyssActiveCombo: engine._abyssActiveCombo || null,
+            abyssComboActivated: engine._abyssComboActivated || false, /* R228-P1: 保存深渊combo激活标志，防止断点续玩后combo永久无法再次激活 */
             handTiles: (engine._handTiles && engine._handTiles.length > 0) ? engine._handTiles.slice() : [],
             formedMelds: (engine._formedMelds && Object.keys(engine._formedMelds).length > 0) ? engine._formedMelds : {},
             jokersDropped: engine._jokersDropped || 0,
@@ -476,6 +478,7 @@
         engine._abyssCoins = _posOrZero(data.abyssCoins, 0);
         engine._abyssUnlockedCombos = data.abyssUnlockedCombos || [];
         engine._abyssActiveCombo = data.abyssActiveCombo || null;
+        engine._abyssComboActivated = data.abyssComboActivated || false; /* R228-P1: 恢复深渊combo激活标志 */
         engine._gambleActive = data.gambleActive || false;
         engine._gambleType = data.gambleType || null;
         engine._gambleStaked = _posOrZero(data.gambleStaked, 0);
@@ -501,10 +504,12 @@
         engine._huLock = !!data.huLock;
         var levelId = data.levelId || 'level_1';
         engine._currentLevelId = levelId;
-        engine._totalWaves = data.totalWaves || (window.levelConfig[levelId] && window.levelConfig[levelId].maxWaves) || 5; /* R226-P0: 恢复波次总数，防止结算界面显示错误分母 */
+        engine._totalWaves = data.totalWaves != null ? data.totalWaves : ((window.levelConfig[levelId] && window.levelConfig[levelId].maxWaves) || 5); /* R226-P0: 恢复波次总数，防止结算界面显示错误分母 — R228-P0: 优先使用快照值而非levelConfig兜底 */
         var levelCfg = window.levelConfig[levelId];
         if (levelCfg) { engine._mapW = levelCfg.mapW; engine._mapH = levelCfg.mapH; }
         /* R164-P0: reset engine fields not covered by snapshot to prevent stale state on resume */
+        /* R228-P0: 恢复时调用_endOverdrive，防止断点续玩残留过drive期间武器伤害倍增和敌人冻结状态 */
+        if (engine._overdriveActive) engine._endOverdrive();
         engine._overdriveActive = false;
         engine._overdriveTimer = 0;
         engine._totems = [];

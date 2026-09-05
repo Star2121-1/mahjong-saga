@@ -129,18 +129,6 @@
     100% { filter: drop-shadow(0 0 12px currentColor) brightness(1); }
 }
 
-/* 玩家受击震颤 */
-#player.hit-shake {
-    animation: playerHitShake 0.15s ease-out;
-}
-@keyframes playerHitShake {
-    0% { transform: translate(-50%, -50%) translate(0, 0); }
-    25% { transform: translate(-50%, -50%) translate(-4px, 2px); }
-    50% { transform: translate(-50%, -50%) translate(3px, -3px); }
-    75% { transform: translate(-50%, -50%) translate(-2px, 1px); }
-    100% { transform: translate(-50%, -50%) translate(0, 0); }
-}
-
 /* 英雄移动轨迹拖尾 (Visual Enhancement D) */
 .player-trail {
     position: absolute;

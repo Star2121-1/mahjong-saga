@@ -532,16 +532,30 @@ Gp._settleRun = async function(tokens) {
         }
     }
 
+    /* Epoch 18: 每周超级挑战 — 提前到胜利路径之前，确保胜利/失败都使用同一份数据 */
+    var weeklyCompleted = [];
+    try {
+        var weeklyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: _goldSaved, hitsTaken: this._playerHitCountThisRun || 0, bossKills: this._bossKillsThisRun || 0, abyssDepth: this.loopCount || 0, dodges: this._totalDodgesThisRun || 0, crits: this._totalCritsThisRun || 0, won: this._won, wins: (this._won ? 1 : 0) };
+        if (typeof window.saveManager.checkWeeklyCompletion === 'function') {
+            var wc = window.saveManager.checkWeeklyCompletion(weeklyStats);
+            weeklyCompleted = wc.completed || [];
+            if (wc.completed && wc.completed.length > 0) {
+                meta.metaTokens = (meta.metaTokens || 0) + wc.bonusTokens;
+                meta.bossCores = (meta.bossCores || 0) + wc.bonusCores;
+                this._spawnCausalityText('🏆 周常完成: ' + wc.completed.length + ' 项');
+            }
+        }
+    } catch(e) { window.toastSystem && window.toastSystem.error('结算错误: ' + e.message); }
     /* ── Epoch 15/23: 战局历史记录 ── */
     var pR3 = this.player && this.player.relicLevels || {};
     var uniqueRelics = Object.keys(pR3).filter(function(k) { return (pR3[k] || 0) > 0; }).length;
-    var _wc = [];
     try {
         if (typeof window.saveManager.recordRunHistory === 'function') {
             window.saveManager.recordRunHistory(
                 this.player.heroId, this._currentLevelId, this.kills, this._elapsed,
-                this._won, this.loopCount || 0, uniqueRelics, _wc
+                this._won, this.loopCount || 0, uniqueRelics, weeklyCompleted
             ); /* R144-P1: 使用_won标志替代!gameOver — gameOver在结算时已置true，导致胜利也被记为败北 */
+            /* R228-P1: 使用weeklyCompleted替代空数组，确保胜利路径也记录周常完成 */
         }
     } catch(e) { window.toastSystem && window.toastSystem.error('战局记录失败: ' + e.message); }
 
@@ -705,20 +719,7 @@ Gp._gameOver = async function() {
         this._spawnCausalityText(chText);
     }
 
-    /* Epoch 18: 每周超级挑战 */
-    var weeklyCompleted = [];
-    try {
-        var weeklyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: _goldSaved, hitsTaken: this._playerHitCountThisRun || 0, bossKills: this._bossKillsThisRun || 0, abyssDepth: this.loopCount || 0, dodges: this._totalDodgesThisRun || 0, crits: this._totalCritsThisRun || 0, /* R140-P0: 用_won替代!gameOver防止胜利路径误报失败 */ won: this._won, /* R221-P0: 周常type:'wins'挑战需独立wins计数，原传won(boolean)导致stats[c.type]恒为undefined */ wins: (this._won ? 1 : 0) };
-        if (typeof window.saveManager.checkWeeklyCompletion === 'function') {
-            var wc = window.saveManager.checkWeeklyCompletion(weeklyStats);
-            weeklyCompleted = wc.completed || [];
-            if (wc.completed && wc.completed.length > 0) {
-                meta.metaTokens = (meta.metaTokens || 0) + wc.bonusTokens;
-                meta.bossCores = (meta.bossCores || 0) + wc.bonusCores;
-                this._spawnCausalityText('🏆 周常完成: ' + wc.completed.length + ' 项');
-            }
-        }
-    } catch(e) { window.toastSystem && window.toastSystem.error('结算错误: ' + e.message); }
+    /* Epoch 18: 每周超级挑战 — weeklyCompleted已在胜利路径中计算，此处仅读取 */
 
     /* Epoch 31: 每日任务完成检查 */
     try {

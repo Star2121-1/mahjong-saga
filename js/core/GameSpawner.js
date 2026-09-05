@@ -156,13 +156,20 @@ Ss._spawnEnemy = function(engine, isBoss) {
     }
 
     /* R141-P1: 活跃突变属性修正对新刷敌人生效，与applyMutator对存量的处理保持一致 */
+    /* R228-P0: 为新刷敌人设置stored标志，确保_clearMutatorEffects能正确还原突变加成 */
     if (engine._activeMutator) {
         var _mut = engine._activeMutator;
         if (_mut === 'bloodmoon') {
+            enemy._bloodmoonStored = true;
+            enemy._bloodmoonOrigAtk = enemy.atk;
+            enemy._bloodmoonOrigMaxHp = enemy.maxHp;
+            enemy._bloodmoonOrigHp = enemy.hp;
             enemy.maxHp = Math.floor(enemy.maxHp * Balance.MUTATOR_BLOODMOON_HP_MULT);
             enemy.hp = enemy.maxHp;
             enemy.atk = Math.floor(enemy.atk * Balance.MUTATOR_BLOODMOON_ATK_MULT);
         } else if (_mut === 'frenzy') {
+            enemy._frenzyStored = true;
+            enemy._frenzyOrigSpeed = enemy.speed;
             enemy.speed *= Balance.MUTATOR_FRENZY_SPEED_MULT;
         }
     }
