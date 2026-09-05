@@ -124,7 +124,7 @@ Gp._loop = function(timestamp) {
             }
             /* R177-P0: 敌人间碰撞分离 — 使用Grid空间分割将O(n²)降至O(n)，防止>50敌时帧率暴跌 */
             var _epG = {};
-            var _epGS = 100; /* R230-P0: 增大碰撞网格从36→100，确保Boss_Lord(半径70)+Tanker(半径26)不会跨格漏检 */
+            var _epGS = 200; /* R237-P0: 从100增至200，确保Boss_Lord(半径84)+Boss_Lord(半径84)不会跨格漏检 */
             /* R187-P0: 每格只加入一次，避免同一敌人在多格重复计算 */
             for (var _gi = 0; _gi < this.enemies.length; _gi++) {
                 var _ge = this.enemies[_gi];

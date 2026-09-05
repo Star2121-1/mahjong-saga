@@ -305,6 +305,9 @@
         var hpGain = level * 2;
         player.maxHp += hpGain;
         player.hp += hpGain;
+        /* R237-P0: 同步更新_baseMaxHp防止levelUp时累加错误基准 */
+        player._baseMaxHp = (player._baseMaxHp || player.maxHp) + hpGain;
+        player._baseAtk = (player._baseAtk || player.atk) + level * 0.5;
     };
 
 })();

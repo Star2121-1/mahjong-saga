@@ -964,6 +964,14 @@ Gp._initJoystick = function() {
         knob.style.top = (50 + (dy / (base.offsetHeight / 2)) * 50) + '%';
         if (dist > 6) { self._joystickDX = dx / o.maxR; self._joystickDY = dy / o.maxR; }
         else { self._joystickDX = 0; self._joystickDY = 0; }
+        /* R237-P0: 触摸设备移动指引 — 将joystick方向同步到_guideMoveDirs，防止移动端无法完成第一步 */
+        if (self._guideMoveDirs && !self._guideDismissed) {
+            var _gdx = self._joystickDX, _gyd = self._joystickDY;
+            if (_gyd < -0.3) self._guideMoveDirs.w = true;
+            if (_gyd > 0.3)  self._guideMoveDirs.s = true;
+            if (_gdx < -0.3) self._guideMoveDirs.a = true;
+            if (_gdx > 0.3)  self._guideMoveDirs.d = true;
+        }
     };
 
     var resetKnob = function() {
