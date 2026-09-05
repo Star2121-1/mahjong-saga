@@ -268,7 +268,7 @@ window.Balance = {
     SHOTGUN_RADIUS: 3,
     KNIGHT_DODGE_SLAM_RADIUS: 100,
     KNIGHT_DODGE_SLAM_FORCE: 200,
-    KNIGHT_DODGE_SLAM_TIMEOUT_MS: 300,
+    KNIGHT_DODGE_SLAM_TIMEOUT_MS: 3000,
     NOVA_PULSE_MAX_RADIUS: 350,      // NovaPulse清一色最大半径(px) (Weapon.js)
     NOVA_PULSE_EXPAND_DURATION: 0.5,  // NovaPulse扩展时长(s) (Weapon.js)
     NOVA_PULSE_CD: 7.0,             // 大四喜CD (Weapon.js) — GAME_BIBLE: 7.0s
