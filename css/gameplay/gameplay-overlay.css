@@ -582,7 +582,7 @@
     padding: calc(20 * var(--_fs) * 1px); z-index: 1050; min-width: calc(320 * var(--_fs) * 1px); max-width: calc(480 * var(--_fs) * 1px);
     box-shadow: 0 0 calc(40 * var(--_fs) * 1px) rgba(156,39,176,0.5);
     color: #e0e0e0;
-    animation: abyssShopAppear calc(0.3 / var(--_fs))s ease-out;
+    animation: abyssShopAppear calc(0.5 / var(--_fs))s ease-out;
 }
 @keyframes abyssShopAppear {
     from { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }

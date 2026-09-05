@@ -350,7 +350,8 @@
 }
 /* Whitelist HP fills so they transition smoothly even during clock freeze */
 .game-clock-frozen #player-hp-fill,
-.game-clock-frozen .enemy-hp-fill {
+.game-clock-frozen .enemy-hp-fill,
+.game-clock-frozen #boss-hp-fill {
     transition-property: width !important;
 }
 /* R116-P1: 持续状态动画在面板打开时应继续运行 */
