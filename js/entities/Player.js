@@ -461,6 +461,10 @@ class Player {
         p._skipRelicAffixes = false;
         /* 3. 按存档的 _relicAffixes 重新应用词条（不随机，保留存档数据） */
         if (!p._skipRelicAffixes) p._applyRelicAffixes();
+        /* R238-P1: 刺客速度加成必须先于速度钳制施加，否则在recalc路径绕过MAX_SPEED_BONUS_PCT上限 */
+        if (p.heroId === 'Assassin') {
+            p.speedMultiplier = (p.speedMultiplier || 1) + (Balance.HERO_ASSASSIN_SPEED_MULT - 1);
+        }
         /* R234-P0: recalcRelicStats后钳制速度，与reset()保持一致，防止多条速度词条叠加溢出 */
         p.speedMultiplier = Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, p.speedMultiplier);
         p.speed = p.baseSpeed * p.speedMultiplier;
@@ -469,11 +473,6 @@ class Player {
         if (p.heroId === 'Hero') {
             p._weaponCdReduction = Balance.HERO_ASPD_BONUS;
             p.cdFloor = Math.max(0.05, (window.heroConfig.Hero.cdFloor || Balance.DEFAULT_CD_FLOOR) * Balance.HERO_CD_FLOOR_REDUCTION);
-        }
-        /* R238-P1: 圣物重算后恢复刺客移速被动 (10% base bonus + cap) */
-        if (p.heroId === 'Assassin') {
-            p.speedMultiplier = Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, p.speedMultiplier + (Balance.HERO_ASSASSIN_SPEED_MULT - 1));
-            p.speed = p.baseSpeed * p.speedMultiplier;
         }
     }
 
