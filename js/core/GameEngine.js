@@ -35,6 +35,7 @@ window.GameEngine = function() {
     this.currentWaveSpawnedCount = 0;
     this._interWaveEvent = null;
     this._interWaveTimer = 0;
+    this._interWaveTimeout = null; /* R217-P1: 初始化波次超时令牌，防止重启路径下 clearTimeout(null) 静默失败 */
 
     /* 雀魂系统状态（HUPAI_DESIGN.md v2.0） */
     this._handTiles = [];        /* 上阵装备区：最多14张 */
