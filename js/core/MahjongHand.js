@@ -130,7 +130,7 @@
                     if (ca === 0) miss.push(a);
                     if (cb === 0) miss.push(b);
                     if (cc === 0) miss.push(c);
-                    if (miss.length === 1 && jok > 0 && (ca + cb + cc) === 2) {
+                    if (miss.length === 1 && jok > 0) {
                         pool[a] -= (ca > 0 ? 1 : 0); pool[b] -= (cb > 0 ? 1 : 0); pool[c] -= (cc > 0 ? 1 : 0);
                         t.jokers--; /* R163-P0: 同步消耗癞子，防止同一癞子被多顺子重复使用 */
                         var maxTier = Math.max(tierMult(a), tierMult(b), tierMult(c));
