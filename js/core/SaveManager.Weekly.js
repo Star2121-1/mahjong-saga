@@ -41,7 +41,7 @@
 
     SaveManager.prototype.getWeeklyVault = function() {
         var meta = this._metaCache || {};
-        return meta.weeklyVault || { active: false, challenge: null, bet: 0, completed: false, reward: null };
+        return meta.weeklyVault || { active: false, challenge: null, bet: 0, completed: false, reward: null, multiplier: 1 };
     };
 
     SaveManager.prototype.openWeeklyVault = async function(betTier) {

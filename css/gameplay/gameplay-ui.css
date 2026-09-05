@@ -422,14 +422,7 @@
     animation-play-state: running !important;
 }
 
-/* R188-P1: 成就弹出动画在时钟冻结期间也应播放（如奖励面板打开时解锁成就） */
-.game-clock-frozen .fct-achieve,
-.game-clock-frozen .fct-achieve *,
-.game-clock-frozen .fct-achieve *::before,
-.game-clock-frozen .fct-achieve *::after {
-    animation-play-state: running !important;
-}
-/* R204-P2: .achievePop 是 inline animation 名而非 class，对应的 whitelist 条目为死代码（已移除） */
+/* R218-P1: fct-achieve class从未被JS添加（成就使用inline animation achievePop），移除死代码 */
 
 /* R192-P1: 玩家武器弹道/护盾动画在时钟冻结期间也应继续播放 */
 .game-clock-frozen .tracking-blade,

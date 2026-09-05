@@ -393,7 +393,7 @@ Gp._onHandChanged = function () {
     for (var i = 0; i < melds.length; i++) {
         var m = melds[i];
         if (m.type === 'pair') continue; /* 对子只作胡牌素材，不触发 */
-        var key = m.type + ':' + m.tiles[0] + (m.tiles.length > 1 ? '+' + m.tiles[1] : '');
+        var key = m.type + ':' + m.tiles.join(','); /* R218-P0: 使用完整tiles拼接防止kong/pung key碰撞 */
         if (this._formedMelds[key]) continue;
         this._formedMelds[key] = true;
         if (typeof this._triggerMeld === 'function') this._triggerMeld(m);
