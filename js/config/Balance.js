@@ -317,6 +317,7 @@ window.Balance = {
 
     /* ── 深渊组合惩罚 ── */
     ABYSS_GRAVITY_COIN_REDUCTION: 0.5, // 深渊引力金币-50%惩罚 (Spawn.js _updateCoins)
+    GRAVITY_DRAIN_HP_PCT: 0.02,        // 引力突变每秒HP损失比例
 
     /* ── 深渊狂乱 ── */
     ABYSS_FRENZY_HEAL_PCT: 0.10,       // 深渊狂乱击杀回血比例（玩家ATK×此值）(Spawn.js _rewardKill)

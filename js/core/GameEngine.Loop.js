@@ -600,7 +600,7 @@ Gp._loop = function(timestamp) {
                 this._witherAbyssTimer = (this._witherAbyssTimer || 0) + dt;
                 if (this._witherAbyssTimer >= Balance.ABYSS_WITHER_TICK_INTERVAL) {
                     this._witherAbyssTimer = 0;
-                    var drainPct = 0.02;
+                    var drainPct = Balance.GRAVITY_DRAIN_HP_PCT; /* R233-P1: 使用Balance常量替代硬编码 */
                     var maxHp = this.player.maxHp;
                     var drainDmg = Math.floor(maxHp * drainPct);
                     if (drainDmg > 0) {
