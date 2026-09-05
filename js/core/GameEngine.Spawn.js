@@ -337,6 +337,8 @@ Gp._rewardKill = function(enemy) {
         goldAmt = Math.floor(goldAmt * this._tempGoldMult);
         this._tempGoldMult = 1;
     }
+    /* R225-P1: 狂突突变金币加成应与掉落路径一致 */
+    if (this._activeMutator === 'frenzy') goldAmt = Math.floor(goldAmt * Balance.MUTATOR_FRENZY_GOLD_MULT);
     this.player.addGold(goldAmt);
     this.player.rage = Math.min(this.player.maxRage, this.player.rage + 5 + (this._tempBerserkBonus ? 10 : 0));
     if (this._tempBerserkBonus) this._tempBerserkBonus = false;

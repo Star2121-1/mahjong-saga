@@ -299,8 +299,10 @@ Gp._loop = function(timestamp) {
                         // 注：非Boss活敌由主死亡循环正常处理，此处仅清理掉落物和状态
                         /* R199-P0: Boss死亡时归还未拾取金币，防止丢失 */
                         /* R207-P0: 单次遍历同时处理加钱和DOM移除，防止addGold触发事件后_activeCoins未清空导致死循环 */
+                        /* R225-P1: Boss死亡金币转化也应受_tempGoldMult加成，与正常拾取路径一致 */
+                        var _bossLordGoldMult = this._tempGoldMult || 1;
                         for (var _lci = this._activeCoins.length - 1; _lci >= 0; _lci--) {
-                            this.player.addGold(1);
+                            this.player.addGold(_bossLordGoldMult > 1 ? Math.ceil(_bossLordGoldMult) : 1);
                             this._activeCoins[_lci].el.remove();
                         }
                         this._activeCoins = [];
