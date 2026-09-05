@@ -143,7 +143,7 @@ window.OrbitShield = class extends window.Weapon {
         super('OrbitShield', '\u73af\u5f62\u62a4\u4f53', level || 1, 0.3, Balance.ORBIT_SHIELD_CD);
         this.orbitRadius = Balance.ORBIT_SHIELD_RADIUS;
         this.orbRadius = Balance.ORBIT_ORB_RADIUS;
-        this.rotationSpeed = Balance.ORBIT_ROTATION_SPEED;
+        this.rotationSpeed = Balance.ORBIT_ROTATION_SPEED + (level || 1) * 0.2; /* R231-P1: 随等级缩放旋转速度，与其他武器保持一致 */
         this.orbAngles = [0, Math.PI * 2 / 3, Math.PI * 4 / 3];
         this.orbitEls = [];
         this.orbitTickTimers = [0, 0.165, 0.33]; /* R30-H-013: 错开3 orb冷却，轮流攻击；硬编码初始偏移，避免this.cd未初始化时为NaN */

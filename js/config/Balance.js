@@ -33,6 +33,7 @@ window.Balance = {
     WEAPON_UPGRADE_CD_MULT: 0.9,     // 武器升级 CD 倍率 (Weapon.js)
     DEFAULT_CD_FLOOR: 0.2,           // 默认 CD 下限 (Weapon.js)
     WEAPON_AMPLIFY_ATK_FACTOR_INC: 0.2,  // 役牌加算 ATK 因子增量 (Player.js)
+    ATK_FACTOR_MAX_CAP: 10.0,            // 武器atkFactor全局上限 (Player.js weapon_amplify + Weapon.js upgrade)
     WEAPON_ASPD_CAP: 3.0,            // 最大临时攻速叠加上限（防止无限加速）
     PROJECTILE_DEFAULT_LIFETIME: 3.0,// 弹道默认存活时间 (Weapon.js)
 
@@ -248,14 +249,14 @@ window.Balance = {
     ORBIT_ROTATION_SPEED: 2.0,
     SHOTGUN_SPREAD_COUNT: 5,
     SHOTGUN_SPREAD_ANGLE: 0.3,
-    GROUND_SLAMMER_WAVE_DURATION: 0.2,
+    GROUND_SLAMMER_WAVE_DURATION: 2.0, /* R231-P0: 扩大震波持续时间从0.2s→2s，确保视觉效果和伤害窗口匹配 */
     GROUND_SLAMMER_MIN_RADIUS: 10,
     GROUND_SLAMMER_RADIUS_GROWTH: 70,
     GROUND_SLAMMER_KNOCKBACK_FORCE: 200,
     KNOCKBACK_DECAY_RATE: 200,     // 击退速度衰减速率 px/s (Enemy.js)
     LASER_BEAM_LENGTH: 300,
     LASER_BEAM_MAX_HITS: 1,
-    LASER_HIT_RADIUS: 4,
+    LASER_HIT_RADIUS: 30, /* R231-P1: 增大激光命中半径从4→30，使LaserBeam实际可用 */
     TRACKING_BLADE_PROJ_LIFE: 2.0,
     TRACKING_BLADE_CD: 0.8, /* GAME_BIBLE: TrackingBlade CD=0.8s | R152-P1: 修正从0.5→0.8对齐设计文档 */
     ORBIT_SHIELD_CD: 0.5,   // 环形护体CD (Weapon.js)

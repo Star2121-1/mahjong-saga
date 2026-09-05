@@ -414,9 +414,9 @@ class Player {
                 if (eng && eng._activeWeapons) {
                     for (var _wi = 0; _wi < eng._activeWeapons.length; _wi++) {
                         var w = eng._activeWeapons[_wi];
-                        w.atkFactor += Balance.WEAPON_AMPLIFY_ATK_FACTOR_INC;
+                        w.atkFactor = Math.min(Balance.ATK_FACTOR_MAX_CAP, w.atkFactor + Balance.WEAPON_AMPLIFY_ATK_FACTOR_INC);
                         /* R188-P0: 同步更新_odOrigAtk防止overdrive结束后恢复错误值 */
-                        if (w._odOrigAtk !== undefined) w._odOrigAtk += Balance.WEAPON_AMPLIFY_ATK_FACTOR_INC;
+                        if (w._odOrigAtk !== undefined) w._odOrigAtk = Math.min(Balance.ATK_FACTOR_MAX_CAP, w._odOrigAtk + Balance.WEAPON_AMPLIFY_ATK_FACTOR_INC);
                         /* R199-P0: weapon_amplify应乘到_origBaseCd而非_baseCd，避免与_render cdReduction双重压缩 */
                         var _ampFloor = this.cdFloor || Balance.DEFAULT_CD_FLOOR;
                         w._origBaseCd = Math.max(_ampFloor, (w._origBaseCd || w.cd) * Balance.WEAPON_UPGRADE_CD_MULT);

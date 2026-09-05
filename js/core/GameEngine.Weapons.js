@@ -117,6 +117,7 @@ Gp._addWeapon = function(weaponId) {
     this._activeWeapons.push(w);
     this._syncWeaponSlots();
     this._renderWeaponSlots();
+    this._syncWeaponSlotBar(); /* R231-P1: 确保新增武器槽CD显示即时更新 */
     /* 武器协同检测 */
     this._checkWeaponSynergies();
     return w;
@@ -132,6 +133,7 @@ Gp._replaceWeapon = function(oldIndex, newWeaponId) {
     this._activeWeapons[oldIndex] = w;
     this._syncWeaponSlots();
     this._renderWeaponSlots();
+    this._syncWeaponSlotBar(); /* R231-P1: 确保替换武器槽CD显示即时更新 */
     /* 武器协同检测 */
     this._checkWeaponSynergies();
     return w;

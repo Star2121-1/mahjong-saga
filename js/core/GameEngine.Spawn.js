@@ -569,7 +569,7 @@ Gp._applyRunBonus = function (suit, tierMult) {
             var newReduction = Math.min(B.HUPAI_RUN_TONG_CD_CAP, w._tongCdReduction + red);
             var deltaRed = newReduction - w._tongCdReduction;
             w._tongCdReduction = newReduction;
-            w._baseCd = Math.max(floor, w._baseCd * (1 - deltaRed));
+            w._baseCd = Math.max(floor, w._origBaseCd * (1 - newReduction)); /* R231-P1: 从_origBaseCd计算避免多次筒顺叠加时_compound压缩 */
             w.cd = w._baseCd;
             /* R138-P0: 保持_origBaseCd不变，使Render.js cdReduction逻辑能正确以_baseCd为基准计算，
                避免筒顺减CD与_hero_weaponCdReduction双重压缩导致实际CD比预期更低 */
