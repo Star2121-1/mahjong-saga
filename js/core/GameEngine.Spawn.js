@@ -800,6 +800,10 @@ if (window.saveManager) {
         snap.formedMelds = engine._formedMelds || {};
         snap.jokersDropped = engine._jokersDropped || 0;
         snap.mainSuit = engine._mainSuit || 'wan';
+        /* R221-P1: 保存打牌模式/胡牌锁定状态，防止断点恢复后状态残留 */
+        snap.discardMode = engine._discardMode || false;
+        snap.discardSel = engine._discardSel !== undefined ? engine._discardSel : -1;
+        snap.huLock = engine._huLock || false;
         /* R30-H-021: 武器状态纳入断点续玩快照，恢复时由 _restoreWeapons 重建 */
         if (engine._activeWeapons && engine._activeWeapons.length > 0) {
             snap.weapons = engine._activeWeapons.map(function(w) {

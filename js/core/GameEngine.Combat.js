@@ -77,6 +77,10 @@ Gp._resumeAfterLevelUp = function() {
     this._pendingBossGamble = false;
     /* R69-P0: 清除 _pendingReward 避免波次结算状态跨升级面板残留，防止奖励面板重复弹出 */
     this._pendingReward = false;
+    /* R221-P1: 清除雀魂打牌/胡牌锁定状态，防止升级后残留锁住游戏 */
+    this._discardMode = false;
+    this._discardSel = -1;
+    this._huLock = false;
     /* M-001: 升级期间如果波次已清除，恢复以显示奖励面板 */
     if (this.enemies.length === 0 && this._activeCoins.length === 0 && this._expGems.length === 0
         && this.currentWaveSpawnedCount >= this._getWaveEnemyMax() && this._waveCount < this._getMaxWaves() - 1) {

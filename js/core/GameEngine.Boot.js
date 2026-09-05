@@ -46,6 +46,10 @@ Gp.init = async function() {
             this._formedMelds = data.formedMelds || {};
             this._jokersDropped = data.jokersDropped || 0;
             this._mainSuit = data.mainSuit || 'wan';
+            /* R221-P1: 恢复打牌模式/胡牌锁定状态，兼容旧存档（字段不存在时回退到默认值） */
+            this._discardMode = !!data.discardMode;
+            this._discardSel = (data.discardSel !== null && data.discardSel !== undefined) ? data.discardSel : -1;
+            this._huLock = !!data.huLock;
             /* P1-1 修复：断点恢复路径补齐手牌 UI 槽位与点击绑定（防打牌模式软锁） */
             this._initHandTiles();
             this._bindHandTileClicks();

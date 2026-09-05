@@ -430,6 +430,10 @@
             formedMelds: (engine._formedMelds && Object.keys(engine._formedMelds).length > 0) ? engine._formedMelds : {},
             jokersDropped: engine._jokersDropped || 0,
             mainSuit: engine._mainSuit || 'wan',
+            /* R221-P1: 保存打牌模式/胡牌锁定状态，防止断点恢复后状态残留 */
+            discardMode: engine._discardMode || false,
+            discardSel: engine._discardSel !== undefined ? engine._discardSel : -1,
+            huLock: engine._huLock || false,
             player: engine.player.snapshot()
             /* R171-P1: 保存武器状态到快照，防止断点恢复后武器重置为默认 */
             , weapons: engine._activeWeapons ? engine._activeWeapons.map(function(w) {
@@ -490,6 +494,10 @@
         engine._formedMelds = data.formedMelds || {};
         engine._jokersDropped = _posOrZero(data.jokersDropped, 0);
         engine._mainSuit = data.mainSuit || 'wan';
+        /* R221-P1: 恢复打牌模式/胡牌锁定状态 */
+        engine._discardMode = !!data.discardMode;
+        engine._discardSel = (data.discardSel !== null && data.discardSel !== undefined) ? data.discardSel : -1;
+        engine._huLock = !!data.huLock;
         var levelId = data.levelId || 'level_1';
         engine._currentLevelId = levelId;
         var levelCfg = window.levelConfig[levelId];
