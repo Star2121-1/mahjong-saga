@@ -581,6 +581,8 @@ Gp._settleRun = async function(tokens) {
 
 Gp._gameOver = async function() {
     var weeklyCompleted = []; /* R233-P0: 声明周常完成列表，防止引用_settleRun作用域变量报ReferenceError */
+    /* R233-P1: 确保每日任务状态在结算前加载，防止跨天时旧任务列表残留 */
+    if (typeof window.saveManager.getDailyQuests === 'function') window.saveManager.getDailyQuests();
     /* P1: 防御性清除 victoryOverlay，防止叠加残留 */
     if (this.victoryOverlay) this.victoryOverlay.classList.remove('active');
     /* R230-P0: 引导进行中死亡时必须关闭引导，防止覆盖层永久阻塞结算界面
@@ -756,6 +758,8 @@ Gp._gameOver = async function() {
                 meta.metaTokens = (meta.metaTokens || 0) + (dqr.bonusTokens || 0);
                 meta.bossCores = (meta.bossCores || 0) + (dqr.bonusCores || 0);
                 this._spawnCausalityText('✅ 每日任务完成: ' + dqr.ids.join(', ') + (dqr.bonusTokens ? ' +' + dqr.bonusTokens + '代币' : '') + (dqr.bonusCores ? ' +' + dqr.bonusCores + '核心' : ''));
+                /* R233-P1: 确保每日任务claimed状态在结算时同步保存，防止fire-and-forget丢失 */
+                await window.saveManager.saveMeta(window.saveManager._metaCache).catch(function(e){ console.warn('[R233-P1] daily quest meta save failed:', e); });
             }
         }
     } catch(e) { window.toastSystem && window.toastSystem.error('结算错误: ' + e.message); }
