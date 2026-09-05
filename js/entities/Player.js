@@ -445,7 +445,7 @@ class Player {
         var POOL = {
             sharp_edge: [
                 { id: 'se_pierce', name: '穿透', apply: function(p) { p.atk += 5; } },
-                { id: 'se_splash', name: '溅射', apply: function(p) { p.explosionChance = Math.min(1, (p.explosionChance || 0) + 0.15); } }
+                { id: 'se_splash', name: '溅射', apply: function(p) { p.explosionChance = Math.min(Balance.MAX_EXPLOSION_CHANCE, (p.explosionChance || 0) + 0.15); } }
             ],
             golden_finger: [
                 { id: 'gf_lifesteal', name: '吸血', apply: function(p) { p.lifestealRate = Math.min(Balance.MAX_LIFESTEAL_RATE, (p.lifestealRate || 0) + 0.1); } },
@@ -456,7 +456,7 @@ class Player {
                 { id: 'ta_crit', name: '暴击', apply: function(p) { p.critRate = Math.min(1, (p.critRate || 0) + 0.1); } }
             ],
             wind_walker: [
-                { id: 'ww_dodge', name: '闪避', apply: function(p) { p.dodgeRate = Math.min(1, (p.dodgeRate || 0) + Balance.RELIC_WW_DODGE_PER_LEVEL); } },
+                { id: 'ww_dodge', name: '闪避', apply: function(p) { p.dodgeRate = Math.min(Balance.MAX_DODGE_RATE, (p.dodgeRate || 0) + Balance.RELIC_WW_DODGE_PER_LEVEL); } },
                 { id: 'ww_speed', name: '极速', apply: function(p) { p.speedMultiplier = (p.speedMultiplier || 1) + Balance.RELIC_WW_SPEED_PER_LEVEL; p.speed = p.baseSpeed * p.speedMultiplier; } }
             ],
             vamp_ring: [
@@ -624,6 +624,10 @@ class Player {
         this._dodgeAspdTimer = 0; /* A-030: 暗影步闪避后攻速加成计时 */
         this._knightSlamCooldown = data._knightSlamCooldown || 0; /* R218-P1: 从快照恢复骑士闪避冲击波冷却计时，防止断点续玩后冷却清零 */
 
+        /* R220-P0: 恢复七对子速度/磁铁加成，防止跨局残留叠加 */
+        this._qiduiSpdBonus = 0;
+        this._qiduiMagBonus = 0;
+
         /* Epoch 23: restore 后重新应用天赋/声望/装备词缀 */
         this._skipRelicAffixes = true; /* P0: snapshot已含最终词条值，避免二次应用导致数值翻倍 */
         this._skipTalentBonus = true; /* R73-P0: 跳过天赋加成重算 — snapshot已含最终值，避免talent HP/speed/magnet暴击/减伤翻倍 */
@@ -742,12 +746,12 @@ class Player {
     _getAllRelicAffixDefs() {
         var POOL = [
             { id: 'se_pierce', apply: function(p) { p.atk += 5; } },
-            { id: 'se_splash', apply: function(p) { p.explosionChance = Math.min(1, (p.explosionChance || 0) + 0.15); } },
+            { id: 'se_splash', apply: function(p) { p.explosionChance = Math.min(Balance.MAX_EXPLOSION_CHANCE, (p.explosionChance || 0) + 0.15); } },
             { id: 'gf_lifesteal', apply: function(p) { p.lifestealRate = Math.min(Balance.MAX_LIFESTEAL_RATE, (p.lifestealRate || 0) + 0.1); } },
             { id: 'gf_thorns', apply: function(p) { p._thornsAffixBonus = (p._thornsAffixBonus || 0) + 0.1; p._recalcThornsRate(); } },
             { id: 'ta_hp', apply: function(p) { p.maxHp += 30; p.hp = Math.min(p.hp + 30, p.maxHp); } },
             { id: 'ta_crit', apply: function(p) { p.critRate = Math.min(1, (p.critRate || 0) + 0.1); } },
-            { id: 'ww_dodge', apply: function(p) { p.dodgeRate = Math.min(1, (p.dodgeRate || 0) + Balance.RELIC_WW_DODGE_PER_LEVEL); } },
+            { id: 'ww_dodge', apply: function(p) { p.dodgeRate = Math.min(Balance.MAX_DODGE_RATE, (p.dodgeRate || 0) + Balance.RELIC_WW_DODGE_PER_LEVEL); } },
             { id: 'ww_speed', apply: function(p) { p.speedMultiplier = (p.speedMultiplier || 1) + Balance.RELIC_WW_SPEED_PER_LEVEL; p.speed = p.baseSpeed * p.speedMultiplier; } },
             { id: 'vr_crit', apply: function(p) { p.critRate = Math.min(1, (p.critRate || 0) + 0.1); } },
             { id: 'vr_atk', apply: function(p) { p.atk += 5; } },

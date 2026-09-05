@@ -446,6 +446,18 @@
 .game-clock-frozen #hand-tile-bar.hu-flash * {
     animation-play-state: running !important;
 }
+/* R220-P1: hu-bang演出动画在面板冻结期间应保持播放 */
+.game-clock-frozen .hu-bang,
+.game-clock-frozen .hu-bang::before,
+.game-clock-frozen .hu-bang::after {
+    animation-play-state: running !important;
+}
+/* R220-P1: Tanker裂纹闪光在面板冻结期间应保持播放 */
+.game-clock-frozen .enemy.tile-crack,
+.game-clock-frozen .enemy.tile-crack::before,
+.game-clock-frozen .enemy.tile-crack::after {
+    animation-play-state: running !important;
+}
 
 /* ══════════════════════════════════════════════
    引导面板步骤导航 (Epoch 1)
