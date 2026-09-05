@@ -1080,6 +1080,8 @@ window.Enemy = class Enemy {
 
         /* R160-P0: 延迟扣血至所有伤害修改器（暴击/刺客/骑士连击/冰冻加成）执行完毕 */
         if (actualDmg > 0) this.hp -= actualDmg;
+        /* R233-P1: 敌人受击音频反馈 — 与Player.takeDamage保持一致 */
+        if (actualDmg > 0 && window.audioManager) window.audioManager.play('hit');
 
         /* ── FCT 喷射 ── */
         if (window.fxManager && actualDmg > 0) {
