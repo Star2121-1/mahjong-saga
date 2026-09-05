@@ -448,6 +448,8 @@ Gp._startNewRun = function(heroId, levelId) {
     this._huBangEl = null;
     /* R234-P0: 重置雨滴数组，防止旧局setTimeout与新局状态竞态 */
     this._rainDrops = [];
+    /* R234-P0: 重置手牌交付定时器，防止断点续玩后残留回调引用已删除的slot DOM */
+    this._handTileDeliverTimers = [];
     this._dayNightEl = null;
     this._zoomLevel = 1;
     if (this.battlefield) this.battlefield.classList.remove('discard-mode');

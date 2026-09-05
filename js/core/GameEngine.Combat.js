@@ -90,6 +90,8 @@ Gp._resumeAfterLevelUp = function() {
         && this._waveCount >= this._getMaxWaves() - 1 && !this._pendingBossLordSettle) {
     this._tempShield = 0;
     this._tempShieldEnd = 0;
+        /* R234-P0: 最终波次胜利前存档，防止关闭时进度丢失 */
+        this._autoSave('victory').catch(function(e) { console.warn('[Combat] final wave save failed:', e); });
         this.running = false;
         this.gameOver = true;
         this._won = true;

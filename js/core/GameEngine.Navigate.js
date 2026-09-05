@@ -13,6 +13,12 @@ Gp._goToSaveSelect = async function() {
     if (this._gambleTimeout) { clearTimeout(this._gambleTimeout); this._gambleTimeout = null; }
     if (this._interWaveTimeout) { clearTimeout(this._interWaveTimeout); this._interWaveTimeout = null; }
     if (this._qqueenShieldTimer) { clearTimeout(this._qqueenShieldTimer); this._qqueenShieldTimer = null; }
+    /* R234-P0: 清理引导/手牌相关定时器，防止导航到s2后旧实例回调访问已移除DOM */
+    if (this._highlightTimers) { this._highlightTimers.forEach(function(t) { clearTimeout(t); }); this._highlightTimers = []; }
+    if (this._guideCheckTimer) { clearInterval(this._guideCheckTimer); this._guideCheckTimer = null; }
+    if (this._guideAutoAdvanceTimer) { clearTimeout(this._guideAutoAdvanceTimer); this._guideAutoAdvanceTimer = null; }
+    if (this._completeGuideTimer) { clearTimeout(this._completeGuideTimer); this._completeGuideTimer = null; }
+    if (this._handTileDeliverTimers) { this._handTileDeliverTimers.forEach(function(t) { clearTimeout(t); }); this._handTileDeliverTimers = []; }
     this._pendingBossGamble = false; /* H-017: 离开页面时重置 Boss Gamble 状态 */
     for (var _g = 0; _g < this._expGems.length; _g++) { if (this._expGems[_g].el) this._expGems[_g].el.remove(); }
     this._expGems = [];
