@@ -8,8 +8,8 @@ window.levelConfig = {
         difficultyFactor: 1.0,
         waveEnemyMax: [20, 30, 40, 50, 1],
         /* Epoch 4: 程序化难度参数 */
-        enemyTypes: { Normal: 0.24, Tanker: 0.14, Stalker: 0.17, Archer: 0.14, Shaman: 0.09, Barrier: 0.12, Bomber: 0.10 },
-        spawnIntervalMin: 1.5,
+        enemyTypes: { Normal: 0.23, Tanker: 0.13, Stalker: 0.16, Archer: 0.13, Shaman: 0.09, Barrier: 0.12, Bomber: 0.10, Splitter: 0.04 },
+        spawnIntervalMin: 0.8,
         spawnIntervalDecay: 0.02,
         difficultyTier: 'easy'
     },
@@ -21,7 +21,7 @@ window.levelConfig = {
         maxWaves: 7,
         difficultyFactor: 1.3,
         waveEnemyMax: [25, 35, 45, 55, 65, 75, 1],
-        enemyTypes: { Normal: 0.17, Tanker: 0.15, Stalker: 0.19, Archer: 0.16, Shaman: 0.11, Barrier: 0.13, Bomber: 0.09 },
+        enemyTypes: { Normal: 0.16, Tanker: 0.14, Stalker: 0.18, Archer: 0.15, Shaman: 0.11, Barrier: 0.13, Bomber: 0.09, Splitter: 0.04 },
         spawnIntervalMin: 1.2,
         spawnIntervalDecay: 0.03,
         difficultyTier: 'medium'
@@ -34,7 +34,7 @@ window.levelConfig = {
         maxWaves: 10,
         difficultyFactor: 1.7,
         waveEnemyMax: [30, 40, 50, 60, 70, 80, 90, 100, 110, 1],
-        enemyTypes: { Normal: 0.11, Tanker: 0.15, Stalker: 0.17, Archer: 0.18, Shaman: 0.13, Barrier: 0.15, Bomber: 0.11 },
+        enemyTypes: { Normal: 0.11, Tanker: 0.14, Stalker: 0.16, Archer: 0.18, Shaman: 0.12, Barrier: 0.14, Bomber: 0.11, Splitter: 0.04 },
         spawnIntervalMin: 1.0,
         spawnIntervalDecay: 0.04,
         difficultyTier: 'hard'
@@ -48,7 +48,7 @@ window.levelConfig = {
         maxWaves: 15,
         difficultyFactor: 2.0,
         waveEnemyMax: null, /* 程序化生成 */
-        enemyTypes: { Normal: 0.08, Tanker: 0.15, Stalker: 0.15, Archer: 0.20, Shaman: 0.14, Barrier: 0.16, Bomber: 0.12 },
+        enemyTypes: { Normal: 0.08, Tanker: 0.14, Stalker: 0.14, Archer: 0.19, Shaman: 0.13, Barrier: 0.15, Bomber: 0.13, Splitter: 0.04 },
         spawnIntervalMin: 0.8,
         spawnIntervalDecay: 0.05,
         difficultyTier: 'extreme',
@@ -160,7 +160,7 @@ window.proceduralSeedGenerator = {
         }
 
         /* 根据种子调整敌人类型权重 — 钳制下限防负值破坏概率分布 */
-        var enemyTypes = { Normal: 0.08, Tanker: 0.15, Stalker: 0.15, Archer: 0.20, Shaman: 0.14, Barrier: 0.16, Bomber: 0.12 };
+        var enemyTypes = JSON.parse(JSON.stringify(base.enemyTypes));
         if (typeBias < 0.33) { enemyTypes.Stalker += 0.1; enemyTypes.Normal = Math.max(0, enemyTypes.Normal - 0.1); }
         else if (typeBias < 0.66) { enemyTypes.Shaman += 0.1; enemyTypes.Tanker = Math.max(0, enemyTypes.Tanker - 0.1); }
         else { enemyTypes.Tanker += 0.1; enemyTypes.Shaman = Math.max(0, enemyTypes.Shaman - 0.1); }

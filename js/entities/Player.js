@@ -44,6 +44,7 @@ class Player {
         this._healAmount = 0;
         this._dodgeSignal = false;
         this._dodgeAspdTimer = 0; /* A-030: 暗影步闪避后攻速加成计时 */
+        this._knightSlamCooldown = 0; /* R208-P1: 骑士闪避冲击波冷却计时 */
         this._thornsAffixBonus = 0;
         this.targetX = x;
         this.targetY = y;
@@ -158,6 +159,7 @@ class Player {
         this.y = Math.max(this.radius, Math.min(mapH - this.radius, this.y));
 
         /* A-030: 暗影步闪避后攻速加成计时 */
+        if (this._knightSlamCooldown > 0) { this._knightSlamCooldown -= dt; if (this._knightSlamCooldown < 0) this._knightSlamCooldown = 0; }
         if (this._dodgeAspdTimer > 0) {
             this._dodgeAspdTimer -= dt;
             if (this._dodgeAspdTimer < 0) this._dodgeAspdTimer = 0;
@@ -173,7 +175,8 @@ class Player {
             if (this.heroId === 'Assassin') {
                 this._dodgeAspdTimer = Balance.HERO_ASSASSIN_DODGE_ASPD_DURATION;
             }
-            if (this.heroId === 'Knight' && window.gameEngine && typeof window.gameEngine._triggerKnightDodgeSlam === 'function') {
+            if (this.heroId === 'Knight' && window.gameEngine && typeof window.gameEngine._triggerKnightDodgeSlam === 'function' && (this._knightSlamCooldown || 0) <= 0) {
+                this._knightSlamCooldown = Balance.KNIGHT_DODGE_SLAM_TIMEOUT_MS / 1000;
                 window.gameEngine._triggerKnightDodgeSlam();
             }
             /* Epoch 3: 闪避计数 */
@@ -618,6 +621,7 @@ class Player {
         this._healAmount = 0;
         this._dodgeSignal = false;
         this._dodgeAspdTimer = 0; /* A-030: 暗影步闪避后攻速加成计时 */
+        this._knightSlamCooldown = 0; /* R208-P1: 骑士闪避冲击波冷却计时 */
         /* R199-P0: _thornsAffixBonus已由line538从快照恢复，此处不应清零 — 否则断点续玩丢失gf_thorns反伤词条 */
 
         /* Epoch 23: restore 后重新应用天赋/声望/装备词缀 */
@@ -860,11 +864,13 @@ class Player {
         this._qiduiMagBonus = 0; /* R154-P1: 七对子磁铁加成跨局清零 */
         this.speedMultiplier = 1.0;
         this.speed = this.baseSpeed;
-        /* H-029: 雀灵流转 -- reset 中恢复CD缩减 */
-        if (this.heroId === 'Hero') {
-            this.cdFloor = Math.max(0.05, this.cdFloor * Balance.HERO_CD_FLOOR_REDUCTION);
-        }
+        /* H-029: 雀灵流转CD缩减已在_initFromConfig应用(line 99)，此处不再重复 */
         /* A-029: 暗影步 -- reset 中恢复速度（已在_initFromConfig应用，此处跳过避免重复叠加） */
+        /* R208-P2: Assassin +10%速度在_initFromConfig已应用，reset后重新激活 */
+        if (this.heroId === 'Assassin') {
+            this.speedMultiplier = Balance.HERO_ASSASSIN_SPEED_MULT;
+            this.speed = this.baseSpeed * this.speedMultiplier;
+        }
         this.currentLvl = 1;
         this.currentExp = 0;
         this.nextLvlExp = Balance.LEVEL_EXP_BASE;
@@ -873,6 +879,7 @@ class Player {
         this._healAmount = 0;
         this._dodgeSignal = false;
         this._dodgeAspdTimer = 0; /* A-030: 暗影步闪避后攻速加成计时 */
+        this._knightSlamCooldown = 0; /* R208-P1: 骑士闪避冲击波冷却计时 */
         this._thornsAffixBonus = 0;
         this._movingToTarget = false;
         this.weaponSlots = [];
