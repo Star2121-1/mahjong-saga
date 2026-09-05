@@ -206,7 +206,8 @@
         var consumed = extractMelds(hand);
         var jokersAfterMelds = t.jokers;
         for (var ci = 0; ci < consumed.length; ci++) {
-            if (consumed[ci].tiles.length > 3) jokersAfterMelds--;
+            /* R219-P0: 只扣除实际使用了癞子的meld，kong(4张相同)不消耗癞子 */
+            if (consumed[ci].tiles.indexOf('joker') > -1) jokersAfterMelds--;
         }
         /* 清一色：非癞子全部同花色（癞子视为该花色任意），字牌不计入花色 */
         var suitsPresent = {};
