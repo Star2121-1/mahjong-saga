@@ -639,6 +639,10 @@ window.Enemy = class Enemy {
                 this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
                 /* R187-P1: 重置辐射弹道计时器，防止转场瞬间触发弹幕 */
                 this._bossRadiationTimer = 0;
+                /* R225-P0: 重置P3召唤计数器，防止P2冻结残留的召唤计数导致P3召唤不足 */
+                this._summonCount = 0;
+                this._summonStalkers = 0;
+                this._summonTankers = 0;
                 if (this.el) this.el.classList.add('boss-enraged');
                 /* B4: 血海沸腾 — 全场红雾 12s + Boss 血渍滴落 */
                 if (engine && engine.battlefield && !engine._bossMistEl) {
