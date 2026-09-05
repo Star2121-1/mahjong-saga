@@ -218,6 +218,8 @@ Gp._enterAbyss = async function() {
     if (this._bossMistEl && this._bossMistEl.parentNode) this._bossMistEl.remove();
     this._bossMistEl = null;
     /* R230-P0: 立即更新最高深渊层数，防止死亡时丢失成就进度 */
+    /* R235-P0: loopCount++ 先于 highestEndlessLoop 保存，防止off-by-one记录错误深度 */
+    this.loopCount++;
     var _meta = window.saveManager._metaCache || {};
     if (this.loopCount > (_meta.highestEndlessLoop || 0)) {
         _meta.highestEndlessLoop = this.loopCount;
@@ -620,7 +622,7 @@ Gp._gameOver = async function() {
     var _seqGO = this._runSeq || 0; /* P0-1: 局序号令牌 */
     window.audioManager && window.audioManager.play('gameover');
     /* R132-P1: 游戏结束前主动存档，防止running=false后beforeunload跳过保存 */
-    this._autoSave('death');
+    await this._autoSave('death'); /* R235-P0: await防止clearActiveRun抢先写入导致数据丢失 */
     /* P0-1 修复: 移除恒真布尔守卫（调用方 Loop 已先行置 flags，原守卫使死亡结算永不执行） */
     this.gameOver = true;
     this.running = false;
