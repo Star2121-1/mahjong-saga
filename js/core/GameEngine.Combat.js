@@ -400,6 +400,12 @@ Gp._settleRun = async function(tokens) {
     meta.overdriveCount = (meta.overdriveCount || 0) + (this._overdriveCount || 0);
     /* R212-P1: 首次Overdrive成就 — inflight检查因缺少overdrive_1条目而静默失败，此处兜底 */
     if ((meta.overdriveCount || 0) >= 1) this._checkAchievement('overdrive_1');
+    /* R232-P1: 额外补充overdrive_10和overdrive_50的结算检查，防止跨局丢失进度 */
+    if ((meta.overdriveCount || 0) >= 10) this._checkAchievement('overdrive_10');
+    if ((meta.overdriveCount || 0) >= 50) this._checkAchievement('overdrive_50');
+    /* R232-P1: 补充crit_master和dodge_king的终局兜底检查，防止inflight失败永久丢失进度 */
+    if ((meta.totalCrits || 0) >= 100) this._checkAchievement('crit_master');
+    if ((meta.totalDodges || 0) >= 50) this._checkAchievement('dodge_king');
     meta.bossKills = (meta.bossKills || 0) + (this._bossKillsThisRun || 0);
     meta.finalBossKills = (meta.finalBossKills || 0) + (this._finalBossKillsThisRun || 0);
     meta.totalCrits = (meta.totalCrits || 0) + (this._totalCritsThisRun || 0);

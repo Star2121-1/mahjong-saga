@@ -200,7 +200,11 @@ class SaveManager {
         var equipped = this._metaCache.equipped = this._metaCache.equipped || { weapon: null, armor: null, talisman: null };
         /* R65-P0: 只更新装备槽引用，不删除背包条目 */
         equipped[slot] = instanceId;
-        return this._saveMetaToStorage(this._metaCache);
+        await this._saveMetaToStorage(this._metaCache);
+        /* R230-P1: 活跃对局中换装后同步更新套装共鸣状态 */
+        var eng = window.gameEngine;
+        if (eng && eng.player && eng.player._recalcSetResonance) eng.player._recalcSetResonance();
+        return;
     }
 
     /* R152-P0: 改为async，传入meta快照防竞态 */
@@ -208,7 +212,11 @@ class SaveManager {
         if (!this._metaCache) return { ok: false, reason: '存档未初始化' };
         var equipped = this._metaCache.equipped = this._metaCache.equipped || { weapon: null, armor: null, talisman: null };
         equipped[slot] = null;
-        return this._saveMetaToStorage(this._metaCache);
+        await this._saveMetaToStorage(this._metaCache);
+        /* R230-P1: 活跃对局中卸下装备后同步更新套装共鸣状态 */
+        var eng = window.gameEngine;
+        if (eng && eng.player && eng.player._recalcSetResonance) eng.player._recalcSetResonance();
+        return;
     }
 
     async rerollAffix(instanceId, affixIndex, cost) {

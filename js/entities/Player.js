@@ -111,7 +111,7 @@ class Player {
         this.maxHp += (tech.life_enhancement || 0) * 10;
         this.hp = this.maxHp;
         this.atk += (tech.sharpening || 0) * 2;
-        this.critRate += (tech.precision_training || 0) * 0.03;
+        this.critRate = Math.min(1, this.critRate + (tech.precision_training || 0) * 0.03); /* R232-P0: 防止tech树暴击率溢出100% */
         /* R199-P1: 更新锚点，防止临时增益过期后fallback到未包含天赋加成后的值 */
         this._baseMaxHp = this.maxHp;
         this._baseAtk = this.atk;
@@ -427,6 +427,39 @@ class Player {
                 break;
             }
         }
+    }
+
+    /* R230-P1: 圣物降级后全量重算基础属性 — addRelic是增量，无对等减量逻辑 */
+    recalcRelicStats() {
+        var p = this;
+        /* 1. 重置依赖等级的字段到英雄初始值 */
+        p.atk = p._baseAtk || (window.heroConfig[p.heroId] && window.heroConfig[p.heroId].atk) || 10;
+        p.critRate = (window.heroConfig[p.heroId] && window.heroConfig[p.heroId].critRate) || 0;
+        p.speedMultiplier = 1;
+        p.maxHp = p._baseMaxHp || (window.heroConfig[p.heroId] && window.heroConfig[p.heroId].hp) || 100;
+        p.hp = Math.min(p.hp, p.maxHp);
+        p.lifestealRate = 0;
+        p.explosionChance = 0;
+        p.freezeChance = 0;
+        p.dodgeRate = p.baseDodge || 0;
+        p.magnetRadius = p._baseMagnetRadius || Balance.MAGNET_RADIUS_DEFAULT;
+        p.hasDrone = false;
+        p.evolvedDrone = false;
+        p.evolvedArmor = false;
+        p.evolvedSpeed = false;
+        p.evolvedVamp = false;
+        p.thornsLifesteal = false;
+
+        /* 2. 遍历 relicLevels 重新应用每个等级 — 跳过词条随机，仅应用基础加成 */
+        p._skipRelicAffixes = true;
+        for (var id in p.relicLevels) {
+            var lv = p.relicLevels[id] || 0;
+            if (lv <= 0) continue;
+            for (var i = 1; i <= lv; i++) p.addRelic(id);
+        }
+        p._skipRelicAffixes = false;
+        /* 3. 按存档的 _relicAffixes 重新应用词条（不随机，保留存档数据） */
+        if (!p._skipRelicAffixes) p._applyRelicAffixes();
     }
 
     /* ── Epoch 33: 圣物随机词条 ── */

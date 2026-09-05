@@ -350,6 +350,7 @@ Gp._enterAbyss = function() {
     this._abyssComboActivated = false;
     /* R205-P0: 先更新缩放倍率再调用_origEnterAbyss，确保玩家HP/ATK使用正确的深渊层数缩放 */
     this._updateAbyssScaling();
+    this._witherAbyssTimer = 0; /* R232-P1: 重置深渊凋零计时器，防止跨轮回残留导致立即触发drain */
     _origEnterAbyss.call(this);
     this._abyssCoins = savedCoins;
     this._abyssUnlockedCombos = savedCombos;

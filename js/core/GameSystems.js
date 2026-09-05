@@ -40,6 +40,8 @@ Sys.triggerOverdrive = function(engine) {
         if (_w) _w.atkFactor = (_w._odOrigAtk || _w.atkFactor) * 2;
     }
     if (engine.container) engine.container.classList.add('overdrive-active');
+    /* R232-P1: Overdrive触发时添加震屏反馈，与其他强力技能一致 */
+    if (engine.triggerShake) engine.triggerShake(2, 400);
 
     /* Overdrive 全屏冲击波白闪 */
     var flash = document.createElement('div');

@@ -51,7 +51,7 @@ class RewardManager {
             { id: 'frost_blade', name: '冰清一刀', desc: '清一色Lv3+冰清玉洁Lv3 → 暴击伤害+50%', check: function(p) { return (p.relicLevels.sharp_edge||0)>=3 && (p.relicLevels.frost_core||0)>=3; }, reward: function(p) { p.critDamageBonus = (p.critDamageBonus||0) + 0.5; } },
             { id: 'thorn_garden', name: '花缠枝', desc: '杠上开花Lv5+自摸加番Lv3 → 反伤伤害同时触发吸血', check: function(p) { return (p.relicLevels.thorn_armor||0)>=5 && (p.relicLevels.vamp_ring||0)>=3; }, reward: function(p) { p.thornsLifesteal = true; } },
             { id: 'wind_fury', name: '四风狂飙', desc: '四风环绕Lv3+抢杠Lv2 → 移速+25%, 闪避+10%', check: function(p) { return (p.relicLevels.wind_walker||0)>=3 && (p.relicLevels.golden_finger||0)>=2; }, reward: function(p) { p.speedMultiplier = (p.speedMultiplier||1) + 0.25; p.speed = p.baseSpeed * p.speedMultiplier; p.dodgeRate = Math.min(Balance.MAX_DODGE_RATE, (p.dodgeRate||0) + 0.1); } },
-            { id: 'gravity_mastery', name: '宝牌引力', desc: '宝牌聚宝Lv3+役牌加算Lv2 → 经验吸附范围+100px, 武器冷却-15%', check: function(p) { return (p.relicLevels.gravity_core||0)>=3 && (p.relicLevels.weapon_amplify||0)>=2; }, reward: function(p) { p.magnetRadius = (p.magnetRadius||60) + 100; p._weaponCdReduction = ((p._weaponCdReduction||0) + 0.15); } }
+            { id: 'gravity_mastery', name: '宝牌引力', desc: '宝牌聚宝Lv3+役牌加算Lv2 → 经验吸附范围+100px, 武器冷却-15%', check: function(p) { return (p.relicLevels.gravity_core||0)>=3 && (p.relicLevels.weapon_amplify||0)>=2; }, reward: function(p) { p.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, (p.magnetRadius||60) + 100); /* R232-P1: 施加全局磁吸上限 */ p._weaponCdReduction = ((p._weaponCdReduction||0) + 0.15); } }
         ];
 
         this.sacrificeOptions = [
@@ -638,13 +638,8 @@ class RewardManager {
         /* 降一级 */
         p.relicLevels[bestRelic] = bestLevel - 1;
         if (p.relicLevels[bestRelic] <= 0) delete p.relicLevels[bestRelic];
-        /* R146-P0: 圣物降级后重算词条效果，防止属性残留 */
-        /* R184-P0: 修复 — 原代码 p._relicAffixes = null 导致所有词条清零（_applyRelicAffixes的null guard直接return） */
-        if (p._relicAffixes && p._relicAffixes[bestRelic]) {
-            delete p._relicAffixes[bestRelic];
-            if (Object.keys(p._relicAffixes).length === 0) p._relicAffixes = {};
-            if (!p._skipRelicAffixes) p._applyRelicAffixes();
-        }
+        /* R230-P1: 圣物降级后全量重算基础属性，防止 atk/maxHp/critRate/speedMultiplier 等残留 */
+        if (p.recalcRelicStats) p.recalcRelicStats();
         if (p.heroId === 'Mage') p._recalcThornsRate();
 
         /* 应用奖励 */

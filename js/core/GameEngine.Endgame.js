@@ -247,6 +247,9 @@ Gp.restart = function() {
     /* R30-H-017: 清理Boss Phase 3红色雾霭DOM */
     if (this._bossMistEl && this._bossMistEl.parentNode) this._bossMistEl.remove();
     this._bossMistEl = null;
+    /* R232-P0: 清理Boss砸地特效DOM，防止restart后crack/ring/flash残留世界层 */
+    var _slamEls = document.querySelectorAll('.ground-crack, .boss-slam-ring, .slam-flash');
+    for (var _si = 0; _si < _slamEls.length; _si++) { if (_slamEls[_si].parentNode) _slamEls[_si].remove(); }
     /* R30-H-023: 清理共振光环DOM防止重启泄漏 */
     if (this._flameAuraEl && this._flameAuraEl.parentNode) this._flameAuraEl.remove();
     this._flameAuraEl = null;
