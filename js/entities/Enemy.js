@@ -739,7 +739,7 @@ window.Enemy = class Enemy {
                     var pdx = player.x - this.x;
                     var pdy = player.y - this.y;
                     /* P1: Slam 伤害范围叠加玩家半径和Boss自身半径 */
-                    var slamReach = Balance.BOSS_SLAM_RANGE + this.radius + player.radius;
+                    var slamReach = Balance.BOSS_SLAM_RANGE + player.radius; /* R225-P1: boss已传送到玩家位置，不应重复叠加自身半径 */
                     if (pdx * pdx + pdy * pdy <= slamReach * slamReach) {
                         player.takeDamage(Math.floor(this._getEffectiveAtk() * Balance.BOSS_P2_SLAM_DMG_MULT), this);
                     }
