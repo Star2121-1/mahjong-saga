@@ -129,7 +129,7 @@ Gp._spawnCoinBurst = function(count) {
     if (this._combat && this._combat.spawnCoinsAt) {
         this._combat.spawnCoinsAt(this, px, py, false, 1); /* R207-P1: count应作为金币数量而非关卡等级传入 */
     }
-    if (window.fxManager) window.fxManager.spawnText(px, py, '+' + count + ' 🪙', '#ffd700', 24);
+    if (window.fxManager) window.fxManager.spawnText(px, py, '+' + count + ' 🪙', '#ffd700'); /* R222-P1: 移除未使用的duration参数 */
 };
 
 /* ══════════════════════════════════════════════
@@ -731,7 +731,7 @@ Gp._triggerKnightDodgeSlam = function() {
         }
     }
     /* FCT 飘字 */
-    if (window.fxManager) window.fxManager.spawnText(px, py - 30, '闪避震荡!', '#4caf50', 18); /* P1: 移除未使用的duration参数 */
+    if (window.fxManager) window.fxManager.spawnText(px, py - 30, '闪避震荡!', '#4caf50'); /* R222-P1: 移除未使用的duration参数 */
 };
 
 })();
