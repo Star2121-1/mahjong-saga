@@ -44,7 +44,6 @@ window.Balance = {
     HERO_ASSASSIN_DODGE_ASPD_MULT: 1.20,  // 暗影步闪避后攻速加成 (Player.js Assassin)
     HERO_ASSASSIN_DODGE_ASPD_DURATION: 5.0,  // 闪避后攻速加成持续时间 (Player.js)
     HERO_CD_FLOOR_REDUCTION: 0.90,   // 雀灵流转CD降低 (Player.js Hero)
-    EVOLVED_SPEED_PER_LEVEL: 0.12,   // 极速图腾每级移速加成 (Player.js)
     EVOLVED_DODGE_BONUS: 0.3,        // 极速图腾闪避加成 (Player.js)
     RELIC_WW_SPEED_PER_LEVEL: 0.15,  // 四风环绕Lv级移速加成 (Player.js)
     RELIC_WW_DODGE_PER_LEVEL: 0.1,   // 四风环绕Lv级闪避加成 (Player.js)
