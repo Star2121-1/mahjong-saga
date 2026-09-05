@@ -531,6 +531,10 @@ Gp._startNewRun = function(heroId, levelId) {
     /* R197-P1: 引力突变原始磁铁半径基准清零 */
     this._origMagnetRadius = null;
     this._totalCritsThisRun = 0; /* R198-P0: _startNewRun路径清零，防止断点续玩残留跨局暴击计数 */
+    /* R239-P0: 补充Boss击杀/金币计数重置，与Endgame.js restart()保持一致，防止跨局残留误报成就 */
+    this._bossKillsThisRun = 0;
+    this._finalBossKillsThisRun = 0;
+    this._maxGoldThisRun = 0;
     this.stalkersKilledInLevel2 = 0;
     this._interWaveEvent = null;
     this._interWaveTimer = 0;

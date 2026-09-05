@@ -403,7 +403,7 @@ Gp._settleRun = async function(tokens) {
     meta.totalKills = (meta.totalKills || 0) + this.kills;
     /* Epoch 3: 保存局内成就计数器到 meta */
     meta.overdriveCount = (meta.overdriveCount || 0) + (this._overdriveCount || 0);
-    /* R212-P1: 首次Overdrive成就 — inflight检查因缺少overdrive_1条目而静默失败，此处兜底 */
+    /* R212-P1: 首次Overdrive兜底 — 确保跨局meta计数达到阈值时仍能触发成就 */
     if ((meta.overdriveCount || 0) >= 1) this._checkAchievement('overdrive_1');
     /* R232-P1: 额外补充overdrive_10和overdrive_50的结算检查，防止跨局丢失进度 */
     if ((meta.overdriveCount || 0) >= 10) this._checkAchievement('overdrive_10');
