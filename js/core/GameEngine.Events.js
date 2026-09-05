@@ -322,7 +322,6 @@ Gp._showBossGamble = function() {
     this.running = false;
     this._pendingBossGamble = true;
     this._pendingReward = true; /* R216-P0: 与 mutator/reward overlay 一致，防止 tab 切换后游戏循环在面板打开时恢复 */
-    this._pendingReward = true; /* R216-P0: 防止tab切换后游戏循环在面板打开时恢复 */
 
     /* H-001: 超时机制 — 10 秒无操作自动选择 safe */
     var self = this;
