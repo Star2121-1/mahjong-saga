@@ -299,8 +299,7 @@
 @media (max-height: 480px) {
     .damage-float { font-size: calc(10 * var(--_fs) * 1px); }
 }
-/* R182-P1: 重新启用overdrive/freeze飘字类型（Enemy.js L1072-1073已使用） */
-/* R182-P1: 重新启用overdrive/freeze飘字类型（Enemy.js L1064-1065已使用） */
+/* R182-P1: 重新启用overdrive/freeze飘字类型（Enemy.js相关行已使用） */
 .fct-overdrive {
     font-size: calc(26 * var(--_fs, 1.4) * 1px);
     color: #ff6600;

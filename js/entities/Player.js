@@ -745,7 +745,7 @@ class Player {
         }
         this.baseSpeed = this.speed;
         /* 装备词条汇总上限校验 */
-        this.xpGainFactor = 1.0 + Math.min(Balance.MAX_XP_GAIN_PCT, this.xpGainFactor - 1.0);
+        this.xpGainFactor = Math.min(Balance.MAX_XP_GAIN_FACTOR, this.xpGainFactor); /* R236-P1: 与relic gc_xp上限对齐，防止equip词条覆盖relic加成 */
         this.iceDurationBonus = Math.min(Balance.MAX_FREEZE_DURATION_BONUS, this.iceDurationBonus);
         /* R164-P1: 防止_eqBaseSpeed为0时除零 — 保留速度下限防止玩家冻结 */
         this.speed = _eqBaseSpeed > 0 ? _eqBaseSpeed * Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, this.speed / _eqBaseSpeed) : (this.baseSpeed || 180);
@@ -873,7 +873,7 @@ class Player {
         }
         this.baseSpeed = this.speed;
         /* 装备词条汇总上限校验 */
-        this.xpGainFactor = 1.0 + Math.min(Balance.MAX_XP_GAIN_PCT, this.xpGainFactor - 1.0);
+        this.xpGainFactor = Math.min(Balance.MAX_XP_GAIN_FACTOR, this.xpGainFactor); /* R236-P1: 与relic gc_xp上限对齐，防止equip词条覆盖relic加成 */
         this.iceDurationBonus = Math.min(Balance.MAX_FREEZE_DURATION_BONUS, this.iceDurationBonus);
         /* R165-P0: 防止_eqBaseSpeed为0时speed归零导致玩家永久冻结 */
         this.speed = _eqBaseSpeed > 0 ? _eqBaseSpeed * Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, this.speed / _eqBaseSpeed) : ((this.baseSpeed || (window.heroConfig[this.heroId] && window.heroConfig[this.heroId].speed) || 180));

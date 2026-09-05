@@ -16,7 +16,7 @@ Gp._loop = function(timestamp) {
         this._lastTime = timestamp;
         /* R116-P0: 周期性自动存档，每30秒保存一次以防崩溃丢失进度 */
         this._saveTimer = (this._saveTimer || 0) + dt;
-        if (this._saveTimer >= Balance.AUTO_SAVE_INTERVAL && !this._pendingReward && !this._paused && !this._announcingWave && this._waveCount > 0) {
+        if (this._saveTimer >= Balance.AUTO_SAVE_INTERVAL && !this._pendingReward && !this._paused && this._waveCount > 0) { /* R236-P1: 移除_announcingWave守卫，公告期间也可安全保存 */
             this._saveTimer = 0;
             this._autoSave('tick');
         }

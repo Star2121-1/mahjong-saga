@@ -1021,7 +1021,7 @@ Gp._initJoystick = function() {
     };
     this._joystickMouseLeave = function() { if (self._joystickActive) resetKnob(); };
     document.addEventListener('touchmove', this._joystickTouchMove, { passive: false });
-    document.addEventListener('touchend', this._joystickTouchEnd);
+    document.addEventListener('touchend', this._joystickTouchEnd, { passive: false }); /* R236-P1: 与touchstart/touchmove保持一致，防止Android默认行为 */
     document.addEventListener('touchcancel', this._joystickTouchCancel);
     base.addEventListener('mouseleave', this._joystickMouseLeave);
 };
