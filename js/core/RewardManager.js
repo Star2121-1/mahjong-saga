@@ -67,9 +67,14 @@ class RewardManager {
     /* ── 波次宝箱 ── */
 
     showRewardPanel() {
-        /* R71-P2: 增加面板锁保护，防止动画中途重入导致UI闪烁 */
+        /* R240-P1: 增加overlay null守护，防止页面跳转/DOM重建后_overlay为null导致_renderCards崩溃 */
         if (this._panelLocked) return;
         this._panelLocked = true;
+        if (!this.overlay) {
+            this.overlay = document.getElementById('reward-overlay');
+            this.cardsContainer = this.overlay ? this.overlay.querySelector('.reward-cards') : null;
+        }
+        if (!this.overlay) { console.warn('[REWARD] overlay not found, retrying...'); this._panelLocked = false; return; }
         var pool = this._buildPool();
         var selected = pool.length > 0 ? this._pickFrom(pool) : [];
         this._renderCards(selected, false);

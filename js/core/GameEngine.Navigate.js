@@ -6,6 +6,8 @@ Gp._goToSaveSelect = async function() {
     this.running = false;
     this.gameOver = false;
     this._announcingWave = false; /* R128-P2: 防止导航后标志残留影响后续逻辑 */
+    /* R240-P0: 清除game-clock-frozen防止面板状态跨页面残留 */
+    if (this.container) this.container.classList.remove('game-clock-frozen');
     if (this.gameOverOverlay) this.gameOverOverlay.classList.remove('active');
     if (this.victoryOverlay) this.victoryOverlay.classList.remove('active');
     if (window.rewardManager) window.rewardManager.hidePanel();

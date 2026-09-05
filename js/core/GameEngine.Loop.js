@@ -308,7 +308,7 @@ Gp._loop = function(timestamp) {
                         this._activeCoins = [];
                         if (this.bossHpBar) this.bossHpBar.classList.remove('active');
                         if (this.bossHpFill) this.bossHpFill.style.width = '0%';
-                        if (this._expGems.length > 0) {
+                        if (this._expGems.length > 0 || (this._pendingExpGems && this._pendingExpGems.length > 0)) {
                             this._pendingBossLordSettle = true;
                         } else {
                             /* R207-P1: 胜利结算前主动存档，防止crash/tab关闭时进度丢失（与_gameOver的autoSave('death')对称） */
@@ -433,7 +433,7 @@ Gp._loop = function(timestamp) {
         this._guidePrevEnemyCount = this.enemies.length;
 
         /* ── BossLord 死亡：等待经验石吸完后再结算 ── */
-        if (this._pendingBossLordSettle && this._expGems.length === 0) {
+        if (this._pendingBossLordSettle && (this._expGems.length > 0 || (this._pendingExpGems && this._pendingExpGems.length > 0))) {
             if (this._levelUpPending) {
                 this._levelUpPending = false;
                 this._pendingBossLordSettle = false; /* R30-H-012: 防止状态标志残留 */

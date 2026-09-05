@@ -619,6 +619,9 @@ Gp._gameOver = async function() {
     /* R226-P0: 清理Boss豪赌面板防止死亡时DOM泄漏 */
     var _bgp = document.getElementById('boss-gamble-panel');
     if (_bgp && _bgp.parentNode) _bgp.remove();
+    /* R240-P0: 清理爆炸特效DOM防止死亡时残留 */
+    var _explEls = document.querySelectorAll('.explosion-effect');
+    for (var _ei = 0; _ei < _explEls.length; _ei++) { if (_explEls[_ei].parentNode) _explEls[_ei].remove(); }
     var _seqGO = this._runSeq || 0; /* P0-1: 局序号令牌 */
     window.audioManager && window.audioManager.play('gameover');
     /* R132-P1: 游戏结束前主动存档，防止running=false后beforeunload跳过保存 */
