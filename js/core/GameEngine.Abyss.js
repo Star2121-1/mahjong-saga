@@ -123,6 +123,7 @@ Gp._applyAbyssVariant = function(enemy) {
 
 Gp._showAbyssShop = function() {
     if (!this.battlefield) return;
+    this.running = false; /* R214-P1: 与 mutator panel/reward overlay 一致，暂停游戏循环 */
     this._freezeClock();
     this._abyssShopVisible = true;
 
@@ -175,6 +176,7 @@ Gp._showAbyssShop = function() {
     panel.querySelector('.abyss-shop-close').addEventListener('click', function() {
         panel.remove();
         self._abyssShopVisible = false;
+        self.running = true; /* R214-P1: 恢复游戏循环 */
         self._unfreezeClock();
         self._beginLoop();
     });
