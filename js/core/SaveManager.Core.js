@@ -437,6 +437,7 @@
             discardSel: engine._discardSel !== undefined ? engine._discardSel : -1,
             huLock: engine._huLock || false,
             bossLordSpawned: engine._bossLordSpawned || false, /* R226-P0: 保存极速通关成就关键状态，防止断点恢复后丢失 */
+            bossLordSavedPhase: (engine._bossLord && engine._bossLord._savedBossPhase !== undefined) ? engine._bossLord._savedBossPhase : null, /* R233-P0: 保存Boss冻结前相位，防止断点恢复后相位回退 */
             player: engine.player.snapshot()
             /* R171-P1: 保存武器状态到快照，防止断点恢复后武器重置为默认 */
             , weapons: engine._activeWeapons ? engine._activeWeapons.map(function(w) {
@@ -516,6 +517,10 @@
         engine._bossLord = null;
         engine._bossLordWave = false;
         engine._bossLordSpawned = data.bossLordSpawned || false; /* R226-P0: 从快照恢复极速通关成就状态 */
+        /* R233-P0: 恢复Boss冻结前相位，防止断点恢复后Boss回到Phase 1 */
+        if (engine._bossLord && data.bossLordSavedPhase !== null && data.bossLordSavedPhase !== undefined) {
+            engine._bossLord._savedBossPhase = data.bossLordSavedPhase;
+        }
         engine._monsterSurgeDoubleDrops = false;
         engine._pendingBossGamble = false;
         engine._gambleAbyssBonus = false;
