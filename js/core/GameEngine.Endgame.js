@@ -444,6 +444,10 @@ Gp.restart = function() {
     this._initJoystick();
     /* R187-P1: restart后重新注册beforeunload，防止第二次restart后自动存档失效 */
     this._initBeforeUnload();
+    /* R241-P0: restart后重新绑定阶段3事件，防止按钮监听器累积 */
+    this._bindStage3Events();
+    /* R241-P1: 重建视口resize监听，防止窗口缩放后相机追踪失效 */
+    this._initViewportResize();
 };
 
 /* ══════════════════════════════════════════════
