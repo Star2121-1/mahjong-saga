@@ -808,7 +808,7 @@ if (window.saveManager) {
         /* R30-H-021: 武器状态纳入断点续玩快照，恢复时由 _restoreWeapons 重建 */
         if (engine._activeWeapons && engine._activeWeapons.length > 0) {
             snap.weapons = engine._activeWeapons.map(function(w) {
-                return { id: w.id, level: w.level, cooldownTimer: w.cooldownTimer, baseCd: w._baseCd, origBaseCd: w._origBaseCd, rawBaseCd: w._rawBaseCd, cd: w.cd, atkFactor: w.atkFactor };
+                return { id: w.id, level: w.level, cooldownTimer: w.cooldownTimer, baseCd: w._baseCd, origBaseCd: w._origBaseCd, rawBaseCd: w._rawBaseCd, cd: w.cd, atkFactor: w.atkFactor, tongCdReduction: w._tongCdReduction || 0 }; /* R224-P0: 恢复筒顺CD减免，防止断点续玩后丢失 */
             });
         }
         return snap;
