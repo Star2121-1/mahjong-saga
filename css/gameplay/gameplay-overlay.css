@@ -8,7 +8,7 @@
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
     display: none; flex-direction: column;
     justify-content: center; align-items: center; padding: calc(20 * var(--_fs) * 1px);
-    pointer-events: auto;
+    pointer-events: auto; overflow-y: auto; /* R243-P1: 防止内容溢出视口 */
 }
 #reward-overlay.active { display: flex; }
 .reward-title {
@@ -191,7 +191,7 @@
     background: rgba(0,0,0,0.55); z-index: 1000;
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
     display: none; flex-direction: column; justify-content: center; align-items: center;
-    pointer-events: auto;
+    pointer-events: auto; overflow-y: auto; /* R243-P1: 防止内容溢出视口 */
 }
 #pause-overlay.active { display: flex; }
 .pause-panel {
@@ -264,7 +264,7 @@
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
     display: none; flex-direction: column;
     justify-content: center; align-items: center; padding: 16px;
-    pointer-events: auto;
+    pointer-events: auto; overflow-y: auto; /* R243-P1: 防止内容溢出视口 */
 }
 #guide-overlay.active { display: flex; }
 .guide-panel {
@@ -317,7 +317,7 @@
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
     z-index: 1000; display: none;
     flex-direction: column; justify-content: center; align-items: center; padding: calc(20 * var(--_fs) * 1px);
-    pointer-events: auto;
+    pointer-events: auto; overflow-y: auto; /* R243-P1: 防止内容溢出视口 */
 }
 #mutator-overlay.active { display: flex; }
 .mutator-title {
@@ -564,7 +564,7 @@
     .abyss-warning { font-size: calc(15 * var(--_fs) * 1px); }
     .abyss-btn { padding: calc(8 * var(--_fs) * 1px) calc(20 * var(--_fs) * 1px); font-size: calc(13 * var(--_fs) * 1px); }
     #reward-overlay .reward-title { font-size: calc(22 * var(--_fs) * 1px); }
-    .reward-card { width: calc(150 * var(--_fs) * 1px); padding: calc(12 * var(--_fs) * 1px) calc(10 * var(--_fs) * 1px); }
+    .reward-card-container { width: calc(150 * var(--_fs) * 1px); padding: calc(12 * var(--_fs) * 1px) calc(10 * var(--_fs) * 1px); }
     .relic-name { font-size: calc(12 * var(--_fs) * 1px); }
     .relic-stars { font-size: calc(10 * var(--_fs) * 1px); }
     .relic-desc { font-size: calc(10 * var(--_fs) * 1px); }

@@ -112,6 +112,8 @@
             }
         }
         /* 顺子：同花色三连（仅数牌），含癞子补位 */
+        /* R243-P0: 防止同一张牌被多个顺子重复消耗 — 用Set记录已使用的牌 */
+        var usedTiles = new Set();
         var suited = Object.keys(pool).filter(isSuitTile).sort();
         for (var si = 0; si < suited.length; si++) {
             var base = suited[si], suit = base.replace(/\d$/, '');
@@ -123,6 +125,7 @@
                 /* 三张齐 → 顺子 */
                 if (ca > 0 && cb > 0 && cc > 0) {
                     pool[a]--; pool[b]--; pool[c]--;
+                    usedTiles.add(a); usedTiles.add(b); usedTiles.add(c);
                     melds.push({ type: 'run', tiles: [a, b, c], tierMult: Math.max(tierMult(a), tierMult(b), tierMult(c)) });
                 } else if (jok > 0) {
                     /* 一张缺口 → 癞子补（每次消耗一个癞子） */
@@ -131,10 +134,14 @@
                     if (cb === 0) miss.push(b);
                     if (cc === 0) miss.push(c);
                     if (miss.length === 1 && jok > 0) {
-                        pool[a] -= (ca > 0 ? 1 : 0); pool[b] -= (cb > 0 ? 1 : 0); pool[c] -= (cc > 0 ? 1 : 0);
-                        t.jokers--; /* R163-P0: 同步消耗癞子，防止同一癞子被多顺子重复使用 */
-                        var maxTier = Math.max(tierMult(a), tierMult(b), tierMult(c));
-                        melds.push({ type: 'run', tiles: [a, b, c, 'joker'], tierMult: maxTier * B.HUPAI_MELD_EFFECT_MULT_JOKER });
+                        /* R243-P0: 检查缺失的牌是否已被之前的顺子消耗，防止重复使用 */
+                        if (!usedTiles.has(miss[0])) {
+                            pool[a] -= (ca > 0 ? 1 : 0); pool[b] -= (cb > 0 ? 1 : 0); pool[c] -= (cc > 0 ? 1 : 0);
+                            t.jokers--; /* R163-P0: 同步消耗癞子，防止同一癞子被多顺子重复使用 */
+                            usedTiles.add(a); usedTiles.add(b); usedTiles.add(c);
+                            var maxTier = Math.max(tierMult(a), tierMult(b), tierMult(c));
+                            melds.push({ type: 'run', tiles: [a, b, c, 'joker'], tierMult: maxTier * B.HUPAI_MELD_EFFECT_MULT_JOKER });
+                        }
                     }
                 }
             }
@@ -199,6 +206,8 @@
         }
     }
     function evaluateHuInner(hand) {
+        /* R243-P0: 输入校验 — 防止游戏结束态调用时hand为null/undefined导致崩溃 */
+        if (!hand || !Array.isArray(hand)) return null;
         var t = tally(hand);
         var effective = t.total + t.jokers;
         if (effective < B.HUPAI_HAND_MAX) return null;

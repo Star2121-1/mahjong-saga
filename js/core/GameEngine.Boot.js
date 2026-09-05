@@ -1166,8 +1166,8 @@ Gp._handleKeyNav = function(e) {
 Gp._announceToSR = function(text) {
     var el = document.getElementById('game-announcements');
     if (el) {
-        el.textContent = '';
-        setTimeout(function() { el.textContent = text; }, 50);
+        /* R243-P1: 直接设置文本，避免50ms延迟导致屏幕阅读器重复播报旧文本 */
+        el.textContent = text;
     }
 };
 
