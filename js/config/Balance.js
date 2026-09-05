@@ -166,7 +166,7 @@ window.Balance = {
     STALKER_COOLDOWN: 2.0,
 
     /* ── Shaman ── */
-    SHAMAN_RETREAT_DIST: 50,    // R177-P0: 从200降至50，确保Shaman能在攻击范围内触发撤退
+    SHAMAN_RETREAT_DIST: 30,    // R236-P0: 从50降至30，确保撤退距离<攻击范围(48px)，让Shaman可正常攻击
     SHAMAN_ADVANCE_DIST: 80,    // R177-P0: 从250降至80，确保Shaman能在攻击范围内触发前进
 
     /* ── Boss ── */

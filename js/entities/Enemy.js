@@ -442,15 +442,16 @@ window.Enemy = class Enemy {
         var dy = player.y - this.y;
         var dist = Math.sqrt(dx * dx + dy * dy);
         /* 风筝走位 [KITE_MIN, KITE_MAX] */
+        var _archerSpd = this._totemBuffed ? this.speed * Balance.TOTEM_BUFF_SPEED_MULT : this.speed;
         if (dist < B.ENEMY_ARCHER_KITE_MIN && dist > 0.01) {
-            this.x -= (dx / dist) * this.speed * dt;
-            this.y -= (dy / dist) * this.speed * dt;
+            this.x -= (dx / dist) * _archerSpd * dt;
+            this.y -= (dy / dist) * _archerSpd * dt;
             this._clampPosition(engine);
             return;
         }
         if (dist > B.ENEMY_ARCHER_KITE_MAX && dist > 0.01) {
-            this.x += (dx / dist) * this.speed * dt;
-            this.y += (dy / dist) * this.speed * dt;
+            this.x += (dx / dist) * _archerSpd * dt;
+            this.y += (dy / dist) * _archerSpd * dt;
             this._clampPosition(engine);
             return;
         }
