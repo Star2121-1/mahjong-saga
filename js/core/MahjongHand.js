@@ -204,11 +204,8 @@
         if (effective < B.HUPAI_HAND_MAX) return null;
         /* R199-P0: pre-consume jokers used by extractMelds so Pengpenghu doesn't double-count them */
         var consumed = extractMelds(hand);
-        var jokersAfterMelds = t.jokers;
-        for (var ci = 0; ci < consumed.length; ci++) {
-            /* R219-P0: 只扣除实际使用了癞子的meld，kong(4张相同)不消耗癞子 */
-            if (consumed[ci].tiles.indexOf('joker') > -1) jokersAfterMelds--;
-        }
+        var jokersConsumedByMelds = consumed.filter(function(m) { return m.tiles.indexOf('joker') > -1; }).length;
+        var jokersAfterMelds = t.jokers - jokersConsumedByMelds; /* R226-P0: 防止癞子在extractMelds消耗后仍被七对子重复计入 */
         /* 清一色：非癞子全部同花色（癞子视为该花色任意），字牌不计入花色 */
         var suitsPresent = {};
         var hasHonor = false; /* R188-P0: 追踪字牌存在性，防止字牌+单花色误判清一色 */
