@@ -55,8 +55,7 @@ Gp._resumeAfterReward = function() {
     this._clearTotems();
     this._cleanEnemyProjectiles();
 
-    /* R37-P0: 重置命中顿帧计时器，防止跨局泄漏 */
-    this._hitStopT = 0;
+    // R227-P1: 命中顿帧系统已移除，保留此处注释防止未来误用
 
     /* ── 检测 Boss Lord 波次 ── */
     this._bossLordWave = (this._waveCount >= this._getMaxWaves() - 1);

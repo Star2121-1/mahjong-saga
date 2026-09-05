@@ -65,8 +65,7 @@ Gp._onClick = function(e) {
 
     if (isCrit) {
         this.triggerShake(2, 300);
-        /* C2: 命中停顿 — 暴击顿帧，世界短暂减速 */
-        this._hitStopT = 0.06;
+        /* R227-P1: C2命中顿帧系统已移除（Loop.js死代码），仅保留震动效果 */
     }
 
     if (p.lifestealRate > 0) {
