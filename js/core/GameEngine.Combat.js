@@ -569,6 +569,10 @@ Gp._settleRun = async function(tokens) {
 Gp._gameOver = async function() {
     /* P1: 防御性清除 victoryOverlay，防止叠加残留 */
     if (this.victoryOverlay) this.victoryOverlay.classList.remove('active');
+    /* R230-P0: 引导进行中死亡时必须关闭引导，防止覆盖层永久阻塞结算界面 */
+    if (this.guideOverlay && this.guideOverlay.classList.contains('active')) {
+        this._completeGuide();
+    }
     /* R69-P1: 清除奖励面板防止游戏结束画面叠加 */
     if (window.rewardManager) window.rewardManager.hidePanel();
     /* R30-H-017: 清理Boss Phase 3红色雾霭 */
