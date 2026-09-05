@@ -379,8 +379,8 @@ window.Enemy = class Enemy {
                 var spd = this._totemBuffed ? this.speed * Balance.TOTEM_BUFF_SPEED_MULT : this.speed;
                 this.x += (dx / dist) * spd * dt;
                 this.y += (dy / dist) * spd * dt; /* R79-P1: advance阶段必须同步更新Y轴，与retreat块保持一致 */
-            this._clampPosition(engine);
             }
+            this._clampPosition(engine); /* R225-P1: _clampPosition应在移动后执行，不应被dist>0.01条件包裹 */
             return;
         }
 
