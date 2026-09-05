@@ -85,6 +85,8 @@ Gp._resumeAfterLevelUp = function() {
     /* R200-P0: Boss死亡期间升级 — 恢复后检查是否需结算胜利（防止波次已清除但无胜利路径的永久运行） */
     if (this.enemies.length === 0 && this._activeCoins.length === 0 && this._expGems.length === 0
         && this._waveCount >= this._getMaxWaves() - 1 && !this._pendingBossLordSettle) {
+    this._tempShield = 0;
+    this._tempShieldEnd = 0;
         this.running = false;
         this.gameOver = true;
         this._won = true;
