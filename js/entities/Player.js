@@ -505,6 +505,7 @@ class Player {
             evolvedSpeed: this.evolvedSpeed,
             evolvedVamp: this.evolvedVamp,
             thornsLifesteal: !!this.thornsLifesteal,
+            _knightSlamCooldown: this._knightSlamCooldown || 0, /* R218-P1: 骑士闪避冲击波冷却计时需跨run持久化，防止断点续玩后冷却清零 */
             invulnTimer: this.invulnTimer,
             hitFlashTimer: this.hitFlashTimer,
             currentLvl: this.currentLvl,
@@ -621,8 +622,7 @@ class Player {
         this._healAmount = 0;
         this._dodgeSignal = false;
         this._dodgeAspdTimer = 0; /* A-030: 暗影步闪避后攻速加成计时 */
-        this._knightSlamCooldown = 0; /* R208-P1: 骑士闪避冲击波冷却计时 */
-        /* R199-P0: _thornsAffixBonus已由line538从快照恢复，此处不应清零 — 否则断点续玩丢失gf_thorns反伤词条 */
+        this._knightSlamCooldown = data._knightSlamCooldown || 0; /* R218-P1: 从快照恢复骑士闪避冲击波冷却计时，防止断点续玩后冷却清零 */
 
         /* Epoch 23: restore 后重新应用天赋/声望/装备词缀 */
         this._skipRelicAffixes = true; /* P0: snapshot已含最终词条值，避免二次应用导致数值翻倍 */
