@@ -23,10 +23,7 @@ Gp._loop = function(timestamp) {
         /* R96-P1: 每帧初重置协同标志，防止跨run残留导致激光额外穿透 */
         this._synBladeLaserHit = false;
         /* C2: 命中停顿 — 顿帧期间世界时间减速至15% */
-        if (this._hitStopT > 0) {
-            this._hitStopT -= dt;
-            dt *= 0.15;
-        }
+        // R226-P0: 移除_hitStopT死代码 — 从未有设置入口，C2命中顿帧系统设计但未实现
         this._elapsed += dt;
 
         /* R171-P0: speed_demon 成就应在通关时检查，而非运行中每帧误报 — 移至_showVictory处理 */

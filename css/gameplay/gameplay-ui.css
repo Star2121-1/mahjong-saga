@@ -469,7 +469,8 @@
 .game-clock-frozen #fct-layer .fct-heal,
 .game-clock-frozen #fct-layer .fct-exp,
 .game-clock-frozen #fct-layer .fct-overdrive,
-.game-clock-frozen #fct-layer .fct-freeze {
+.game-clock-frozen #fct-layer .fct-freeze,
+.game-clock-frozen [style*="achievePop"] {
     animation-play-state: running !important;
 }
 /* R221-P0: 冰冻敌人冰霜呼吸在面板打开时不应暂停 */

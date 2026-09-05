@@ -3,7 +3,7 @@
 window.FxManager = function() {
     this._pool = [];
     this._layer = null;
-    this._poolSize = 50;
+    this._poolSize = window.Balance.FCT_POOL_SIZE_INIT || 50; /* R226-P1: 使用Balance常量而非硬编码 */
     this._returnCount = 0; /* 健康检查计数器 */
 };
 

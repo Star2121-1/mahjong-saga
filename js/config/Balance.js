@@ -121,7 +121,7 @@ window.Balance = {
     /* ── FxManager ── */
     FCT_POOL_SIZE_INIT: 50,
     FCT_POOL_MAX_GROWTH: 200,
-    FCT_FALLBACK_TIMEOUT_MS: 5000,
+    FCT_FALLBACK_TIMEOUT_MS: 2000, /* R226-P1: 降低至2s，避免节点空闲占用池容量过久 */
     FCT_HEALTHCHECK_MODULO: 500, /* R187-P1: 从50提升到500，减少激烈战斗中的全池扫描频率 */
     FCT_STALE_NODE_TIMEOUT_MS: 5000,
 
