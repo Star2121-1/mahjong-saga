@@ -35,7 +35,7 @@ class RewardManager {
             { id: 'blade_orbit', name: '飞牌 + 三面', desc: '飞牌追踪范围扩大50%', weapons: ['TrackingBlade', 'OrbitShield'], apply: function(engine) { engine._synBladeOrbit = true; } },
             { id: 'nova_laser', name: '大四喜 + 一气', desc: 'Nova蓄力期间 LaserBeam 伤害翻倍', weapons: ['NovaPulse', 'LaserBeam'], apply: function(engine) { engine._synNovaLaser = true; } },
             { id: 'nova_shotgun', name: '大四喜 + 七对子', desc: 'Nova爆发时 ShotgunBurst 弹丸数+4', weapons: ['NovaPulse', 'ShotgunBurst'], apply: function(engine) { engine._synNovaShotgun = true; } },
-            { id: 'nova_orbit', name: '大四喜 + 三面', desc: 'Nova爆发时 OrbitShield 旋转加速+伤害翻倍', weapons: ['NovaPulse', 'OrbitShield'], apply: function(engine) { engine._synNovaOrbit = true; } }
+            { id: 'nova_orbit', name: '大四喜 + 三面', desc: 'Nova爆发时 OrbitShield 旋转加速+伤害翻倍', weapons: ['NovaPulse', 'OrbitShield'], apply: function(engine) { engine._synNovaOrbit = true; engine._novaOrbitSpeedMult = Balance.NOVA_ORBIT_SPEED_MULT; } }
         ];
 
         this.overlay = document.getElementById('reward-overlay');

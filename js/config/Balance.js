@@ -271,6 +271,7 @@ window.Balance = {
     NOVA_PULSE_EXPAND_DURATION: 0.5,  // NovaPulse扩展时长(s) (Weapon.js)
     NOVA_PULSE_CD: 7.0,             // 大四喜CD (Weapon.js) — GAME_BIBLE: 7.0s
     NOVA_PULSE_ATK_FACTOR: 5.0,      // 大四喜atkFactor (Weapon.js) — GAME_BIBLE: 5.0
+    NOVA_ORBIT_SPEED_MULT: 1.5,       // 大四喜+三面 旋转加速倍率 (Weapon.js OrbitShield)
 
     /* ── 经验石/金币 ── */
     BOSS_MIN_GEM_COUNT: 5,
