@@ -723,6 +723,7 @@ Gp._triggerHu = function (hu) {
     this._renderHandTiles();
 
     setTimeout(function () {
+        if (self.gameOver || !self.running) return; /* R226-P0: 防止restart/gameover后状态泄漏 */
         self._unfreezeClock();
         self._huLock = false;
         if (self._handTileBar) self._handTileBar.classList.remove('hu-flash');

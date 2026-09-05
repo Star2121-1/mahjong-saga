@@ -24,7 +24,7 @@ Gp._goToSaveSelect = async function() {
     this._clearMutatorEffects();
     if (this.bossHpBar) this.bossHpBar.classList.remove('active');
     /* R205-P1: 导航前确保当前局已存档，防止30s间隔内跳转丢失进度 */
-    if (window.saveManager && this._autoSave) this._autoSave('nav');
+    if (window.saveManager && this._autoSave) await this._autoSave('nav'); /* R226-P0: await防止clearActiveRun抢先写入导致数据丢失 */
     /* R137-P0: await确保存档写入完成后再跳转，防止竞态导致"继续游戏"误判 */
     if (window.saveManager) await window.saveManager.clearActiveRun();
     window.location.href = 's2_main_hub.html';

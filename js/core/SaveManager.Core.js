@@ -500,6 +500,7 @@
         engine._huLock = !!data.huLock;
         var levelId = data.levelId || 'level_1';
         engine._currentLevelId = levelId;
+        engine._totalWaves = data.totalWaves || (window.levelConfig[levelId] && window.levelConfig[levelId].maxWaves) || 5; /* R226-P0: 恢复波次总数，防止结算界面显示错误分母 */
         var levelCfg = window.levelConfig[levelId];
         if (levelCfg) { engine._mapW = levelCfg.mapW; engine._mapH = levelCfg.mapH; }
         /* R164-P0: reset engine fields not covered by snapshot to prevent stale state on resume */

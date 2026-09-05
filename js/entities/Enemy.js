@@ -684,8 +684,10 @@ window.Enemy = class Enemy {
         /* R56-P0-2: 冻结期间不应递减接触冷却，避免解冻后瞬杀 */
         if (!this.frozen) {
             this._bossContactTimer -= dt;
+            this.attackTimer -= dt; /* R226-P0: Boss攻击CD冻结期间也应暂停，防止解冻瞬发 */
+        } else {
+            this.attackTimer = 0; /* R226-P0: 冻结时清零attackTimer，确保解冻后正常CD重置 */
         }
-        this.attackTimer -= dt;
 
         /* ── Phase 1：弹幕压制（B4: 每三轮一次蓄力齐射演出） ── */
         if (this._bossPhase === 1) {

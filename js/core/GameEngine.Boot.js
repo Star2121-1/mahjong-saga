@@ -792,10 +792,11 @@ Gp._beginLoop = function() {
     requestAnimationFrame(guardedLoop);
 };
 
-Gp._autoSave = function(trigger) {
+Gp._autoSave = async function(trigger) {
     var snap = window.saveManager.snapshotForRun(this);
     /* R102-P1: await断点存档防止闪退丢失进度 */
-    window.saveManager.saveActiveRun(snap).catch(function(e) { console.warn('[AutoSave] save failed:', e); });
+    try { await window.saveManager.saveActiveRun(snap); } catch(e) { console.warn('[AutoSave] save failed:', e); }
+    return snap; /* R226-P0: 返回Promise供导航时await，防止clearActiveRun抢先写入 */
     /* Epoch 45: 存档确认 Toast */
     if (window.toastSystem) {
         var labels = { wave: '波次存档', relic: '圣物存档', victory: '结算存档', death: '死亡存档' };
