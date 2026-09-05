@@ -522,6 +522,12 @@ class Player {
             rage: this.rage,
             maxRage: this.maxRage,
             setResonanceSpeed: this.setResonanceSpeed,
+            /* R225-P1: 序列化七对子武器CD减免，防止断点续玩后丢失 */
+            weaponCdReduction: this._weaponCdReduction || 0,
+            _baseMagnetRadius: this._baseMagnetRadius || this.magnetRadius, /* R57-P1: 序列化基准磁铁半径 */
+            rage: this.rage,
+            maxRage: this.maxRage,
+            setResonanceSpeed: this.setResonanceSpeed,
             setResonanceIce: this.setResonanceIce,
             damageReduction: this.damageReduction,
             _reviveCount: this._reviveCount || 0,
@@ -627,6 +633,8 @@ class Player {
         /* R220-P0: 恢复七对子速度/磁铁加成，防止跨局残留叠加 */
         this._qiduiSpdBonus = 0;
         this._qiduiMagBonus = 0;
+        /* R225-P1: 恢复七对子武器CD减免，防止断点续玩后丢失 */
+        this._weaponCdReduction = data.weaponCdReduction || 0;
 
         /* Epoch 23: restore 后重新应用天赋/声望/装备词缀 */
         this._skipRelicAffixes = true; /* P0: snapshot已含最终词条值，避免二次应用导致数值翻倍 */
