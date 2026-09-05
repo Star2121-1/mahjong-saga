@@ -1055,6 +1055,7 @@ window.Enemy = class Enemy {
                     /* R79-P2: 记录冻结前相位，解冻时恢复 */
                     if (this.type === 'Boss_Lord') this._savedBossPhase = this._bossPhase;
                     if (this.el) { this.el.classList.add('frozen-crystal'); this.el.classList.add('frozen'); }
+                    if (window.audioManager) window.audioManager.play('freeze'); /* R227-P0: 武器/Drone路径冰冻需播放音效，与onClick路径对齐 */
                 }
                 /* 吸血：onClick在外部处理，此处仅武器路径 */
                 if (!_fctTypeOverride && _pg.lifestealRate > 0) {
