@@ -863,13 +863,13 @@ Gp._autoSave = async function(trigger) {
     var snap = window.saveManager.snapshotForRun(this);
     /* R102-P1: await断点存档防止闪退丢失进度 */
     try { await window.saveManager.saveActiveRun(snap); } catch(e) { console.warn('[AutoSave] save failed:', e); }
-    return snap; /* R226-P0: 返回Promise供导航时await，防止clearActiveRun抢先写入 */
     /* Epoch 45: 存档确认 Toast */
     if (window.toastSystem) {
         var labels = { wave: '波次存档', relic: '圣物存档', victory: '结算存档', death: '死亡存档' };
         var msg = labels[trigger] || '自动存档';
         window.toastSystem.info('💾 ' + msg, 1500);
     }
+    return snap; /* R226-P0: 返回Promise供导航时await，防止clearActiveRun抢先写入 */
 };
 
 Gp._initKeyboard = function() {
