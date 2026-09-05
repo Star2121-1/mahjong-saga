@@ -682,6 +682,53 @@ Gp._unfreezeClock = function() {
     }
 };
 
+/* R231-P1: 尝试关闭任意覆盖层面板，返回true表示已关闭（不再暂停） */
+Gp._tryCloseOverlay = function() {
+    if (this._pendingReward) {
+        /* reward-levelUp 面板由 _resumeAfter* 关闭，此处无法直接处理 */
+        return false;
+    }
+    if (this._gambleActive && this._pendingBossGamble) {
+        /* gamble 超时已自动处理；手动点击已通过 button handler 关闭 */
+        return false;
+    }
+    var asp = document.getElementById('abyss-shop-panel');
+    if (asp && asp.parentNode && this._abyssShopVisible) {
+        asp.remove();
+        this._abyssShopVisible = false;
+        this.running = true;
+        this._unfreezeClock();
+        this._beginLoop();
+        return true;
+    }
+    var mo = document.getElementById('mutator-overlay');
+    if (mo && mo.classList.contains('active')) {
+        mo.classList.remove('active');
+        this._activeMutator = null;
+        this.running = true;
+        this._unfreezeClock();
+        this._beginLoop();
+        return true;
+    }
+    if (this._announcingWave && this.waveAnnounceEl && this.waveAnnounceEl.classList.contains('active')) {
+        this.waveAnnounceEl.classList.remove('active');
+        this._announcingWave = false;
+        this._startNextWave();
+        return true;
+    }
+    /* pause overlay → 直接解除暂停，无需冻结时钟 */
+    var po = document.getElementById('pause-overlay');
+    if (po && po.classList.contains('active')) {
+        po.classList.remove('active');
+        this._paused = false;
+        this.running = true;
+        this._unfreezeClock();
+        this._beginLoop();
+        return true;
+    }
+    return false;
+};
+
 /* ── 暂停系统 ── */
 
 Gp._isPauseAllowed = function() {
@@ -825,10 +872,11 @@ Gp._initKeyboard = function() {
             if (e.code === 'KeyA' || e.code === 'ArrowLeft') self._guideMoveDirs.a = true;
             if (e.code === 'KeyD' || e.code === 'ArrowRight') self._guideMoveDirs.d = true;
         }
-        /* Escape 暂停/继续，任何状态下均可触发 */
+        /* Escape 关闭覆盖层或暂停，任何状态下均可触发 */
         if (e.code === 'Escape') {
-            self._togglePause();
-            e.preventDefault(); /* P1-1: 防止浏览器后退 */
+            e.preventDefault(); /* R160-P0: 防止浏览器后退 */
+            /* R231-P1: overlay期间Escape尝试关闭面板，失败时回退到暂停 */
+            if (!self._tryCloseOverlay()) self._togglePause();
             return;
         }
         if (!self.running || self.gameOver || self._announcingWave || self._gambleActive) {
@@ -1074,7 +1122,7 @@ Gp._handleKeyNav = function(e) {
     /* Enter/Space 激活聚焦元素 */
     if (code === 'Enter' || code === 'Space') {
         var active = document.activeElement;
-        if (active && (active.tagName === 'BUTTON' || active.classList.contains('relic-btn') || active.classList.contains('mutator-btn'))) {
+        if (active && (active.tagName === 'BUTTON' || active.classList.contains('relic-btn') || active.classList.contains('mutator-btn') || active.classList.contains('gamble-btn'))) {
             e.preventDefault();
             active.click();
         }

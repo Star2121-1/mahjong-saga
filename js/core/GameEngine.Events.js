@@ -334,6 +334,7 @@ Gp._showBossGamble = function() {
             return;
         }
         self._pendingBossGamble = false;
+        self._pendingReward = false; /* R231-P0: 超时路径必须重置，防止 Loop 跳过最终Boss战 */
         self._gambleActive = false;
         self._gambleType = null;
         self._gambleStaked = 0;
@@ -418,6 +419,7 @@ Gp._resolveGambleChoice = function(choice) {
     }
     /* 生成领主（无论是否赌注） */
     this._spawnBossLordFromGamble();
+    this._pendingReward = false; /* R231-P0: 手动选择路径必须重置，防止 Loop 提前触发胜利 */
     this._unfreezeClock(); /* R119-P0: 手动选择路径必须解冻时钟，与超时路径一致 */
     this._beginLoop();
 };
