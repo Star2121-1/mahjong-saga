@@ -957,7 +957,7 @@ window.Enemy = class Enemy {
             }
             var dot = toPlayerX * Math.cos(this._barrierFacing) + toPlayerY * Math.sin(this._barrierFacing); /* R37-P0: 使用独立朝向 */
             if (dot > Balance.BARRIER_FRONT_COS_ANGLE) actualDmg = Math.floor(actualDmg * Balance.BARRIER_FRONT_DAMAGE_MULT);
-            else if (dot < -Balance.BARRIER_FRONT_COS_ANGLE) actualDmg = Math.floor(actualDmg * Balance.KNOCKBACK_DAMAGE_REDUCTION); /* P1: 背面减伤 */
+            else if (dot < -Balance.BARRIER_FRONT_COS_ANGLE) /* back hit: full damage, no reduction */;
         }
         var isAssassinCrit = false;
         if (this.frozen) {
