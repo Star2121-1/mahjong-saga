@@ -111,7 +111,7 @@ window.TrackingBlade = class extends window.Weapon {
         var speed = 300 + this.level * 20;
         /* Syn-BladeOrbit: tracking range +50% */
         if (engine && engine._synBladeOrbit) {
-            speed = Math.floor(speed * 1.5);
+            speed *= 1.5; /* R218-P1: speed恒为偶数(300+level*20)，*1.5结果必为整数，Math.floor多余 */
         }
         var atkMult = 1 + (player && player._tempAtkBoost || 0);
         var dmg = Math.floor(player.atk * this.atkFactor * atkMult);
@@ -444,10 +444,6 @@ window.NovaPulse = class extends window.Weapon {
         var atkMult = 1 + (player._tempAtkBoost || 0);
         var dmg = Math.floor(player.atk * this.atkFactor * atkMult);
         /* R188-P0: 协同标志由Render.js两阶段更新统一管理，此处移除直接设置 */
-        /* R159-P1: 仅在脉冲激活时设置标志，防止LaserBeam永久双倍伤害 */
-        if (engine && engine._synNovaLaser && this.activePulses.length > 0) {
-            /* _synNovaLaserActive已在上层phase 1中设置，此处保留注释说明协同条件 */
-        }
         for (var i = this.activePulses.length - 1; i >= 0; i--) {
             var p = this.activePulses[i];
             p.elapsed += dt;
