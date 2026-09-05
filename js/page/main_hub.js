@@ -325,7 +325,8 @@
         /* Epoch 22: 赛季触发检查 */
         if (typeof window.saveManager.checkSeasonTrigger === 'function') {
             window.saveManager.checkSeasonTrigger().then(function(res) {
-                if (res.triggered && res.ok) {
+                /* R230-P0: activateSeason 不返回 ok 字段，修复为仅检查 triggered */
+                if (res.triggered) {
                     var seasonEl = document.getElementById('season-indicator');
                     if (seasonEl) {
                         seasonEl.textContent = '🌟 新赛季激活！';

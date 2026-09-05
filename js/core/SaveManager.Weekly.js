@@ -217,9 +217,11 @@
         var today = this._todayKey();
         if (meta.dailyQuests.lastDate !== today) {
             var pool = SaveManager.DAILY_QUEST_POOL;
-            var seed = today.charCodeAt(today.length - 1) + today.charCodeAt(0);
+            /* R230-P0: 提高每日任务种子熵，避免LCG低熵导致部分天数只生成1-2个任务 */
+            var seed = 0;
+            for (var _si = 0; _si < today.length; _si++) seed = ((seed << 5) - seed + today.charCodeAt(_si)) | 0;
             var indices = []; var h = seed;
-            for (var i = 0; i < 3 && indices.length < pool.length; i++) {
+            for (var i = 0; i < Math.min(3, pool.length) && indices.length < 3; i++) {
                 h = (h * 1103515245 + 12345) & 0x7fffffff;
                 var idx = h % pool.length;
                 if (indices.indexOf(idx) === -1) indices.push(idx);
@@ -237,12 +239,15 @@
         var pool = SaveManager.DAILY_QUEST_POOL;
         var poolMap = {};
         for (var i = 0; i < pool.length; i++) poolMap[pool[i].id] = pool[i];
+        var claimed = (dq.claimed && typeof dq.claimed === 'object') ? dq.claimed : {}; /* R230-P1: 防止已领奖任务重复触发 */
         var completed = [];
         var bonusTokens = 0;
         var bonusCores = 0;
         for (var i = 0; i < dq.quests.length; i++) {
             var q = dq.quests[i];
             if (q.completed) continue;
+            /* R230-P1: 跳过已领奖的任务，防止重复产出奖励 */
+            if (claimed[q.id]) continue;
             var def = poolMap[q.id];
             if (def && def.check(stats)) {
                 dq.quests[i].completed = true;

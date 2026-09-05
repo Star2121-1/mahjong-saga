@@ -208,16 +208,16 @@
             if (!bp.claimedTiers) bp.claimedTiers = [];
             if (bp.claimedTiers.indexOf(tier) !== -1) return { ok: false, reason: '已领取' };
             bp.claimedTiers.push(tier);
-            /* 奖励 */
+            /* 奖励 — R230-P1: 先检查premium再发放，防止免费玩家白嫖 */
             var reward = BattlePassRewards[tier - 1];
             if (reward) {
-                if (reward.metaTokens) meta.metaTokens = (meta.metaTokens || 0) + reward.metaTokens;
-                if (reward.bossCores) meta.bossCores = (meta.bossCores || 0) + reward.bossCores;
                 if (reward.premium && !bp.premium) {
                     /* 免费玩家不能领Premium奖励 */
                     bp.claimedTiers.pop();
                     return { ok: false, reason: '需要购买高级通行证' };
                 }
+                if (reward.metaTokens) meta.metaTokens = (meta.metaTokens || 0) + reward.metaTokens;
+                if (reward.bossCores) meta.bossCores = (meta.bossCores || 0) + reward.bossCores;
             }
             meta.season = season;
             return self.saveMeta(meta).then(function() { return { ok: true, reward: reward }; });
