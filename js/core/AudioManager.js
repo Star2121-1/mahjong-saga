@@ -138,7 +138,7 @@ Ap.setCategoryVolume = function(category, vol) {
         if (m) {
             if (!m.audioCategoryVolumes) m.audioCategoryVolumes = {};
             m.audioCategoryVolumes[category] = this._categoryVolumes[category];
-            window.saveManager._saveMetaToStorage().catch(function(e) { console.warn('[Audio] category volume save failed:', e); });
+            window.saveManager.saveMeta(m);
         }
     } catch(e) {}
 };
@@ -256,7 +256,7 @@ Ap.setMuted = function(muted) {
     /* P1: 持久化静音状态到 meta */
     try {
         var m = window.saveManager && window.saveManager._metaCache;
-        if (m) { m.audioMuted = this._muted; window.saveManager._saveMetaToStorage().catch(function(e) { console.warn('[Audio] muted save failed:', e); }); }
+        if (m) { m.audioMuted = this._muted; window.saveManager.saveMeta(m); }
     } catch(e) {}
 };
 
@@ -276,7 +276,7 @@ Ap.setVolume = function(v) {
     /* P1: 持久化音量到 meta，刷新后恢复 */
     try {
         var m = window.saveManager && window.saveManager._metaCache;
-        if (m) { m.audioVolume = this._volume; window.saveManager._saveMetaToStorage().catch(function(e) { console.warn('[Audio] volume save failed:', e); }); }
+        if (m) { m.audioVolume = this._volume; window.saveManager.saveMeta(m); }
     } catch(e) {}
 };
 
