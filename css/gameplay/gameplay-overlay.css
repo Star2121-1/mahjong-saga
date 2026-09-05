@@ -408,12 +408,17 @@
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
     display: flex; flex-direction: column; align-items: center;
     justify-content: center; gap: 12px;
-    animation: abyssBloodPulse 2s infinite;
+    animation: abyssPanelIn 0.5s ease-out forwards, abyssBloodPulse 2s infinite;
 }
 @keyframes abyssBloodPulse {
     0% { box-shadow: inset 0 0 50px rgba(182,41,41,0.4); }
     50% { box-shadow: inset 0 0 120px rgba(182,41,41,0.8); }
     100% { box-shadow: inset 0 0 50px rgba(182,41,41,0.4); }
+}
+@keyframes abyssPanelIn {
+    0% { opacity: 0; transform: scale(0.8); }
+    60% { transform: scale(1.02); }
+    100% { opacity: 1; transform: scale(1); }
 }
 .abyss-title { font-size: calc(28 * var(--_fs) * 1px); font-weight: 900; color: #4caf50; text-shadow: 0 0 30px rgba(76,175,80,0.8); letter-spacing: 3px; }
 .abyss-label { font-size: calc(14 * var(--_fs) * 1px); color: #a8c8b8; letter-spacing: 2px; }
@@ -510,16 +515,6 @@
 }
 @keyframes gamblePanelIn {
     0% { opacity: 0; transform: scale(0.9); }
-    100% { opacity: 1; transform: scale(1); }
-}
-
-/* 深渊面板增强 */
-.abyss-panel {
-    animation: abyssPanelIn 0.5s ease-out forwards, abyssBloodPulse 2s infinite;
-}
-@keyframes abyssPanelIn {
-    0% { opacity: 0; transform: scale(0.8); }
-    60% { transform: scale(1.02); }
     100% { opacity: 1; transform: scale(1); }
 }
 

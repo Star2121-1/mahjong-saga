@@ -1039,10 +1039,12 @@ Gp._spawnAchievementText = function(text) {
     }
     var el = document.createElement('div');
     el.textContent = text;
-    el.style.cssText = 'position:absolute;top:15%;left:50%;transform:translate(-50%,-50%);font-size:28px;font-weight:900;color:#ffd700;text-shadow:0 0 24px rgba(255,215,0,0.9),0 0 48px rgba(255,215,0,0.5);z-index:210;pointer-events:none;white-space:nowrap;animation:achievePop 2.5s ease-out forwards;';
-    this.battlefield.appendChild(el);
-    var self = this;
-    setTimeout(function() { if (el.parentNode) el.remove(); }, Balance.TIMEOUT_FLICKER_REMOVE_MS);
+    if (this.battlefield) { /* R219-P1: null guard 防止 battlefield 不存在时崩溃 */
+        el.style.cssText = 'position:absolute;top:15%;left:50%;transform:translate(-50%,-50%);font-size:28px;font-weight:900;color:#ffd700;text-shadow:0 0 24px rgba(255,215,0,0.9),0 0 48px rgba(255,215,0,0.5);z-index:210;pointer-events:none;white-space:nowrap;animation:achievePop 2.5s ease-out forwards;';
+        this.battlefield.appendChild(el);
+        var self = this;
+        setTimeout(function() { if (el.parentNode) el.remove(); }, Balance.TIMEOUT_FLICKER_REMOVE_MS);
+    }
 };
 
 Gp._syncUI = function() {

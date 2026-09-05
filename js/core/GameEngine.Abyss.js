@@ -165,6 +165,10 @@ Gp._showAbyssShop = function() {
             self._abyssCoins -= displayCost;
             self._buyAbyssItem(item);
             panel.querySelector('.abyss-shop-balance').textContent = '深渊币: ' + self._abyssCoins;
+            /* R219-P0: 购买后恢复游戏循环，与关闭按钮保持一致 */
+            self.running = true;
+            self._unfreezeClock();
+            self._beginLoop();
             /* 更新按钮状态 */
             panel.querySelectorAll('.abyss-shop-btn').forEach(function(b, i) {
                 var ic = Math.floor(items[i].cost * Balance.ABYSS_SHOP_PRICE_MULT);
