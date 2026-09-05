@@ -712,7 +712,7 @@ Gp._triggerHu = function (hu) {
     } catch (e) { console.warn('hu buff error:', e); }
 
     if (this.triggerShake) this.triggerShake(3, 500);
-    if (window.audioManager) window.audioManager.play('overdrive');
+    if (window.audioManager) window.audioManager.play('reward'); /* R231-P1: 胡牌音效应使用reward而非overdrive */
     if (window.toastSystem) window.toastSystem.success('—— ' + name + ' ——');
 
     /* 清手牌重开一轮收集 */

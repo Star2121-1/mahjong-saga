@@ -238,11 +238,11 @@ Gp._cacheStage3DOM = function() {
 };
 
 Gp._bindStage3Events = function() {
-    if (this.restartBtn) { var s = this; this.restartBtn.addEventListener('click', function() { s.restart(); }); }
-    if (this.victoryRestartBtn) { var s = this; this.victoryRestartBtn.addEventListener('click', function() { s.restart(); }); }
-    if (this.victoryContinueBtn) { var s = this; this.victoryContinueBtn.addEventListener('click', function() { s._continueChallenge(); }); }
-    if (this.victoryHubBtn) { var s = this; this.victoryHubBtn.addEventListener('click', function() { s._goToSaveSelect(); }); }
-    if (this.hubBtn) { var s = this; this.hubBtn.addEventListener('click', function() { s._goToSaveSelect(); }); }
+    if (this.restartBtn) { var s = this; this.restartBtn.addEventListener('click', function() { window.audioManager && window.audioManager.play('reward'); s.restart(); }); }
+    if (this.victoryRestartBtn) { var s = this; this.victoryRestartBtn.addEventListener('click', function() { window.audioManager && window.audioManager.play('reward'); s.restart(); }); }
+    if (this.victoryContinueBtn) { var s = this; this.victoryContinueBtn.addEventListener('click', function() { window.audioManager && window.audioManager.play('reward'); s._continueChallenge(); }); }
+    if (this.victoryHubBtn) { var s = this; this.victoryHubBtn.addEventListener('click', function() { window.audioManager && window.audioManager.play('reward'); s._goToSaveSelect(); }); }
+    if (this.hubBtn) { var s = this; this.hubBtn.addEventListener('click', function() { window.audioManager && window.audioManager.play('reward'); s._goToSaveSelect(); }); }
     if (this._pauseBtn) { var s = this; this._pauseBtn.addEventListener('click', function() { s._togglePause(); }); }
     if (this.pauseOverlay) {
         var s = this;
@@ -520,6 +520,8 @@ Gp._startNewRun = function(heroId, levelId) {
     this._cleanEnemyProjectiles();
     this._bossLord = null;
     this._bossLordWave = false;
+    this._announcingWave = false; /* R231-P1: 重置波次公告标志，防止_startNewRun路径残留导致新游戏永久冻结 */
+    this._skillGlowEls = null; /* R231-P1: 清理技能光效引用，防止跨局DOM泄漏 */
     this._bossLordSpawned = false;
     /* R116-P1: 防止Boss死亡等待结算期间死亡导致新游戏误触发 */
     this._pendingBossLordSettle = false;

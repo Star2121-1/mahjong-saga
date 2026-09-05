@@ -154,7 +154,7 @@ Gp._showAbyssShop = function() {
         '<div class="abyss-shop-grid">' + cardsHtml + '</div>' +
         '<button class="abyss-shop-close">离开</button>';
 
-    this.battlefield.appendChild(panel);
+    document.body.appendChild(panel); /* R231-P1: 深渊商店面板追加到body，避免transform:scale导致position:fixed失效 */
 
     /* R165-P0: displayCost now stored as closure variable — recompute in button handler */
     panel.querySelectorAll('.abyss-shop-btn').forEach(function(btn, idx) {

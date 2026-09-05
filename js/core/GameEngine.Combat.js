@@ -194,7 +194,7 @@ Gp._showAbyssPanel = function() {
             '<button class="abyss-btn abyss-btn-retreat">\u64a4\u9000\u5927\u672c\u8425</button>' +
             '<button class="abyss-btn abyss-btn-enter">\u8e0f\u5165\u6df1\u6e0a</button>' +
         '</div>';
-    this.battlefield.appendChild(panel);
+    document.body.appendChild(panel); /* R231-P1: 深渊面板追加到body而非battlefield，避免transform:scale导致position:fixed失效 */
     this._abyssPanelVisible = true;
 
     panel.querySelector('.abyss-btn-retreat').addEventListener('click', async function() {

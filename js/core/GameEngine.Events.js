@@ -377,7 +377,7 @@ Gp._showBossGamble = function() {
                 '<button class="gamble-btn' + (!canAbyss ? ' disabled' : '') + '" data-choice="abyss"' + (!canAbyss ? ' disabled' : '') + '>深渊试炼</button>' +
             '</div>' +
         '</div>';
-    this.battlefield.appendChild(panel);
+    document.body.appendChild(panel); /* R231-P1: Boss Gamble面板追加到body，避免transform:scale导致position:fixed失效 */
 
     var self = this;
     var btns = panel.querySelectorAll('.gamble-btn');
