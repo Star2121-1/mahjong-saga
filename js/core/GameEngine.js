@@ -117,6 +117,7 @@ window.GameEngine = function() {
     this.gameOverOverlay = null;
     this.resultTime = null;
     this.resultKills = null;
+    this.resultWave = null;
     this.restartBtn = null;
     this.victoryOverlay = null;
     this.victoryTime = null;

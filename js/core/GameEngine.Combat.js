@@ -686,6 +686,7 @@ Gp._gameOver = async function() {
     meta.totalCrits = (meta.totalCrits || 0) + (this._totalCritsThisRun || 0);
     meta.totalDodges = (meta.totalDodges || 0) + (this._totalDodgesThisRun || 0);
     meta.maxGoldThisRun = Math.max(meta.maxGoldThisRun || 0, this._maxGoldThisRun || 0);
+    var _goldSaved = this._maxGoldThisRun || 0; /* R222-P1: 保存清零前的值，后续recordRunStats和死亡补偿均依赖此值 */
     this._maxGoldThisRun = 0;
     var challengeResults = null;
     try {
@@ -705,7 +706,7 @@ Gp._gameOver = async function() {
     /* Epoch 18: 每周超级挑战 */
     var weeklyCompleted = [];
     try {
-        var weeklyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: this._maxGoldThisRun || 0, hitsTaken: this._playerHitCountThisRun || 0, bossKills: this._bossKillsThisRun || 0, abyssDepth: this.loopCount || 0, dodges: this._totalDodgesThisRun || 0, crits: this._totalCritsThisRun || 0, /* R140-P0: 用_won替代!gameOver防止胜利路径误报失败 */ won: this._won, /* R221-P0: 周常type:'wins'挑战需独立wins计数，原传won(boolean)导致stats[c.type]恒为undefined */ wins: (this._won ? 1 : 0) };
+        var weeklyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: _goldSaved, hitsTaken: this._playerHitCountThisRun || 0, bossKills: this._bossKillsThisRun || 0, abyssDepth: this.loopCount || 0, dodges: this._totalDodgesThisRun || 0, crits: this._totalCritsThisRun || 0, /* R140-P0: 用_won替代!gameOver防止胜利路径误报失败 */ won: this._won, /* R221-P0: 周常type:'wins'挑战需独立wins计数，原传won(boolean)导致stats[c.type]恒为undefined */ wins: (this._won ? 1 : 0) };
         if (typeof window.saveManager.checkWeeklyCompletion === 'function') {
             var wc = window.saveManager.checkWeeklyCompletion(weeklyStats);
             weeklyCompleted = wc.completed || [];
@@ -719,7 +720,7 @@ Gp._gameOver = async function() {
 
     /* Epoch 31: 每日任务完成检查 */
     try {
-        var dailyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: this._maxGoldThisRun || 0, hitsTaken: this._playerHitCountThisRun || 0, /* R140-P0: 用_won替代!gameOver */ won: this._won, waves: this._waveCount || 0, crits: this._totalCritsThisRun || 0, dodges: this._totalDodgesThisRun || 0, abyssDepth: this.loopCount || 0 };
+        var dailyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: _goldSaved, hitsTaken: this._playerHitCountThisRun || 0, /* R140-P0: 用_won替代!gameOver */ won: this._won, waves: this._waveCount || 0, crits: this._totalCritsThisRun || 0, dodges: this._totalDodgesThisRun || 0, abyssDepth: this.loopCount || 0 };
         if (typeof window.saveManager.checkDailyQuestCompletion === 'function') {
             var dqr = window.saveManager.checkDailyQuestCompletion(dailyStats);
             if (dqr.ids && dqr.ids.length > 0) {
@@ -735,7 +736,7 @@ Gp._gameOver = async function() {
     var uniqueRelics = Object.keys(pRelics).filter(function(k) { return (pRelics[k] || 0) > 0; }).length;
     if (typeof window.saveManager.recordRunStats === 'function') {
         window.saveManager.recordRunStats(
-            this.kills, this._elapsed, this._maxGoldThisRun || 0,
+            this.kills, this._elapsed, _goldSaved,
             this._overdriveCount || 0, this._totalDodgesThisRun || 0,
             this._totalCritsThisRun || 0, this._waveCount,
             this._bossKillsThisRun || 0, this.loopCount || 0,
@@ -745,7 +746,7 @@ Gp._gameOver = async function() {
 
     /* Epoch 31: 死亡奖励 — P1-NEW-a 修复: 移到 saveMeta 之前，否则确定性丢失 */
     try {
-        var deathReward = window.saveManager.calcDeathReward(this.kills, this._maxGoldThisRun || 0, this._elapsed);
+        var deathReward = window.saveManager.calcDeathReward(this.kills, _goldSaved, this._elapsed);
         if (deathReward.metaTokens > 0 || deathReward.bossCores > 0) {
             meta.metaTokens = (meta.metaTokens || 0) + deathReward.metaTokens;
             meta.bossCores = (meta.bossCores || 0) + deathReward.bossCores;

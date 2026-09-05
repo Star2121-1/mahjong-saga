@@ -842,7 +842,7 @@
                         affixHtml +
                         '</div>';
                     card.addEventListener('click', function() {
-                        window.saveManager.equipItem(item.instanceId);
+                        window.saveManager.equipItem(item.instanceId).catch(function(e) { console.warn('[forge] equip failed:', e); });
                         self.renderForge();
                     });
                     invEl.appendChild(card);
