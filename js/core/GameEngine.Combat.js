@@ -211,10 +211,16 @@ Gp._showAbyssPanel = function() {
     });
 };
 
-Gp._enterAbyss = function() {
+Gp._enterAbyss = async function() {
     /* R30-H-017: 清理Boss Phase 3红色雾霭 */
     if (this._bossMistEl && this._bossMistEl.parentNode) this._bossMistEl.remove();
     this._bossMistEl = null;
+    /* R230-P0: 立即更新最高深渊层数，防止死亡时丢失成就进度 */
+    var _meta = window.saveManager._metaCache || {};
+    if (this.loopCount > (_meta.highestEndlessLoop || 0)) {
+        _meta.highestEndlessLoop = this.loopCount;
+        window.saveManager.saveMeta(_meta).catch(function(e) { console.warn('[Abyss] saveMeta failed:', e); });
+    }
     var bc = document.getElementById('active-buffs-container');
     if (bc) bc.remove();
     /* R138-P0: 清一色金光环在进入深渊前重置，防止视觉残留误导 */

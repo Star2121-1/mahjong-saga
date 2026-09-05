@@ -323,6 +323,10 @@ class Player {
         }
         this.setResonanceSpeed = (affixCounts.speed_pct || 0) >= 3;
         this.setResonanceIce = (affixCounts.ice_bonus || 0) >= 3;
+        /* R230-P0: 套装共鸣激活即检查成就，无需等到胜利结算 — 防止死亡后永久错过 */
+        if (this.setResonanceSpeed && this.setResonanceIce && window.gameEngine) {
+            window.gameEngine._checkAchievement('full_set');
+        }
     }
 
     addRelic(id) {

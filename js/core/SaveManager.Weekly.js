@@ -251,6 +251,9 @@
             var def = poolMap[q.id];
             if (def && def.check(stats)) {
                 dq.quests[i].completed = true;
+                /* R230-P0: 标记为已领取，防止 checkDailyQuestCompletion 和 claimDailyQuestReward 重复发放 */
+                if (!dq.claimed) dq.claimed = {};
+                dq.claimed[q.id] = true;
                 completed.push(q.id);
                 bonusTokens += (def.reward.metaTokens || 0);
                 bonusCores += (def.reward.bossCores || 0);
