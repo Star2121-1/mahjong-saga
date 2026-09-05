@@ -339,7 +339,7 @@ window.Enemy = class Enemy {
             this._totemTimer = Balance.TOTEM_SPAWN_INTERVAL;
             if (engine) {
                 /* B3: 图腾二相化 — 风灵(增益)/北冥(减速领域)交替 */
-                this._totemKind = (this._totemKind === 'frost') ? 'wind' : 'frost';
+                this._totemKind = (this._totemKind || 'frost') === 'frost' ? 'wind' : 'frost'; /* R227-P1: 首次默认frost确保交替从减速图腾开始 */
                 var kind = this._totemKind;
                 /* Epoch 16: 图腾上限 10，防止无限增长 */
                 var existingTotems = engine._totems ? engine._totems.length : 0;
@@ -741,7 +741,7 @@ window.Enemy = class Enemy {
                     var pdx = player.x - this.x;
                     var pdy = player.y - this.y;
                     /* P1: Slam 伤害范围叠加玩家半径和Boss自身半径 */
-                    var slamReach = Balance.BOSS_SLAM_RANGE + player.radius; /* R225-P1: boss已传送到玩家位置，不应重复叠加自身半径 */
+                    var slamReach = Balance.BOSS_SLAM_RANGE; /* R227-P1: 移除player.radius，Boss已传送至玩家位置，不应再叠加 */
                     if (pdx * pdx + pdy * pdy <= slamReach * slamReach) {
                         player.takeDamage(Math.floor(this._getEffectiveAtk() * Balance.BOSS_P2_SLAM_DMG_MULT), this);
                     }
@@ -897,7 +897,7 @@ window.Enemy = class Enemy {
                 x: this.x, y: this.y,
                 vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
                 radius: 6, damage: dmg,
-                alive: true, lifeTime: 4, _hitPlayer: false, el: null,
+                alive: true, lifeTime: Balance.BOSS_RING_PROJ_LIFE, _hitPlayer: false, el: null,
                 _ownerId: this.id /* R129-P0: 防止Boss被自己的弹幕击中 */
             };
             engine._enemyProjectiles.push(p);

@@ -547,6 +547,7 @@ Gp._spawnEnemyType = function(type) {
     enemy.hp = enemy.maxHp;
     enemy.atk = Math.floor(enemy.atk * diff);
     this.enemies.push(enemy);
+    this.currentWaveSpawnedCount += 1; /* R227-P0: Boss召唤和事件生成也计入波次上限，防止无限召唤绕过计数 */
     /* R37-P0: 深渊变体 — 与 _spawnEliteEnemy 保持一致 */
     if (this._applyAbyssVariant) this._applyAbyssVariant(enemy);
     /* R204-P1: 应用活跃突变属性，与 GameSpawner._spawnEnemy 保持一致 */
