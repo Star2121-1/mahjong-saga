@@ -97,10 +97,15 @@ Ss.update = function(dt, engine) {
 Ss._selectEnemyType = function(isBoss) {
     if (isBoss) return 'Boss_Lord';
     if (!this._enemyTypeWeights) {
+        /* R230-P1: 使用Balance默认权重而非硬编码，避免分布差异 */
         var roll = Math.random();
-        if (roll < 0.25) return 'Tanker';
-        if (roll < 0.55) return 'Stalker';
-        if (roll < 0.80) return 'Shaman';
+        var w = Balance.DEFAULT_ENEMY_WEIGHTS;
+        var cumulative = 0;
+        var types = Object.keys(w);
+        for (var ti = 0; ti < types.length; ti++) {
+            cumulative += w[types[ti]];
+            if (roll < cumulative) return types[ti];
+        }
         return 'Normal';
     }
     var weights = this._enemyTypeWeights;
@@ -186,12 +191,7 @@ Ss._spawnEnemy = function(engine, isBoss) {
         var maxWaves = engine._getMaxWaves(); /* R60-P0: 使用engine方法而非this */
         if (waveIdx >= maxWaves) {
             enemy.radius = 75;
-            /* R50-Fix: 使用 Balance.BOSS_LORD_BASE_HP 替代硬编码公式 */
-            var bossLevel = level;
-            var bossHpMult = Math.pow(Balance.ENEMY_LEVEL_HP_ATK_MULT, bossLevel - 1);
-            enemy.maxHp = Math.floor(Balance.BOSS_LORD_BASE_HP * bossHpMult);
-            var _loopCount = (engine && engine.loopCount) || 0;
-            /* R160-P0: 保留深渊缩放 — 构造器已应用，此处不覆盖 */
+            /* R230-P0: 深渊缩放已在Enemy构造函数中应用，此处不再覆盖HP */
             enemy.hp = enemy.maxHp;
         }
     }
