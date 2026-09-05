@@ -52,6 +52,7 @@ window.Weapon = class {
         this._justFired = false;
         this.cooldownTimer = 0; /* R57-P1: 重置冷却计时器，防止跨局残留进度 */
         this._origBaseCd = this._rawBaseCd; /* R161-P0c: 无条件恢复构造时原始值，防止筒顺/升级路径污染 */
+        this._tongCdReduction = 0; /* R223-P1: 重置筒顺减CD，防止跨run残留 */
     }
 };
 
