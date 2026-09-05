@@ -231,7 +231,7 @@ Gp._enterAbyss = async function() {
     if (this.playerEl) this.playerEl.classList.remove('hu-qingyise');
     /* R204-P1: 重置胜利标记，防止深渊死亡被错误计入总胜场 */
     this._won = false;
-    this.loopCount++;
+    /* R235-P0: loopCount已在上面递增，移除重复的++防止深渊深度跳2层 */
     this._waveCount = 0;
     this.currentWaveSpawnedCount = 0;
     this._elapsed = 0;
