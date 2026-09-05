@@ -376,6 +376,8 @@
         /* R188-P1: 更新lastSaveTimestamp，防止存档选择器显示过期时间 */
         var meta = await this.getMeta();
         meta.lastSaveTimestamp = Date.now();
+        /* R233-P0: 确保新游戏开始时周常挑战已初始化（否则同周内可能使用过期挑战） */
+        if (typeof this.getWeeklyChallenges === 'function') this.getWeeklyChallenges();
         await this.saveMeta(meta);
     };
 
@@ -421,7 +423,7 @@
             activeMutator: engine._activeMutator || null,
             tempEnemyAtkDebuff: engine._tempEnemyAtkDebuff !== undefined ? engine._tempEnemyAtkDebuff : null,
             tempEnemySpeedDebuff: engine._tempEnemySpeedDebuff !== undefined ? engine._tempEnemySpeedDebuff : null,
-            godModeApplied: engine._godModeApplied || false,
+            godModeApplied: false, /* R233-P1: _godModeApplied是死字段——从未在引擎中读取，仅从causalityFlags派生；不序列化避免混淆 */
             bloodRageActive: engine._bloodRageActive || false,
             currentWaveSpawnedCount: engine.currentWaveSpawnedCount || 0,
             abyssCoins: engine._abyssCoins || 0,
@@ -492,7 +494,7 @@
         engine._activeMutator = data.activeMutator || null;
         engine._tempEnemyAtkDebuff = data.tempEnemyAtkDebuff !== null && data.tempEnemyAtkDebuff !== undefined ? data.tempEnemyAtkDebuff : 0;
         engine._tempEnemySpeedDebuff = data.tempEnemySpeedDebuff !== null && data.tempEnemySpeedDebuff !== undefined ? data.tempEnemySpeedDebuff : 0;
-        engine._godModeApplied = data.godModeApplied || false;
+        /* R233-P1: _godModeApplied已从snapshotForRun移除，此处不再恢复 */
         engine._bloodRageActive = data.bloodRageActive || false;
         engine.currentWaveSpawnedCount = _posOrZero(data.currentWaveSpawnedCount, 0);
         engine._handTiles = data.handTiles ? data.handTiles.slice() : [];

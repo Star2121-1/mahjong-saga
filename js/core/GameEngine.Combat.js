@@ -695,7 +695,7 @@ Gp._gameOver = async function() {
 
     if (this.resultTime) this.resultTime.textContent = this._formatTime(this._elapsed);
     if (this.resultKills) this.resultKills.textContent = this.kills;
-    if (this.resultWave) this.resultWave.textContent = (this._waveCount || 0) +' /' + (this._totalWaves || this._getMaxWaves() || 0);
+    if (this.resultWave) this.resultWave.textContent = ((this._waveCount || 0) + 1) +' /' + (this._totalWaves || this._getMaxWaves() || 0);
     if (this.gameOverOverlay) this.gameOverOverlay.classList.add('active');
     /* R115-P0: 屏幕阅读器播报失败 */
     this._announceToSR('游戏结束。击杀 ' + this.kills + ' 个敌人，存活 ' + this._formatTime(this._elapsed));

@@ -50,6 +50,8 @@ Gp.init = async function() {
             this._discardMode = !!data.discardMode;
             this._discardSel = (data.discardSel !== null && data.discardSel !== undefined) ? data.discardSel : -1;
             this._huLock = !!data.huLock;
+            /* R233-P1: 恢复后退出打牌模式，防止存档中处于打牌状态导致新游戏无法操作 */
+            if (this._discardMode) this._exitDiscardMode();
             /* P1-1 修复：断点恢复路径补齐手牌 UI 槽位与点击绑定（防打牌模式软锁） */
             this._initHandTiles();
             this._bindHandTileClicks();
@@ -357,7 +359,12 @@ Gp._initBeforeUnload = function() {
         if (self.running || (self.gameOver && (self._elapsed || 0) > 0)) {
             var snap = window.saveManager.snapshotForRun(self);
             /* R37-P2: 使用同步写入避免beforeunload异步竞态 */
-            window.saveManager._writeJSON('active_run.json', snap);
+            var saved = window.saveManager._writeJSON('active_run.json', snap);
+            if (!saved) {
+                e.preventDefault();
+                e.returnValue = '存档失败，请检查存储空间';
+                return;
+            }
             e.preventDefault();
             e.returnValue = '';
         }

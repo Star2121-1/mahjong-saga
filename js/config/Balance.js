@@ -378,6 +378,8 @@ window.Balance = {
     HUPAI_HUA_XIA_BUFF_DURATION: 5,       // 花夏增益持续时间(s) (Spawn.js hua_xia)
     HUPAI_HUA_LAN_CRIT_INC: 0.10,         // 花兰暴击率加成 (Spawn.js hua_lan)
     HUPAI_HUA_ZHU_HEAL_PCT: 0.15,         // 花竹回复HP比例 (Spawn.js hua_zhu)
+    HUPAI_HUA_QIU_GOLD_PER_WAVE: 20,      // 花秋金币奖励 per wave (Spawn.js hua_qiu)
+    HUPAI_HUA_JU_GOLD_PER_WAVE: 10,       // 菊花金币奖励 per wave (Spawn.js hua_ju)
     /* ── 字牌刻子效果（Spawn.js _triggerHonorMeld）── */
     HUPAI_FENG_NAN_HP_DMG_PCT: 0.08,      // 南火燎原伤害比例 maxHp×此值 (Spawn.js feng_nan)
     HUPAI_JIAN_BAI_HP_RESTORE_PCT: 0.20,  // 白板归真回血比例 (Spawn.js jian_bai)

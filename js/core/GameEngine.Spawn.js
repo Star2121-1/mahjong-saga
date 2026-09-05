@@ -421,6 +421,10 @@ Gp._renderHandTiles = function () {
     if (ting) {
         for (var i = 0; i < ting.tingPung.length; i++) tingMap[ting.tingPung[i]] = 'ting-pung';
         for (var k = 0; k < ting.tingKong.length; k++) tingMap[ting.tingKong[k]] = 'ting-kong';
+        /* R233-P1: 渲染顺子进度标记（tingRun），紫色标记缺1张的成序列牌 */
+        if (ting.tingRun) {
+            for (var r = 0; r < ting.tingRun.length; r++) tingMap[ting.tingRun[r].need] = 'ting-run';
+        }
     }
     for (var s = 0; s < this._handTileSlots.length; s++) {
         var slot = this._handTileSlots[s];
@@ -462,7 +466,7 @@ Gp._triggerFlowerEvent = function (id) {
         switch (id) {
             case 'hua_chun': p.hp = Math.min(p.maxHp, p.hp + p.maxHp * Balance.HUPAI_HUA_CHUN_HEAL_PCT); break;
             case 'hua_xia': p._tempAtkBoost = (p._tempAtkBoost || 0) + Balance.HUPAI_HUA_XIA_ATK_BOOST; p._tempBuffTimeLeft = Math.max(p._tempBuffTimeLeft || 0, Balance.HUPAI_HUA_XIA_BUFF_DURATION); break; /* P2-6: 5s 对齐设计表 */
-            case 'hua_qiu': p.addGold(20 * Math.max(1, this._waveCount)); break;
+            case 'hua_qiu': p.addGold(Balance.HUPAI_HUA_QIU_GOLD_PER_WAVE * Math.max(1, this._waveCount)); break;
             case 'hua_dongJ':
                 for (var i = 0; i < this.enemies.length; i++) { this.enemies[i].frozen = true; this.enemies[i].frozenTimer = B.FROZEN_TIMER_BONUS_BASE + (this.player.iceDurationBonus || 0); }
                 break;
@@ -480,8 +484,8 @@ Gp._triggerFlowerEvent = function (id) {
                 break;
             case 'hua_ju':
                 /* R130-P0: 菊花 = 金币 + 视觉反馈 */
-                p.addGold(10 * Math.max(1, this._waveCount));
-                if (this._spawnFloatText) this._spawnFloatText(p.x, p.y - 70, '💰 +' + (10 * Math.max(1, this._waveCount)), false);
+                p.addGold(Balance.HUPAI_HUA_JU_GOLD_PER_WAVE * Math.max(1, this._waveCount));
+                if (this._spawnFloatText) this._spawnFloatText(p.x, p.y - 70, '💰 +' + (Balance.HUPAI_HUA_JU_GOLD_PER_WAVE * Math.max(1, this._waveCount)), false);
                 break;
         }
     } catch (e) { console.warn('flower event error:', e); }
@@ -735,7 +739,8 @@ Gp._enterDiscardMode = function (slotIndex) {
     if (this._discardMode || this.gameOver || this._pendingReward || this._huLock) return;
     if (this._handTiles.length < window.Balance.HUPAI_HAND_MAX) return;
     this._discardMode = true;
-    this._discardSel = slotIndex;
+    /* R233-P1: slotIndex=-1时自动选择第一个牌，避免玩家必须手动点选才能进入有效状态 */
+    this._discardSel = (slotIndex >= 0 && slotIndex < this._handTiles.length) ? slotIndex : 0;
     this._freezeClock();
     if (this.battlefield) this.battlefield.classList.add('discard-mode');
     this._renderHandTiles();

@@ -131,6 +131,14 @@
     border-radius: 1px;
     animation: tingPulse 0.8s ease-in-out infinite alternate;
 }
+/* R233-P1: 差1成顺子 = 紫三角 */
+.ting-mark.ting-run {
+    background: #9c27b0;
+    box-shadow: 0 0 6px rgba(156,39,176,0.9);
+    transform: rotate(45deg);
+    border-radius: 1px;
+    animation: tingPulse 1.2s ease-in-out infinite alternate;
+}
 @keyframes tingPulse { from { opacity: 0.55; } to { opacity: 1; } }
 /* 清一色进度竖条（手牌栏左缘，高度=同花色占比） */
 #hand-tile-bar::before {
