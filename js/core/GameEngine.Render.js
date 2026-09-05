@@ -71,6 +71,8 @@ Gp._resetAllWeapons = function() {
 Gp._updateWeapons = function(dt) {
     /* R188-P0: 预扫描NovaPulse确保协同标志在武器更新前正确设置，避免帧内时序依赖 */
     this._synNovaLaserActive = false;
+    /* R207-P1: 同步清掉 nova_orbit 旋转加速倍率，防止nova结束后速度残留 */
+    this._novaOrbitSpeedMult = null;
     for (var _ni = 0; _ni < this._activeWeapons.length; _ni++) {
         var _nw = this._activeWeapons[_ni];
         if (_nw instanceof window.NovaPulse && _nw.activePulses && _nw.activePulses.length > 0) {
