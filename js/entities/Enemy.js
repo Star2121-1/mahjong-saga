@@ -1044,6 +1044,8 @@ window.Enemy = class Enemy {
                         actualDmg = Math.floor(actualDmg * (Balance.CRIT_BASE_MULT + (_pg.critDamageBonus || 0)));
                         /* R32-D-001: 不重复扣血 — hp已在所有修改器后统一扣减（R160-P0修复） */
                         this._critThisHit = true; /* R221-P1: 标记本次命中为暴击，供击杀结算路径使用 */
+                        /* R230-P0: 武器路径暴击需同步累加 _totalCritsThisRun，防止成就漏计 */
+                        if (_eng && !_fctTypeOverride) _eng._totalCritsThisRun = (_eng._totalCritsThisRun || 0) + 1;
                     } else {
                         this._critThisHit = false; /* R221-P1: 确保非暴击时标记清晰 */
                     }
