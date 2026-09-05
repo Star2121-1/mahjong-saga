@@ -972,9 +972,9 @@ Gp._syncEntities = function() {
         }
         /* 冰冻 - 只在状态变化时操作classList，避免每帧无意义写入 */
         if (enemy.frozen) {
-            if (!el.classList.contains('frozen-crystal')) el.classList.add('frozen-crystal');
+            if (!el.classList.contains('frozen-crystal')) { el.classList.add('frozen-crystal'); el.classList.add('frozen'); }
         } else {
-            if (el.classList.contains('frozen-crystal')) el.classList.remove('frozen-crystal');
+            if (el.classList.contains('frozen-crystal')) { el.classList.remove('frozen-crystal'); el.classList.remove('frozen'); }
         }
         /* M-024: Stalker 冰冻时恢复完全不透明 */
         if (enemy.type === 'Stalker') {

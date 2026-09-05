@@ -283,7 +283,7 @@ Sys.updateResonanceAuras = function(engine, dt) {
                 if (idx * idx + idy * idy <= iceR * iceR) {
                     e2.frozen = true;
                     e2.frozenTimer = dur;
-                    if (e2.el) e2.el.classList.add('frozen-crystal');
+                    if (e2.el) { e2.el.classList.add('frozen-crystal'); e2.el.classList.add('frozen'); }
                     /* Visual Enhancement C: 冰冻冰晶扩散波纹 */
                     if (engine._worldLayer) {
                         var ring = document.createElement('div');

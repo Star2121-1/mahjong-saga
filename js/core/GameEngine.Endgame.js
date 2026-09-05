@@ -40,7 +40,7 @@ Gp._onClick = function(e) {
     if (p.freezeChance > 0 && Math.random() < p.freezeChance) {
         enemy.frozen = true;
         enemy.frozenTimer = Balance.FROZEN_TIMER_BONUS_BASE + (p.iceDurationBonus || 0);
-        if (enemy.el) enemy.el.classList.add('frozen-crystal');
+        if (enemy.el) { enemy.el.classList.add('frozen-crystal'); enemy.el.classList.add('frozen'); }
         window.audioManager && window.audioManager.play('freeze'); /* R204-P1: 将音效移至冻结判定内，消除双随机数导致的音画不同步 */
     }
 

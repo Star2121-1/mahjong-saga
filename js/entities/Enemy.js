@@ -1043,7 +1043,7 @@ window.Enemy = class Enemy {
                     this.frozenTimer = Balance.FROZEN_TIMER_BONUS_BASE + (_pg.iceDurationBonus || 0);
                     /* R79-P2: 记录冻结前相位，解冻时恢复 */
                     if (this.type === 'Boss_Lord') this._savedBossPhase = this._bossPhase;
-                    if (this.el) this.el.classList.add('frozen-crystal');
+                    if (this.el) { this.el.classList.add('frozen-crystal'); this.el.classList.add('frozen'); }
                 }
                 /* 吸血：onClick在外部处理，此处仅武器路径 */
                 if (!_fctTypeOverride && _pg.lifestealRate > 0) {
