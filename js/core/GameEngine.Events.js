@@ -527,6 +527,9 @@ Gp._resolveGamble = function(won) {
 /* DEPRECATED: Gp._spawnBossLord 已在RXX移除，使用 _spawnBossLordFromGamble 替代；保留此注释防止重复添加 */
 
 Gp._spawnEnemyType = function(type) {
+    /* R231-P0: 波次上限检查 — Stalker等事件生成必须遵守_waveEnemyMax，防止无限刷怪 */
+    var cap = this._getWaveEnemyMax ? this._getWaveEnemyMax() : 999;
+    if (this.currentWaveSpawnedCount >= cap) return;
     var angle = Math.random() * Math.PI * 2;
     var margin = 30;
     var vpW = this.battlefield.clientWidth;

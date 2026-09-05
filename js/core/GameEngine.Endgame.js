@@ -159,7 +159,7 @@ Gp._spawnExplosion = function(x, y, radius, damage, excludeId) {
     el.style.width = d + 'px';
     el.style.height = d + 'px';
     this._worldLayer.appendChild(el);
-    setTimeout(function() { el.remove(); }, 400);
+    setTimeout(function() { el.remove(); }, Balance.EXPLOSION_EFFECT_TIMEOUT);
 };
 
 Gp._screenShake = function() {
