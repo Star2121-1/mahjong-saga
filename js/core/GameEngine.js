@@ -138,6 +138,8 @@ window.GameEngine = function() {
     this._monsterSurgeDoubleDrops = false; /* R89-P1: 防止怪物潮标志跨局残留 */
     this._gambleType = null;
     this._gambleStaked = 0;
+    this._pendingBossGamble = false; /* R234-P0: 构造函数补齐初始化，与restart/startNewRun保持一致 */
+    this._gambleTimeout = null; /* R234-P0: 构造函数补齐初始化，防止clearTimeout(undefined) */
 };
 
 /* R89-P1: 移除未使用的 Gp 局部变量，所有原型方法在独立模块中定义 */

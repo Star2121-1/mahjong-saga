@@ -83,6 +83,8 @@ Gp.init = async function() {
             this._initViewportResize();
             /* R189-P1: 重置_announcingWave，防止崩溃时处于wave公告状态导致resume后死锁 */
             this._announcingWave = false;
+            /* R234-P1: 恢复路径清理残留冻结状态，防止面板打开后恢复游戏时clock仍被冻结 */
+            if (this.container) this.container.classList.remove('game-clock-frozen');
             this._syncEntities();
             this._syncPlayerHP();
             this._renderWeaponSlots();
@@ -668,7 +670,7 @@ Gp._announceWave = function(waveIdx) {
         setTimeout(function() {
             self._announcingWave = false; /* M-030: 公告链结束，解除守卫 */
             self._unfreezeClock();
-            if (!self._paused) self._beginLoop(); /* R61-P1: 暂停状态下不恢复循环 */
+            if (!self._paused && !self._pendingReward && !self._levelUpPending) self._beginLoop(); /* R61-P1: 暂停状态下不恢复循环 */
         }, 300);
     }, 1200);
 };

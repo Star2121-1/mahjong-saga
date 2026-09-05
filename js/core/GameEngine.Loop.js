@@ -474,7 +474,8 @@ Gp._loop = function(timestamp) {
             this._skillGlowEls = this._skillGlowEls || [];
             this._skillGlowEls.push(glow); /* R226-P0: 追踪技能光效引用供restart清理 */
             var _glowRef = glow; /* R140-P1: 捕获引用防止restart后回调操作已移除DOM */
-            setTimeout(function(el) { if (el && el.parentNode) el.remove(); var i=this._skillGlowEls?this._skillGlowEls.indexOf(el):-1; if(i>=0)this._skillGlowEls.splice(i,1); }, 600, _glowRef);
+            var _glowEls = this._skillGlowEls; /* R234-P1: 捕获this引用，避免setTimeout回调中this指向全局/undefined导致splice失效 */
+            setTimeout(function(el) { if (el && el.parentNode) el.remove(); var arr=_glowEls; if(arr){var i=arr.indexOf(el);if(i>=0)arr.splice(i,1);} }, 600, _glowRef);
             this._weaponJustFired = false;
         }
 
@@ -640,6 +641,8 @@ Gp._loop = function(timestamp) {
 
         if (this._pendingReward && this._activeCoins.length === 0 && this._expGems.length === 0) {
             if (this._waveCount >= this._getMaxWaves() - 1) {
+                /* R234-P0: 最终波次胜利前存档，防止页面关闭时进度丢失 */
+                this._autoSave('victory').catch(function(e) { console.warn('[Loop] final wave save failed:', e); });
                 this.running = false;
                 this.gameOver = true;
                 this._won = true; /* R136-P0: 标记胜利，供_settleRun中flawless/speed_demon使用 */
