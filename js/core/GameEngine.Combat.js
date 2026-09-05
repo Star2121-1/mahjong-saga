@@ -405,8 +405,9 @@ Gp._settleRun = async function(tokens) {
     if ((meta.overdriveCount || 0) >= 10) this._checkAchievement('overdrive_10');
     if ((meta.overdriveCount || 0) >= 50) this._checkAchievement('overdrive_50');
     /* R232-P1: 补充crit_master和dodge_king的终局兜底检查，防止inflight失败永久丢失进度 */
-    if ((meta.totalCrits || 0) >= 100) this._checkAchievement('crit_master');
-    if ((meta.totalDodges || 0) >= 50) this._checkAchievement('dodge_king');
+    /* R234-P0: 使用本轮局内计数器而非meta跨局累计值，避免多局叠加后误触发 */
+    if ((this._totalCritsThisRun || 0) >= 100) this._checkAchievement('crit_master');
+    if ((this._totalDodgesThisRun || 0) >= 50) this._checkAchievement('dodge_king');
     meta.bossKills = (meta.bossKills || 0) + (this._bossKillsThisRun || 0);
     meta.finalBossKills = (meta.finalBossKills || 0) + (this._finalBossKillsThisRun || 0);
     meta.totalCrits = (meta.totalCrits || 0) + (this._totalCritsThisRun || 0);
@@ -520,7 +521,7 @@ Gp._settleRun = async function(tokens) {
     /* 金币 — get_rich/gold_10k 是单局实时成就，通过 _syncUI inflight 检测，此处不应使用meta跨局值 */
     /* R136-P0: speed_demon 终局兜底 — 用_won替代!gameOver防止死代码 */
     /* R188-P1: 增加_bossLordSpawned检查，防止非最终Boss关卡提前触发极速通关成就 */
-    if (this._won && this._bossLordSpawned && (this._elapsed || 0) <= 180) this._checkAchievement('speed_demon');
+    if (this._won && this._bossLordSpawned && this.loopCount === 0 && (this._elapsed || 0) <= 180) this._checkAchievement('speed_demon');
 
     /* ── 变异保险库：20%概率解锁新突变 ── */
     /* R207-P0: 仅深渊轮回允许解锁突变，防止非深渊局误触发 */

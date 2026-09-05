@@ -487,6 +487,15 @@
         engine._gambleStaked = _posOrZero(data.gambleStaked, 0);
         engine._shieldActive = data.shieldActive || false;
         engine._shieldTimer = data.shieldTimer || 0;
+        /* R234-P1: 恢复雀魂护盾超时时钟，防止存档中护盾激活状态下恢复后永远无法再次触发 */
+        if (engine._shieldActive && engine._shieldTimer > 0) {
+            if (engine._qqueenShieldTimer) clearTimeout(engine._qqueenShieldTimer);
+            var _shieldLv = (window.saveManager && (window.saveManager._metaCache || {}).talents || {}).que_spirit_shield || 0;
+            engine._qqueenShieldTimer = setTimeout(function() {
+                engine._shieldActive = false;
+                if (engine.container) engine.container.style.boxShadow = '';
+            }, engine._shieldTimer * 1000);
+        }
         engine._tempShieldEnd = data.tempShieldEnd || 0;
         engine._tempShield = data.tempShield || 0;
         engine._eliteModeActive = data.eliteModeActive || false;
@@ -520,8 +529,8 @@
         engine._bossLordWave = false;
         engine._bossLordSpawned = data.bossLordSpawned || false; /* R226-P0: 从快照恢复极速通关成就状态 */
         /* R233-P0: 恢复Boss冻结前相位，防止断点恢复后Boss回到Phase 1 */
-        if (engine._bossLord && data.bossLordSavedPhase !== null && data.bossLordSavedPhase !== undefined) {
-            engine._bossLord._savedBossPhase = data.bossLordSavedPhase;
+        if (data.bossLordSavedPhase !== null && data.bossLordSavedPhase !== undefined) {
+            engine._bossLordSavedPhase = data.bossLordSavedPhase;
         }
         engine._monsterSurgeDoubleDrops = false;
         engine._pendingBossGamble = false;
@@ -717,6 +726,7 @@
             }
         }
         /* R164-P0: validate activeRun.player numeric fields to prevent crafted imports from setting negative HP / Infinity ATK */
+        if (data.activeRun.player === null) return false; /* R234-P1: 拒绝player为null的导入，防止restore时崩溃 */
         if (data.activeRun.player) {
             var _p = data.activeRun.player;
             var _pNumFields = ['hp','maxHp','atk','speed','baseSpeed','gold','critRate',

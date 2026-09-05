@@ -443,6 +443,11 @@ Gp._startNewRun = function(heroId, levelId) {
     /* R199-P0: 清理跨局残留DOM元素 — 避免abyss雾霭/昼夜指示器泄漏 */
     if (this._abyssMistEl && this._abyssMistEl.parentNode) this._abyssMistEl.remove();
     this._abyssMistEl = null;
+    /* R234-P0: 清理胡牌演出残留，防止restart/hu-bang动画期间新游戏时DOM泄漏 */
+    if (this._huBangEl && this._huBangEl.parentNode) this._huBangEl.remove();
+    this._huBangEl = null;
+    /* R234-P0: 重置雨滴数组，防止旧局setTimeout与新局状态竞态 */
+    this._rainDrops = [];
     this._dayNightEl = null;
     this._zoomLevel = 1;
     if (this.battlefield) this.battlefield.classList.remove('discard-mode');

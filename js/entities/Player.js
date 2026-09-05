@@ -460,6 +460,10 @@ class Player {
         p._skipRelicAffixes = false;
         /* 3. 按存档的 _relicAffixes 重新应用词条（不随机，保留存档数据） */
         if (!p._skipRelicAffixes) p._applyRelicAffixes();
+        /* R234-P0: recalcRelicStats后钳制速度，与reset()保持一致，防止多条速度词条叠加溢出 */
+        p.speedMultiplier = Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, p.speedMultiplier);
+        p.speed = p.baseSpeed * p.speedMultiplier;
+        p.speed = Math.min(Balance.PLAYER_MAX_SPEED, p.speed);
     }
 
     /* ── Epoch 33: 圣物随机词条 ── */
@@ -494,7 +498,7 @@ class Player {
             ],
             wind_walker: [
                 { id: 'ww_dodge', name: '闪避', apply: function(p) { p.dodgeRate = Math.min(Balance.MAX_DODGE_RATE, (p.dodgeRate || 0) + Balance.RELIC_WW_DODGE_PER_LEVEL); } },
-                { id: 'ww_speed', name: '极速', apply: function(p) { p.speedMultiplier = (p.speedMultiplier || 1) + Balance.RELIC_WW_SPEED_PER_LEVEL; p.speed = p.baseSpeed * p.speedMultiplier; } }
+                { id: 'ww_speed', name: '极速', apply: function(p) { p.speedMultiplier = Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, (p.speedMultiplier || 1) + Balance.RELIC_WW_SPEED_PER_LEVEL); p.speed = p.baseSpeed * p.speedMultiplier; } }
             ],
             vamp_ring: [
                 { id: 'vr_crit', name: '暴击', apply: function(p) { p.critRate = Math.min(1, (p.critRate || 0) + 0.1); } },
@@ -806,7 +810,7 @@ class Player {
             { id: 'ta_hp', apply: function(p) { p.maxHp += 30; p.hp = Math.min(p.hp + 30, p.maxHp); } },
             { id: 'ta_crit', apply: function(p) { p.critRate = Math.min(1, (p.critRate || 0) + 0.1); } },
             { id: 'ww_dodge', apply: function(p) { p.dodgeRate = Math.min(Balance.MAX_DODGE_RATE, (p.dodgeRate || 0) + Balance.RELIC_WW_DODGE_PER_LEVEL); } },
-            { id: 'ww_speed', apply: function(p) { p.speedMultiplier = (p.speedMultiplier || 1) + Balance.RELIC_WW_SPEED_PER_LEVEL; p.speed = p.baseSpeed * p.speedMultiplier; } },
+            { id: 'ww_speed', apply: function(p) { p.speedMultiplier = Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, (p.speedMultiplier || 1) + Balance.RELIC_WW_SPEED_PER_LEVEL); p.speed = p.baseSpeed * p.speedMultiplier; } },
             { id: 'vr_crit', apply: function(p) { p.critRate = Math.min(1, (p.critRate || 0) + 0.1); } },
             { id: 'vr_atk', apply: function(p) { p.atk += 5; } },
             { id: 'ec_range', apply: function(p) { p.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, (p.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT) + 30); } },

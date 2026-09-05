@@ -77,6 +77,7 @@ window.GameEngine = function() {
     this._bossLord = null;
     this._bossLordWave = false;
     this._bossLordSpawned = false;
+    this._bossLordSavedPhase = null; /* R234-P1: Boss相位断点续玩恢复字段初始化 */
 
     this._overdriveActive = false;
     this._overdriveTimer = 0;
