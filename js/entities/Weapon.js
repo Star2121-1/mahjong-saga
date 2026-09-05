@@ -313,8 +313,10 @@ window.GroundSlammer = class extends window.Weapon {
                         sw._knockbackApplied.add(e.id);
                         var knockAngle = Math.atan2(swdy, swdx);
                         var force = Balance.GROUND_SLAMMER_KNOCKBACK_FORCE;
-                        /* R233-P1: 仅设速度，避免与_knockbackVelocity系统双重位移 */
+                        /* R236-P0: 设速度和方向分量供Enemy.knockback位移消费 */
                         e._knockbackVelocity = force;
+                        e._knockbackVelocityX = Math.cos(knockAngle) * force;
+                        e._knockbackVelocityY = Math.sin(knockAngle) * force;
                     }
                     if (typeof e._clampPosition === 'function') e._clampPosition(engine);
                 }
