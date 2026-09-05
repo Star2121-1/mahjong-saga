@@ -476,7 +476,7 @@ class Player {
                 { id: 'gc_magnet', name: '巨吸', apply: function(p) { p.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, (p.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT) + 50); } }
             ],
             weapon_amplify: [
-                { id: 'wa_cd', name: '迅捷', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { var _w = eng._activeWeapons[i]; var _f = p.cdFloor || Balance.DEFAULT_CD_FLOOR; _w._baseCd = Math.max(_f, (_w._baseCd || _w.cd) * Balance.WEAPON_UPGRADE_CD_MULT); _w.cd = _w._baseCd; } } } }, /* R145-P1: 使用Balance常量替代硬编码0.9 | R204-P1: 同步更新_baseCd防止Render.js帧循环覆盖 */
+                { id: 'wa_cd', name: '迅捷', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { var _w = eng._activeWeapons[i]; var _f = p.cdFloor || Balance.DEFAULT_CD_FLOOR; /* R212-P0: 更新_origBaseCd而非_baseCd，防止Render.js帧循环覆盖 */ _w._origBaseCd = Math.max(_f, (_w._origBaseCd || _w.cd) * Balance.WEAPON_UPGRADE_CD_MULT); _w._baseCd = _w._origBaseCd; _w.cd = _w._baseCd; } } } }, /* R212-P0: 与weapon_amplify一致，写入_origBaseCd防止帧循环覆盖 */
                 { id: 'wa_atk', name: '强化', apply: function(p) { p.atk += 5; } }
             ]
         };
@@ -757,7 +757,7 @@ class Player {
             { id: 'fc_chance', apply: function(p) { p.freezeChance = Math.min(Balance.MAX_FREEZE_CHANCE, (p.freezeChance || 0) + 0.1); } },
             { id: 'gc_xp', apply: function(p) { p.xpGainFactor = Math.min(Balance.MAX_XP_GAIN_FACTOR, (p.xpGainFactor || 1) + 0.15); } },
             { id: 'gc_magnet', apply: function(p) { p.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, (p.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT) + 50); } },
-            { id: 'wa_cd', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { var _w = eng._activeWeapons[i]; var _f = p.cdFloor || Balance.DEFAULT_CD_FLOOR; _w._baseCd = Math.max(_f, (_w._baseCd || _w.cd) * Balance.WEAPON_UPGRADE_CD_MULT); _w.cd = _w._baseCd; } } } }, /* R146-P1: 统一使用WEAPON_UPGRADE_CD_MULT常量 | R204-P1: 同步更新_baseCd防止Render.js帧循环覆盖 */
+            { id: 'wa_cd', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { var _w = eng._activeWeapons[i]; var _f = p.cdFloor || Balance.DEFAULT_CD_FLOOR; /* R212-P0: 更新_origBaseCd而非_baseCd，防止Render.js帧循环覆盖 */ _w._origBaseCd = Math.max(_f, (_w._origBaseCd || _w.cd) * Balance.WEAPON_UPGRADE_CD_MULT); _w._baseCd = _w._origBaseCd; /* R212-P1: 与weapon_amplify一致，应用_weaponCdReduction防止双重压缩 */ _w.cd = Math.max(_f, _w._origBaseCd * (1 - (p._weaponCdReduction || 0))); } } } }, /* R212-P0: 与weapon_amplify一致，写入_origBaseCd防止帧循环覆盖 */
             { id: 'wa_atk', apply: function(p) { p.atk += 5; } }
         ];
         var map = {};

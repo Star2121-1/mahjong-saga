@@ -387,6 +387,8 @@ Gp._settleRun = async function(tokens) {
     meta.totalKills = (meta.totalKills || 0) + this.kills;
     /* Epoch 3: 保存局内成就计数器到 meta */
     meta.overdriveCount = (meta.overdriveCount || 0) + (this._overdriveCount || 0);
+    /* R212-P1: 首次Overdrive成就 — inflight检查因缺少overdrive_1条目而静默失败，此处兜底 */
+    if ((meta.overdriveCount || 0) >= 1) this._checkAchievement('overdrive_1');
     meta.bossKills = (meta.bossKills || 0) + (this._bossKillsThisRun || 0);
     meta.finalBossKills = (meta.finalBossKills || 0) + (this._finalBossKillsThisRun || 0);
     meta.totalCrits = (meta.totalCrits || 0) + (this._totalCritsThisRun || 0);

@@ -36,6 +36,7 @@ window.achievementConfig = [
 /* 检测条件 */
 window.achievementCheck = {
     inflight: {
+        overdrive_1:    function(engine, val) { return val >= 1; },
         overdrive_10:   function(engine, val) { return val >= 10; },
         overdrive_50:   function(engine, val) { return val >= 50; },
         get_rich:       function(engine, gold) { return gold >= 1000; },
