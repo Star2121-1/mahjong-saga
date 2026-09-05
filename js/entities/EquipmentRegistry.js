@@ -40,8 +40,10 @@ window.equipmentRegistry = {
                 affix = this.getRandomAffix();
                 attempts++;
             } while (usedAffixIds[affix.id] && attempts < 10);
-            usedAffixIds[affix.id] = true;
-            affixes.push(affix);
+            if (!usedAffixIds[affix.id]) { /* R226-P0: 跳过已达上限的重复词条，防止传奇装备出现同名affix */
+                usedAffixIds[affix.id] = true;
+                affixes.push(affix);
+            } else { i--; /* 重试该槽位 */ }
         }
         /* R65-P1: 深拷贝base属性，防止多实例共享同一引用导致污染 */
         return {

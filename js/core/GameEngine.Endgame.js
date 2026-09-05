@@ -234,6 +234,13 @@ Gp.restart = function() {
     }
     /* R207-P0: 清理引导自动推进定时器，防止restart后旧定时器触发导致新游戏引导步骤错乱 */
     if (this._guideAutoAdvanceTimer) { clearTimeout(this._guideAutoAdvanceTimer); this._guideAutoAdvanceTimer = null; }
+    /* R226-P0: 清理技能光效，防止restart后残留DOM */
+    if (this._skillGlowEls) {
+        for (var _gi = 0; _gi < this._skillGlowEls.length; _gi++) {
+            if (this._skillGlowEls[_gi] && this._skillGlowEls[_gi].parentNode) this._skillGlowEls[_gi].remove();
+        }
+        this._skillGlowEls = [];
+    }
     /* R101-P1: 清理引导完成定时器 */
     if (this._completeGuideTimer) { clearTimeout(this._completeGuideTimer); this._completeGuideTimer = null; }
     /* R154-P0: 清除引导透明度Map，防止跨局战场元素错误褪色 */
@@ -275,6 +282,9 @@ Gp.restart = function() {
     /* R171-P1: 清理Boss Gamble面板DOM，防止重启后面板残留 */
     var _bgp = document.getElementById('boss-gamble-panel');
     if (_bgp && _bgp.parentNode) _bgp.remove();
+    /* R226-P0: 清理胡牌演出节点，防止restart期间hu-bang残留 */
+    if (this._huBangEl && this._huBangEl.parentNode) this._huBangEl.remove();
+    this._huBangEl = null;
     /* R118-P0: 清理FxManager对象池，防止飘字节点跨局泄漏 */
     if (window.fxManager) window.fxManager.cleanup();
     /* R165-P0: 清理ToastSystem活跃节点，防止restart后toast DOM残留 */

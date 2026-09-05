@@ -474,8 +474,10 @@ Gp._loop = function(timestamp) {
             }[this.player.heroId] || 'rgba(255,255,255,0.5)';
             glow.style.boxShadow = '0 0 20px 10px ' + heroColor;
             this._worldLayer.appendChild(glow);
+            this._skillGlowEls = this._skillGlowEls || [];
+            this._skillGlowEls.push(glow); /* R226-P0: 追踪技能光效引用供restart清理 */
             var _glowRef = glow; /* R140-P1: 捕获引用防止restart后回调操作已移除DOM */
-            setTimeout(function(el) { if (el && el.parentNode) el.remove(); }, 600, _glowRef);
+            setTimeout(function(el) { if (el && el.parentNode) el.remove(); var i=this._skillGlowEls?this._skillGlowEls.indexOf(el):-1; if(i>=0)this._skillGlowEls.splice(i,1); }, 600, _glowRef);
             this._weaponJustFired = false;
         }
 

@@ -570,6 +570,9 @@ Gp._gameOver = async function() {
     this._pendingBossLordSettle = false;
     /* R117-P0: 防止深渊面板双开守卫在重启后失效 */
     this._abyssPanelVisible = false;
+    /* R226-P0: 清理Boss豪赌面板防止死亡时DOM泄漏 */
+    var _bgp = document.getElementById('boss-gamble-panel');
+    if (_bgp && _bgp.parentNode) _bgp.remove();
     var _seqGO = this._runSeq || 0; /* P0-1: 局序号令牌 */
     window.audioManager && window.audioManager.play('gameover');
     /* R132-P1: 游戏结束前主动存档，防止running=false后beforeunload跳过保存 */

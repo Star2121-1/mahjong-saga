@@ -47,7 +47,7 @@ Fp.spawnText = function(x, y, text, typeOrColor) {
     type = type || 'normal';
     node.textContent = text;
     node.className = 'fct-node fct-' + type;
-    if (color) node.style.color = color;
+    if (typeof color === 'string' && color.startsWith('#')) node.style.color = color; /* R226-P0: 仅hex颜色设inline color，避免'normal'等字符串被当作CSS颜色 */
     node.style.left = x + 'px';
     node.style.top = y + 'px';
     node._fctActive = true;
@@ -109,7 +109,7 @@ Fp._borrowNode = function() {
         el.className = 'fct-node';
         el._fctActive = false;
         if (el._fctTimeout) { clearTimeout(el._fctTimeout); el._fctTimeout = null; }
-        this._returnNode(el); /* R207-P0: 使用this替代self — _borrowNode内未声明self变量，overflow节点animationend回调会抛ReferenceError导致节点无法回收 */
+        self._returnNode(el); /* R226-P0: overflow节点animationend中this=el(DOM), 需用self捕获FxManager引用 */
     };
     el.addEventListener('animationend', el._fctOnEnd);
     if (this._layer && this._layer.parentNode) {

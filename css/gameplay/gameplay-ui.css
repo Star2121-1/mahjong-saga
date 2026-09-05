@@ -463,6 +463,7 @@
     animation-play-state: running !important;
 }
 /* R222-P1: FCT飘字动画在面板打开时应继续播放 */
+.game-clock-frozen #fct-layer .fct-node,
 .game-clock-frozen #fct-layer .fct-normal,
 .game-clock-frozen #fct-layer .fct-crit,
 .game-clock-frozen #fct-layer .fct-heal,

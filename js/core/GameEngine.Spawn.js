@@ -668,7 +668,9 @@ Gp._triggerHu = function (hu) {
         bang.className = 'hu-bang';
         bang.textContent = '胡！';
         this.battlefield.appendChild(bang);
-        setTimeout(function () { if (bang.parentNode) bang.remove(); }, Balance.TIMEOUT_BANG_REMOVE_MS);
+        this._huBangEl = bang; /* R226-P0: 存储引用供restart/gameover清理 */
+        var _bangRef = bang;
+        setTimeout(function(el) { if (el && el.parentNode) el.remove(); }, Balance.TIMEOUT_BANG_REMOVE_MS, _bangRef);
     }
     /* 手牌扇形脉冲（MVP 简化，V2 做飞牌展扇） */
     if (this._handTileBar) this._handTileBar.classList.add('hu-flash');
