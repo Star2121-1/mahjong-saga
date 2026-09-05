@@ -841,6 +841,8 @@ class Player {
 
     reset(heroId) {
         this.heroId = heroId || 'Hero';
+        /* R239-P1: 先清零run-specific的CD缩减，再调用_initFromConfig重设英雄被动 */
+        this._weaponCdReduction = 0; /* R239-P1: 移至_initFromConfig之前，防止覆盖Hero被动 */
         this._initFromConfig();
 
         /* ── 永久天赋加成 ── */
@@ -917,7 +919,7 @@ class Player {
         this.invulnTimer = 0;
         this.hitFlashTimer = 0; /* 独立受击闪烁计时器，与无敌帧分离 */
         this.critRate = 0;
-        this._weaponCdReduction = 0; /* P1-3: 跨局冷却缩减清零 */
+        /* R239-P1: _weaponCdReduction已在_initFromConfig前清零(line 845)，此处不再重复 */
         this._tempBuffTimeLeft = undefined;
         this._tempAtkBoost = 0;
         this._tempHpBonus = 0;
