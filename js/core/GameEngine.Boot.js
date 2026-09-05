@@ -767,6 +767,8 @@ Gp._replayGuide = function() {
 };
 
 Gp._beginLoop = function() {
+    /* R230-P1: 防止 _completeGuide 等路径在 gameOver 后调度 _beginLoop 导致死锁复活 */
+    if (this.gameOver) return;
     this._unfreezeClock();
     if (this.running) return;
     if (this._announcingWave) return; /* M-030: 公告链正在进行中，不重入 */

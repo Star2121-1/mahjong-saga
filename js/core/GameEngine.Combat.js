@@ -575,9 +575,17 @@ Gp._settleRun = async function(tokens) {
 Gp._gameOver = async function() {
     /* P1: 防御性清除 victoryOverlay，防止叠加残留 */
     if (this.victoryOverlay) this.victoryOverlay.classList.remove('active');
-    /* R230-P0: 引导进行中死亡时必须关闭引导，防止覆盖层永久阻塞结算界面 */
+    /* R230-P0: 引导进行中死亡时必须关闭引导，防止覆盖层永久阻塞结算界面
+       不调用 _completeGuide() — 它会调度 500ms 后的 _beginLoop（重置 gameOver），
+       直接执行内联清理以确保游戏状态不被覆盖。 */
     if (this.guideOverlay && this.guideOverlay.classList.contains('active')) {
-        this._completeGuide();
+        if (this._guideCheckTimer) { clearInterval(this._guideCheckTimer); this._guideCheckTimer = null; }
+        if (this._guideAutoAdvanceTimer) { clearTimeout(this._guideAutoAdvanceTimer); this._guideAutoAdvanceTimer = null; }
+        if (this._completeGuideTimer) { clearTimeout(this._completeGuideTimer); this._completeGuideTimer = null; }
+        if (this._originalOpacities) { this._restoreOpacity(); this._originalOpacities.clear(); this._originalOpacities = null; }
+        if (this._highlightTimers) { this._highlightTimers.forEach(function(t) { clearTimeout(t); }); this._highlightTimers = []; }
+        this.guideOverlay.classList.remove('active');
+        this._guideDismissed = true;
     }
     /* R69-P1: 清除奖励面板防止游戏结束画面叠加 */
     if (window.rewardManager) window.rewardManager.hidePanel();
