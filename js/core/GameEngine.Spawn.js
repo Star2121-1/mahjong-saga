@@ -486,6 +486,11 @@ Gp._triggerFlowerEvent = function (id) {
                 /* R130-P0: 菊花 = 金币 + 视觉反馈 */
                 p.addGold(Balance.HUPAI_HUA_JU_GOLD_PER_WAVE * Math.max(1, this._waveCount));
                 if (this._spawnFloatText) this._spawnFloatText(p.x, p.y - 70, '💰 +' + (Balance.HUPAI_HUA_JU_GOLD_PER_WAVE * Math.max(1, this._waveCount)), false);
+                /* R241-P0: 补充bossCores奖励，防止功能缺失 */
+                if (window.saveManager && window.saveManager._metaCache) {
+                    window.saveManager._metaCache.bossCores = (window.saveManager._metaCache.bossCores || 0) + 1;
+                    window.saveManager.saveMeta(window.saveManager._metaCache).catch(function(e){ console.warn('[Hupai] hua_ju bossCores save failed:', e); });
+                }
                 break;
         }
     } catch (e) { console.warn('flower event error:', e); }
