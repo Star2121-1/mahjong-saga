@@ -467,13 +467,9 @@ window.Enemy = class Enemy {
         var dist = Math.sqrt(dx * dx + dy * dy);
         var attackRange = Balance.ENEMY_ATTACK_RANGE_OFFSET + this.radius;
 
-        /* R37-P0: 更新屏障独立朝向 — 仅在移动方向显著变化时更新 */
+        /* R37-P0: 更新屏障独立朝向 — 始终面向玩家，避免45度容差产生永久安全区 */
         var moveAngle = Math.atan2(dy, dx);
-        var angleDiff = Math.abs(moveAngle - this._barrierFacing);
-        if (angleDiff <= Math.PI / 4) {
-            /* 玩家角度变化在±45°扇区内，更新朝向 */
-            this._barrierFacing = moveAngle;
-        }
+        this._barrierFacing = moveAngle;
         /* P1: 使用点积替代冗余的atan2，计算方向向量余弦值 */
         /* R79-P2: 移除未使用的变量 cosA/sinA/len/nx/ny，消除每帧无意义分配 */
 
@@ -1162,6 +1158,18 @@ window.Enemy = class Enemy {
                     var _childDiff = ((engRef && engRef.levelConfig && engRef.levelConfig[engRef._currentLevelId] && engRef.levelConfig[engRef._currentLevelId].difficultyFactor) || 1) * (window.difficultyScale || 1); /* R227-P1: 应用全局难度系数，与正常生成路径一致 */
                     child.maxHp = Math.floor(child.maxHp * _childDiff);
                     child.atk = Math.floor(child.atk * _childDiff);
+                    /* R231-P1: 应用活跃突变属性，与正常生成路径保持一致 */
+                    if (engRef && engRef._activeMutator) {
+                        if (engRef._activeMutator === 'bloodmoon') {
+                            child._bloodmoonStored = true;
+                            child._bloodmoonOrigAtk = child.atk;
+                            child._bloodmoonOrigMaxHp = child.maxHp;
+                            child._bloodmoonOrigHp = child.hp;
+                            child.maxHp = Math.floor(child.maxHp * Balance.MUTATOR_BLOODMOON_HP_MULT);
+                            child.hp = child.maxHp;
+                            child.atk = Math.floor(child.atk * Balance.MUTATOR_BLOODMOON_ATK_MULT);
+                        }
+                    }
                     child.speed = child.baseSpeed * Balance.SPLITTER_CHILD_SPEED_MULT;
                     child.baseSpeed = child.speed;
                     engRef.enemies.push(child);
