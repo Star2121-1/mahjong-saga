@@ -93,7 +93,7 @@ class Player {
         if (cfg.cdFloor != null) this.cdFloor = cfg.cdFloor;
         /* H-029: 雀灵流转 -- 攻击速度 +15% */
         if (this.heroId === 'Hero') {
-            this.speed = this.baseSpeed * Balance.HERO_SPEED_BONUS;
+            this._weaponCdReduction += Balance.HERO_ASPD_BONUS;
         }
         /* Epoch 42: 雀灵流转 -- 武器CD -10% */
         if (this.heroId === 'Hero') {
