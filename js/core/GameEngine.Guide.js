@@ -161,7 +161,12 @@ Gp._completeGuide = function() {
     this._completeGuideTimer = setTimeout(function() {
         /* R117-P0: guide 关闭后恢复时钟再开始循环 */
         self._unfreezeClock();
-        self._beginLoop();
+        /* R230-P1: 引导完成后首次波次公告，与 _startNewRun 非引导路径保持一致 */
+        if (!self.gameOver && !self._pendingReward && self._waveCount === 0) {
+            self._announceWave(0);
+        } else {
+            self._beginLoop();
+        }
     }, 500);
 };
 
