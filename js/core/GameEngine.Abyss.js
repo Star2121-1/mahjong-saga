@@ -297,6 +297,10 @@ Gp._applyAbyssCombo = function(comboId) {
         } else if (combo.id === 'abyss_wither') {
             this._witherAbyssTimer = 0;
         }
+        /* R221-P0: wither计时器应在所有combo关闭时重置，否则切换后再激活wither会导致立即触发 drain/shield 效果 */
+        if (combo.id !== 'abyss_wither') {
+            this._witherAbyssTimer = 0;
+        }
         return;
     }
     this._abyssActiveCombo = comboId;

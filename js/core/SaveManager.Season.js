@@ -19,7 +19,7 @@
             nextLevelCores: nextLevelCores,
             points: cores,
             potential: nextLevelCores,
-            canPrestige: cores >= nextLevelCores,
+            canPrestige: cores >= (2 * level + 1), /* R221-P0: (level+1)^2恒大于cores(因level=floor(sqrt(cores)))，原守卫永远为false导致声望按钮永久禁用 */
             perks: []
         };
     };

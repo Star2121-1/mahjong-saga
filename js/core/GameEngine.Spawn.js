@@ -341,7 +341,8 @@ Gp._rewardKill = function(enemy) {
     this.player.rage = Math.min(this.player.maxRage, this.player.rage + 5 + (this._tempBerserkBonus ? 10 : 0));
     if (this._tempBerserkBonus) this._tempBerserkBonus = false;
     /* R198-P0: 铁拳暴击加成对称消费 — 与点金术/狂战士相同模式，防止跨波累积永久DPS膨胀 */
-    if (this._tempCritBonus > 0) this._tempCritBonus = 0;
+    /* R221-P1: 仅在暴击击杀时消费加成，非暴击击杀保留下次机会 */
+    if (this._tempCritBonus > 0 && enemy._critThisHit) this._tempCritBonus = 0;
     /* R38-P0: EXP仅通过gem路径给予（Enemy.js onDeath已生成gem），避免双计数 */
     /* 雀魂系统：击杀掉牌（HUPAI_DESIGN.md v2.0） */
     this._tryTileDrop(enemy);

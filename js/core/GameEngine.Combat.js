@@ -705,7 +705,7 @@ Gp._gameOver = async function() {
     /* Epoch 18: 每周超级挑战 */
     var weeklyCompleted = [];
     try {
-        var weeklyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: this._maxGoldThisRun || 0, hitsTaken: this._playerHitCountThisRun || 0, bossKills: this._bossKillsThisRun || 0, abyssDepth: this.loopCount || 0, dodges: this._totalDodgesThisRun || 0, crits: this._totalCritsThisRun || 0, /* R140-P0: 用_won替代!gameOver防止胜利路径误报失败 */ won: this._won };
+        var weeklyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: this._maxGoldThisRun || 0, hitsTaken: this._playerHitCountThisRun || 0, bossKills: this._bossKillsThisRun || 0, abyssDepth: this.loopCount || 0, dodges: this._totalDodgesThisRun || 0, crits: this._totalCritsThisRun || 0, /* R140-P0: 用_won替代!gameOver防止胜利路径误报失败 */ won: this._won, /* R221-P0: 周常type:'wins'挑战需独立wins计数，原传won(boolean)导致stats[c.type]恒为undefined */ wins: (this._won ? 1 : 0) };
         if (typeof window.saveManager.checkWeeklyCompletion === 'function') {
             var wc = window.saveManager.checkWeeklyCompletion(weeklyStats);
             weeklyCompleted = wc.completed || [];

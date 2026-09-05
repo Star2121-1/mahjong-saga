@@ -494,7 +494,7 @@ Gp._loop = function(timestamp) {
         /* 设计决策：面板打开时游戏循环暂停，Overdrive 计时随之暂停。
            面板关闭后倒计时从剩余时间继续。不按真实时间流逝。
            R38: Sys.updateOverdrive 是死代码（从未被调用），此处是唯一活跃计时器 */
-        if (this._overdriveActive) {
+        if (this._overdriveActive && !this._pendingReward) {
             this._overdriveTimer -= dt;
             if (this._overdriveTimer <= 0) this._endOverdrive();
         }

@@ -458,6 +458,44 @@
 .game-clock-frozen .enemy.tile-crack::after {
     animation-play-state: running !important;
 }
+/* R221-P0: 冰冻敌人冰霜呼吸在面板打开时不应暂停 */
+.game-clock-frozen .enemy.frozen,
+.game-clock-frozen .enemy.frozen::before,
+.game-clock-frozen .enemy.frozen::after {
+    animation-play-state: running !important;
+}
+/* R221-P0: Boss诱饵消散动画在面板打开时应继续播放 */
+.game-clock-frozen .boss-decoy {
+    animation-play-state: running !important;
+}
+/* R221-P0: 弓箭手瞄准辉光在面板打开时应继续播放 */
+.game-clock-frozen .enemy.draw-aim,
+.game-clock-frozen .enemy.draw-aim::before,
+.game-clock-frozen .enemy.draw-aim::after {
+    animation-play-state: running !important;
+}
+/* R221-P0: Boss P1蓄力辉光在面板打开时应继续播放 */
+.game-clock-frozen .enemy.p1-charging,
+.game-clock-frozen .enemy.p1-charging::before,
+.game-clock-frozen .enemy.p1-charging::after {
+    animation-play-state: running !important;
+}
+/* R221-P0: 玩家受击动画在面板打开时应继续播放 */
+.game-clock-frozen #player.take-damage,
+.game-clock-frozen #player.take-damage::before,
+.game-clock-frozen #player.take-damage::after {
+    animation-play-state: running !important;
+}
+/* R221-P0: 清一色进度条辉光在面板打开时应继续播放 */
+.game-clock-frozen #hand-tile-bar.qy-near,
+.game-clock-frozen #hand-tile-bar.qy-near::before,
+.game-clock-frozen #hand-tile-bar.qy-near::after {
+    animation-play-state: running !important;
+}
+/* R221-P1: 精英标记辉光在面板打开时应继续播放 */
+.game-clock-frozen .elite-marker {
+    animation-play-state: running !important;
+}
 
 /* ══════════════════════════════════════════════
    引导面板步骤导航 (Epoch 1)
