@@ -485,6 +485,7 @@ Gp._spawnBossLordFromGamble = function() {
     /* R194-P1: 最终波龙王速度翻倍 + 花色偏转，从死代码路径迁移至此 */
     if (this._waveCount >= this._getMaxWaves() - 1) {
         lord.speed *= 2;
+        lord.baseSpeed = lord.speed; /* R225-P1: 同步baseSpeed防止overdrive结束后速度回退 */
         lord.hue = 30;
     }
 

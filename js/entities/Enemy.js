@@ -639,6 +639,8 @@ window.Enemy = class Enemy {
                 this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
                 /* R187-P1: 重置辐射弹道计时器，防止转场瞬间触发弹幕 */
                 this._bossRadiationTimer = 0;
+                /* R225-P1: 重置P3召唤计时器，防止P2残留导致首次召唤过早触发 */
+                this._bossSummonTimer = Balance.BOSS_PHASE3_SUMMON_INTERVAL;
                 /* R225-P0: 重置P3召唤计数器，防止P2冻结残留的召唤计数导致P3召唤不足 */
                 this._summonCount = 0;
                 this._summonStalkers = 0;
