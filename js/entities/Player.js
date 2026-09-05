@@ -12,6 +12,7 @@ class Player {
         this.hitFlashTimer = 0; /* 独立受击闪烁计时器，与无敌帧分离 */
         this.critRate = 0;
         this._weaponCdReduction = 0; /* P1-3: 跨局冷却缩减清零 */
+        this.damageReduction = 0; /* R242-P1: 显式初始化防止restore路径undefined导致隐患 */
         this._tempBuffTimeLeft = undefined;
         this.mapAffinityLevel = 0; /* R56-P1: 关卡亲和等级初始化，防止未定义 */
         this._tempAtkBoost = 0;
@@ -528,7 +529,7 @@ class Player {
                 { id: 'gc_magnet', name: '巨吸', apply: function(p) { p.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, (p.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT) + 50); } }
             ],
             weapon_amplify: [
-                { id: 'wa_cd', name: '迅捷', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { var _w = eng._activeWeapons[i]; var _f = p.cdFloor || Balance.DEFAULT_CD_FLOOR; /* R212-P0: 更新_origBaseCd而非_baseCd，防止Render.js帧循环覆盖 */ _w._origBaseCd = Math.max(_f, (_w._origBaseCd || _w.cd) * Balance.WEAPON_UPGRADE_CD_MULT); _w._baseCd = _w._origBaseCd; _w.cd = Math.max(_f, _w._baseCd); /* R238-P1: 添加cdFloor下限钳制，防止_baseCd被意外压低后无下限 */ } } } }, /* R212-P0: 与weapon_amplify一致，写入_origBaseCd防止帧循环覆盖 */
+                { id: 'wa_cd', name: '迅捷', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { var _w = eng._activeWeapons[i]; var _f = p.cdFloor || Balance.DEFAULT_CD_FLOOR; /* R212-P0: 更新_origBaseCd而非_baseCd，防止Render.js帧循环覆盖 */ _w._origBaseCd = Math.max(_f, (_w._origBaseCd || _w.cd) * Balance.WEAPON_UPGRADE_CD_MULT); _w._baseCd = _w._origBaseCd; /* R242-P1: 与getAllRelicAffixDefs路径一致，应用_weaponCdReduction防止CD计算不一致 */ _w.cd = Math.max(_f, _w._origBaseCd * (1 - (p._weaponCdReduction || 0))); } } } }, /* R212-P0: 与weapon_amplify一致，写入_origBaseCd防止帧循环覆盖 */
                 { id: 'wa_atk', name: '强化', apply: function(p) { p.atk += 5; } }
             ]
         };
@@ -627,7 +628,7 @@ class Player {
         this.hitFlashTimer = data.hitFlashTimer || 0;
         this.currentLvl = data.currentLvl || 1;
         this.currentExp = data.currentExp || 0;
-        this.nextLvlExp = data.nextLvlExp || 15;
+        this.nextLvlExp = data.nextLvlExp !== undefined ? data.nextLvlExp : Balance.LEVEL_EXP_BASE;
 
         this.hue = data.hue ?? this.hue;
         /* R164-P0: clamp restored HP/maxHp/atk to prevent crafted imports from setting negative/Infinity values */

@@ -392,6 +392,7 @@ Gp._showBossGamble = function() {
     for (var i = 0; i < btns.length; i++) {
         btns[i].addEventListener('click', (function(choice) {
             return function() {
+                if (!self._pendingBossGamble) return; /* R242-P0: 守卫防止超时与点击竞态导致面板残留 */
                 if (panel.parentNode) panel.remove();
                 self._resolveGambleChoice(choice);
             };

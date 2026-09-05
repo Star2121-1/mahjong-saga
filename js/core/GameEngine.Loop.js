@@ -171,8 +171,6 @@ Gp._loop = function(timestamp) {
 
             /* ── 图腾 buff 应用（Epoch 46: 网格空间分割优化） ── */
             for (var _toti = 0; _toti < this.enemies.length; _toti++) this.enemies[_toti]._totemBuffed = false;
-            /* P2-7 真修: 复位移到 totems 分支外 — 防末图腾消失后减速标志永久残留 */
-            this.player._frostSlowed = false;
             if (this._totems.length > 0) {
                 /* B3: 图腾寿命到期清理（8s） */
                 for (var _tex = this._totems.length - 1; _tex >= 0; _tex--) {
@@ -499,7 +497,7 @@ Gp._loop = function(timestamp) {
         /* 设计决策：面板打开时游戏循环暂停，Overdrive 计时随之暂停。
            面板关闭后倒计时从剩余时间继续。不按真实时间流逝。
            R38: Sys.updateOverdrive 是死代码（从未被调用），此处是唯一活跃计时器 */
-        if (this._overdriveActive && !this._pendingReward && !this._levelUpPending) { /* R235-P1: 与突变触发守卫一致，防止面板打开时计时继续 */
+        if (this._overdriveActive && !this._pendingReward && !this._levelUpPending && !this._activeMutator) { /* R235-P1/R242-P1: 添加_mutator守卫，防止突变面板打开时overdrive计时继续流逝 */
             this._overdriveTimer -= dt;
             if (this._overdriveTimer <= 0) this._endOverdrive();
         }
@@ -603,7 +601,7 @@ Gp._loop = function(timestamp) {
                 this._witherAbyssTimer = (this._witherAbyssTimer || 0) + dt;
                 if (this._witherAbyssTimer >= Balance.ABYSS_WITHER_TICK_INTERVAL) {
                     this._witherAbyssTimer = 0;
-                    var drainPct = Balance.GRAVITY_DRAIN_HP_PCT; /* R233-P1: 使用Balance常量替代硬编码 */
+                    var drainPct = Balance.ABYSS_WITHER_DRAIN_HP_PCT; /* R233-P1/R242-P1: 修正常量名，该常量为深渊凋零组合使用 */
                     var maxHp = this.player.maxHp;
                     var drainDmg = Math.floor(maxHp * drainPct);
                     if (drainDmg > 0) {

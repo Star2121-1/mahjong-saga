@@ -126,7 +126,7 @@ Gp._spawnExpText = function(x, y, amount) {
         return;
     }
     var el = document.createElement('div');
-    el.className = 'damage-float exp-gain';
+    el.className = 'damage-float exp';
     el.textContent = '+' + amount + 'EXP';
     el.style.left = (x - 10) + 'px';
     el.style.top = (y - 40) + 'px';
