@@ -251,6 +251,7 @@ Gp._triggerOverdrive = function() {
     this._overdriveActive = true;
     this._overdriveTimer = Balance.OVERDRIVE_DURATION;
     this.player.rage = 0;
+    this._origCdFloor = this.player.cdFloor; /* R235-P1: fallback路径保存cdFloor，防止_endOverdrive使用默认值0.2 */
     /* R117-P1: fallback 路径也递增计数，确保断点续玩时成就不丢失 */
     this._overdriveCount = (this._overdriveCount || 0) + 1;
     /* R117-P1: fallback 路径应用武器增益和敌人冻结（等效 Sys.triggerOverdrive） */
@@ -293,7 +294,7 @@ Gp._endOverdrive = function() {
     for (var _oi = 0; _oi < this.enemies.length; _oi++) {
         var _oe = this.enemies[_oi];
         if (_oe._overdriveStored) {
-            _oe.speed = _oe._overdriveOrigSpeed || _oe.baseSpeed;
+            _oe.speed = _oe._overdriveOrigSpeed !== undefined ? _oe._overdriveOrigSpeed : _oe.baseSpeed; /* R235-P1: 使用!==undefined防止0速敌人被解冻 */
             _oe._overdriveStored = false;
             _oe._overdriveOrigSpeed = undefined;
         }

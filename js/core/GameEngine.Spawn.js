@@ -694,7 +694,7 @@ Gp._triggerHu = function (hu) {
                 this._tempAspdT = 9999;
                 break;
             case 'qiduizi':
-                p.dodgeRate = Math.min(0.8, (p.dodgeRate || 0) + B.HU_QIDUI_DODGE);
+                p.dodgeRate = Math.min(Balance.MAX_DODGE_RATE, (p.dodgeRate || 0) + B.HU_QIDUI_DODGE);
                 /* R149-P0: 速度加成改为加法叠加，防止多次七对子乘法复合 */
                 p._qiduiSpdBonus = (p._qiduiSpdBonus || 0) + B.HU_QIDUI_SPD;
                 var _baseSpd = p.baseSpeed || B.PLAYER_MAX_SPEED;

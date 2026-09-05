@@ -54,6 +54,7 @@ window.Balance = {
     RELIC_GOLDEN_FINGER_CRIT_INC: 0.15, // 鬼指每级暴击加成 (Player.js)
     MAX_LIFESTEAL_RATE: 0.8,         // 吸血上限 (Player.js)
     MAX_DODGE_RATE: 0.8,             // 闪避率上限 (RewardManager secret 四风狂飙)
+    CORE_RES_PER_LEVEL: 0.1,         // R235-P1: 核心共振每级加成 (Combat.js + SaveManager.Core.js)
     MAX_XP_GAIN_FACTOR: 2.0,         // EXP获取倍率上限 (Player.js relic gc_xp)
     MAX_XP_GAIN_PCT: 0.50,           // 装备xp_gain词条累计上限 (Player.js _reapplyMetaBonuses/reset)
     MAX_FREEZE_DURATION_BONUS: 5.0,  // ice_bonus词条累计冻结时长上限(s) (Player.js)

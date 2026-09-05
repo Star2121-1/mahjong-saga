@@ -26,9 +26,9 @@ window.Weapon = class {
     }
     upgrade() {
         this.level++;
-        this.atkFactor = Math.min(10.0, this.atkFactor + Balance.WEAPON_UPGRADE_ATK_INC);
+        this.atkFactor = Math.min(Balance.ATK_FACTOR_MAX_CAP, this.atkFactor + Balance.WEAPON_UPGRADE_ATK_INC);
         /* R159-P0: overdrive期间升级武器时同步更新_odOrigAtk，防止overdrive结束后升级丢失 */
-        if (this._odOrigAtk !== undefined) this._odOrigAtk = Math.min(10.0, this._odOrigAtk + Balance.WEAPON_UPGRADE_ATK_INC);
+        if (this._odOrigAtk !== undefined) this._odOrigAtk = Math.min(Balance.ATK_FACTOR_MAX_CAP, this._odOrigAtk + Balance.WEAPON_UPGRADE_ATK_INC);
         var playerCdFloor = (window.gameEngine && window.gameEngine.player) ? window.gameEngine.player.cdFloor : null;
         var floor = (playerCdFloor != null) ? playerCdFloor : Balance.DEFAULT_CD_FLOOR;
         this.cd = Math.max(floor, this.cd * Balance.WEAPON_UPGRADE_CD_MULT);

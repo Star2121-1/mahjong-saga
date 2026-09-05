@@ -469,6 +469,7 @@ class Player {
     /* ── Epoch 33: 圣物随机词条 ── */
 
     _rollRelicAffix(relicId, level) {
+        if (this._skipRelicAffixes) return; /* R235-P1: 跳过词条随机，保留存档数据 */
         var affixes = this._getRelicAffixPool(relicId);
         if (affixes.length === 0) return;
         var affix = affixes[Math.floor(Math.random() * affixes.length)];

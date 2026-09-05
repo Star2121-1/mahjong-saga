@@ -429,7 +429,7 @@ Gp._settleRun = async function(tokens) {
     var metaForResonance = window.saveManager._metaCache || {};
     var coreResLevel = (metaForResonance.talents || {}).he_resonance || 0;
     if (coreResLevel > 0) {
-        bonusCores = Math.floor(bonusCores * (1 + coreResLevel * 0.1));
+        bonusCores = Math.floor(bonusCores * (1 + coreResLevel * Balance.CORE_RES_PER_LEVEL));
     }
     /* ── 变异保险库：每携带一个异变，核心翻倍 ── */
     if (this._vaultMutations && this._vaultMutations.length > 0) {
