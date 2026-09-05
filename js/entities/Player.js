@@ -524,10 +524,6 @@ class Player {
             setResonanceSpeed: this.setResonanceSpeed,
             /* R225-P1: 序列化七对子武器CD减免，防止断点续玩后丢失 */
             weaponCdReduction: this._weaponCdReduction || 0,
-            _baseMagnetRadius: this._baseMagnetRadius || this.magnetRadius, /* R57-P1: 序列化基准磁铁半径 */
-            rage: this.rage,
-            maxRage: this.maxRage,
-            setResonanceSpeed: this.setResonanceSpeed,
             setResonanceIce: this.setResonanceIce,
             damageReduction: this.damageReduction,
             _reviveCount: this._reviveCount || 0,
@@ -544,7 +540,13 @@ class Player {
             _tempAtkBoost: this._tempAtkBoost || 0,
             _tempHpBonus: this._tempHpBonus || 0,
             _doubleCoinNextWave: !!this._doubleCoinNextWave,
-            mapAffinityLevel: this.mapAffinityLevel || 0
+            mapAffinityLevel: this.mapAffinityLevel || 0,
+            /* R227-P0: 深渊combo运行时状态序列化，防止断点恢复后ATK/HP倍率重算 */
+            _abyssFrailtyOrigAtk: this._abyssFrailtyOrigAtk !== undefined ? this._abyssFrailtyOrigAtk : null,
+            _abyssFrailtyAtk: this._abyssFrailtyAtk !== undefined ? this._abyssFrailtyAtk : null,
+            _abyssBloodmoonApplied: this._abyssBloodmoonApplied || false,
+            _abyssBloodmoonOrigMaxHp: this._abyssBloodmoonOrigMaxHp !== undefined ? this._abyssBloodmoonOrigMaxHp : null,
+            _abyssBloodmoonAtkBonus: this._abyssBloodmoonAtkBonus !== undefined ? this._abyssBloodmoonAtkBonus : null
         };
     }
 
@@ -623,6 +625,12 @@ class Player {
         this.setResonanceSpeed = !!data.setResonanceSpeed;
         this.setResonanceIce = !!data.setResonanceIce;
         this.mapAffinityLevel = data.mapAffinityLevel || 0;
+        /* R227-P0: 恢复深渊combo运行时状态 */
+        this._abyssFrailtyOrigAtk = data._abyssFrailtyOrigAtk;
+        this._abyssFrailtyAtk = data._abyssFrailtyAtk;
+        this._abyssBloodmoonApplied = !!data._abyssBloodmoonApplied;
+        this._abyssBloodmoonOrigMaxHp = data._abyssBloodmoonOrigMaxHp;
+        this._abyssBloodmoonAtkBonus = data._abyssBloodmoonAtkBonus;
         this._thornCritX = undefined;
         this._thornCritY = undefined;
         this._healAmount = 0;
