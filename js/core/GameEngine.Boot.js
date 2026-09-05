@@ -123,7 +123,8 @@ Gp.init = async function() {
                 self._zoomLevel = Math.max(1, Math.min(1.5, (self._zoomLevel || 1) + d));
             }, { passive: false });
         this.battlefield.addEventListener('pointerdown', function(e) {
-            if (e.button !== 0) return;
+            /* R238-P0: 触屏设备e.button为undefined，需同时允许touch/pen指针类型 */
+            if (e.pointerType !== 'touch' && e.pointerType !== 'pen' && e.button !== 0) return;
             if (e.target.closest && e.target.closest('#joystick-container')) return;
             /* 排除 overlay 区域 — 防止拦截 modal 点击 */
             if (e.target.closest && (e.target.closest('#reward-overlay, #victory-overlay, #game-over-overlay, #pause-overlay, #guide-overlay, #mutator-overlay, #boss-gamble-panel, #abyss-panel, #abyss-shop-panel'))) return;
@@ -421,6 +422,8 @@ Gp._startNewRun = function(heroId, levelId) {
     this._initViewportResize();
     /* P0-1: 局序号递增 — 使旧局未完成结算的 await 守卫失效 */
     this._runSeq = (this._runSeq || 0) + 1;
+    /* R238-P0: 重置待处理经验石队列，防止断点续玩残留 */
+    this._pendingExpGems = [];
     /* P1-4: 跨局状态重置（雀魂手牌/面子/打牌态/金光环） */
     this._handTiles = [];
     this._formedMelds = {};

@@ -125,9 +125,16 @@ Gp._spawnCoinBurst = function(count) {
     if (!this.battlefield) return;
     var px = this.player.x;
     var py = this.player.y;
-    /* L-022: 通过 spawnCoinsAt 生成可拾取金币，避免 addGold 直接加钱导致双倍 */
-    if (this._combat && this._combat.spawnCoinsAt) {
-        this._combat.spawnCoinsAt(this, px, py, false, 1); /* R207-P1: count应作为金币数量而非关卡等级传入 */
+    /* R238-P0: CombatSystem无spawnCoinsAt方法，直接生成可拾取金币 */
+    for (var i = 0; i < count; i++) {
+        var cx = px + (Math.random() - 0.5) * 60;
+        var cy = py + (Math.random() - 0.5) * 60;
+        var el = document.createElement('div');
+        el.className = 'coin-placeholder';
+        el.style.left = (cx - 6) + 'px';
+        el.style.top = (cy - 6) + 'px';
+        this._worldLayer.appendChild(el);
+        this._activeCoins.push({ x: cx, y: cy, el: el, baseGold: 1 });
     }
     if (window.fxManager) window.fxManager.spawnText(px, py, '+' + count + ' 🪙', '#ffd700'); /* R222-P1: 移除未使用的duration参数 */
 };

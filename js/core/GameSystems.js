@@ -37,7 +37,7 @@ Sys.triggerOverdrive = function(engine) {
     for (var _wi = 0; _wi < (engine._activeWeapons || []).length; _wi++) {
         var _w = engine._activeWeapons[_wi];
         if (_w && _w._odOrigAtk === undefined) _w._odOrigAtk = _w.atkFactor;
-        if (_w) _w.atkFactor = (_w._odOrigAtk || _w.atkFactor) * 2;
+        if (_w) _w.atkFactor = _w._odOrigAtk * 2; /* R238-P0: 移除 || _w.atkFactor 兜底，防止_odOrigAtk被清空后二次叠加 */
     }
     if (engine.container) engine.container.classList.add('overdrive-active');
     /* R232-P1: Overdrive触发时添加震屏反馈，与其他强力技能一致 */

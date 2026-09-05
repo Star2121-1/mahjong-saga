@@ -683,6 +683,11 @@ window.Enemy = class Enemy {
             if (this._bossPhase >= 2) {
                 this._bossAbilityTimer = Balance.BOSS_PHASE2_ABILITY_INTERVAL;
                 this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
+                /* R238-P1: P1→P3跳过phase2时重置召唤计时器，防止_stalker残留导致过早召唤 */
+                if (this._bossPhase === 3) {
+                    this._bossSummonTimer = Balance.BOSS_PHASE3_SUMMON_INTERVAL;
+                    this._summonCount = 0;
+                }
             }
         }
 
@@ -872,6 +877,7 @@ window.Enemy = class Enemy {
                 this.y -= (pdy / pDist) * this.speed * dt;
                 this._clampPosition(engine);
             }
+            /* R238-P1: pDist==0时也需结算接触伤害，原代码将damage检查放在pDist>0.01内导致玩家站在boss身上不受伤害 */
             if (this._bossContactTimer <= 0) {
                 this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
                 var contactDmg = this._bossPhase === 3 ? Math.floor(this._getEffectiveAtk() * Balance.BOSS_P3_CONTACT_DMG_MULT) : this._getEffectiveAtk();

@@ -389,7 +389,7 @@ class Player {
                 var _baseThorns = Balance.EVOLVED_ARMOR_THORNS_BASE;
                 if (this.heroId === 'Mage') {
                     /* Mage被动在基础反伤之上增加，R38-P0: 包含affix加成防止丢失 */
-                    this.thornsRate = Math.min(1.0, _baseThorns + (this.relicLevels.thorn_armor || 0) * Balance.THORN_PER_LEVEL + (this._thornsAffixBonus || 0));
+                    this._recalcThornsRate();
                 } else {
                     this.thornsRate = _baseThorns;
                 }
@@ -397,7 +397,7 @@ class Player {
             case 'evolved_speed':
                 this.evolvedSpeed = true;
                 this.dodgeRate = Math.min(Balance.MAX_DODGE_RATE, this.dodgeRate + Balance.EVOLVED_DODGE_BONUS);
-                this.speedMultiplier += Balance.EVOLVED_DODGE_BONUS;
+                this.speedMultiplier = Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, this.speedMultiplier + Balance.EVOLVED_DODGE_BONUS);
                 this.speed = this.baseSpeed * this.speedMultiplier;
                 break;
             case 'evolved_vamp':
@@ -410,6 +410,7 @@ class Player {
                 break;
             case 'weapon_amplify': {
                 this.atk += 3;
+                this._baseAtk = this.atk; /* R238-P1: 同步更新_baseAtk锚点，防止recalcRelicStats和深渊轮回缩放使用旧值 */
                 var eng = window.gameEngine;
                 if (eng && eng._activeWeapons) {
                     for (var _wi = 0; _wi < eng._activeWeapons.length; _wi++) {
@@ -464,6 +465,16 @@ class Player {
         p.speedMultiplier = Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, p.speedMultiplier);
         p.speed = p.baseSpeed * p.speedMultiplier;
         p.speed = Math.min(Balance.PLAYER_MAX_SPEED, p.speed);
+        /* R238-P1: 圣物重算后恢复英雄被动 — 雀灵流转CD缩减与CD下限 */
+        if (p.heroId === 'Hero') {
+            p._weaponCdReduction = Balance.HERO_ASPD_BONUS;
+            p.cdFloor = Math.max(0.05, (window.heroConfig.Hero.cdFloor || Balance.DEFAULT_CD_FLOOR) * Balance.HERO_CD_FLOOR_REDUCTION);
+        }
+        /* R238-P1: 圣物重算后恢复刺客移速被动 (10% base bonus + cap) */
+        if (p.heroId === 'Assassin') {
+            p.speedMultiplier = Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, p.speedMultiplier + (Balance.HERO_ASSASSIN_SPEED_MULT - 1));
+            p.speed = p.baseSpeed * p.speedMultiplier;
+        }
     }
 
     /* ── Epoch 33: 圣物随机词条 ── */
@@ -518,7 +529,7 @@ class Player {
                 { id: 'gc_magnet', name: '巨吸', apply: function(p) { p.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, (p.magnetRadius || Balance.MAGNET_RADIUS_DEFAULT) + 50); } }
             ],
             weapon_amplify: [
-                { id: 'wa_cd', name: '迅捷', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { var _w = eng._activeWeapons[i]; var _f = p.cdFloor || Balance.DEFAULT_CD_FLOOR; /* R212-P0: 更新_origBaseCd而非_baseCd，防止Render.js帧循环覆盖 */ _w._origBaseCd = Math.max(_f, (_w._origBaseCd || _w.cd) * Balance.WEAPON_UPGRADE_CD_MULT); _w._baseCd = _w._origBaseCd; _w.cd = _w._baseCd; } } } }, /* R212-P0: 与weapon_amplify一致，写入_origBaseCd防止帧循环覆盖 */
+                { id: 'wa_cd', name: '迅捷', apply: function(p) { var eng = window.gameEngine; if (eng && eng._activeWeapons) { for (var i = 0; i < eng._activeWeapons.length; i++) { var _w = eng._activeWeapons[i]; var _f = p.cdFloor || Balance.DEFAULT_CD_FLOOR; /* R212-P0: 更新_origBaseCd而非_baseCd，防止Render.js帧循环覆盖 */ _w._origBaseCd = Math.max(_f, (_w._origBaseCd || _w.cd) * Balance.WEAPON_UPGRADE_CD_MULT); _w._baseCd = _w._origBaseCd; _w.cd = Math.max(_f, _w._baseCd); /* R238-P1: 添加cdFloor下限钳制，防止_baseCd被意外压低后无下限 */ } } } }, /* R212-P0: 与weapon_amplify一致，写入_origBaseCd防止帧循环覆盖 */
                 { id: 'wa_atk', name: '强化', apply: function(p) { p.atk += 5; } }
             ]
         };
