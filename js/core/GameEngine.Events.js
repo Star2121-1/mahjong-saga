@@ -652,9 +652,7 @@ Gp._updateEnemyProjectiles = function(dt) {
                             if (!p._hitEnemy) {
                                 p._hitEnemy = true;
                                 var projDmg = p.damage;
-                                if (this._mapAffinityReduction) {
-                                    projDmg = Math.max(1, Math.floor(projDmg * (1 - this._mapAffinityReduction)));
-                                }
+                                /* R208-P0: mapAffinityReduction only applied once in Enemy.takeDamage() */
                                 if (_pe.takeDamage) _pe.takeDamage(projDmg, p._owner || this);
                             }
                             _hitAny = true;

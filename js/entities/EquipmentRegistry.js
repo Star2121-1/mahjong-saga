@@ -6,9 +6,9 @@ window.equipmentRegistry = {
     },
 
     affixPool: {
-        xp_gain:    { id: 'xp_gain',    name: '\u7ecf\u9a8c\u756a',  min: 0.05, max: 0.15, fmt: '\u7ecf\u9a8c\u83b7\u53d6 +{val}%' },
+        xp_gain:    { id: 'xp_gain',    name: '\u7ecf\u9a8c\u756a',  min: 0.05, max: 0.15, fmt: '\u7ecf\u9a8c\u83b7\u53d6 +{val}' },
         ice_bonus:  { id: 'ice_bonus',  name: '\u51b0\u51bb\u756a',  min: 0.1,  max: 0.5,  fmt: '\u51b0\u51bb\u63a7\u5236\u65f6\u95f4 +{val}s' },
-        speed_pct:  { id: 'speed_pct',  name: '\u81ea\u6478\u901f',  min: 0.05, max: 0.10, fmt: '\u79fb\u52a8\u901f\u5ea6 +{val}%' }
+        speed_pct:  { id: 'speed_pct',  name: '\u81ea\u6478\u901f',  min: 0.05, max: 0.10, fmt: '\u79fb\u52a8\u901f\u5ea6 +{val}' }
     },
 
     _affixKeys: ['xp_gain', 'ice_bonus', 'speed_pct'],

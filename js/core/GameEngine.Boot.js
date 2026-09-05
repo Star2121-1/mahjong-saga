@@ -802,10 +802,13 @@ Gp._autoSave = function(trigger) {
 
 Gp._initKeyboard = function() {
     var self = this;
-    /* R134-P0: 先移除旧监听器，防止restart后匿名函数累加 */
-    document.removeEventListener('keydown', self._onKeyDown);
-    document.removeEventListener('keyup', self._onKeyUp);
-    document.removeEventListener('keydown', self._onKeyDownNav);
+    /* R208-P1: 先保存旧引用再移除，否则removeEventListener对新版闭包无效(no-op) */
+    var _oldKD = self._onKeyDown;
+    var _oldKU = self._onKeyUp;
+    var _oldKN = self._onKeyDownNav;
+    document.removeEventListener('keydown', _oldKD);
+    document.removeEventListener('keyup', _oldKU);
+    document.removeEventListener('keydown', _oldKN);
     self._onKeyDown = function(e) {
         if (e.repeat) return; /* R140-P0: 忽略OS键重复，防止快速连按污染按键状态机 */
         /* Epoch 43: 引导移动追踪 */
@@ -821,7 +824,7 @@ Gp._initKeyboard = function() {
             e.preventDefault(); /* P1-1: 防止浏览器后退 */
             return;
         }
-        if (!self.running || self.gameOver) return;
+        if (!self.running || self.gameOver || self._announcingWave || self._gambleActive) return;
         if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyW','KeyA','KeyS','KeyD'].includes(e.code)) e.preventDefault();
         if (e.code === 'Space' && self.player && self.player.rage >= self.player.maxRage && !self._overdriveActive && !self._paused && !self._announcingWave && !self._discardMode && !self._huLock && !self._pendingReward && !self._levelUpPending && !self._gambleActive && !self._activeMutator) {
             self._pressedKeys[e.code] = false;

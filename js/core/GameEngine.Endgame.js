@@ -6,7 +6,7 @@ Gp._onClick = function(e) {
     var enemyEl = e.target.closest('.enemy');
     if (!enemyEl) return;
     /* R46-P1: 防止overlay打开时误触攻击 */
-    if (!this.running || this._paused || this._levelUpPending || this._pendingReward || this._gambleActive) return;
+    if (!this.running || this._paused || this._levelUpPending || this._pendingReward || this._gambleActive || this._announcingWave) return;
 
     var id = parseInt(enemyEl.dataset.id, 10);
     var enemy = null;
@@ -417,6 +417,9 @@ Gp.restart = function() {
     var heroId = this.player ? this.player.heroId : 'Hero';
     var levelId = this._currentLevelId || 'level_1';
     this._startNewRun(heroId, levelId);
+    /* R208-P1: restart后重新注册键盘/摇杆监听，防止DOM节点复用导致输入失效 */
+    this._initKeyboard();
+    this._initJoystick();
     /* R187-P1: restart后重新注册beforeunload，防止第二次restart后自动存档失效 */
     this._initBeforeUnload();
 };

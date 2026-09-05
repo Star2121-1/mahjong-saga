@@ -61,6 +61,7 @@ class RewardManager {
             { id: 'sacrifice_temp_hp', name: '铁壁番护', icon: '🛡', desc: '献祭一个圣物，获得 +100 最大HP临时增益（30秒）', type: 'temp_buff', buff: 'tempHp', duration: 30, value: 100 },
             { id: 'sacrifice_double_coin', name: '翻倍宝牌', icon: '🪙', desc: '献祭一个圣物，下一波金币收益翻倍', type: 'double_coin', value: 1 }
         ];
+        this._pendingSecretSave = Promise.resolve();
     }
 
     /* ── 波次宝箱 ── */

@@ -660,9 +660,6 @@
                 if (!_eq || typeof _eq !== 'object') return false;
                 if (!_eq.instanceId || typeof _eq.instanceId !== 'string') return false;
                 if (!_eq.protoId || typeof _eq.protoId !== 'string') return false;
-                if (!_eq.affixes || !Array.isArray(_eq.affixes)) return false;
-                if (typeof _eq !== 'object' || Array.isArray(_eq)) return false;
-                if (typeof _eq.instanceId !== 'string' || !_eq.instanceId) return false;
                 if (!_eq.protoId) return false;
                 if (_validQ.indexOf(_eq.quality) === -1) return false;
                 if (_validS.indexOf(_eq.slot) === -1) return false;
