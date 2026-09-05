@@ -202,6 +202,14 @@
         var t = tally(hand);
         var effective = t.total + t.jokers;
         if (effective < B.HUPAI_HAND_MAX) return null;
+        /* R237-P0: 七对子必须在 extractMelds 之前判定，防止贪心顺子/刻子消耗癞子导致漏判；
+           公式加入 t.jokers 使有效手牌数正确（原公式 t.total - pairs*2 遗漏了癞子）*/
+        var pairs = 0;
+        for (var id2 in t.count) { pairs += Math.floor(t.count[id2] / 2); }
+        var maxPossiblePairs = pairs + Math.min(t.jokers, t.total + t.jokers - pairs * 2);
+        if (maxPossiblePairs >= 7) {
+            return { huType: 'qiduizi' };
+        }
         /* R199-P0: pre-consume jokers used by extractMelds so Pengpenghu doesn't double-count them */
         var consumed = extractMelds(hand);
         var jokersConsumedByMelds = consumed.filter(function(m) { return m.tiles.indexOf('joker') > -1; }).length;
@@ -220,14 +228,6 @@
         /* R188-P0: 增加 !hasHonor 约束，防止字牌+单花色被误判为清一色 */
         if (suitKeys.length > 0 && !hasHonor && (t.jokers > 0 ? suitKeys.length <= 1 : suitKeys.length === 1)) {
             return { huType: 'qingyise', suit: suitKeys[0] };
-        }
-        /* 七对子：凑齐 7 对（14 张），每癞子可补 1 个缺口 */
-        var pairs = 0;
-        for (var id2 in t.count) { pairs += Math.floor(t.count[id2] / 2); }
-        /* R140-P0: 修正七对子判定 — 用maxPossiblePairs防止多刻+多对+多癞子误判 */
-        var maxPossiblePairs = pairs + Math.min(jokersAfterMelds, t.total - pairs * 2);
-        if (maxPossiblePairs >= 7) {
-            return { huType: 'qiduizi' };
         }
         /* 碰碰胡：刻/杠组 ≥4 — 直接计数 extractMelds 已消耗癞子后的真实刻/杠组数，避免近似公式高估 */
         var pengpenghu = 0;
