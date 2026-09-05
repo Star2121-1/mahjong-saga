@@ -600,7 +600,8 @@ class Player {
         const cfg = window.heroConfig[this.heroId];
         if (cfg) {
             if (cfg.weaponSlots != null) this.maxWeaponSlots = cfg.weaponSlots;
-            if (cfg.cdFloor != null) this.cdFloor = cfg.cdFloor;
+            /* Only apply config cdFloor if snapshot didn't capture a run-modified value */
+            if (cfg.cdFloor != null && data.cdFloor === undefined) this.cdFloor = cfg.cdFloor;
         }
         this.maxWeaponSlots = data.maxWeaponSlots !== undefined ? data.maxWeaponSlots : this.maxWeaponSlots;
         /* R164-P1: 钳制存档中恶意篡改的maxWeaponSlots，防止突破武器槽上限 */
