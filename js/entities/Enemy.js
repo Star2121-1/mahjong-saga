@@ -959,7 +959,7 @@ window.Enemy = class Enemy {
         if (this.frozen) {
             actualDmg = Math.floor(actualDmg * Balance.FROZEN_DAMAGE_MULT);
             /* R159-P0: 仅玩家攻击来源衰减冰冻计时器，反伤/环境伤害不消耗冰冻时长 */
-            var _frozenByPlayer = source === 'player' || (source && typeof source.x === 'number');
+            var _frozenByPlayer = source === 'player' || (source && typeof source.x === 'number') || source === 'wither';
             if (_frozenByPlayer && !this._freezeHitDecayed) {
                 this.frozenTimer -= Balance.FROZEN_HIT_DECAY;
                 this._freezeHitDecayed = true;

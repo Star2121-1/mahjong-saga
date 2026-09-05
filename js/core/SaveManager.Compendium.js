@@ -9,8 +9,9 @@
     var _compSaveTimer = null;
     SaveManager.prototype.recordCompendiumEntry = function(category, id) {
         if (!this._metaCache) return;
+        if (!this._metaCache.compendium) this._metaCache.compendium = { relics: [], weapons: [], enemies: [], equips: [], mutations: [], hupai: [] };
         var arr = this._metaCache.compendium[category];
-        if (!arr) return;
+        if (!arr) { this._metaCache.compendium[category] = []; arr = this._metaCache.compendium[category]; }
         if (arr.indexOf(id) === -1) {
             arr.push(id);
             if (!_compSaveTimer) {
