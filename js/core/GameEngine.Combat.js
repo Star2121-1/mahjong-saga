@@ -112,6 +112,8 @@ Gp._resumeAfterLevelUp = function() {
     /* R250-P1: 疾风连打攻速加成单波有效 — 防止跨升级面板残留 */
     this._tempAspd = 0;
     this._tempAspdT = 0;
+    /* R271-P1: 铁拳暴击加成单波有效 — 防止跨升级面板残留，与波次重置路径一致 */
+    this._tempCritBonus = 0;
     /* R255-P0: 清理武器特效(shockwave/pulse)，防止升级面板期间效果跨级泄漏 */
     if (this._activeWeapons) {
         for (var _wi = 0; _wi < this._activeWeapons.length; _wi++) {

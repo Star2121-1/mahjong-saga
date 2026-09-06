@@ -573,7 +573,8 @@ window.Enemy = class Enemy {
                     if (exdx * exdx + exdy * exdy <= explodeR2) {
                         var _bombDmg = Math.floor(this._getEffectiveAtk() * Balance.BOMBER_EXPLODE_DAMAGE_MULT);
                         /* R267-P0: 渊爆变体伤害加成 */
-                        if (this._abyssVariant && this._abyssVariant.dmgMult) _bombDmg = Math.floor(_bombDmg * this._abyssVariant.dmgMult);
+                        var _dmgM = (this._abyssVariant && this._abyssVariant.dmgMult) || this._abyssVariantDmgMult || 1;
+                        if (_dmgM > 1) _bombDmg = Math.floor(_bombDmg * _dmgM);
                         e.takeDamage(_bombDmg, this, this.x, this.y);
                     }
                 }

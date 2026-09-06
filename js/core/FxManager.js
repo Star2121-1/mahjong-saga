@@ -98,7 +98,7 @@ Fp._borrowNode = function() {
     }
     /* R187-P0: 池已满(≥MAX_GROWTH)，创建不受池管理的临时节点保底 */
     var el = document.createElement('div');
-    el.className = 'fct-node';
+    el.className = 'fct-node fct-normal'; /* R271-P1: 添加默认类型类，确保overflow节点有动画定义，防止动画结束后永久残留DOM */
     el.style.display = '';
     el.style.left = '0px'; el.style.top = '0px';
     /* R187-P0: 标记为已激活并绑定清理回调，防止健康检查误扫和动画结束后内存泄漏 */

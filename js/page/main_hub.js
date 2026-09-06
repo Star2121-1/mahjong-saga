@@ -505,7 +505,7 @@
             { id: 'ting_intuition', name: '听牌直觉', desc: '暴击率 +2%/级', maxLv: 5, branch: 'offense' },
             { id: 'gang_hardiness', name: '杠上硬气', desc: '受到伤害 -3%/级', maxLv: 5, branch: 'defense' },
             { id: 'mo_pa_cd', name: '摸牌快手', desc: '武器CD -5%/级', maxLv: 5, branch: 'offense' },
-            { id: 'kaiju_weapons', name: '开局双牌', desc: '额外初始武器槽', maxLv: 1, branch: 'economy' },
+            { id: 'kaiju_weapons', name: '开局双牌', desc: '开局额外获得 OrbitShield 武器', maxLv: 1, branch: 'economy' },
             { id: 'he_resonance', name: '和牌共鸣', desc: 'Boss掉落核心 +10%/级', maxLv: 5, branch: 'offense' },
             { id: 'que_spirit_shield', name: '雀魂护体', desc: '每10波触发1次护盾', maxLv: 3, branch: 'defense' }
         ],
@@ -1640,7 +1640,7 @@
             overdriveCount: engine._overdriveCount || 0,
             maxGold: engine._maxGoldThisRun || 0,
             hitsTaken: engine._playerHitCountThisRun || 0,
-            won: engine.gameOver === false && engine._pendingReward === false,
+            won: engine._won === true,
             bossKills: engine._bossKillsThisRun || 0,
             abyssDepth: engine.loopCount || 0,
             dodges: engine._totalDodgesThisRun || 0,
