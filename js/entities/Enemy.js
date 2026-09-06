@@ -988,8 +988,9 @@ window.Enemy = class Enemy {
         var isAssassinCrit = false;
         if (this.frozen) {
             actualDmg = Math.floor(actualDmg * Balance.FROZEN_DAMAGE_MULT);
-            /* R159-P0: 仅玩家攻击来源衰减冰冻计时器，反伤/环境伤害不消耗冰冻时长 */
-            var _frozenByPlayer = source === 'player' || (source && typeof source.x === 'number') || source === 'wither';
+            /* R159-P0: 仅玩家攻击来源衰减冰冻计时器，反伤/环境伤害不消耗冰冻时长
+             * R262-P0: 移除source==='wither'检查 — Wither是环境伤害不应消耗冰冻时长 */
+            var _frozenByPlayer = source === 'player' || (source && typeof source.x === 'number');
             if (_frozenByPlayer && !this._freezeHitDecayed) {
                 this.frozenTimer -= Balance.FROZEN_HIT_DECAY;
                 this._freezeHitDecayed = true;
