@@ -470,9 +470,7 @@ Gp._settleRun = async function(tokens) {
     /* 再次检查 — await 后可能已 restart */
     if ((this._runSeq || 0) !== _seq) return;
     meta.metaTokens = (meta.metaTokens || 0) + tokens;
-    /* R236-P0: totalRuns在胜利路径累加 — _gameOver仅处理死亡，_settleRun需负责胜利计数 */
-    if (this._won) meta.totalRuns = (meta.totalRuns || 0) + 1;
-    meta.totalKills = (meta.totalKills || 0) + this.kills;
+    /* R264-P0: 不再手动累加totalRuns/totalKills — 统一由recordRunStats处理，防止胜利路径漏记runStats导致赛季激活失效 */
     /* Epoch 3: 保存局内成就计数器到 meta */
     meta.overdriveCount = (meta.overdriveCount || 0) + (this._overdriveCount || 0);
     /* R212-P1: 首次Overdrive兜底 — 确保跨局meta计数达到阈值时仍能触发成就 */
@@ -663,6 +661,21 @@ Gp._settleRun = async function(tokens) {
             /* R228-P1: 使用weeklyCompleted替代空数组，确保胜利路径也记录周常完成 */
         }
     } catch(e) { window.toastSystem && window.toastSystem.error('战局记录失败: ' + e.message); }
+
+    /* R264-P0: 记录运行统计至runStats（含wins），确保赛季激活条件（5胜/深渊10层）可正确触发 */
+    try {
+        var pR4 = this.player && this.player.relicLevels || {};
+        var ur4 = Object.keys(pR4).filter(function(k) { return (pR4[k] || 0) > 0; }).length;
+        if (typeof window.saveManager.recordRunStats === 'function') {
+            window.saveManager.recordRunStats(
+                this.kills, this._elapsed, this._maxGoldThisRun || 0,
+                this._overdriveCount || 0, this._totalDodgesThisRun || 0,
+                this._totalCritsThisRun || 0, this._waveCount,
+                this._bossKillsThisRun || 0, this.loopCount || 0,
+                this._won, this._playerHitCountThisRun || 0, ur4
+            );
+        }
+    } catch(e) { window.toastSystem && window.toastSystem.error('统计记录失败: ' + e.message); }
 
     /* P1-NEW-b: 终末确定性落盘 — 统计/历史/成就/变异解锁一次性持久化 */
     if ((this._runSeq || 0) === _seq) {
