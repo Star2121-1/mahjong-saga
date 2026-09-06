@@ -179,6 +179,11 @@ Ss._spawnEnemy = function(engine, isBoss) {
         }
     }
 
+    /* R262-P1: 波次间事件临时debuff（时光缓流）应与精英怪路径对称，确保所有敌人生成都生效 */
+    if (engine._tempEnemySpeedDebuff > 0) {
+        enemy.speed *= engine._tempEnemySpeedDebuff;
+    }
+
     /* Boss Lord 特殊处理 */
     if (isBoss && enemyType === 'Boss_Lord') {
         /* Boss Gamble: 先显示选择面板，玩家决定后再生成领主 */

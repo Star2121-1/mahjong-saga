@@ -168,6 +168,7 @@ Gp._tryDropEquipment = function(x, y, isBossLord) {
     /* 限制装备仓库最近 100 件，防止无限增长 */
     if (meta.equipments.length > 100) meta.equipments = meta.equipments.slice(-100);
     /* R200-P0: 先推入再保存，避免中间态丢失掉落 + 重复toast */
+    /* R262-P1: 仅在主路径（totalMult=1）保存一次；循环分支为 abyss/gamble 额外副本处理 */
     meta.equipments.push(item);
     if (meta.equipments.length > 100) meta.equipments = meta.equipments.slice(-100);
     window.saveManager._saveMetaToStorage().catch(function(e){ console.warn('[Spawn] saveMeta failed:', e); });
@@ -327,7 +328,7 @@ Gp._updateExpGems = function(dt) {
                 expVal = Math.floor(expVal * player.xpGainFactor);
             }
             var leveled = player.gainExp(expVal);
-            this._spawnExpText(player.x, player.y, cg.value);
+            this._spawnExpText(player.x, player.y, expVal);
             if (leveled) anyLeveled = true;
         }
         var idx = this._expGems.indexOf(cg);
@@ -441,7 +442,7 @@ Gp._onHandChanged = function () {
         var hu = MH.evaluateHu(this._handTiles);
         if (hu && !this._pendingReward && !this.gameOver && typeof this._triggerHu === 'function') {
             this._triggerHu(hu);
-        } else if (!hu && !this._discardMode && typeof this._enterDiscardMode === 'function') {
+        } else if (!hu && !this._discardMode && !this.gameOver && !this._pendingReward && typeof this._enterDiscardMode === 'function') {
             this._enterDiscardMode(-1);
             if (window.toastSystem) window.toastSystem.warning('未成牌型 —— 点击一张牌打出换张');
         }
