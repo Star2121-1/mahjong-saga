@@ -52,6 +52,16 @@ Gp._loop = function(timestamp) {
         }
         /* B3: 北冥图腾减速 — 移动期间临时降速，更新后还原 */
         var _spdSave = this.player.speed;
+        /* R251-P0: 每次循环开始前重置冰冻标志，防止永久减速 — 之前在for循环中只设true从未设false */
+        this.player._frostSlowed = false;
+        for (var _tf = 0; _tf < this._totems.length; _tf++) {
+            var tf = this._totems[_tf];
+            if (tf.kind === 'frost') {
+                var fdx = this.player.x - tf.x, fdy = this.player.y - tf.y;
+                var fr = tf.radius || 100;
+                if (fdx * fdx + fdy * fdy < fr * fr) { this.player._frostSlowed = true; break; }
+            }
+        }
         if (this.player._frostSlowed) this.player.speed = _spdSave * Balance.FROST_SLOW_MULT;
         this.player.update(dt, input.x, input.y, this._mapW, this._mapH);
         this.player.speed = _spdSave;

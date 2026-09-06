@@ -193,6 +193,7 @@
             }
             if (bp.currentTier >= 30) bp.currentTier = 30; /* 满级 */
             meta.season = season;
+            this._metaCache = meta; /* R251-P1: 更新缓存，防止同步读取看到过期数据 */
             return self.saveMeta(meta).then(function() { return { tier: bp.currentTier, xp: bp.xp }; });
         }).catch(function(e){console.warn("[Season] save error:",e);});
     };

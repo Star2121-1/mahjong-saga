@@ -711,7 +711,7 @@ window.Enemy = class Enemy {
         if (this._bossPhase === 1) {
             this._bossAbilityTimer -= dt;
             if (this._bossAbilityTimer <= 0) {
-                this._bossAbilityTimer = Balance.BOSS_PHASE1_ABILITY_INTERVAL * (this._abyssTier >= 3 ? 0.85 : 1);
+                this._bossAbilityTimer = Balance.BOSS_PHASE1_ABILITY_INTERVAL * (this._abyssTier >= 3 ? Balance.BOSS_ABYSS_SPEED_MULT : 1);
                 var selfB = this;
                 this._bossVolleyCount = (this._bossVolleyCount || 0) + 1;
                 var spd = (engine && engine._bloodRageActive) ? 120 : 100;
@@ -767,7 +767,7 @@ window.Enemy = class Enemy {
                     if (this._bossWarningEl && this._bossWarningEl.parentNode) this._bossWarningEl.remove();
                     this._bossWarningEl = null;
                     this._bossWarningActive = false;
-                    this._bossAbilityTimer = Balance.BOSS_PHASE2_ABILITY_INTERVAL * (this._abyssTier >= 3 ? 0.85 : 1);
+                    this._bossAbilityTimer = Balance.BOSS_PHASE2_ABILITY_INTERVAL * (this._abyssTier >= 3 ? Balance.BOSS_ABYSS_SPEED_MULT : 1);
                 }
             } else {
                 this._bossAbilityTimer -= dt;
@@ -824,7 +824,7 @@ window.Enemy = class Enemy {
             }
             this._bossSummonTimer -= dt;
             if (this._bossSummonTimer <= 0) {
-                this._bossSummonTimer = Balance.BOSS_PHASE3_SUMMON_INTERVAL * (this._abyssTier >= 3 ? 0.85 : 1);
+                this._bossSummonTimer = Balance.BOSS_PHASE3_SUMMON_INTERVAL * (this._abyssTier >= 3 ? Balance.BOSS_ABYSS_SPEED_MULT : 1);
                 var maxSummon = Balance.BOSS_PHASE3_SUMMON_MAX;
                 if (engine && typeof engine._spawnEnemyType === 'function' && this._summonCount < maxSummon) {
                     /* R182-P0: 修复Boss P3召唤逻辑 — 原代码用_summonCount同时追踪Stalker和Tanker导致第二次调用时stalkerLeft=tankLeft=0 */

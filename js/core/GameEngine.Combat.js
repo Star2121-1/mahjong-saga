@@ -41,11 +41,19 @@ Gp._resumeAfterReward = function() {
 
     this._waveCount++;
     this.currentWaveSpawnedCount = 0;
+    /* R251-P0: 雀魂系统每波开始重置手牌，防止跨波累积导致无法胡牌 */
+    this._handTiles = [];
+    this._formedMelds = {};
+    this._discardMode = false;
+    this._discardSel = -1;
+    this._huLock = false;
     /* R201-P0: 铁拳事件暴击加成单波有效 — 若波次清空时无击杀，buff 不应泄漏到下一波 */
     this._tempCritBonus = 0;
-    /* R207-P1: 临时护盾/狂暴/金币加成单波有效 — 防止跨波残留 */
-    this._tempShield = 0;
-    this._tempShieldEnd = 0;
+    /* R251-P0: 仅清除已过期的护盾，防止花竹等跨波护盾被误清 */
+    if (this._tempShieldEnd > 0 && this._elapsed >= this._tempShieldEnd) {
+        this._tempShield = 0;
+        this._tempShieldEnd = 0;
+    }
     this._tempBerserkBonus = false;
     this._tempGoldMult = 1;
     /* R250-P1: 疾风连打攻速加成单波有效 — 防止跨奖励面板残留 */
@@ -229,7 +237,8 @@ Gp._enterAbyss = async function() {
     var _meta = window.saveManager._metaCache || {};
     if (this.loopCount > (_meta.highestEndlessLoop || 0)) {
         _meta.highestEndlessLoop = this.loopCount;
-        window.saveManager.saveMeta(_meta).catch(function(e) { console.warn('[Abyss] saveMeta failed:', e); });
+        window.saveManager._metaCache = _meta; /* R251-P1: 更新缓存，防止并发写入覆盖最高深渊记录 */
+        await window.saveManager.saveMeta(_meta).catch(function(e) { console.warn('[Abyss] saveMeta failed:', e); });
     }
     var bc = document.getElementById('active-buffs-container');
     if (bc) bc.remove();

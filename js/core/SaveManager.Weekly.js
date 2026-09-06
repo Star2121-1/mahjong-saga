@@ -371,6 +371,7 @@
         }
         if (completed.length > 0) {
             meta.weeklyChallenges.challenges = chs;
+            this._metaCache = meta; /* R251-P1: 更新缓存，防止并发写入后内存状态不一致 */
             this.saveMeta(meta).catch(function(e) { console.warn('[Weekly] completion save failed:', e); });
         }
         return { completed: completed, bonusTokens: bonusTokens, bonusCores: bonusCores };
