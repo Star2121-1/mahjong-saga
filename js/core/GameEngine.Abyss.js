@@ -110,7 +110,10 @@ Gp._applyAbyssVariant = function(enemy) {
         enemy.hp = Math.floor(enemy.hp * v.hpMult);
     }
     if (v.atkMult) enemy.atk = Math.floor(enemy.atk * v.atkMult);
-    if (v.speedMult) enemy.speed = Math.floor(enemy.speed * v.speedMult);
+    if (v.speedMult) {
+        enemy.speed = Math.floor(enemy.speed * v.speedMult);
+        enemy.baseSpeed = enemy.speed; /* R253-P1: 同步baseSpeed，防止frenzy combo恢复时丢失变体速度加成 */
+    }
     /* 视觉标记 */
     if (enemy.el) {
         enemy.el.classList.add('abyss-variant');

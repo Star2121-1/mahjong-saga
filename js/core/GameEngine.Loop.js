@@ -660,7 +660,12 @@ Gp._loop = function(timestamp) {
                 this.running = false;
                 this.gameOver = true;
                 this._won = true; /* R136-P0: 标记胜利，供_settleRun中flawless/speed_demon使用 */
-                this._showVictory();
+                /* R253-P0: 深渊模式下应显示深渊面板而非胜利界面 */
+                if (this._currentLevelId === 'level_3' || this.loopCount > 0) {
+                    this._showAbyssPanel();
+                } else {
+                    this._showVictory();
+                }
             } else {
                 /* Epoch 32: 波次间事件 */
                 if (this._waveCount >= 1 && Math.random() < Balance.WAVE_INTER_EVENT_CHANCE) {
