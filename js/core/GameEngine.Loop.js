@@ -245,7 +245,7 @@ Gp._loop = function(timestamp) {
 
             /* Buff/Debuff 计时递减统一在上方 Epoch 32 块处理（修复双重递减 bug） */
             /* 护盾过期 — 使用游戏时间而非墙钟时间，避免面板冻结导致意外过期 */
-            if (this._tempShieldEnd > 0 && this._elapsed > this._tempShieldEnd) {
+            if (this._tempShieldEnd > 0 && this._elapsed >= this._tempShieldEnd) {
                 this._tempShield = 0;
                 this._tempShieldEnd = 0;
             }
@@ -502,7 +502,7 @@ Gp._loop = function(timestamp) {
         /* 设计决策：面板打开时游戏循环暂停，Overdrive 计时随之暂停。
            面板关闭后倒计时从剩余时间继续。不按真实时间流逝。
            R38: Sys.updateOverdrive 是死代码（从未被调用），此处是唯一活跃计时器 */
-        if (this._overdriveActive && !this._pendingReward && !this._levelUpPending && !this._activeMutator) { /* R235-P1/R242-P1: 添加_mutator守卫，防止突变面板打开时overdrive计时继续流逝 */
+        if (this._overdriveActive && !this._pendingReward && !this._levelUpPending && !this._activeMutator && !this._announcingWave) { /* R235-P1/R242-P1: 添加_mutator守卫，防止突变面板打开时overdrive计时继续流逝 */ /* R259-P1: 添加_announcingWave守卫，防止波次公告期间overdrive计时继续流逝 */
             this._overdriveTimer -= dt;
             if (this._overdriveTimer <= 0) this._endOverdrive();
         }

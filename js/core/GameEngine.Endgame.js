@@ -191,6 +191,8 @@ Gp.restart = function() {
     this._removeViewportResize();
     /* R164-P1: 清理beforeunload监听器，防止restart后handler累积 */
     this._removeBeforeUnload();
+    /* R259-P1: 清理visibilitychange监听器，防止restart后累积多份回调 */
+    this._removeVisibilityPause();
     /* R206-P1: 停止所有音频，防止上一局残留oscillator在新局中播放 */
     window.audioManager && window.audioManager.stopAll();
     /* R46-P1: 清理Overdrive状态，防止重启后伤害倍率残留 */

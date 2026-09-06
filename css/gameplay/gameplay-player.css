@@ -93,7 +93,7 @@
     width: 70px;
 }
 #player-hp-bar { width: 100%; height: 5px; background: rgba(0,0,0,0.6); border-radius: 3px; overflow: hidden; }
-#player-hp-fill { height: 100%; background: linear-gradient(90deg, #1a5336, #00e676); border-radius: 3px; transition: width 0.15s ease; }
+#player-hp-fill { height: 100%; background: linear-gradient(90deg, #1a5336, #00e676); border-radius: 3px; /* R259-P1: 移除width transition，JS每帧脏检查直接写入 */ }
 #player-hp-text {
     font-size: calc(13 * var(--_fs) * 1px); font-weight: 900; color: #fffef5;
     white-space: nowrap; letter-spacing: 0.3px;

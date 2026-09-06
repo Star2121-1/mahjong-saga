@@ -342,7 +342,8 @@ Gp._bindStage3Events = function() {
 Gp._initVisibilityPause = function() {
     /* R110-P0: 页面不可见时暂停rAF循环，防止后台持续消耗CPU并推进游戏逻辑 */
     var self = this;
-    document.addEventListener('visibilitychange', function() {
+    /* R259-P1: 存储handler引用以便restart时清理，防止每次restart累积新监听器 */
+    this._visibilityPauseHandler = function() {
         if (document.hidden) {
             if (self.running && !self.gameOver) self.running = false;
         } else if (!self._paused && !self.gameOver) {
@@ -352,7 +353,16 @@ Gp._initVisibilityPause = function() {
                 self._beginLoop();
             }
         }
-    });
+    };
+    document.addEventListener('visibilitychange', this._visibilityPauseHandler);
+};
+
+Gp._removeVisibilityPause = function() {
+    /* R259-P1: 清理visibilitychange监听器，防止restart后旧handler累积 */
+    if (this._visibilityPauseHandler) {
+        document.removeEventListener('visibilitychange', this._visibilityPauseHandler);
+        this._visibilityPauseHandler = null;
+    }
 };
 
 Gp._initBeforeUnload = function() {

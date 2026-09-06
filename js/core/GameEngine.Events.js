@@ -110,7 +110,7 @@ Gp._continueAfterInterWave = function() {
        等待 Spawn.js 下一波生成时由 applySpawnModifiers 消费后清零，
        确保冥想/时光缓流等 debuff 能正确应用到下一波敌人 */
     /* P2: 不清除仍在生效的护盾 — 只清除已过期的 */
-    if (this._tempShieldEnd > 0 && this._elapsed > this._tempShieldEnd) {
+    if (this._tempShieldEnd > 0 && this._elapsed >= this._tempShieldEnd) {
         this._tempShield = 0;
         this._tempShieldEnd = 0;
     }
@@ -276,7 +276,9 @@ Gp._triggerOverdrive = function() {
         if (_en && _en.alive) {
             _en._overdriveStored = true; /* R137-P0: 记录状态以便_endOverdrive正确恢复 */
             _en._overdriveOrigSpeed = _en.speed;
-            _en.speed = 0;
+            /* R259-P0: 设置frozen=true而非speed=0，确保Enemy.update()完整跳过AI和攻击计时器，防止Boss在过驱动期间继续发射弹幕 */
+            _en.frozen = true;
+            _en._overdriveFrozen = true;
         }
     }
 };
@@ -305,6 +307,8 @@ Gp._endOverdrive = function() {
         var _oe = this.enemies[_oi];
         if (_oe._overdriveStored) {
             _oe.speed = _oe._overdriveOrigSpeed !== undefined ? _oe._overdriveOrigSpeed : _oe.baseSpeed; /* R235-P1: 使用!==undefined防止0速敌人被解冻 */
+            /* R259-P0: 解冻所有被过驱动冻结的敌人 */
+            if (_oe._overdriveFrozen) { _oe.frozen = false; _oe._overdriveFrozen = false; }
             _oe._overdriveStored = false;
             _oe._overdriveOrigSpeed = undefined;
         }
