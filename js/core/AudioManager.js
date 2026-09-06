@@ -13,6 +13,7 @@ window.AudioManager = function() {
         feedback: 0.9  /* 胜利/失败/升级等关键UI反馈音 */
     };
     this._activeOscillators = []; /* R165-P1: 跟踪活跃振荡器，防止tryReinit时内存泄漏 */
+    this._noiseBuffer = null; /* R255-P1: 缓存在ctx初始化后的噪声buffer，避免每次受击/爆炸重复分配 */
     /* R165-P0: restore persisted category volumes from meta — write path exists but read was missing */
     try {
         var _amMeta = window.saveManager && window.saveManager._metaCache;
@@ -57,6 +58,8 @@ Ap._ensureContext = function() {
             });
         }
         this._initialized = true;
+        /* R255-P1: 初始化后预分配噪声buffer，避免高频调用时重复分配 */
+        this._initNoiseBuffer();
         return true;
     } catch (e) {
         this._ctx = null;
@@ -109,7 +112,6 @@ Ap.play = function(sound, opts) {
        区别于music氛围层；overdrive保留music保持沉浸感 */
     var catKey = (sound === 'victory' || sound === 'gameover' || sound === 'levelup') ? 'feedback' : 'sfx';
     if (sound === 'overdrive') catKey = 'music';
-    if (sound === 'boss') catKey = 'sfx';
     var vol = Math.min(1, (opts.volume != null ? opts.volume : 1) * this._volume * (this._categoryVolumes[catKey] || 1));
     switch (sound) {
         case 'attack': this._sine(300, 0.06, vol, -0.3); break;
@@ -180,13 +182,25 @@ Ap._sine = function(freq, dur, vol, rampEndFreq) {
 Ap._saw = function(freq, dur, vol) {
     this._osc('sawtooth', freq, this._ctx.currentTime, dur, vol);
 };
+Ap._initNoiseBuffer = function() {
+    /* R255-P1: 预分配噪声buffer，避免高频受击/爆炸音效重复分配 */
+    if (!this._noiseBuffer || this._noiseBuffer.sampleRate !== this._ctx.sampleRate) {
+        var bufSize = Math.floor(this._ctx.sampleRate * 0.3);
+        this._noiseBuffer = this._ctx.createBuffer(1, bufSize, this._ctx.sampleRate);
+        var data = this._noiseBuffer.getChannelData(0);
+        for (var i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+    }
+};
+
 Ap._noise = function(dur, vol) {
     var self = this; /* R173-P0: capture this to avoid self resolving to window.self in onended closure */
     try {
-        var bufSize = this._ctx.sampleRate * dur;
-        var buf = this._ctx.createBuffer(1, bufSize, this._ctx.sampleRate);
+        var bufSize = Math.ceil(this._ctx.sampleRate * dur);
+        var buf = this._noiseBuffer && this._noiseBuffer.length >= bufSize ? this._noiseBuffer : this._ctx.createBuffer(1, bufSize, this._ctx.sampleRate);
         var data = buf.getChannelData(0);
-        for (var i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+        if (buf !== this._noiseBuffer) {
+            for (var i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+        }
         var src = this._ctx.createBufferSource();
         src.buffer = buf;
         var filt = this._ctx.createBiquadFilter();
