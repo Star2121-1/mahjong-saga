@@ -309,7 +309,8 @@ window.GroundSlammer = class extends window.Weapon {
                 var swdx = e.x - sw.x;
                 var swdy = e.y - sw.y;
                 var swdist = Math.sqrt(swdx * swdx + swdy * swdy);
-                if (swdist <= e.radius + radius) {
+                /* R268-P1: 修正冲击波命中判定 — 敌人中心必须在冲击波圆内，而非边缘相切 */
+                if (swdist + e.radius <= radius) {
                     sw.hitEnemies.add(e.id);
                     e.takeDamage(dmg, 'player', sw.x, sw.y);
                     /* R199-P1: 击退只应用一次，防止每帧叠加导致敌人被推出地图 */

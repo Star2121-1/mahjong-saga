@@ -701,6 +701,10 @@ window.Enemy = class Enemy {
             if (this._bossPhase >= 2) {
                 this._bossAbilityTimer = Balance.BOSS_PHASE2_ABILITY_INTERVAL;
                 this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
+                /* R268-P1: P1→P3跳过时重置警告圈，防止_p1残留warning状态 */
+                if (this._bossWarningEl && this._bossWarningEl.parentNode) { this._bossWarningEl.remove(); this._bossWarningEl = null; }
+                this._bossWarningActive = false;
+                this._bossWarningTimer = 0;
                 /* R238-P1: P1→P3跳过phase2时重置召唤计时器，防止_stalker残留导致过早召唤 */
                 if (this._bossPhase === 3) {
                     this._bossSummonTimer = Balance.BOSS_PHASE3_SUMMON_INTERVAL;
@@ -1214,6 +1218,8 @@ window.Enemy = class Enemy {
                     }
                     child.speed = child.baseSpeed * Balance.SPLITTER_CHILD_SPEED_MULT;
                     child.baseSpeed = child.speed;
+                    /* R268-P1: 继承父体frozen状态，防止frozen死亡时子体以正常速度移动 */
+                    if (this.frozen) { child.frozen = true; child.frozenTimer = this.frozenTimer; }
                     engRef.enemies.push(child);
                     /* R245-P0: Splitter子体在Overdrive激活时需冻结速度 */
                     if (engRef._overdriveActive) {

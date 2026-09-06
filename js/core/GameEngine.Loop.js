@@ -310,6 +310,9 @@ Gp._loop = function(timestamp) {
                         /* R252-P1: 清理 Boss Lord 引用和红色雾霭 DOM，防止胜利界面残留 */
                         if (this._bossLord) this._bossLord = null;
                         if (this._bossMistEl && this._bossMistEl.parentNode) { this._bossMistEl.remove(); this._bossMistEl = null; }
+                        /* R268-P1: 清理Boss P2警告圈DOM，防止快速击杀时残留 */
+                        if (this._bossWarningEl && this._bossWarningEl.parentNode) { this._bossWarningEl.remove(); this._bossWarningEl = null; }
+                        this._bossWarningActive = false;
                         this._pendingReward = false; /* R252-P1: 清除波次结算标志，防止奖励面板重复弹出 */
                         if (this._expGems.length > 0 || (this._pendingExpGems && this._pendingExpGems.length > 0)) {
                             this._pendingBossLordSettle = true;

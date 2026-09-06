@@ -30,6 +30,8 @@ Sys.triggerOverdrive = function(engine) {
             oe._overdriveStored = true;
             oe._overdriveOrigSpeed = oe.speed;
             oe.speed = 0;
+            oe.frozen = true; /* R268-P1: 必须同步设置frozen=true，确保Enemy.update()完整跳过AI和攻击计时器 */
+            oe._overdriveFrozen = true; /* R268-P1: 与Events.js fallback路径保持一致 */
         }
     }
 
@@ -95,6 +97,8 @@ Sys.endOverdrive = function(engine) {
             oe.speed = oe._overdriveOrigSpeed !== undefined ? oe._overdriveOrigSpeed : oe.baseSpeed;
             oe._overdriveStored = false;
             oe._overdriveOrigSpeed = undefined;
+            oe.frozen = false; /* R268-P1: 恢复frozen状态，防止战后敌人永久冻结 */
+            oe._overdriveFrozen = false;
         }
     }
     /* R205-P0: 二次扫描清除过驱动期间新刷出敌人的残留冻结状态 — 首次迭代时不在数组中的敌人未被恢复 */
@@ -104,6 +108,8 @@ Sys.endOverdrive = function(engine) {
             oe2.speed = oe2._overdriveOrigSpeed !== undefined ? oe2._overdriveOrigSpeed : oe2.baseSpeed;
             oe2._overdriveStored = false;
             oe2._overdriveOrigSpeed = undefined;
+            oe2.frozen = false; /* R268-P1: 二次扫描也需恢复frozen状态 */
+            oe2._overdriveFrozen = false;
         }
     }
 
