@@ -39,6 +39,7 @@ window.Weapon = class {
         } else {
             this._baseCd = this._origBaseCd;
         }
+        /* R255-P0: 子类覆写此方法以更新特殊属性(如OrbitShield.rotationSpeed) */
     }
     reset() { /* P0: 清除overdrive残留状态，防止跨局伤害累积 */
         /* R159-P0: 优先恢复_odOrigAtk（overdrive期间升级的武器），再清除标志 */
@@ -211,6 +212,10 @@ window.OrbitShield = class extends window.Weapon {
         this.orbitHitSets = [new Set(), new Set(), new Set()];
         this.initialized = false;
         this.cooldownTimer = 0; /* R131-P1: 补全OrbitShield重置，防止跨波冷却残留 */
+    }
+    upgrade() { super.upgrade();
+        /* R255-P0: 随等级缩放旋转速度，与构造函数保持一致 */
+        this.rotationSpeed = Balance.ORBIT_ROTATION_SPEED + this.level * 0.2;
     }
 };
 

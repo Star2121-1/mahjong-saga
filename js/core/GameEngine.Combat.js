@@ -30,6 +30,24 @@ Gp._resumeAfterReward = function() {
     this._pendingExpGems = [];
     this._cleanAllProjectiles();
     this._cleanEnemyProjectiles();
+    /* R255-P0: 清理武器特效(shockwave/pulse)，防止跨波伤害泄漏 */
+    if (this._activeWeapons) {
+        for (var _wi = 0; _wi < this._activeWeapons.length; _wi++) {
+            var _w = this._activeWeapons[_wi];
+            if (_w && _w.activeShockwaves) {
+                for (var _swi = 0; _swi < _w.activeShockwaves.length; _swi++) {
+                    if (_w.activeShockwaves[_swi].el && _w.activeShockwaves[_swi].el.parentNode) _w.activeShockwaves[_swi].el.remove();
+                }
+                _w.activeShockwaves = [];
+            }
+            if (_w && _w.activePulses) {
+                for (var _pi = 0; _pi < _w.activePulses.length; _pi++) {
+                    if (_w.activePulses[_pi].el && _w.activePulses[_pi].el.parentNode) _w.activePulses[_pi].el.remove();
+                }
+                _w.activePulses = [];
+            }
+        }
+    }
 
     /* R30-H-007: 清理雨滴粒子防止累积 */
     if (this._rainDrops) {
@@ -94,6 +112,24 @@ Gp._resumeAfterLevelUp = function() {
     /* R250-P1: 疾风连打攻速加成单波有效 — 防止跨升级面板残留 */
     this._tempAspd = 0;
     this._tempAspdT = 0;
+    /* R255-P0: 清理武器特效(shockwave/pulse)，防止升级面板期间效果跨级泄漏 */
+    if (this._activeWeapons) {
+        for (var _wi = 0; _wi < this._activeWeapons.length; _wi++) {
+            var _w = this._activeWeapons[_wi];
+            if (_w && _w.activeShockwaves) {
+                for (var _swi = 0; _swi < _w.activeShockwaves.length; _swi++) {
+                    if (_w.activeShockwaves[_swi].el && _w.activeShockwaves[_swi].el.parentNode) _w.activeShockwaves[_swi].el.remove();
+                }
+                _w.activeShockwaves = [];
+            }
+            if (_w && _w.activePulses) {
+                for (var _pi = 0; _pi < _w.activePulses.length; _pi++) {
+                    if (_w.activePulses[_pi].el && _w.activePulses[_pi].el.parentNode) _w.activePulses[_pi].el.remove();
+                }
+                _w.activePulses = [];
+            }
+        }
+    }
     /* M-001: 升级期间如果波次已清除，恢复以显示奖励面板 */
     if (this.enemies.length === 0 && this._activeCoins.length === 0 && this._expGems.length === 0
         && this.currentWaveSpawnedCount >= this._getWaveEnemyMax() && this._waveCount < this._getMaxWaves() - 1) {
@@ -269,6 +305,24 @@ Gp._enterAbyss = async function() {
     this._mutatorTriggered = false;
     this._activeMutator = null;
     this._clearMutatorEffects(); /* R131-P0: 深渊进入时清理突变效果，防止bloodmoon/frenzy等跨轮回残留 */
+    /* R255-P0: 清理武器特效(shockwave/pulse)，防止深渊轮回跨层伤害泄漏 */
+    if (this._activeWeapons) {
+        for (var _wi = 0; _wi < this._activeWeapons.length; _wi++) {
+            var _w = this._activeWeapons[_wi];
+            if (_w && _w.activeShockwaves) {
+                for (var _swi = 0; _swi < _w.activeShockwaves.length; _swi++) {
+                    if (_w.activeShockwaves[_swi].el && _w.activeShockwaves[_swi].el.parentNode) _w.activeShockwaves[_swi].el.remove();
+                }
+                _w.activeShockwaves = [];
+            }
+            if (_w && _w.activePulses) {
+                for (var _pi = 0; _pi < _w.activePulses.length; _pi++) {
+                    if (_w.activePulses[_pi].el && _w.activePulses[_pi].el.parentNode) _w.activePulses[_pi].el.remove();
+                }
+                _w.activePulses = [];
+            }
+        }
+    }
     this._pendingReward = false;
     this._levelUpPending = false;
     this.playerHitCountInLevel1 = 0;
@@ -748,7 +802,7 @@ Gp._gameOver = async function() {
 
     if (this.resultTime) this.resultTime.textContent = this._formatTime(this._elapsed);
     if (this.resultKills) this.resultKills.textContent = this.kills;
-    if (this.resultWave) this.resultWave.textContent = ((this._waveCount || 0) + 1) +' /' + (this._totalWaves || this._getMaxWaves() || 0); /* R248-P1: 优先使用_totalWaves避免恢复存档后levelConfig缺失导致分母错误 */
+    if (this.resultWave) this.resultWave.textContent = ((this._waveCount || 0) + 1) +' /' + (this._totalWaves || this._getMaxWaves() || 1); /* R248-P1: 优先使用_totalWaves避免恢复存档后levelConfig缺失导致分母错误；最终兜底为1防止显示N/0 */
     if (this.gameOverOverlay) this.gameOverOverlay.classList.add('active');
     /* R115-P0: 屏幕阅读器播报失败 */
     this._announceToSR('游戏结束。击杀 ' + this.kills + ' 个敌人，存活 ' + this._formatTime(this._elapsed));
