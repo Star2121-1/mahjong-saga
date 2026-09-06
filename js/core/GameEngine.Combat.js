@@ -490,6 +490,8 @@ Gp._settleRun = async function(tokens) {
     meta.totalDodges = (meta.totalDodges || 0) + (this._totalDodgesThisRun || 0);
     meta.maxGoldThisRun = Math.max(meta.maxGoldThisRun || 0, this._maxGoldThisRun || 0);
     /* R188-P0: 重置单局最高金币，防止跨局累加导致gold_10k名不副实 */
+    /* R258-P0: 先保存值供每日任务检查使用，避免清零后dq_gold_300无法完成 */
+    var _dailyGold = this._maxGoldThisRun || 0;
     this._maxGoldThisRun = 0;
     /* 检查套装共鸣成就 — 需同时激活炎痕+永冻番印 (R147-P1: ||→&& 对齐设计文档) */
     if (this.player && this.player.setResonanceSpeed && this.player.setResonanceIce) {
@@ -559,7 +561,7 @@ Gp._settleRun = async function(tokens) {
 
     /* ── R248-P0: 每日任务完成检查（胜利/深渊撤退路径补全） ── */
     try {
-        var dailyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: this._maxGoldThisRun || 0, hitsTaken: this._playerHitCountThisRun || 0, won: this._won, waves: this._waveCount || 0, crits: this._totalCritsThisRun || 0, dodges: this._totalDodgesThisRun || 0, abyssDepth: this.loopCount || 0 };
+        var dailyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: _dailyGold || 0, hitsTaken: this._playerHitCountThisRun || 0, won: this._won, waves: this._waveCount || 0, crits: this._totalCritsThisRun || 0, dodges: this._totalDodgesThisRun || 0, abyssDepth: this.loopCount || 0 };
         if (typeof window.saveManager.checkDailyQuestCompletion === 'function') {
             var dqr = window.saveManager.checkDailyQuestCompletion(dailyStats);
             if (dqr.ids && dqr.ids.length > 0) {

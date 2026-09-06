@@ -104,6 +104,7 @@ window.GameEngine = function() {
     this._totalDodgesThisRun = 0;
     this._bossKillsThisRun = 0;
     this._finalBossKillsThisRun = 0;
+    this._playerHitCountThisRun = 0; /* R258-P0: 成就完美通关计数，防止undefined++导致NaN永久破坏成就 */
 
     this.battlefield = null;
     this.container = null;

@@ -231,4 +231,6 @@
     .ws-icon { width: 8px; height: 8px; }
     .ws-name { font-size: calc(8 * var(--_fs) * 1px); max-width: 36px; }
     .ws-level { font-size: calc(7 * var(--_fs) * 1px); }
+    /* R258-P1: 武器栏缩小至22px时，手牌栏底部位置需相应上移避免碰撞 */
+    #hand-tile-bar { bottom: calc(55px + env(safe-area-inset-bottom, 0px)); }
 }
