@@ -487,6 +487,19 @@ Gp._settleRun = async function(tokens) {
         } catch(e) { console.warn('[WeeklyVault] evaluation failed:', e); }
     }
 
+    /* ── R248-P0: 每日任务完成检查（胜利/深渊撤退路径补全） ── */
+    try {
+        var dailyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: this._maxGoldThisRun || 0, hitsTaken: this._playerHitCountThisRun || 0, won: this._won, waves: this._waveCount || 0, crits: this._totalCritsThisRun || 0, dodges: this._totalDodgesThisRun || 0, abyssDepth: this.loopCount || 0 };
+        if (typeof window.saveManager.checkDailyQuestCompletion === 'function') {
+            var dqr = window.saveManager.checkDailyQuestCompletion(dailyStats);
+            if (dqr.ids && dqr.ids.length > 0) {
+                meta.metaTokens = (meta.metaTokens || 0) + (dqr.bonusTokens || 0);
+                meta.bossCores = (meta.bossCores || 0) + (dqr.bonusCores || 0);
+                this._spawnCausalityText('✅ 每日任务完成: ' + dqr.ids.join(', ') + (dqr.bonusTokens ? ' +' + dqr.bonusTokens + '代币' : '') + (dqr.bonusCores ? ' +' + dqr.bonusCores + '核心' : ''));
+            }
+        }
+    } catch(e) { console.warn('[Combat] daily quest check failed:', e); }
+
     await window.saveManager.saveMeta(meta).catch(function(e){ window.toastSystem && window.toastSystem.error('存档失败: ' + e.message); });
     await window.saveManager.clearActiveRun().catch(function(e){ window.toastSystem && window.toastSystem.error('清除存档失败: ' + e.message); });
 
@@ -719,7 +732,7 @@ Gp._gameOver = async function() {
 
     if (this.resultTime) this.resultTime.textContent = this._formatTime(this._elapsed);
     if (this.resultKills) this.resultKills.textContent = this.kills;
-    if (this.resultWave) this.resultWave.textContent = ((this._waveCount || 0) + 1) +' /' + (this._getMaxWaves() || 0); /* R238-P1: 使用_getMaxWaves()替代可能过时的_totalWaves */
+    if (this.resultWave) this.resultWave.textContent = ((this._waveCount || 0) + 1) +' /' + (this._totalWaves || this._getMaxWaves() || 0); /* R248-P1: 优先使用_totalWaves避免恢复存档后levelConfig缺失导致分母错误 */
     if (this.gameOverOverlay) this.gameOverOverlay.classList.add('active');
     /* R115-P0: 屏幕阅读器播报失败 */
     this._announceToSR('游戏结束。击杀 ' + this.kills + ' 个敌人，存活 ' + this._formatTime(this._elapsed));
@@ -753,6 +766,9 @@ Gp._gameOver = async function() {
     meta.finalBossKills = (meta.finalBossKills || 0) + (this._finalBossKillsThisRun || 0);
     meta.totalCrits = (meta.totalCrits || 0) + (this._totalCritsThisRun || 0);
     meta.totalDodges = (meta.totalDodges || 0) + (this._totalDodgesThisRun || 0);
+    /* R248-P1: 死亡路径补充crit_master和dodge_king终局兜底 — _gameOver原先仅有胜利路径(settleRun)有此检查，导致玩家死亡后累积的暴击/闪避成就永久丢失 */
+    if ((this._totalCritsThisRun || 0) >= 100) this._checkAchievement('crit_master');
+    if ((this._totalDodgesThisRun || 0) >= 50) this._checkAchievement('dodge_king');
     meta.maxGoldThisRun = Math.max(meta.maxGoldThisRun || 0, this._maxGoldThisRun || 0);
     var _goldSaved = this._maxGoldThisRun || 0; /* R222-P1: 保存清零前的值，后续recordRunStats和死亡补偿均依赖此值 */
     this._maxGoldThisRun = 0;
@@ -782,11 +798,12 @@ Gp._gameOver = async function() {
                 meta.metaTokens = (meta.metaTokens || 0) + (dqr.bonusTokens || 0);
                 meta.bossCores = (meta.bossCores || 0) + (dqr.bonusCores || 0);
                 this._spawnCausalityText('✅ 每日任务完成: ' + dqr.ids.join(', ') + (dqr.bonusTokens ? ' +' + dqr.bonusTokens + '代币' : '') + (dqr.bonusCores ? ' +' + dqr.bonusCores + '核心' : ''));
-                /* R233-P1: 确保每日任务claimed状态在结算时同步保存，防止fire-and-forget丢失 */
-                await window.saveManager.saveMeta(window.saveManager._metaCache).catch(function(e){ console.warn('[R233-P1] daily quest meta save failed:', e); });
+                /* R248-P1: 移除fire-and-forget save，由调用方统一存档 */
             }
         }
-    } catch(e) { window.toastSystem && window.toastSystem.error('结算错误: ' + e.message); }
+    } catch(e) { console.warn('[Combat] daily quest check failed:', e); }
+
+    await window.saveManager.saveMeta(meta).catch(function(e){ window.toastSystem && window.toastSystem.error('存档失败: ' + e.message); });
 
     /* ── Epoch 14: 运行统计记录 ── */
     var pRelics = this.player && this.player.relicLevels || {};

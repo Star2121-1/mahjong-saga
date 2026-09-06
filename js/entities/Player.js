@@ -367,7 +367,7 @@ class Player {
                 var _hasWwSpeed = this._relicAffixes && this._relicAffixes['wind_walker'] &&
                     this._relicAffixes['wind_walker'].indexOf('ww_speed') !== -1;
                 if (!_hasWwSpeed) {
-                    this.speedMultiplier += Balance.RELIC_WW_SPEED_PER_LEVEL;
+                    this.speedMultiplier = Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, this.speedMultiplier + Balance.RELIC_WW_SPEED_PER_LEVEL); /* R248-P1: 封顶MAX_SPEED_BONUS_PCT，防止超5级后速度溢出 */
                     this.speed = this.baseSpeed * this.speedMultiplier;
                 }
                 break;

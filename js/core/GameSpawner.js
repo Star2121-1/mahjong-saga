@@ -190,8 +190,6 @@ Ss._spawnEnemy = function(engine, isBoss) {
         var waveIdx = this._waveCount;
         var maxWaves = engine._getMaxWaves(); /* R60-P0: 使用engine方法而非this */
         if (waveIdx >= maxWaves) {
-            enemy.radius = 75;
-            /* R230-P0: 深渊缩放已在Enemy构造函数中应用，此处不再覆盖HP */
             enemy.hp = enemy.maxHp;
         }
     }

@@ -25,6 +25,7 @@ Fp.init = function() {
         el.style.display = 'none';
         this._layer.appendChild(el);
         this._pool.push(el);
+        this._freeStack.push(el); /* R248-P2: 初始化时将节点同时加入_freeStack，避免首次borrow时不必要地创建溢出节点 */
     }
 };
 
@@ -134,7 +135,12 @@ Fp._returnNode = function(node) {
     this._freeStack.push(node);
     /* R236-P0: 从_pool中移除overflow节点，防止pool无限增长超出FCT_POOL_MAX_GROWTH */
     var poolIdx = this._pool.indexOf(node);
-    if (poolIdx !== -1) this._pool.splice(poolIdx, 1);
+    if (poolIdx !== -1) {
+        this._pool.splice(poolIdx, 1);
+    } else {
+        /* R248-P1: 溢出节点在_freeStack中但不在_pool里，重新加入_pool以便cleanup能正确删除DOM */
+        this._pool.push(node);
+    }
     /* 健康检查：每 50 次归还扫描一次，强制回收超过 5s 未归还的节点 */
     if (++this._returnCount % Balance.FCT_HEALTHCHECK_MODULO === 0) this._healthCheck();
 };

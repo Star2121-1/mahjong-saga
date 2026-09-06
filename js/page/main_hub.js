@@ -179,6 +179,7 @@
         if (_hubListenersBound) return; /* 防止重复绑定事件监听器 */
         _hubListenersBound = true;
         DOM.hubMetaTokens = $('hub-meta-tokens');
+        DOM.hubMetaTokenCount = $('hub-meta-token-count'); /* R248-P0: 修复代币计数器始终为0 — 补全DOM引用 */
         DOM.hubTotalRuns = $('hub-total-runs');
         DOM.hubTotalKills = $('hub-total-kills');
         DOM.btnHeroPrev = $('btn-hero-prev');
@@ -246,7 +247,8 @@
         var meta = window.saveManager._metaCache || {};
         if (DOM.hubTotalRuns) DOM.hubTotalRuns.textContent = meta.totalRuns || 0;
         if (DOM.hubTotalKills) DOM.hubTotalKills.textContent = meta.totalKills || 0;
-        if (DOM.hubMetaTokens) DOM.hubMetaTokens.textContent = meta.metaTokens || 0;
+        if (DOM.hubMetaTokens) DOM.hubMetaTokens.textContent = (meta.bossCores || 0); /* R248-P0: hub-meta-tokens对应"核心"，显示bossCores */
+        if (DOM.hubMetaTokenCount) DOM.hubMetaTokenCount.textContent = (meta.metaTokens || 0); /* R248-P0: hub-meta-token-count对应"代币"，显示metaTokens */
 
         /* Epoch 15: 精英模式指示器 */
         if (typeof window.saveManager.isEliteMode === 'function') {
@@ -467,7 +469,7 @@
             var btn = node.querySelector('.btn-tech-upgrade');
 
             if (levelEl) levelEl.textContent = 'Lv.' + level;
-            if (costEl) costEl.textContent = '升级: ' + cost + ' 核心';
+            if (costEl) costEl.textContent = '升级: ' + cost + ' 代币'; /* R248-P1: 修正货币标签 — 天赋树花费的是metaTokens(代币)而非bossCores(核心) */
             if (btn) {
                 btn.disabled = (meta.metaTokens || 0) < cost;
             }

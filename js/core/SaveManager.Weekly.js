@@ -142,7 +142,8 @@
             if (lastLogin === today) {
                 return { streak: streak, claimed: !!claimed[today], reward: null, makeupTokens: makeup };
             }
-            var yesterday = new Date(Date.now() - 86400000);
+            var _today = new Date();
+            var yesterday = new Date(Date.UTC(_today.getUTCFullYear(), _today.getUTCMonth(), _today.getUTCDate() - 1)); /* R248-P1: 使用UTC日期计算防止DST边界误判 */
             var yKey = yesterday.getUTCFullYear() + '-' + (yesterday.getUTCMonth()+1) + '-' + yesterday.getUTCDate();
             var isNewStreak = lastLogin === yKey || lastLogin === '';
             if (isNewStreak) { streak++; }
@@ -191,7 +192,8 @@
             var makeup = meta.makeupTokens || 0;
             if (makeup <= 0) return { ok: false, reason: '没有补签 token' };
             if (meta.lastLoginDate === self._todayKey()) return { ok: false, reason: '今日已登录' };
-            var yesterday = new Date(Date.now() - 86400000);
+            var _today2 = new Date();
+            var yesterday = new Date(Date.UTC(_today2.getUTCFullYear(), _today2.getUTCMonth(), _today2.getUTCDate() - 1)); /* R248-P1: 使用UTC日期计算防止DST边界误判 */
             var yKey = yesterday.getUTCFullYear() + '-' + (yesterday.getUTCMonth()+1) + '-' + yesterday.getUTCDate();
             if (meta.lastLoginDate !== yKey && meta.lastLoginDate !== '') {
                 return { ok: false, reason: '无法补签' };

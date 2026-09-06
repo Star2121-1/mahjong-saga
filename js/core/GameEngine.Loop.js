@@ -662,7 +662,7 @@ Gp._loop = function(timestamp) {
             return;
         }
 
-        if (!this._pendingReward && this.enemies.length === 0 && this._activeCoins.length === 0 && this._expGems.length === 0 && this.currentWaveSpawnedCount >= this._getWaveEnemyMax() && this._waveCount < this._getMaxWaves() - 1) {
+        if (!this._pendingReward && this.enemies.length === 0 && this._activeCoins.length === 0 && this._expGems.length === 0 && !this._bossLordSpawned && this.currentWaveSpawnedCount >= this._getWaveEnemyMax() && this._waveCount < this._getMaxWaves() - 1) {
             this._pendingReward = true;
         }
 
