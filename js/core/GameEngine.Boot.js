@@ -243,12 +243,20 @@ Gp._cacheStage3DOM = function() {
 };
 
 Gp._bindStage3Events = function() {
-    if (this.restartBtn) { var s = this; this.restartBtn.addEventListener('click', function() { window.audioManager && window.audioManager.play('reward'); s.restart(); }); }
-    if (this.victoryRestartBtn) { var s = this; this.victoryRestartBtn.addEventListener('click', function() { window.audioManager && window.audioManager.play('reward'); s.restart(); }); }
-    if (this.victoryContinueBtn) { var s = this; this.victoryContinueBtn.addEventListener('click', function() { window.audioManager && window.audioManager.play('reward'); s._continueChallenge(); }); }
-    if (this.victoryHubBtn) { var s = this; this.victoryHubBtn.addEventListener('click', function() { window.audioManager && window.audioManager.play('reward'); s._goToSaveSelect(); }); }
-    if (this.hubBtn) { var s = this; this.hubBtn.addEventListener('click', function() { window.audioManager && window.audioManager.play('reward'); s._goToSaveSelect(); }); }
-    if (this._pauseBtn) { var s = this; this._pauseBtn.addEventListener('click', function() { s._togglePause(); }); }
+    /* R264-P1: 先移除旧handler防止restart累积 */
+    if (this._restartBtnHandler) { this.restartBtn.removeEventListener('click', this._restartBtnHandler); this._restartBtnHandler = null; }
+    if (this._victoryRestartBtnHandler) { this.victoryRestartBtn.removeEventListener('click', this._victoryRestartBtnHandler); this._victoryRestartBtnHandler = null; }
+    if (this._victoryContinueBtnHandler) { this.victoryContinueBtn.removeEventListener('click', this._victoryContinueBtnHandler); this._victoryContinueBtnHandler = null; }
+    if (this._victoryHubBtnHandler) { this.victoryHubBtn.removeEventListener('click', this._victoryHubBtnHandler); this._victoryHubBtnHandler = null; }
+    if (this._hubBtnHandler) { this.hubBtn.removeEventListener('click', this._hubBtnHandler); this._hubBtnHandler = null; }
+    if (this._pauseBtnHandler) { this._pauseBtn.removeEventListener('click', this._pauseBtnHandler); this._pauseBtnHandler = null; }
+    /* R264-P1: 存储handler引用以便restart时清理，防止多次restart累积监听器 */
+    if (this.restartBtn) { var s = this; var h = function() { window.audioManager && window.audioManager.play('reward'); s.restart(); }; this._restartBtnHandler = h; this.restartBtn.addEventListener('click', h); }
+    if (this.victoryRestartBtn) { var s = this; var h = function() { window.audioManager && window.audioManager.play('reward'); s.restart(); }; this._victoryRestartBtnHandler = h; this.victoryRestartBtn.addEventListener('click', h); }
+    if (this.victoryContinueBtn) { var s = this; var h = function() { window.audioManager && window.audioManager.play('reward'); s._continueChallenge(); }; this._victoryContinueBtnHandler = h; this.victoryContinueBtn.addEventListener('click', h); }
+    if (this.victoryHubBtn) { var s = this; var h = function() { window.audioManager && window.audioManager.play('reward'); s._goToSaveSelect(); }; this._victoryHubBtnHandler = h; this.victoryHubBtn.addEventListener('click', h); }
+    if (this.hubBtn) { var s = this; var h = function() { window.audioManager && window.audioManager.play('reward'); s._goToSaveSelect(); }; this._hubBtnHandler = h; this.hubBtn.addEventListener('click', h); }
+    if (this._pauseBtn) { var s = this; var h = function() { s._togglePause(); }; this._pauseBtnHandler = h; this._pauseBtn.addEventListener('click', h); }
     if (this.pauseOverlay) {
         var s = this;
         var contBtn = this.pauseOverlay.querySelector('#pause-continue-btn');
@@ -256,18 +264,10 @@ Gp._bindStage3Events = function() {
         var settingsBtn = this.pauseOverlay.querySelector('#pause-settings-btn');
         var settingsPanel = this.pauseOverlay.querySelector('#pause-settings-panel');
         var settingsCloseBtn = this.pauseOverlay.querySelector('#settings-close-btn');
-        if (contBtn) contBtn.addEventListener('click', function() { s._togglePause(); });
-        if (hubBtn) hubBtn.addEventListener('click', function() {
-            s._paused = false;
-            if (s.pauseOverlay) s.pauseOverlay.classList.remove('active');
-            s._goToSaveSelect();
-        });
-        if (settingsBtn) settingsBtn.addEventListener('click', function() {
-            if (settingsPanel) settingsPanel.style.display = settingsPanel.style.display === 'none' ? '' : 'none';
-        });
-        if (settingsCloseBtn) settingsCloseBtn.addEventListener('click', function() {
-            if (settingsPanel) settingsPanel.style.display = 'none';
-        });
+        if (contBtn) { var h = function() { s._togglePause(); }; if (this._contBtnHandler) contBtn.removeEventListener('click', this._contBtnHandler); this._contBtnHandler = h; contBtn.addEventListener('click', h); }
+        if (hubBtn) { var h = function() { s._paused = false; if (s.pauseOverlay) s.pauseOverlay.classList.remove('active'); s._goToSaveSelect(); }; if (this._pauseHubBtnHandler) hubBtn.removeEventListener('click', this._pauseHubBtnHandler); this._pauseHubBtnHandler = h; hubBtn.addEventListener('click', h); }
+        if (settingsBtn) { var h = function() { if (settingsPanel) settingsPanel.style.display = settingsPanel.style.display === 'none' ? '' : 'none'; }; if (this._settingsBtnHandler) settingsBtn.removeEventListener('click', this._settingsBtnHandler); this._settingsBtnHandler = h; settingsBtn.addEventListener('click', h); }
+        if (settingsCloseBtn) { var h = function() { if (settingsPanel) settingsPanel.style.display = 'none'; }; if (this._settingsCloseBtnHandler) settingsCloseBtn.removeEventListener('click', this._settingsCloseBtnHandler); this._settingsCloseBtnHandler = h; settingsCloseBtn.addEventListener('click', h); }
         /* 音量滑块 */
         var volMaster = this.pauseOverlay.querySelector('#vol-master');
         var volSfx = this.pauseOverlay.querySelector('#vol-sfx');

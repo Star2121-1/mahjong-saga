@@ -138,10 +138,8 @@ Fp._returnNode = function(node) {
     var poolIdx = this._pool.indexOf(node);
     if (poolIdx !== -1) {
         this._pool.splice(poolIdx, 1);
-    } else {
-        /* R248-P1: 溢出节点在_freeStack中但不在_pool里，重新加入_pool以便cleanup能正确删除DOM */
-        this._pool.push(node);
     }
+    /* R264-P2: 移除else分支 — 所有节点通过borrow路径都应已在_pool中，else分支仅在异常路径触发，cleanup()通过遍历_freeStack正确清理DOM */
     /* 健康检查：每 50 次归还扫描一次，强制回收超过 5s 未归还的节点 */
     if (++this._returnCount % window.Balance.FCT_HEALTHCHECK_MODULO === 0) this._healthCheck();
 };

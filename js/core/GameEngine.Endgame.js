@@ -229,6 +229,8 @@ Gp.restart = function() {
     if (this._iceHideTimer) { clearTimeout(this._iceHideTimer); this._iceHideTimer = null; }
     /* R102-P1: 清理死亡动画定时器 */
     if (this._deathAnimTimer) { clearTimeout(this._deathAnimTimer); this._deathAnimTimer = null; }
+    /* R264-P0: 重置玩家DOM显示状态，防止死亡动画后display:none残留 */
+    if (this.playerEl) this.playerEl.style.display = '';
     /* Clear guide timers to prevent stale callbacks after restart */
     if (this._highlightTimers) {
         this._highlightTimers.forEach(function(t) { clearTimeout(t); });
@@ -255,7 +257,7 @@ Gp.restart = function() {
     if (this._bossMistEl && this._bossMistEl.parentNode) this._bossMistEl.remove();
     this._bossMistEl = null;
     /* R232-P0: 清理Boss砸地特效DOM，防止restart后crack/ring/flash残留世界层 */
-    var _slamEls = document.querySelectorAll('.ground-crack, .boss-slam-ring, .slam-flash, .knight-dodge-slam, .explosion-effect'); /* R240-P0: 补充爆炸特效DOM清理，防止restart后残留 */
+    var _slamEls = document.querySelectorAll('.ground-crack, .boss-slam-ring, .slam-flash, .knight-dodge-slam, .explosion-effect, .boss-warning-zone, .boss-decoy'); /* R240-P0: 补充爆炸特效DOM清理，防止restart后残留 */
     for (var _si = 0; _si < _slamEls.length; _si++) { if (_slamEls[_si].parentNode) _slamEls[_si].remove(); }
     /* R30-H-023: 清理共振光环DOM防止重启泄漏 */
     if (this._flameAuraEl && this._flameAuraEl.parentNode) this._flameAuraEl.remove();

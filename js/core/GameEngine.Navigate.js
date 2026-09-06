@@ -25,6 +25,9 @@ Gp._goToSaveSelect = async function() {
     if (this._guideAutoAdvanceTimer) { clearTimeout(this._guideAutoAdvanceTimer); this._guideAutoAdvanceTimer = null; }
     if (this._completeGuideTimer) { clearTimeout(this._completeGuideTimer); this._completeGuideTimer = null; }
     if (this._handTileDeliverTimers) { this._handTileDeliverTimers.forEach(function(t) { clearTimeout(t); }); this._handTileDeliverTimers = []; }
+    /* R264-P1: 清理音频/FCT池，防止导航后声音泄漏到hub页面 */
+    if (window.audioManager) window.audioManager.stopAll();
+    if (window.fxManager) window.fxManager.cleanup();
     this._pendingBossGamble = false; /* H-017: 离开页面时重置 Boss Gamble 状态 */
     for (var _g = 0; _g < this._expGems.length; _g++) { if (this._expGems[_g].el) this._expGems[_g].el.remove(); }
     this._expGems = [];
