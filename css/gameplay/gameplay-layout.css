@@ -103,7 +103,7 @@
     background: linear-gradient(180deg, #66d98a 0%, #2e9e57 45%, #1a5336 100%);
     border-radius: 0 3px 3px 0;
     box-shadow: 0 0 14px rgba(76,175,80,0.65), inset 0 1px 1px rgba(255,255,255,0.35);
-    transition: width 0.15s ease;
+    /* R257-P1: 移除 width transition，JS 已有脏检查，避免面板打开时跳变 */
     position: absolute; top: 0; left: 0;
 }
 #exp-bar-text {
@@ -129,7 +129,7 @@
     background: linear-gradient(90deg, #7a1414 0%, #b62929 40%, #ff1744 100%);
     border-radius: 0 3px 3px 0;
     box-shadow: 0 0 12px rgba(255,23,68,0.55), inset 0 1px 1px rgba(255,255,255,0.25);
-    transition: width 0.12s ease;
+    /* R257-P1: 移除 width transition，JS 已有脏检查，避免面板打开时跳变 */
     position: absolute; top: 0; left: 0;
 }
 /* 怒气全满：金色呼吸 + 边框脉冲，确保深绿底上醒目 */

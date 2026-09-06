@@ -74,6 +74,7 @@ window.GameEngine = function() {
     this._lastClickAngle = 0;
     this._weaponSlotsEl = null;
     this._enemyProjectiles = [];
+    this._skillGlowEls = null; /* R257-P1: 显式初始化，防止lazy-init路径被绕过时undefined崩溃 */
     this._bossLord = null;
     this._bossLordWave = false;
     this._bossLordSpawned = false;

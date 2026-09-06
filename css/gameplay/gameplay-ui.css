@@ -355,8 +355,6 @@
 }
 /* R116-P1: 持续状态动画在面板打开时应继续运行 */
 .game-clock-frozen .enemy.frozen-crystal,
-.game-clock-frozen .enemy.frozen-crystal::before,
-.game-clock-frozen .enemy.frozen-crystal::after,
 .game-clock-frozen .boss-enraged,
 .game-clock-frozen .boss-enraged::before,
 .game-clock-frozen .boss-enraged::after,
