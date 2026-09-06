@@ -8,12 +8,10 @@ Gp._checkWeaponSynergies = function() {
     /* 重置所有协同标记 */
     this._synBladeLaser = false;
     this._synBladeOrbit = false;
-    this._synNovaLaser = false;
     this._synNovaShotgun = false;
     this._synNovaOrbit = false;
     /* R207-P1: 同步清掉 nova_orbit 旋转加速倍率，防止移除武器后速度残留 */
     this._novaOrbitSpeedMult = null;
-    /* R167-P1: _synNovaLaserActive 已由 _updateWeapons 每帧重置，此处的赋值是死代码（始终被覆盖），移除以保持清晰 */
 
     /* 收集已装备武器ID */
     var ids = {};

@@ -222,7 +222,10 @@
 .game-clock-frozen #world-layer,
 .game-clock-frozen #world-layer *,
 .game-clock-frozen #world-layer *::before,
-.game-clock-frozen #world-layer *::after {
+.game-clock-frozen #world-layer *::after,
+/* R247-P1: 日夜背景切换在面板冻结期间也应停止，防止视觉不一致 */
+.game-clock-frozen #battlefield,
+.game-clock-frozen #battlefield * {
     animation-play-state: paused !important;
     transition-property: none !important;
 }
@@ -295,10 +298,6 @@
 .game-clock-frozen .relic-btn.legendary-btn,
 .game-clock-frozen .relic-btn.legendary-btn::before,
 .game-clock-frozen .relic-btn.legendary-btn::after,
-/* R82-P1: 冰冻敌人冰霜呼吸在面板打开时不应暂停 */
-.game-clock-frozen .frozen-crystal,
-.game-clock-frozen .frozen-crystal::before,
-.game-clock-frozen .frozen-crystal::after,
 /* R82-P1: 特效动画在面板打开时不应暂停 */
 .game-clock-frozen .explosion-effect,
 .game-clock-frozen .explosion-effect::before,

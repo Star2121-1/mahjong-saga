@@ -694,6 +694,8 @@ Gp._announceWave = function(waveIdx) {
 Gp._freezeClock = function() {
     if (this.container) this.container.classList.add('game-clock-frozen');
     /* R190-P0: 暂停AudioContext防止面板打开时音效持续播放 */
+    /* R247-P1: 先停止所有活跃振荡器，防止在途音效穿透面板 */
+    if (window.audioManager) window.audioManager.stopAll();
     if (window.audioManager && window.audioManager._ctx) {
         var ctx = window.audioManager._ctx;
         if (ctx.state === 'running') ctx.suspend();
