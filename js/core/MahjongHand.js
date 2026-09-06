@@ -222,8 +222,8 @@
         }
         /* R199-P0: pre-consume jokers used by extractMelds so Pengpenghu doesn't double-count them */
         var consumed = extractMelds(hand);
-        var jokersConsumedByMelds = consumed.filter(function(m) { return m.tiles.indexOf('joker') > -1; }).length;
-        var jokersAfterMelds = t.jokers - jokersConsumedByMelds; /* R226-P0: 防止癞子在extractMelds消耗后仍被七对子重复计入 */
+        /* R199-P0: extractMelds 已更新 hand.jokers，后续判定直接读取 t.jokers */
+        /* R249-P2: 移除未使用的 jokersAfterMelds 变量（原始注释称其防止七对子重复计数，但变量未被引用） */
         /* 清一色：非癞子全部同花色（癞子视为该花色任意），字牌不计入花色 */
         var suitsPresent = {};
         var hasHonor = false; /* R188-P0: 追踪字牌存在性，防止字牌+单花色误判清一色 */

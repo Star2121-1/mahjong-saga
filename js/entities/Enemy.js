@@ -417,6 +417,15 @@ window.Enemy = class Enemy {
         /* 蓄力瞄准：站定，倒计时结束发射骨签 */
         if (this._archerCharging > 0) {
             this._archerCharging -= dt;
+            /* R249-P1: 蓄力期间允许被贴脸时后退，防止 Archer 原地站桩被秒杀 */
+            var _chargeDx = player.x - this.x, _chargeDy = player.y - this.y;
+            var _chargeDist = Math.sqrt(_chargeDx * _chargeDx + _chargeDy * _chargeDy);
+            if (_chargeDist < B.ENEMY_ARCHER_KITE_MIN && _chargeDist > 0.01) {
+                var _chargeSpd = this._totemBuffed ? this.speed * Balance.TOTEM_BUFF_SPEED_MULT : this.speed;
+                this.x -= (_chargeDx / _chargeDist) * _chargeSpd * dt;
+                this.y -= (_chargeDy / _chargeDist) * _chargeSpd * dt;
+                this._clampPosition(engine);
+            }
             if (this._archerCharging <= 0) {
                 if (this.el) this.el.classList.remove('draw-aim');
                 if (engine && engine._enemyProjectiles) {
@@ -661,6 +670,8 @@ window.Enemy = class Enemy {
                     engine.battlefield.appendChild(bMist);
                     engine._bossMistEl = bMist;
                     setTimeout(function () {
+                        /* R249-P0: guard against engine stale after nav/death — prevent TypeError on destroyed state */
+                        if (!engine || !engine.running) return;
                         if (bMist.parentNode) bMist.remove();
                         if (engine._bossMistEl === bMist) engine._bossMistEl = null;
                     }, 12000);
