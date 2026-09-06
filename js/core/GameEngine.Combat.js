@@ -179,7 +179,7 @@ Gp._checkQqueenShield = function() {
     }, this._shieldTimer * 1000);
 };
 
-Gp._showVictory = function() {
+Gp._showVictory = async function() {
     /* R207-P1: 确保胜利时引导覆盖层已关闭，防止z-index冲突阻塞交互 */
     if (this.guideOverlay && this.guideOverlay.classList.contains('active')) {
         this._completeGuide();
@@ -227,7 +227,7 @@ Gp._showVictory = function() {
         this._resolveGamble(true);
     }
 
-    this._settleRun(tokens);
+    await this._settleRun(tokens); /* R256-P0: await结算完成，防止restart竞态窗口 */
 };
 
 Gp._showAbyssPanel = function() {
@@ -710,10 +710,10 @@ Gp._gameOver = async function() {
     var _seqGO = this._runSeq || 0; /* P0-1: 局序号令牌 */
     window.audioManager && window.audioManager.play('gameover');
     /* R132-P1: 游戏结束前主动存档，防止running=false后beforeunload跳过保存 */
-    await this._autoSave('death'); /* R235-P0: await防止clearActiveRun抢先写入导致数据丢失 */
-    /* P0-1 修复: 移除恒真布尔守卫（调用方 Loop 已先行置 flags，原守卫使死亡结算永不执行） */
+    /* R256-P0: 先置gameOver标志防止visibilitychange在await期间重启循环 */
     this.gameOver = true;
     this.running = false;
+    await this._autoSave('death'); /* R235-P0: await防止clearActiveRun抢先写入导致数据丢失 */
     this._freezeClock();
 
     /* Epoch 46: 玩家死亡动画 — 雀牌碎裂 */
