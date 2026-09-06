@@ -314,6 +314,8 @@ Gp._enterAbyss = async function() {
     this._syncEntities();
     this._syncPlayerHP();
     this._syncUI();
+    /* R243-P0: 重置_announcingWave，防止深渊重新进入时残留标志阻塞波次公告 */
+    this._announcingWave = false;
     this._announceWave(0);
     /* R205-P0: 深渊战斗开始后清除面板可见标志，恢复暂停功能 */
     this._abyssPanelVisible = false;

@@ -676,6 +676,8 @@ Gp._announceWave = function(waveIdx) {
     wa.classList.add('active');
     /* R115-P0: 屏幕阅读器播报波次公告 */
     this._announceToSR('第 ' + (waveIdx + 1) + ' 波开始');
+    /* R243-P0: 波次公告添加音效，避免完全无声 */
+    window.audioManager && window.audioManager.play('reward');
     this._autoSave('wave');
     var self = this;
     setTimeout(function() {

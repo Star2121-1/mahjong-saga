@@ -148,6 +148,12 @@ class Player {
             var dy = this.targetY - this.y;
             var dist = Math.sqrt(dx * dx + dy * dy);
             if (dist < 5) {
+                /* R243-P1: 速度感知到达阈值，防止低移速时永久卡顿 */
+                var spd = this.speed * dt;
+                if (dist < Math.min(5, spd)) {
+                    this.x = this.targetX;
+                    this.y = this.targetY;
+                }
                 this._movingToTarget = false;
             } else {
                 var spd = this.speed * dt;
