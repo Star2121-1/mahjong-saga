@@ -354,7 +354,7 @@
             dateString: this._formatDateString(new Date()),
             waveCount: 0, heroId: '', levelId: '', player: null, kills: 0, elapsed: 0
         });
-        if (!ok) return false; /* R199-P0: 检查写入结果，quota满时返回false防止后续错误流程 */
+        if (!ok) throw new Error('clearActiveRun: write failed (quota?)'); /* R263-P0: 写入失败时抛错而非返回false，防止调用方误认为成功 */
         var meta = await this.getMeta();
         meta.lastSaveTimestamp = Date.now();
         return await this.saveMeta(meta); /* R199-P0: 单次meta写入即可，消除双重写竞争 */

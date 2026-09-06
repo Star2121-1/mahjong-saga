@@ -27,15 +27,16 @@
     SaveManager.prototype.doPrestige = async function() {
         var self = this;
         return this.getMeta().then(function(meta) {
-            var info = self.getPrestigeInfo();
-            /* R119-P0: 修正声望公式 — 原(info.level+1)^2恒大于info.cores(因level=floor(sqrt(cores)))导致守卫永远为false */
-            var cost = 2 * (info.level || 0) + 1;
-            if (info.cores < cost) return { ok: false, reason: '核心不足' };
-            meta.bossCores = info.cores - cost;
-            meta.prestigeLevel = (info.level || 0) + 1;
+            /* R263-P0: 使用fresh meta而非this._metaCache计算声望等级，防止页面刷新后_stale缓存导致cost=1 */
+            var cores = (meta.bossCores || 0);
+            var level = Math.floor(Math.sqrt(cores));
+            var cost = 2 * level + 1;
+            if (cores < cost) return Promise.resolve({ ok: false, reason: '核心不足' });
+            meta.bossCores = cores - cost;
+            meta.prestigeLevel = level + 1;
             meta.prestigeCoresSpent = (meta.prestigeCoresSpent || 0) + cost;
             return self.saveMeta(meta).then(function() { return { ok: true, newLevel: meta.prestigeLevel }; });
-        }).catch(function(e){console.warn("[Season] save error:",e);});
+        }).catch(function(e){console.warn("[Season] save error:",e); return { ok: false, reason: String(e); }});
     };
 
     SaveManager.prototype.spendMetaTokens = async function(perkId, cost) {
@@ -84,8 +85,8 @@
         if (season.currentSeason > 0) return Promise.resolve({ triggered: false });
         var totalWins = meta.runStats && meta.runStats.wins || 0;
         var bestAbyss = meta.highestEndlessLoop || 0;
-        if (totalWins >= 5) return this.activateSeason();
-        if (bestAbyss >= 10) return this.activateSeason();
+        if (totalWins >= 5) return this.activateSeason().catch(function() { return { triggered: false }; });
+        if (bestAbyss >= 10) return this.activateSeason().catch(function() { return { triggered: false }; });
         return Promise.resolve({ triggered: false, reason: '未满足赛季激活条件（需 5 胜或深渊 10 层）' });
     };
 
@@ -99,7 +100,7 @@
             meta.season = season;
             return self.saveMeta(meta).then(function() {
                 return { triggered: true, season: season.currentSeason };
-            }).catch(function(e){console.warn("[Season] save error:",e);});
+            }).catch(function(e){console.warn("[Season] save error:",e); return { triggered: false }; });
         });
     };
 
@@ -193,7 +194,7 @@
             }
             if (bp.currentTier >= 30) bp.currentTier = 30; /* 满级 */
             meta.season = season;
-            this._metaCache = meta; /* R251-P1: 更新缓存，防止同步读取看到过期数据 */
+            self._metaCache = meta; /* R263-P1: 使用self而非this确保在.then()回调中正确更新缓存 */
             return self.saveMeta(meta).then(function() { return { tier: bp.currentTier, xp: bp.xp }; });
         }).catch(function(e){console.warn("[Season] save error:",e);});
     };

@@ -3,6 +3,10 @@
     var Gp = window.GameEngine.prototype;
 
 Gp._goToSaveSelect = async function() {
+    /* R263-P0: 导航守卫防止快速双击导致重复存档/清除竞态 */
+    if (this._navSaving) return;
+    this._navSaving = true;
+    try {
     this.running = false;
     this.gameOver = false;
     this._announcingWave = false; /* R128-P2: 防止导航后标志残留影响后续逻辑 */
@@ -36,6 +40,8 @@ Gp._goToSaveSelect = async function() {
     /* R137-P0: await确保存档写入完成后再跳转，防止竞态导致"继续游戏"误判 */
     if (window.saveManager) await window.saveManager.clearActiveRun();
     window.location.href = 's2_main_hub.html';
+    } catch(e) { console.warn('[Navigate] _goToSaveSelect error:', e); }
+    finally { this._navSaving = false; }
 };
 
 Gp._formatTime = function(sec) {
