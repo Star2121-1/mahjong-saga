@@ -204,7 +204,7 @@ class Player {
         /* L-008: 脆弱 — 突变+30% / 深渊+50% (R245-P0: 使用乘法允许双重叠加) */
         if (this._frailtyDebuff) {
             var _frailtyMult = 1.0;
-            if (this._frailtyStored) _frailtyMult *= Balance.MUTATOR_FRAILTY_DAMAGE_TAKEN_MULT;  // 突变脆弱 +30%
+            if (this._frailtyDebuff) _frailtyMult *= Balance.MUTATOR_FRAILTY_DAMAGE_TAKEN_MULT;  // 突变脆弱 +30% — R272-P1: 用_frailtyDebuff替代已不存在的_frailtyStored，确保debuff正确生效
             if (this._abyssFrailtyOrigAtk !== undefined) _frailtyMult *= Balance.ABYSS_FRAILTY_DMG_MULT;  // 深渊脆弱 +50%
             dmg = Math.floor(dmg * _frailtyMult);
         }
@@ -488,6 +488,11 @@ class Player {
             if (_secrets.indexOf('gravity_mastery') !== -1) {
                 p._weaponCdReduction = Math.min(Balance.MAX_WEAPON_CD_REDUCTION, p._weaponCdReduction + 0.15);
             }
+            /* R272-P1: 恢复所有已发现秘密的永久加成，防止献祭降阶后秘密效果永久丢失 */
+            if (_secrets.indexOf('dragon_formation') !== -1) { p.atk += 10; }
+            if (_secrets.indexOf('frost_blade') !== -1) { p.critDamageBonus = Math.min(Balance.CRIT_DAMAGE_BONUS_MAX, (p.critDamageBonus || 0) + 0.5); }
+            if (_secrets.indexOf('thorn_garden') !== -1) { p.thornsLifesteal = true; }
+            if (_secrets.indexOf('gravity_mastery') !== -1) { p.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, (p.magnetRadius || 60) + 100); }
         }
     }
 

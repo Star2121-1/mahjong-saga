@@ -421,6 +421,7 @@
             eliteModeActive: engine._eliteModeActive || false,
             eliteMultiplier: engine._eliteMultiplier || null,
             activeMutator: engine._activeMutator || null,
+            origMagnetRadius: engine._origMagnetRadius !== null && engine._origMagnetRadius !== undefined ? engine._origMagnetRadius : null,
             tempEnemyAtkDebuff: engine._tempEnemyAtkDebuff !== undefined ? engine._tempEnemyAtkDebuff : null,
             tempEnemySpeedDebuff: engine._tempEnemySpeedDebuff !== undefined ? engine._tempEnemySpeedDebuff : null,
             godModeApplied: false, /* R233-P1: _godModeApplied是死字段——从未在引擎中读取，仅从causalityFlags派生；不序列化避免混淆 */
@@ -507,6 +508,7 @@
         engine._eliteModeActive = data.eliteModeActive || false;
         engine._eliteMultiplier = data.eliteMultiplier || null;
         engine._activeMutator = data.activeMutator || null;
+        engine._origMagnetRadius = (data.origMagnetRadius !== null && data.origMagnetRadius !== undefined) ? data.origMagnetRadius : null;
         engine._tempEnemyAtkDebuff = data.tempEnemyAtkDebuff !== null && data.tempEnemyAtkDebuff !== undefined ? data.tempEnemyAtkDebuff : 0;
         engine._tempEnemySpeedDebuff = data.tempEnemySpeedDebuff !== null && data.tempEnemySpeedDebuff !== undefined ? data.tempEnemySpeedDebuff : 0;
         /* R233-P1: _godModeApplied已从snapshotForRun移除，此处不再恢复 */

@@ -97,6 +97,7 @@ window.GameEngine = function() {
     this._shakeTimer = 0;
     this._shakeIntensity = 0;
     this._witherTimer = 0;
+    this._origMagnetRadius = null; /* R272-P1: 引力突变存储原始磁铁范围，断点续玩必须序列化 */
     this._paused = false;
     this.pauseOverlay = null;
     this._overdriveCount = 0;

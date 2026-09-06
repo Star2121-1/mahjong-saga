@@ -705,7 +705,9 @@ Gp._triggerHu = function (hu) {
     var name = names[hu.huType] || '胡牌';
     /* R115-P0: 屏幕阅读器播报胡牌 */
     this._announceToSR(name + '！');
-    var self = this;
+    /* R272-P1: 胡牌音效需在freeze前播放，否则AudioContext已suspended导致音效丢失 */
+    if (window.audioManager) window.audioManager.play('reward'); /* R231-P1: 胡牌音效应使用reward而非overdrive */
+    if (window.toastSystem) window.toastSystem.success('—— ' + name + ' ——');
 
     /* 全场时间冻结 */
     this._freezeClock();
@@ -760,7 +762,7 @@ Gp._triggerHu = function (hu) {
     } catch (e) { console.warn('hu buff error:', e); }
 
     if (this.triggerShake) this.triggerShake(3, 500);
-    if (window.audioManager) window.audioManager.play('reward'); /* R231-P1: 胡牌音效应使用reward而非overdrive */
+
     if (window.toastSystem) window.toastSystem.success('—— ' + name + ' ——');
 
     /* 清手牌重开一轮收集 */

@@ -65,6 +65,8 @@ Gp._resumeAfterReward = function() {
     this._discardMode = false;
     this._discardSel = -1;
     this._huLock = false;
+    /* R272-P1: 每波重置癞子计数，防止一局中仅第一波可掉落癞子 */
+    this._jokersDropped = 0;
     /* R201-P0: 铁拳事件暴击加成单波有效 — 若波次清空时无击杀，buff 不应泄漏到下一波 */
     this._tempCritBonus = 0;
     /* R251-P0: 仅清除已过期的护盾，防止花竹等跨波护盾被误清 */
@@ -481,7 +483,9 @@ Gp._settleRun = async function(tokens) {
     /* 再次检查 — await 后可能已 restart */
     if ((this._runSeq || 0) !== _seq) return;
     meta.metaTokens = (meta.metaTokens || 0) + tokens;
-    /* R264-P0: 不再手动累加totalRuns/totalKills — 统一由recordRunStats处理，防止胜利路径漏记runStats导致赛季激活失效 */
+    /* R272-P0: 当前局结算时递增meta累计值，确保通关/击杀类成就在本局即能触发（recordRunStats仅写runStats子对象） */
+    if (this._won) meta.totalRuns = (meta.totalRuns || 0) + 1;
+    meta.totalKills = (meta.totalKills || 0) + (this.kills || 0);
     /* Epoch 3: 保存局内成就计数器到 meta */
     meta.overdriveCount = (meta.overdriveCount || 0) + (this._overdriveCount || 0);
     /* R212-P1: 首次Overdrive兜底 — 确保跨局meta计数达到阈值时仍能触发成就 */
