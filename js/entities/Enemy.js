@@ -1215,6 +1215,7 @@ window.Enemy = class Enemy {
                         child._overdriveStored = true;
                         child._overdriveOrigSpeed = child.speed;
                         child.speed = 0;
+                        child._overdriveFrozen = true; /* R266-P0: 必须同步设置_overdriveFrozen，否则_endOverdrive无法解冻 */
                     }
                     /* R245-P0: 补充frenzy突变应用，与正常生成路径保持一致 */
                     if (engRef && engRef._activeMutator === 'frenzy') {
