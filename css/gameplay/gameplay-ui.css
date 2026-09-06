@@ -190,7 +190,7 @@
 
 #game-container.overdrive-active #battlefield {
     filter: saturate(1.6) hue-rotate(-10deg) brightness(1.15);
-    transition: filter 0.15s;
+    /* R261-P0: 移除transition避免面板打开时filter渐变与clock-freeze竞争造成画面闪烁 */
     will-change: filter;
 }
 /* Epoch 38: Mutator screen tinting */
@@ -389,6 +389,12 @@
 .game-clock-frozen .totem-pillar.frost,
 .game-clock-frozen .totem-pillar.frost::before,
 .game-clock-frozen .totem-pillar.frost::after {
+    animation-play-state: running !important;
+}
+/* R261-P1: wind totem场脉冲动画同样需要在面板打开时继续运行 */
+.game-clock-frozen .totem-pillar.wind,
+.game-clock-frozen .totem-pillar.wind::before,
+.game-clock-frozen .totem-pillar.wind::after {
     animation-play-state: running !important;
 }
 /* R144-P2: tile-delivering入场动画在面板打开时不应冻结 */

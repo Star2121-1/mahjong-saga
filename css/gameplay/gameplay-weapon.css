@@ -24,7 +24,7 @@
 .ws-icon { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 6px currentColor; }
 .ws-name { font-size: calc(9 * var(--_fs) * 1px); color: #e0e0d8; font-weight: 600; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 48px; }
 .ws-cd-track { flex: 1; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; min-width: 12px; }
-.ws-cd-fill { height: 100%; background: #1e6f42; border-radius: 2px; transition: width 0.08s linear; }
+.ws-cd-fill { height: 100%; background: #1e6f42; border-radius: 2px; /* R261-P1: 移除transition避免每帧width更新触发layout reflow */ }
 .ws-level { font-size: calc(8 * var(--_fs) * 1px); color: #c8c8c0; font-weight: 700; flex-shrink: 0; min-width: 16px; text-align: right; }
 .ws-cd-text { font-size: calc(7 * var(--_fs) * 1px); color: #d0d0c8; font-weight: 600; flex-shrink: 0; min-height: 10px; text-align: center; }
 .weapon-slot.on-cd .ws-name { opacity: 0.4; }

@@ -76,17 +76,15 @@ Ap._ensureContext = function() {
 Ap.tryReinit = function() {
     /* R54-P1: 检查ctx状态而非仅initialized标志，防止浏览器回收后永久失效 */
     if (this._ctx) {
-        if (this._ctx.state === 'closed' || this._ctx.state === 'suspended') {
-            /* R165-P1: 显式断开所有active振荡器，防止Safari GC延迟导致内存累积 */
-            if (this._activeOscillators) {
-                for (var _ao = this._activeOscillators.length - 1; _ao >= 0; _ao--) {
-                    var _osc = this._activeOscillators[_ao];
-                    try { _osc.stop(); _osc.disconnect(); } catch(e) {}
-                }
-                this._activeOscillators = [];
+        /* R261-P1: 无论ctx状态如何，始终清理振荡器和关闭旧context，防止running状态时泄漏 */
+        if (this._activeOscillators) {
+            for (var _ao = this._activeOscillators.length - 1; _ao >= 0; _ao--) {
+                var _osc = this._activeOscillators[_ao];
+                try { _osc.stop(); _osc.disconnect(); } catch(e) {}
             }
-            try { this._ctx.close(); } catch(e) {} /* R165-P1: 显式释放已关闭的context */
+            this._activeOscillators = [];
         }
+        try { this._ctx.close(); } catch(e) {}
         this._ctx = null;
     }
     /* R207-P0: 无论ctx当前state如何，在reinit前清空引用防止leak — setMuted(false)时ctx可能为running状态，旧context从未被关闭 */
