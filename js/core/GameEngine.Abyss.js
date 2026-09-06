@@ -172,7 +172,6 @@ Gp._showAbyssShop = function() {
             panel.remove();
             self._abyssShopVisible = false;
             /* R219-P0: 购买后恢复游戏循环 */
-            self.running = true;
             self._unfreezeClock();
             self._beginLoop();
             /* 更新按钮状态 */
@@ -186,7 +185,7 @@ Gp._showAbyssShop = function() {
     panel.querySelector('.abyss-shop-close').addEventListener('click', function() {
         panel.remove();
         self._abyssShopVisible = false;
-        self.running = true; /* R214-P1: 恢复游戏循环 */
+        /* R214-P1: 恢复游戏循环 */
         self._unfreezeClock();
         self._beginLoop();
     });

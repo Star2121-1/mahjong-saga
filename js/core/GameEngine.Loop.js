@@ -190,15 +190,6 @@ Gp._loop = function(timestamp) {
                         this._totems.splice(_tex, 1);
                     }
                 }
-                /* B3: 北冥图腾减速领域（玩家进入 r100 内移速-25%） */
-                for (var _tf = 0; _tf < this._totems.length; _tf++) {
-                    var tf = this._totems[_tf];
-                    if (tf.kind === 'frost') {
-                        var fdx = this.player.x - tf.x, fdy = this.player.y - tf.y;
-                        var fr = tf.radius || 100;
-                        if (fdx * fdx + fdy * fdy < fr * fr) { this.player._frostSlowed = true; break; }
-                    }
-                }
                 /* Epoch 46: 构建敌人网格 */
                 var GRID_SIZE = 80;
                 var totemGrid = {};
@@ -234,7 +225,7 @@ Gp._loop = function(timestamp) {
             }
 
             /* ── 波次突变触发器（Boss Lord 波次跳过） ── */
-            if (!this._bossLordWave && !this._mutatorTriggered && this._activeMutator === null && this.currentWaveSpawnedCount > 0 && !this._pendingReward && !this._levelUpPending && !this._overdriveActive) {
+            if (!this._bossLordWave && !this._mutatorTriggered && this._activeMutator === null && this.currentWaveSpawnedCount > 0 && !this._pendingReward && !this._levelUpPending && !this._overdriveActive && !this._announcingWave) {
                 var cap = this._getWaveEnemyMax();
                 if (cap > 0 && this.currentWaveSpawnedCount >= Math.ceil(cap * 0.5)) {
                     this._mutatorTriggered = true;
@@ -324,7 +315,7 @@ Gp._loop = function(timestamp) {
                             this._pendingBossLordSettle = true;
                         } else {
                             /* R207-P1: 胜利结算前主动存档，防止crash/tab关闭时进度丢失（与_gameOver的autoSave('death')对称） */
-                            this._autoSave('victory');
+                            this._autoSave('victory').catch(function(e) { console.warn('[Loop] boss lord victory save failed:', e); });
                             this.running = false;
                             this.gameOver = true;
                             this._won = true; /* R136-P0: 标记胜利，供_settleRun中flawless/speed_demon使用 */
@@ -457,7 +448,7 @@ Gp._loop = function(timestamp) {
             }
             this._pendingBossLordSettle = false;
             /* R207-P1: 胜利结算前主动存档，防止crash/tab关闭时进度丢失 */
-            this._autoSave('victory');
+            this._autoSave('victory').catch(function(e) { console.warn('[Loop] boss lord settle victory save failed:', e); });
             this.running = false;
             this.gameOver = true;
             this._won = true; /* R136-P0: 标记胜利，供_settleRun中flawless/speed_demon使用 */
