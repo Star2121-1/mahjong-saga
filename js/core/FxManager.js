@@ -34,9 +34,10 @@ Fp.spawnText = function(x, y, text, typeOrColor) {
     var node = this._borrowNode();
     if (!node) return;
     /* R72-P1: 使用固定设计分辨率钳制，避免responsive.js scale后clientWidth偏移导致飘字截断 */
+    /* R252-P1: 优先使用_layer实际尺寸，兼容大地图（level_3/4 高度可达2000） */
     if (this._layer) {
-        var w = 1920; /* gameplay design width */
-        var h = 1080; /* gameplay design height */
+        var w = this._layer.clientWidth || 1920;
+        var h = this._layer.clientHeight || 1080;
         x = Math.max(0, Math.min(x, w - 40));
         y = Math.max(0, Math.min(y, h - 20));
     }
