@@ -234,7 +234,8 @@ Gp._updateCoins = function(dt) {
         if (dist < player.radius + 6 || dist < (player.magnetRadius != null ? player.magnetRadius : Balance.MAGNET_RADIUS_DEFAULT)) {
             coin.el.remove();
             this._activeCoins.splice(i, 1);
-            collected++;
+            /* R266-P1: 使用baseGold而非固定+1，使coinVal计算有意义 */
+            collected += (coin.baseGold || 1);
         } else {
             var speed = Math.min(Balance.PLAYER_MAX_SPEED, 400 + (player.magnetRadius || 0) * 2);
             var move = speed * dt;
