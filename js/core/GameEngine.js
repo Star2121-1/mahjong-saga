@@ -57,6 +57,7 @@ window.GameEngine = function() {
     this._lastMoveX = 0;
 
     this._expGems = [];
+    this._pendingExpGems = []; /* R266-P1: 初始化待合并经验石队列，防止跨局残留 */
     this._levelUpPending = false;
     this._ignoreGemCollection = false;
     this._mutatorTriggered = false;

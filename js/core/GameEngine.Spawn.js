@@ -622,8 +622,11 @@ Gp._applyRunBonus = function (suit, tierMult) {
     } else if (suit === 'tiao') {
         var dodgeInc = B.HUPAI_RUN_TIAO_DODGE_INC * (tierIdx + 1);
         p.dodgeRate = Math.min(Balance.MAX_DODGE_RATE, (p.dodgeRate || 0) + dodgeInc);
-        var _tiaoSpdMult = 1 + Math.min(B.HUPAI_RUN_TIAO_CAP, B.HUPAI_RUN_TIAO_SPD_INC * (tierIdx + 1));
-        p.speed = Math.min(B.PLAYER_MAX_SPEED, (p.speed || 100) * _tiaoSpdMult);
+        /* R266-P0: 条顺速度改为加法叠加（与qiduizi模式一致），防止乘法复合超限 */
+        var _tiaoSpdInc = Math.min(B.HUPAI_RUN_TIAO_CAP, B.HUPAI_RUN_TIAO_SPD_INC * (tierIdx + 1));
+        p._tiaoSpdBonus = Math.min(B.HUPAI_RUN_TIAO_CAP, (p._tiaoSpdBonus || 0) + _tiaoSpdInc);
+        var _baseSpd = p.baseSpeed || B.PLAYER_MAX_SPEED;
+        p.speed = Math.min(B.PLAYER_MAX_SPEED, _baseSpd * (1 + (p._tiaoSpdBonus || 0) + (p._qiduiSpdBonus || 0)));
         if (this._spawnFloatText) this._spawnFloatText(p.x, p.y - 40, '条顺 敏捷↑', false);
     }
 };

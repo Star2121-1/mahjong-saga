@@ -709,6 +709,7 @@ class Player {
         /* R220-P0: 恢复七对子速度/磁铁加成，防止跨局残留叠加 */
         this._qiduiSpdBonus = 0;
         this._qiduiMagBonus = 0;
+        this._tiaoSpdBonus = 0; /* R266-P1: 条顺速度加成跨局清零 */
         /* R225-P1: 恢复七对子武器CD减免，防止断点续玩后丢失 */
         this._weaponCdReduction = data.weaponCdReduction || 0;
 
@@ -952,6 +953,7 @@ class Player {
         this.thornsLifesteal = false; /* R82-P1: 清除花缠枝状态，防止跨局残留 */
         this._qiduiSpdBonus = 0; /* R154-P1: 七对子速度加成跨局清零，防止残留叠加 */
         this._qiduiMagBonus = 0; /* R154-P1: 七对子磁铁加成跨局清零 */
+        this._tiaoSpdBonus = 0; /* R266-P1: 条顺速度加成跨局清零，防止残留叠加 */
         this.speedMultiplier = 1.0;
         this.speed = this.baseSpeed;
         /* H-029: 雀灵流转CD缩减已在_initFromConfig应用(line 99)，此处不再重复 */

@@ -208,6 +208,7 @@ Ss._spawnEnemy = function(engine, isBoss) {
         enemy._overdriveStored = true;
         enemy._overdriveOrigSpeed = enemy.speed;
         enemy.speed = 0;
+        enemy._overdriveFrozen = true; /* R266-P0: 必须同步设置_overdriveFrozen，否则_endOverdrive无法解冻 */
     }
 
     /* 创建 DOM */
