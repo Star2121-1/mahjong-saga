@@ -743,7 +743,7 @@ Gp._tryCloseOverlay = function() {
     var mo = document.getElementById('mutator-overlay');
     if (mo && mo.classList.contains('active')) {
         mo.classList.remove('active');
-        this._activeMutator = null;
+        this._clearMutatorEffects(); /* R262-P1: 清除mutator效果而非仅置null，防止bloodmoon/frenzy等stat残留 */
         this.running = true;
         this._unfreezeClock();
         this._beginLoop();

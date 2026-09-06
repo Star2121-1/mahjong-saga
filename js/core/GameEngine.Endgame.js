@@ -163,7 +163,8 @@ Gp._spawnExplosion = function(x, y, radius, damage, excludeId) {
     el.style.width = d + 'px';
     el.style.height = d + 'px';
     this._worldLayer.appendChild(el);
-    setTimeout(function() { el.remove(); }, Balance.EXPLOSION_EFFECT_TIMEOUT);
+    /* R262-P1: setTimeout清理需加parentNode守卫，防止快速波次切换时元素已移除导致JS警告 */
+    setTimeout(function(el) { if (el && el.parentNode) el.remove(); }, Balance.EXPLOSION_EFFECT_TIMEOUT, el);
 };
 
 Gp._screenShake = function() {
