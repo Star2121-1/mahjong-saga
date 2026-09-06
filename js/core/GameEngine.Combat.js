@@ -255,6 +255,7 @@ Gp._showAbyssPanel = function() {
         self._abyssPanelVisible = false;
         var tokens = window.saveManager.calcMetaTokens(self.kills, self._elapsed);
         await self._settleRun(tokens); /* R204-P1: 等待结算完成后再显示胜利覆盖层，确保周常/每日任务奖励已计入 */
+        self._won = true; /* R267-P1: 撤退视为胜利，确保_won标记正确用于flawless/speed_demon成就和周报结算 */
         self._unfreezeClock(); /* R264-P0: 结算完成后解冻时钟，防止_ freezeClock后游戏永久卡死 */
         self._showVictoryOverlay();
     });

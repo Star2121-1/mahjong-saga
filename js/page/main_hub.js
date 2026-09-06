@@ -1698,7 +1698,7 @@
         if (!grid) return;
         var weaponData = (window.rewardManager && window.rewardManager.weaponInfos) || {};
         var meta = window.saveManager._metaCache || {};
-        var unlocked = meta.defaultWeapons || ['TrackingBlade'];
+        var unlocked = (meta.compendium && meta.compendium.weapons) || ['TrackingBlade']; /* R267-P0: 使用compendium记录的真实解锁武器列表，而非defaultWeapons（初始武器） */
 
         var html = '';
         var weaponKeys = Object.keys(weaponData);

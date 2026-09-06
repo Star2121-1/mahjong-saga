@@ -12,8 +12,8 @@ window.achievementConfig = [
 
     /* ═══ 通关类 ═══ */
     { id: 'first_victory',  name: '小胡初成',  desc: '首次胡牌通关',       icon: '🏆', category: 'victory', thresholds: [1] },
-    { id: 'victory_10',     name: '大胡连连',  desc: '累计胡牌 10 次（含尝试）', icon: '🎖️', category: 'victory', thresholds: [10] },
-    { id: 'victory_50',     name: '传奇雀圣',  desc: '累计胡牌 50 次（含尝试）', icon: '👑', category: 'victory', thresholds: [50] },
+    { id: 'victory_10',     name: '大胡连连',  desc: '累计胡牌 10 次', icon: '🎖️', category: 'victory', thresholds: [10] },
+    { id: 'victory_50',     name: '传奇雀圣',  desc: '累计胡牌 50 次', icon: '👑', category: 'victory', thresholds: [50] },
     { id: 'flawless',       name: '无伤胡',  desc: '任一关卡全程未受击胡牌', icon: '✨', category: 'victory', thresholds: [1] },
     { id: 'flawless_5',     name: '完美无瑕',  desc: '累计无伤胡牌 5 次',      icon: '🌟', category: 'victory', thresholds: [5] },
 

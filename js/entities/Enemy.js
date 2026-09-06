@@ -26,7 +26,9 @@ window.Enemy = class Enemy {
             this.maxHp = Math.floor(this.maxHp * Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, loopCount));
             this.hp = this.maxHp;
             this.atk = Math.floor(this.atk * Math.pow(Balance.ABYSS_LOOP_HP_ATK_MULT, loopCount));
-            this.speed = Math.floor(this.speed * Math.pow(Balance.ABYSS_LOOP_SPEED_MULT, loopCount));
+            /* R267-P1: 深渊速度指数暴涨钳制，防止loop>=50时速度溢出导致不可游玩 */
+            var _spdScale = Math.min(Math.pow(Balance.ABYSS_LOOP_SPEED_MULT, loopCount), 3.0);
+            this.speed = Math.floor(this.speed * _spdScale);
         }
 
         this.baseSpeed = this.speed;
@@ -569,7 +571,10 @@ window.Enemy = class Enemy {
                     /* P1: 使用平方距离比较避免 sqrt */
                     var explodeR2 = this._explodeRadius * this._explodeRadius;
                     if (exdx * exdx + exdy * exdy <= explodeR2) {
-                        e.takeDamage(Math.floor(this._getEffectiveAtk() * Balance.BOMBER_EXPLODE_DAMAGE_MULT), this, this.x, this.y);
+                        var _bombDmg = Math.floor(this._getEffectiveAtk() * Balance.BOMBER_EXPLODE_DAMAGE_MULT);
+                        /* R267-P0: 渊爆变体伤害加成 */
+                        if (this._abyssVariant && this._abyssVariant.dmgMult) _bombDmg = Math.floor(_bombDmg * this._abyssVariant.dmgMult);
+                        e.takeDamage(_bombDmg, this, this.x, this.y);
                     }
                 }
                 /* R175-P0: Bomber玩家伤害应检查爆炸半径，防止玩家在范围外仍受到伤害 */
@@ -1008,7 +1013,7 @@ window.Enemy = class Enemy {
                 this.frozenTimer = 0;
             }
         }
-        var _pg = (this._eng || window.gameEngine) && (this._eng || window.gameEngine).player; if (_pg && _pg.heroId === 'Assassin') {
+        var _pg = (this._eng || window.gameEngine) && (this._eng || window.gameEngine).player; if (_pg && _pg.heroId === 'Assassin' && _fctTypeOverride !== 'crit') { /* R267-P0: 排除已暴击的攻击路径，防止Assassin对冰冻/击退敌人造成2.5×1.5=3.75倍伤害 */
             if (this.frozen || this._knockbackVelocity > 0) {
                 actualDmg = Math.floor(actualDmg * Balance.ASSASSIN_CRIT_MULT);
                 isAssassinCrit = true;

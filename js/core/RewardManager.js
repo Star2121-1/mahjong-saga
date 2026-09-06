@@ -658,7 +658,7 @@ class RewardManager {
                 break;
             case 'gold':
                 var goldReward = Math.floor(p.gold * item.value);
-                if (goldReward < 1) goldReward = 50;
+                if (goldReward < 1) goldReward = 10; /* R267-P1: 降低金币献祭保底值（原50g过于慷慨，1g玩家可得5000%回报） */
                 p.addGold(goldReward);
                 this._showFloatingText('+' + goldReward + ' 金', '#ffd700');
                 break;

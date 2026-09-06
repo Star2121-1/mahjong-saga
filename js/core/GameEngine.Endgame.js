@@ -43,7 +43,7 @@ Gp._onClick = function(e) {
         if (enemy.type === 'Boss_Lord') enemy._savedBossPhase = enemy._bossPhase; /* R261-P1: 点击冰冻也保存Boss相位，与武器弹道路径对称 */
         if (enemy.el) { enemy.el.classList.add('frozen-crystal'); enemy.el.classList.add('frozen'); }
         window.audioManager && window.audioManager.play('freeze');
-        isCrit = false;
+        var isCrit = false; /* R267-P0: 声明为var防止strict-mode ReferenceError（原isCrit未声明即赋值） */
     }
 
     var isCrit = Math.random() < (p.critRate + (this._tempCritBonus || 0));
@@ -459,6 +459,7 @@ Gp.restart = function() {
     this._initBeforeUnload();
     /* R241-P0: restart后重新绑定阶段3事件，防止按钮监听器累积 */
     this._bindStage3Events();
+    this._bindAudioButton(); /* R267-P1: 确保restart后音频按钮事件仍有效 */
     /* R241-P1: 重建视口resize监听，防止窗口缩放后相机追踪失效 */
     this._initViewportResize();
 };

@@ -114,6 +114,12 @@ Gp._applyAbyssVariant = function(enemy) {
         enemy.speed = Math.floor(enemy.speed * v.speedMult);
         enemy.baseSpeed = enemy.speed; /* R253-P1: 同步baseSpeed，防止frenzy combo恢复时丢失变体速度加成 */
     }
+    /* R267-P0: 应用rangeMult/dmgMult — 原代码仅读取hpMult/atmMult/speedMult，渊爆变体的爆炸范围与伤害完全失效 */
+    if (v.rangeMult && enemy._explodeRadius !== undefined) {
+        enemy._explodeRadius = Math.floor(enemy._explodeRadius * v.rangeMult);
+    }
+    if (v.dmgMult) enemy._abyssVariantDmgMult = v.dmgMult;
+    if (v.healMult) enemy._abyssVariantHealMult = v.healMult; /* R267-P0: 渊巫治疗范围倍率（当前 Shaman 无主动治疗，预留字段） */
     /* 视觉标记 */
     if (enemy.el) {
         enemy.el.classList.add('abyss-variant');
