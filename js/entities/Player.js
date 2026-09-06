@@ -783,7 +783,7 @@ class Player {
         this.setResonanceIce = (affixCounts.ice_bonus || 0) >= 3;
         /* 天赋额外加成 — R73-P0: restore时跳过，snapshot已含最终值 */
         if (!this._skipTalentBonus) {
-            this.critRate += (talents.ting_intuition || 0) * 0.02;
+            this.critRate = Math.min(1, this.critRate + (talents.ting_intuition || 0) * 0.02);
             this.damageReduction += (talents.gang_hardiness || 0) * 0.03;
             this.cdFloor = Math.max(0.05, (this.cdFloor || Balance.DEFAULT_CD_FLOOR) - (talents.mo_pa_cd || 0) * 0.01);
         }
@@ -972,7 +972,7 @@ class Player {
         this.maxRage = Balance.PLAYER_MAX_RAGE;
 
         /* Epoch 2: 新天赋开局加成（在全部重置后应用，避免被覆盖） */
-        this.critRate += (talents.ting_intuition || 0) * 0.02;
+        this.critRate = Math.min(1, this.critRate + (talents.ting_intuition || 0) * 0.02);
         this.damageReduction += (talents.gang_hardiness || 0) * 0.03;
         this.cdFloor = Math.max(0.05, (this.cdFloor || Balance.DEFAULT_CD_FLOOR) - (talents.mo_pa_cd || 0) * 0.01);
 

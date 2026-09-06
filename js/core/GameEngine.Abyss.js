@@ -174,11 +174,7 @@ Gp._showAbyssShop = function() {
             /* R219-P0: 购买后恢复游戏循环 */
             self._unfreezeClock();
             self._beginLoop();
-            /* 更新按钮状态 */
-            panel.querySelectorAll('.abyss-shop-btn').forEach(function(b, i) {
-                var ic = Math.floor(items[i].cost * Balance.ABYSS_SHOP_PRICE_MULT);
-                b.disabled = self._abyssCoins < ic;
-            });
+
         });
     });
 

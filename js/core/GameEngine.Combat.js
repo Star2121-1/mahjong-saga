@@ -255,6 +255,7 @@ Gp._showAbyssPanel = function() {
         self._abyssPanelVisible = false;
         var tokens = window.saveManager.calcMetaTokens(self.kills, self._elapsed);
         await self._settleRun(tokens); /* R204-P1: 等待结算完成后再显示胜利覆盖层，确保周常/每日任务奖励已计入 */
+        self._unfreezeClock(); /* R264-P0: 结算完成后解冻时钟，防止_ freezeClock后游戏永久卡死 */
         self._showVictoryOverlay();
     });
     panel.querySelector('.abyss-btn-enter').addEventListener('click', function() {
@@ -887,6 +888,11 @@ Gp._gameOver = async function() {
             }
         }
     } catch(e) { console.warn('[Combat] daily quest check failed:', e); }
+
+    /* R264-P0: 深渊深度记录 — _gameOver路径需保存highestEndlessLoop，防止深渊死亡后成就永久丢失 */
+    if (this.loopCount > (meta.highestEndlessLoop || 0)) {
+        meta.highestEndlessLoop = this.loopCount;
+    }
 
     await window.saveManager.saveMeta(meta).catch(function(e){ window.toastSystem && window.toastSystem.error('存档失败: ' + e.message); });
 

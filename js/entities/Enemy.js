@@ -166,12 +166,14 @@ window.Enemy = class Enemy {
             this.frozenTimer -= dt;
             if (this.frozenTimer <= 0) {
                 this.frozen = false;
-                if (this.el) this.el.classList.remove('frozen-crystal');
+                if (this.el) { this.el.classList.remove('frozen-crystal'); this.el.classList.remove('frozen'); } /* R264-P1: 同时移除.frozen类，防止自然解冻时冰霜动画残留 */
                 if (this.type === 'Boss_Lord' && this._savedBossPhase !== undefined) {
                     this._bossPhase = this._savedBossPhase;
                     this._savedBossPhase = undefined;
                     this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
                     this._bossContactThisFrame = false;
+                    /* R264-P1: 解冻时恢复对应阶段的速度，防止冻结期间phase变化导致速度残留 */
+                    this.speed = this._bossPhase < 3 ? this.baseSpeed : this.baseSpeed * Balance.BOSS_PHASE3_SPEED_MULT;
                 }
             }
             return;
@@ -700,6 +702,12 @@ window.Enemy = class Enemy {
                     this._summonCount = 0;
                 }
             }
+        }
+        /* R264-P0: 当Boss从Phase3回到Phase1/2时重置速度，防止永久超速 */
+        if (prevPhase !== this._bossPhase && this._bossPhase < 3) {
+            this.speed = this.baseSpeed;
+            this._bossEnraged = false;
+            if (this.el) this.el.classList.remove('boss-enraged');
         }
 
         /* R56-P0-2: 冻结期间不应递减接触冷却，避免解冻后瞬杀 */
