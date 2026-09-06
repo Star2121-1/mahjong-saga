@@ -55,7 +55,6 @@ window.levelConfig = {
         /* 程序化参数 */
         abyssScaling: {
             enemyHpMult: 1.10,      /* 每层敌人 HP 倍率（从 1.15 降为 1.10 防双重指数） */
-            enemyAtkMult: 1.12,     /* 每层敌人攻击倍率 */
             spawnCountMult: 1.05,   /* 每层刷怪数量倍率（从 1.10 降为 1.05 防数值爆炸） */
             intervalReduce: 0.05,   /* 每层刷怪间隔减少 */
             maxWavesBonus: 1,       /* 每层额外波次 */
@@ -137,7 +136,6 @@ window.proceduralSeedGenerator = {
         var base = window.levelConfig.level_procedural;
         var scaling = base.abyssScaling;
         var diffMult = Math.pow(scaling.enemyHpMult, abyssLevel);
-        var atkMult = Math.pow(scaling.enemyAtkMult, abyssLevel);
         var spawnMult = Math.pow(scaling.spawnCountMult, abyssLevel);
         var intervalReduction = Math.max(0.3, base.spawnIntervalMin - abyssLevel * scaling.intervalReduce);
         var effectiveWaves = base.maxWaves + Math.floor(abyssLevel * scaling.maxWavesBonus);
@@ -190,9 +188,7 @@ window.proceduralSeedGenerator = {
             abyssLevel: abyssLevel,
             isProcedural: true,
             isSeeded: true,
-            seed: seedHash,
-            hpMultiplier: hpOffset,
-            atkMultiplier: atkOffset
+            seed: seedHash
         };
     }
 };

@@ -235,7 +235,7 @@ Gp._updateCoins = function(dt) {
             this._activeCoins.splice(i, 1);
             collected++;
         } else {
-            var speed = 400 + (player.magnetRadius || 0) * 2;
+            var speed = Math.min(Balance.PLAYER_MAX_SPEED, 400 + (player.magnetRadius || 0) * 2);
             var move = speed * dt;
             coin.x += (dx / dist) * move;
             coin.y += (dy / dist) * move;
@@ -300,7 +300,7 @@ Gp._updateExpGems = function(dt) {
         if (dist < player.radius + gem.radius || dist < (player.magnetRadius != null ? player.magnetRadius : Balance.MAGNET_RADIUS_DEFAULT)) {
             collected.push(gem);
         } else {
-            var speed = 400 + (player.magnetRadius || 0) * 2;
+            var speed = Math.min(Balance.PLAYER_MAX_SPEED, 400 + (player.magnetRadius || 0) * 2);
             var move = speed * dt;
             if (move >= dist) {
                 gem.x = player.x;

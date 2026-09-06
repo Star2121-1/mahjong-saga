@@ -1124,7 +1124,7 @@ window.Enemy = class Enemy {
             this.alive = false;
             /* R123-P1: 清除冻结状态，防止死亡后仍显示冰冻特效 */
             if (this.frozen) { this.frozen = false; this.frozenTimer = 0; }
-            if (this.el) this.el.style.opacity = (this.type === 'Stalker' && this._stalkerState === 'charging') ? String(Balance.STALKER_CHARGE_OPACITY) : '1';
+            if (this.el) this.el.style.opacity = '1'; /* R257-P0: Stalker死亡后全不透明，避免半透明尸体残留 */
 
             /* R30-L-006: 敌人死亡触发碎裂动画 */
             if (this.el && !this.isBoss) {
