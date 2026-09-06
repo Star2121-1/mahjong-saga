@@ -215,8 +215,9 @@
            公式加入 t.jokers 使有效手牌数正确（原公式 t.total - pairs*2 遗漏了癞子）*/
         var pairs = 0;
         for (var id2 in t.count) { pairs += Math.floor(t.count[id2] / 2); }
-        /* R246-P1: 七对子癞子公式修正 — 每个癞子只能补半对，需2个癞子才能组成1对 */
-        var maxPossiblePairs = pairs + Math.floor(t.jokers / 2);
+        /* R246-P1: 七对子癞子公式修正 — 每个癞子可补1个单牌成对，剩余癞子两两配对 */
+        var singles = t.total - pairs * 2;
+        var maxPossiblePairs = pairs + Math.min(t.jokers, singles) + Math.floor(Math.max(0, t.jokers - singles) / 2);
         if (maxPossiblePairs >= 7) {
             return { huType: 'qiduizi' };
         }
