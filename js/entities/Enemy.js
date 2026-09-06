@@ -334,6 +334,8 @@ window.Enemy = class Enemy {
     }
 
     _updateShaman(dt, player, engine) {
+        /* R256-P0: 死亡图腾不再持续生成 — 防止已死亡Shaman继续刷图腾 */
+        if (!this.alive) return;
         var dx = player.x - this.x;
         var dy = player.y - this.y;
         var dist = Math.sqrt(dx * dx + dy * dy);
@@ -354,7 +356,8 @@ window.Enemy = class Enemy {
                     if (oldest && oldest.el && oldest.el.parentNode) oldest.el.remove();
                 }
                 var tel = document.createElement('div');
-                tel.className = 'totem-pillar' + (kind === 'frost' ? ' frost' : '');
+                /* R256-P1: wind类型需要与frost不同的视觉样式区分 */
+                tel.className = 'totem-pillar' + (kind === 'frost' ? ' frost' : ' wind');
                 tel.style.left = this.x + 'px';
                 tel.style.top = this.y + 'px';
                 engine._worldLayer.appendChild(tel);

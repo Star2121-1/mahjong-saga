@@ -245,6 +245,22 @@
     0%, 100% { opacity: 0.5; transform: scale(1); }
     50% { opacity: 1; transform: scale(1.08); }
 }
+/* R256-P1: 风灵图腾 — 金色增益领域（当前无游戏逻辑，仅视觉区分） */
+.totem-pillar.wind {
+    background: linear-gradient(180deg, #ffd700, #b8860b);
+    box-shadow: 0 0 22px rgba(255,215,0,0.55), 0 0 70px rgba(255,215,0,0.18);
+}
+.totem-pillar.wind::after {
+    content: '';
+    position: absolute; inset: -90px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.16) 0%, transparent 70%);
+    animation: windFieldPulse 2.4s ease-in-out infinite;
+}
+@keyframes windFieldPulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.08); }
+}
 
 /* B3: 盾甲半血裂纹 — 盾要碎了的可读性演出 */
 .enemy.tile-crack::after {

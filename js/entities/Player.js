@@ -473,9 +473,11 @@ class Player {
         p.speed = p.baseSpeed * p.speedMultiplier;
         p.speed = Math.min(Balance.PLAYER_MAX_SPEED, p.speed);
         /* R238-P1: 圣物重算后恢复英雄被动 — 雀灵流转CD缩减与CD下限 */
-        if (p.heroId === 'Hero') {
+        if (p.heroId) {
             p._weaponCdReduction = Balance.HERO_ASPD_BONUS;
-            p.cdFloor = Math.max(0.05, (window.heroConfig.Hero.cdFloor || Balance.DEFAULT_CD_FLOOR) * Balance.HERO_CD_FLOOR_REDUCTION);
+            /* R256-P1: 动态读取对应英雄的cdFloor，防止mo_pa_cd天赋减免被硬编码Hero覆盖 */
+            var _hCfg = window.heroConfig[p.heroId];
+            p.cdFloor = Math.max(0.05, (_hCfg && _hCfg.cdFloor != null ? _hCfg.cdFloor : Balance.DEFAULT_CD_FLOOR) * Balance.HERO_CD_FLOOR_REDUCTION);
         }
     }
 

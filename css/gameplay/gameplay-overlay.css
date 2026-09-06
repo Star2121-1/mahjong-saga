@@ -578,7 +578,7 @@
    ══════════════════════════════════════════════ */
 
 #abyss-shop-panel {
-    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
     background: linear-gradient(135deg, rgba(30,0,50,0.95), rgba(60,0,90,0.95));
     border: 2px solid #9c27b0; border-radius: calc(16 * var(--_fs) * 1px);
     padding: calc(20 * var(--_fs) * 1px); z-index: 1050; min-width: calc(320 * var(--_fs) * 1px); max-width: calc(480 * var(--_fs) * 1px);
