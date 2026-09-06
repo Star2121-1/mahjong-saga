@@ -53,6 +53,8 @@ Gp._onClick = function(e) {
     if (damage === 0) return;
 
     enemy.takeDamage(damage, this.player, this.player.x, this.player.y, isCrit ? 'crit' : undefined);
+    /* R260-P1: 点击暴击需标记_critThisHit，与武器弹道路径对称，确保tempCritBonus击杀消费一致 */
+    if (isCrit) enemy._critThisHit = true;
     /* Epoch 36: 攻击音效 */
     if (isCrit) window.audioManager && window.audioManager.play('crit');
     else window.audioManager && window.audioManager.play('attack');
@@ -335,6 +337,7 @@ Gp.restart = function() {
     this._bossLordSpawned = false; /* R80-P1: 防止跨局Boss领主生成标志残留 */
     this._pendingBossLordSettle = false; /* R226-P1: 重置Boss结算标志，防止restart后胜利状态卡死 */
     this._bossLord = null; /* R135-P1: 防止restart后_bossLord残留死引用 */
+    this._bossLordSavedPhase = null; /* R260-P0: 重置冻结Boss相位快照，防止跨restart泄漏 */
     this._levelUpPending = false;
     this._ignoreGemCollection = false;
     this._mutatorTriggered = false;

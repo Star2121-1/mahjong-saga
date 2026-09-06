@@ -185,7 +185,7 @@ Gp._updateProjectiles = function(dt) {
             var _dy = e.y - p.y;
             var _radiusSum = e.radius + p.radius;
             if (_dx * _dx + _dy * _dy < _radiusSum * _radiusSum) {
-                e.takeDamage(p.damage, p, p.x, p.y);
+                e.takeDamage(p.damage, 'player', p.x, p.y); /* R260-P0: 武器弹道伤害源传'player'确保暴击/冰冻/吸血/爆炸等玩家被动正常触发 */
                 p.hitEnemies.add(e.id);
                 if (p.pierceCount > 0) {
                     p.pierceCount--;

@@ -284,6 +284,11 @@ window.Balance = {
     COIN_COUNT_NORMAL_PER_LVL: 0.3,
     COIN_COUNT_NORMAL_RANDOM_MAX: 3,       // 普通金币随机范围上限 (Spawn.js _spawnCoinsAt / _rewardKill)
     COIN_SCATTER: 20,
+    COIN_BURST_SCATTER: 60,          // 金币雨散开距离 (Events.js _spawnCoinBurst)
+    COIN_BURST_VALUE: 1,             // 金币雨单枚金币基础价值 (Events.js)
+    INTERWAVE_SHIELD_DURATION: 15,   // 信仰护盾持续时间(s) (Events.js shield_of_faith)
+    BOSS_SPAWN_Y_RATIO: 0.35,        // Boss生成Y位置占地图高度比例 (Events.js)
+    TEMP_ATK_BOOST_CAP: 3.0,         // 临时攻击加成上限(防无限叠加) (Spawn.js + RewardManager.js)
     /* ── Coin/Gem 拾取 ── */
     COIN_VISUAL_OFFSET: 6,            // 金币视觉偏移 (GameEngine.Spawn.js)
     MAGNET_RADIUS_DEFAULT: 60,        // 默认吸附半径 (Player.js + Spawn.js)

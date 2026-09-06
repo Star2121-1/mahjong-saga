@@ -50,7 +50,7 @@ class RewardManager {
             { id: 'dragon_formation', name: '龙七对', desc: '清一色Lv3+杠上开花Lv3+爆牌圈Lv2 → 永久+10攻击力', check: function(p) { return (p.relicLevels.sharp_edge||0)>=3 && (p.relicLevels.thorn_armor||0)>=3 && (p.relicLevels.explosive_core||0)>=2; }, reward: function(p) { p.atk += 10; } },
             { id: 'frost_blade', name: '冰清一刀', desc: '清一色Lv3+冰清玉洁Lv3 → 暴击伤害+50%', check: function(p) { return (p.relicLevels.sharp_edge||0)>=3 && (p.relicLevels.frost_core||0)>=3; }, reward: function(p) { p.critDamageBonus = (p.critDamageBonus||0) + 0.5; } },
             { id: 'thorn_garden', name: '花缠枝', desc: '杠上开花Lv5+自摸加番Lv3 → 反伤伤害同时触发吸血', check: function(p) { return (p.relicLevels.thorn_armor||0)>=5 && (p.relicLevels.vamp_ring||0)>=3; }, reward: function(p) { p.thornsLifesteal = true; } },
-            { id: 'wind_fury', name: '四风狂飙', desc: '四风环绕Lv3+抢杠Lv2 → 移速+25%, 闪避+10%', check: function(p) { return (p.relicLevels.wind_walker||0)>=3 && (p.relicLevels.golden_finger||0)>=2; }, reward: function(p) { p.speedMultiplier = (p.speedMultiplier||1) + 0.25; p.speed = p.baseSpeed * p.speedMultiplier; p.dodgeRate = Math.min(Balance.MAX_DODGE_RATE, (p.dodgeRate||0) + 0.1); } },
+            { id: 'wind_fury', name: '四风狂飙', desc: '四风环绕Lv3+抢杠Lv2 → 移速+25%, 闪避+10%', check: function(p) { return (p.relicLevels.wind_walker||0)>=3 && (p.relicLevels.golden_finger||0)>=2; }, reward: function(p) { p.speedMultiplier = Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, (p.speedMultiplier||1) + 0.25); p.speed = p.baseSpeed * p.speedMultiplier; p.dodgeRate = Math.min(Balance.MAX_DODGE_RATE, (p.dodgeRate||0) + 0.1); } },
             { id: 'gravity_mastery', name: '宝牌引力', desc: '宝牌聚宝Lv3+役牌加算Lv2 → 经验吸附范围+100px, 武器冷却-15%', check: function(p) { return (p.relicLevels.gravity_core||0)>=3 && (p.relicLevels.weapon_amplify||0)>=2; }, reward: function(p) { p.magnetRadius = Math.min(Balance.MAX_MAGNET_RADIUS, (p.magnetRadius||60) + 100); /* R232-P1: 施加全局磁吸上限 */ p._weaponCdReduction = ((p._weaponCdReduction||0) + 0.15); } }
         ];
 
@@ -665,7 +665,7 @@ class RewardManager {
             case 'temp_buff':
                 var b = item.cardData && item.cardData.buff;
                 if (b === 'atkBoost') {
-                    p._tempAtkBoost = (p._tempAtkBoost || 0) + item.value;
+                    p._tempAtkBoost = Math.min(Balance.TEMP_ATK_BOOST_CAP, (p._tempAtkBoost || 0) + item.value);
                     p._tempBuffTimeLeft = item.duration;
                     this._showFloatingText('+50% 攻击 ' + item.duration + 's', '#ff8800');
                 } else if (b === 'tempHp') {

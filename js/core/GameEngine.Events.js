@@ -14,7 +14,7 @@ Gp._interWaveEvents = [
     { id: 'berserk', name: '狂战士祝福', icon: '⚔', desc: '下波击杀额外 +10 怒气', weight: 15, apply: function() { this._tempBerserkBonus = true; } },
     { id: 'golden_touch', name: '点金术', icon: '✨', desc: '下波金币收益 ×3', weight: 15, apply: function() { this._tempGoldMult = 3; } },
     { id: 'iron_fist', name: '铁拳', icon: '👊', desc: '下波暴击率 +25%', weight: 20, apply: function() { this._tempCritBonus = Balance.WAVE_IRON_FIST_CRIT_BONUS; } },
-    { id: 'shield_of_faith', name: '信仰护盾', icon: '🛡', desc: '获得可吸收 50 伤害的护盾（持续 15 秒）', weight: 15, apply: function() { this._tempShield = 50; this._tempShieldEnd = this._elapsed + 15; } }
+    { id: 'shield_of_faith', name: '信仰护盾', icon: '🛡', desc: '获得可吸收 50 伤害的护盾（持续 15 秒）', weight: 15, apply: function() { this._tempShield = 50; this._tempShieldEnd = this._elapsed + Balance.INTERWAVE_SHIELD_DURATION; } }
 ];
 
 Gp._pickInterWaveEvent = function() {
@@ -127,14 +127,14 @@ Gp._spawnCoinBurst = function(count) {
     var py = this.player.y;
     /* R238-P0: CombatSystem无spawnCoinsAt方法，直接生成可拾取金币 */
     for (var i = 0; i < count; i++) {
-        var cx = px + (Math.random() - 0.5) * 60;
-        var cy = py + (Math.random() - 0.5) * 60;
+        var cx = px + (Math.random() - 0.5) * Balance.COIN_BURST_SCATTER;
+        var cy = py + (Math.random() - 0.5) * Balance.COIN_BURST_SCATTER;
         var el = document.createElement('div');
         el.className = 'coin-placeholder';
         el.style.left = (cx - 6) + 'px';
         el.style.top = (cy - 6) + 'px';
         this._worldLayer.appendChild(el);
-        this._activeCoins.push({ x: cx, y: cy, el: el, baseGold: 1 });
+        this._activeCoins.push({ x: cx, y: cy, el: el, baseGold: Balance.COIN_BURST_VALUE });
     }
     if (window.fxManager) window.fxManager.spawnText(px, py, '+' + count + ' 🪙', '#ffd700'); /* R222-P1: 移除未使用的duration参数 */
 };
@@ -445,7 +445,7 @@ Gp._spawnBossLordFromGamble = function() {
     if (this._bossLordSpawned) return;
     var level = Math.floor(this._elapsed / 15) + 1;
     var x = this._mapW / 2;
-    var y = Math.floor(this._mapH * 0.35);
+    var y = Math.floor(this._mapH * Balance.BOSS_SPAWN_Y_RATIO);
     var margin = 100;
     x = Math.max(margin, Math.min(this._mapW - margin, x));
     y = Math.max(margin, Math.min(this._mapH - margin, y));

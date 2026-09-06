@@ -477,7 +477,8 @@ class Player {
             p._weaponCdReduction = Balance.HERO_ASPD_BONUS;
             /* R256-P1: 动态读取对应英雄的cdFloor，防止mo_pa_cd天赋减免被硬编码Hero覆盖 */
             var _hCfg = window.heroConfig[p.heroId];
-            p.cdFloor = Math.max(0.05, (_hCfg && _hCfg.cdFloor != null ? _hCfg.cdFloor : Balance.DEFAULT_CD_FLOOR) * Balance.HERO_CD_FLOOR_REDUCTION);
+            p.cdFloor = Math.max(0.05, (_hCfg && _hCfg.cdFloor != null ? _hCfg.cdFloor : Balance.DEFAULT_CD_FLOOR)); /* R260-P1: 仅Hero英雄有cdFloor*0.9的被动，recalc时不应错误缩放其他英雄 */
+            if (p.heroId === 'Hero') p.cdFloor = Math.max(0.05, p.cdFloor * Balance.HERO_CD_FLOOR_REDUCTION);
         }
     }
 
