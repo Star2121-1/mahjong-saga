@@ -376,6 +376,8 @@ Gp._rewardKill = function(enemy) {
     if (this._activeMutator === 'frenzy') goldAmt = Math.floor(goldAmt * Balance.MUTATOR_FRENZY_GOLD_MULT);
     /* R245-P1: 深渊引力combo减少击杀金币 */
     if (this._abyssActiveCombo === 'abyss_gravity') goldAmt = Math.floor(goldAmt * Balance.ABYSS_GRAVITY_COIN_REDUCTION);
+    /* R273-P1: 深渊血月combo"掉落×2"需包含金币，与装备掉落路径(_tryDropEquipment)对齐 */
+    if (this._abyssActiveCombo === 'abyss_bloodmoon') goldAmt = Math.floor(goldAmt * Balance.ABYSS_BLOODMOON_DROP_MULT);
     this.player.addGold(goldAmt);
     this.player.rage = Math.min(this.player.maxRage, this.player.rage + 5 + (this._tempBerserkBonus ? 10 : 0));
     if (this._tempBerserkBonus) this._tempBerserkBonus = false;
