@@ -100,8 +100,9 @@ Gp._resumeAfterLevelUp = function() {
         this._pendingReward = true;
     }
     /* R200-P0: Boss死亡期间升级 — 恢复后检查是否需结算胜利（防止波次已清除但无胜利路径的永久运行） */
+    /* R252-P0: _pendingBossLordSettle 在 level-up 中断时保留，此处恢复后重新检查 */
     if (this.enemies.length === 0 && this._activeCoins.length === 0 && this._expGems.length === 0
-        && this._waveCount >= this._getMaxWaves() - 1 && !this._pendingBossLordSettle) {
+        && this._waveCount >= this._getMaxWaves() - 1 && (this._pendingBossLordSettle || !this._bossLord)) {
     this._tempShield = 0;
     this._tempShieldEnd = 0;
         /* R234-P0: 最终波次胜利前存档，防止关闭时进度丢失 */
