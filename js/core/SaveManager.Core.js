@@ -430,6 +430,7 @@
             abyssUnlockedCombos: engine._abyssUnlockedCombos || [],
             abyssActiveCombo: engine._abyssActiveCombo || null,
             abyssComboActivated: engine._abyssComboActivated || false, /* R228-P1: 保存深渊combo激活标志，防止断点续玩后combo永久无法再次激活 */
+            witherAbyssTimer: engine._witherAbyssTimer || 0,
             handTiles: (engine._handTiles && engine._handTiles.length > 0) ? engine._handTiles.slice() : [],
             formedMelds: (engine._formedMelds && Object.keys(engine._formedMelds).length > 0) ? engine._formedMelds : {},
             jokersDropped: engine._jokersDropped || 0,
@@ -482,6 +483,11 @@
         engine._abyssUnlockedCombos = data.abyssUnlockedCombos || [];
         engine._abyssActiveCombo = data.abyssActiveCombo || null;
         engine._abyssComboActivated = data.abyssComboActivated || false; /* R228-P1: 恢复深渊combo激活标志 */
+        engine._witherAbyssTimer = data.witherAbyssTimer || 0;
+        /* R245-P0: 无激活combo时重置combo激活标志，防止异常状态导致后续轮回无法自动触发 */
+        if (engine._abyssActiveCombo === null) {
+            engine._abyssComboActivated = false;
+        }
         engine._gambleActive = data.gambleActive || false;
         engine._gambleType = data.gambleType || null;
         engine._gambleStaked = _posOrZero(data.gambleStaked, 0);

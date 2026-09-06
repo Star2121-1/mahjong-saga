@@ -286,7 +286,8 @@ Gp._endOverdrive = function() {
     this._overdriveActive = false;
     this._overdriveTimer = 0;
     /* R243-P0: Overdrive结束添加音效反馈，让玩家感知到能力失效 */
-    window.audioManager && window.audioManager.play('freeze');
+    /* R245-P1: 改用专用音效避免与冰系技能混淆 */
+    window.audioManager && window.audioManager.play('overdrive_end');
 
     if (this.player) this.player.cdFloor = this._origCdFloor !== undefined ? this._origCdFloor : Balance.DEFAULT_CD_FLOOR;
     this._origCdFloor = null; /* P1: 清除跨局残留 */
@@ -698,6 +699,7 @@ Gp._cleanEnemyProjectiles = function() {
         if (this._enemyProjectiles[i].el && this._enemyProjectiles[i].el.parentNode) {
             this._enemyProjectiles[i].el.remove();
         }
+        this._enemyProjectiles[i].el = null; /* R245-P1: 防止幽灵弹道 */
     }
     this._enemyProjectiles = [];
 };

@@ -1190,6 +1190,18 @@ window.Enemy = class Enemy {
                     child.speed = child.baseSpeed * Balance.SPLITTER_CHILD_SPEED_MULT;
                     child.baseSpeed = child.speed;
                     engRef.enemies.push(child);
+                    /* R245-P0: Splitter子体在Overdrive激活时需冻结速度 */
+                    if (engRef._overdriveActive) {
+                        child._overdriveStored = true;
+                        child._overdriveOrigSpeed = child.speed;
+                        child.speed = 0;
+                    }
+                    /* R245-P0: 补充frenzy突变应用，与正常生成路径保持一致 */
+                    if (engRef && engRef._activeMutator === 'frenzy') {
+                        child._frenzyStored = true;
+                        child._frenzyOrigSpeed = child.speed;
+                        child.speed = Math.round(child.speed * Balance.MUTATOR_FRENZY_SPEED_MULT);
+                    }
                     /* R119-P1: Splitter子体计入波次计数，防止绕过波次上限 */
                     if (typeof engRef.currentWaveSpawnedCount !== 'undefined') engRef.currentWaveSpawnedCount += 1;
                     var cel = document.createElement('div');

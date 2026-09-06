@@ -124,6 +124,7 @@ Ap.play = function(sound, opts) {
         case 'victory':  this._chord([523,659,784,1047], 0.5, vol * 0.6); break;
         case 'gameover': this._sine(300, 0.4, vol * 0.5, -0.8); break;
         case 'freeze':   this._sine(1000, 0.1, vol * 0.3, 0.1); break;
+        case 'overdrive_end': this._sweep(800, 200, 0.3, vol * 0.4); break;
         case 'explode':  this._noise(0.2, vol * 0.6); break;
         default: console.error('[AudioManager] unknown sound:', sound, '(expected: attack,crit,hit,heal,pickup,levelup,reward,boss,overdrive,victory,gameover,freeze,explode)'); break;
     }

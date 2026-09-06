@@ -341,6 +341,8 @@ Gp._rewardKill = function(enemy) {
     }
     /* R225-P1: 狂突突变金币加成应与掉落路径一致 */
     if (this._activeMutator === 'frenzy') goldAmt = Math.floor(goldAmt * Balance.MUTATOR_FRENZY_GOLD_MULT);
+    /* R245-P1: 深渊引力combo减少击杀金币 */
+    if (this._abyssActiveCombo === 'abyss_gravity') goldAmt = Math.floor(goldAmt * Balance.ABYSS_GRAVITY_COIN_REDUCTION);
     this.player.addGold(goldAmt);
     this.player.rage = Math.min(this.player.maxRage, this.player.rage + 5 + (this._tempBerserkBonus ? 10 : 0));
     if (this._tempBerserkBonus) this._tempBerserkBonus = false;
