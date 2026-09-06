@@ -749,9 +749,10 @@ Gp._triggerKnightDodgeSlam = function() {
         var dist = Math.sqrt(sx * sx + sy * sy);
         if (dist < radius && dist > 0) {
             var force = Balance.KNIGHT_DODGE_SLAM_FORCE;
-            se.x += (sx / dist) * force;
-            se.y += (sy / dist) * force;
+            var angle = Math.atan2(sy, sx);
             se._knockbackVelocity = force;
+            se._knockbackVelocityX = Math.cos(angle) * force;
+            se._knockbackVelocityY = Math.sin(angle) * force;
             if (typeof se._clampPosition === 'function') se._clampPosition(this);
         }
     }

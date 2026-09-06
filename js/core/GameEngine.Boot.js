@@ -30,7 +30,10 @@ Gp.init = async function() {
     document.addEventListener('pointerdown', _activateAudio, { once: true });
     document.addEventListener('keydown', _activateAudio, { once: true });
 
-    this.player = new Player(this._mapW / 2, this._mapH / 2);
+    /* R265-P1: 使用存档预选英雄初始化Player，防止load期间heroId为默认'Hero'的短暂窗口 */
+    var _meta = window.saveManager && window.saveManager._metaCache || {};
+    var _savedHero = (_meta.currentSelectedHero || _meta.currentHero || 'Hero');
+    this.player = new Player(this._mapW / 2, this._mapH / 2, _savedHero);
 
     await window.saveManager.init();
 

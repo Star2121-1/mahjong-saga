@@ -479,6 +479,15 @@ class Player {
             var _hCfg = window.heroConfig[p.heroId];
             p.cdFloor = Math.max(0.05, (_hCfg && _hCfg.cdFloor != null ? _hCfg.cdFloor : Balance.DEFAULT_CD_FLOOR)); /* R260-P1: 仅Hero英雄有cdFloor*0.9的被动，recalc时不应错误缩放其他英雄 */
             if (p.heroId === 'Hero') p.cdFloor = Math.max(0.05, p.cdFloor * Balance.HERO_CD_FLOOR_REDUCTION);
+            /* R265-P1: 恢复已发现秘密圣物的持久加成 — wind_fury速度/闪避 + gravity_mastery武器CD */
+            var _secrets = p._discoveredSecrets || [];
+            if (_secrets.indexOf('wind_fury') !== -1) {
+                p.speedMultiplier = Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, (p.speedMultiplier || 1) + 0.25);
+                p.dodgeRate = Math.min(Balance.MAX_DODGE_RATE, (p.dodgeRate || 0) + 0.1);
+            }
+            if (_secrets.indexOf('gravity_mastery') !== -1) {
+                p._weaponCdReduction = Math.min(Balance.MAX_WEAPON_CD_REDUCTION, p._weaponCdReduction + 0.15);
+            }
         }
     }
 

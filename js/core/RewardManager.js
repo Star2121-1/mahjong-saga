@@ -648,7 +648,7 @@ class RewardManager {
         }
         /* R230-P1: 圣物降级后全量重算基础属性，防止 atk/maxHp/critRate/speedMultiplier 等残留 */
         if (p.recalcRelicStats) p.recalcRelicStats();
-        if (p.heroId === 'Mage') p._recalcThornsRate();
+        /* R265-P1: recalcRelicStats已内部调用 _recalcThornsRate（Player.js line ~1010），无需额外调用 */
 
         /* 应用奖励 */
         switch (item.sacrificeType) {
