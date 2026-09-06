@@ -753,6 +753,11 @@ Gp._tryCloseOverlay = function() {
         this._beginLoop();
         return true;
     }
+    /* R246-P0: ESC可关闭引导覆盖层，防止玩家被困 */
+    if (this.guideOverlay && this.guideOverlay.classList.contains('active')) {
+        this._completeGuide();
+        return true;
+    }
     return false;
 };
 

@@ -464,8 +464,8 @@ window.Enemy = class Enemy {
                 if (this.el) this.el.classList.add('draw-aim');
             }
         } else {
-            /* 不在射程带：冷却继续倒计时，确保回到范围后可立即开火 */
-            this._archerFireCd -= dt;
+            /* R246-P1: 离开射程带时重置CD，防止玩家反复进出射程导致立即开火 */
+            this._archerFireCd = B.ENEMY_ARCHER_FIRE_INTERVAL;
         }
     }
 
@@ -1208,7 +1208,7 @@ window.Enemy = class Enemy {
                     cel.className = 'enemy';
                     cel.dataset.id = cid;
                     cel.dataset.enemyType = ct;
-                    var suitMap = { 'Normal': '萬', 'Tanker': '條', 'Stalker': '筒', 'Archer': '索', 'Barrier': '白', 'Shaman': '風' };
+                    var suitMap = { 'Normal': '萬', 'Tanker': '條', 'Stalker': '筒', 'Archer': '索', 'Barrier': '白', 'Shaman': '風', 'Bomber': '發', 'Splitter': '中' };
                     cel.setAttribute('data-suit', suitMap[ct] || '萬');
                     cel.style.opacity = '1';
                     var chpBar = document.createElement('div');

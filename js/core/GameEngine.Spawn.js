@@ -106,6 +106,37 @@ Gp._spawnEliteEnemy = function() {
     }
 
     this.enemies.push(enemy);
+    /* R246-P1: 精英怪创建DOM，否则永远不会渲染 */
+    var eel = document.createElement('div');
+    eel.className = 'enemy';
+    eel.dataset.enemyType = enemyType;
+    eel.dataset.suit = ({ Normal: '萬', Tanker: '條', Stalker: '筒', Shaman: '風', Barrier: '白', Bomber: '發', Splitter: '中', Archer: '索' })[enemyType] || '萬';
+    if (enemy.isBoss) {
+        eel.classList.add('boss');
+        var maxW = this._getMaxWaves ? this._getMaxWaves() : 99;
+        if (this._waveCount >= maxW - 1) eel.classList.add('final-boss');
+        if (enemyType === 'Boss_Lord') eel.classList.add('boss-lord');
+    }
+    eel.dataset.id = id;
+    eel.style.background = '#2a4a3a';
+    eel.style.borderRadius = '4px';
+    eel.style.boxShadow = '0 3px 0 #1a3020, 0 5px 0.5px #3a5a4a, 0 6px 8px rgba(0,0,0,0.4)';
+    eel.style.display = 'flex';
+    eel.style.alignItems = 'center';
+    eel.style.justifyContent = 'center';
+    eel.style.fontSize = '12px';
+    eel.style.fontWeight = '700';
+    eel.style.color = '#5a8a6a';
+    var ehpBar = document.createElement('div');
+    ehpBar.className = 'enemy-hp-bar';
+    var ehpFill = document.createElement('div');
+    ehpFill.className = 'enemy-hp-fill';
+    ehpBar.appendChild(ehpFill);
+    eel.appendChild(ehpBar);
+    if (this._worldLayer) this._worldLayer.appendChild(eel);
+    if (this._enemyElements) this._enemyElements.set(id, eel);
+    enemy.el = eel;
+    enemy.el.classList.add('elite-marker');
     /* P1: 直接调用GameEngine原型方法，而非通过 Systems（不存在此方法） */
     if (this._applyAbyssVariant) this._applyAbyssVariant(enemy);
     /* R30-H-010: Boss 不计入波次计数，防止提前触发奖励面板 */

@@ -414,6 +414,7 @@
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
     display: flex; flex-direction: column; align-items: center;
     justify-content: center; gap: 12px;
+    overflow-y: auto; /* R246-P1: 防止内容溢出时无滚动 */
     animation: abyssPanelIn 0.5s ease-out forwards, abyssBloodPulse 2s infinite;
 }
 @keyframes abyssBloodPulse {

@@ -141,6 +141,8 @@ Gp._showGuideStep = function(stepIndex) {
 };
 
 Gp._completeGuide = function() {
+    /* R246-P0: 防止死亡/结算后取消冻结，导致CSS动画异常 */
+    if (this.gameOver) return;
     /* R46-P2: 清除检查timer，防止guide完成后interval泄漏 */
     if (this._guideCheckTimer) { clearInterval(this._guideCheckTimer); this._guideCheckTimer = null; }
     if (this._guideAutoAdvanceTimer) { clearTimeout(this._guideAutoAdvanceTimer); this._guideAutoAdvanceTimer = null; }

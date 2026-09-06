@@ -151,7 +151,7 @@
 }
 /* P2 全屏白闪 */
 .slam-flash {
-    position: absolute; inset: 0;
+    position: fixed; inset: 0;
     background: rgba(255,255,255,0.55);
     pointer-events: none; z-index: 70;
     animation: slamFlashFade 0.3s ease-out forwards;
