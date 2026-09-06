@@ -161,6 +161,21 @@ window.Enemy = class Enemy {
     update(dt, player, engine) {
         if (!this.alive) return;
         this._freezeHitDecayed = false;
+        /* R250-P1: 冻结检查优先于击退 — 冻结状态应完全阻止移动，包括击退位移 */
+        if (this.frozen) {
+            this.frozenTimer -= dt;
+            if (this.frozenTimer <= 0) {
+                this.frozen = false;
+                if (this.el) this.el.classList.remove('frozen-crystal');
+                if (this.type === 'Boss_Lord' && this._savedBossPhase !== undefined) {
+                    this._bossPhase = this._savedBossPhase;
+                    this._savedBossPhase = undefined;
+                    this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
+                    this._bossContactThisFrame = false;
+                }
+            }
+            return;
+        }
         /* R236-P0: GroundSlammer knockback位移 — 设置速度分量供movement消费 */
         if (this._knockbackVelocity > 0) {
             this.x += (this._knockbackVelocityX || 0) * dt;
@@ -172,24 +187,6 @@ window.Enemy = class Enemy {
         this._knockbackVelocity = Math.max(0, this._knockbackVelocity - dt * Balance.KNOCKBACK_DECAY_RATE);
         this.flashTimer = Math.max(0, this.flashTimer - dt);
         this._comboCooldown = Math.max(0, (this._comboCooldown || 0) - dt); /* K-030: 冷却倒计时 */
-
-        if (this.frozen) {
-            this.frozenTimer -= dt;
-            if (this.frozenTimer <= 0) {
-                this.frozen = false;
-                if (this.el) this.el.classList.remove('frozen-crystal');
-                /* P2: 解冻时恢复冻结前相位，避免冻结期间受伤害导致相位回退后解冻瞬间触发过强能力 */
-                if (this.type === 'Boss_Lord' && this._savedBossPhase !== undefined) {
-                    this._bossPhase = this._savedBossPhase;
-                    this._savedBossPhase = undefined;
-                    /* R117-P1: 解冻后重置接触冷却，防止解冻瞬间误触接触伤害 */
-                    this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
-                    /* R170-P1: 重置接触标志，防止解冻瞬间跳过接触伤害 */
-                    this._bossContactThisFrame = false;
-                }
-            }
-            return;
-        }
 
         /* B3: 盾甲半血裂纹演出 */
         if (this.type === 'Tanker' && this.el && !this._cracked && this.hp < this.maxHp * Balance.TANKER_CRACK_HP_THRESHOLD) {

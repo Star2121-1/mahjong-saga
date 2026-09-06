@@ -25,6 +25,7 @@ Gp._initDefaultWeapons = function() {
     }
     this._syncWeaponSlots();
     this._renderWeaponSlots();
+    this._checkWeaponSynergies(); /* R250-P1: 初始化后重新计算协同标志，防止新游戏协同失效 */
 };
 
 Gp._restoreWeapons = function(weaponData) {
@@ -49,6 +50,7 @@ Gp._restoreWeapons = function(weaponData) {
     if (this._activeWeapons.length === 0) this._initDefaultWeapons();
     this._syncWeaponSlots();
     this._renderWeaponSlots();
+    this._checkWeaponSynergies(); /* R250-P1: 恢复后重新计算协同标志，防止存档读取后协同失效 */
 };
 
 Gp._cleanAllProjectiles = function() {

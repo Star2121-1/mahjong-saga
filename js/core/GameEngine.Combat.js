@@ -48,6 +48,9 @@ Gp._resumeAfterReward = function() {
     this._tempShieldEnd = 0;
     this._tempBerserkBonus = false;
     this._tempGoldMult = 1;
+    /* R250-P1: 疾风连打攻速加成单波有效 — 防止跨奖励面板残留 */
+    this._tempAspd = 0;
+    this._tempAspdT = 0;
     /* R137-P0: 同步SpawnSystem计数器，防止波次间空刷 */
     if (window.SpawnSystem) window.SpawnSystem.currentWaveSpawnedCount = 0;
     this._mutatorTriggered = false;
@@ -80,6 +83,9 @@ Gp._resumeAfterLevelUp = function() {
     this._discardMode = false;
     this._discardSel = -1;
     this._huLock = false;
+    /* R250-P1: 疾风连打攻速加成单波有效 — 防止跨升级面板残留 */
+    this._tempAspd = 0;
+    this._tempAspdT = 0;
     /* M-001: 升级期间如果波次已清除，恢复以显示奖励面板 */
     if (this.enemies.length === 0 && this._activeCoins.length === 0 && this._expGems.length === 0
         && this.currentWaveSpawnedCount >= this._getWaveEnemyMax() && this._waveCount < this._getMaxWaves() - 1) {
