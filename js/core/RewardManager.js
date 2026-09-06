@@ -642,7 +642,10 @@ class RewardManager {
 
         /* 降一级 */
         p.relicLevels[bestRelic] = bestLevel - 1;
-        if (p.relicLevels[bestRelic] <= 0) delete p.relicLevels[bestRelic];
+        if (p.relicLevels[bestRelic] <= 0) {
+            delete p.relicLevels[bestRelic];
+            delete p._relicAffixes && delete p._relicAffixes[bestRelic]; /* R255-P0: 圣物降至Lv.0后清理词条，防止效果残留 */
+        }
         /* R230-P1: 圣物降级后全量重算基础属性，防止 atk/maxHp/critRate/speedMultiplier 等残留 */
         if (p.recalcRelicStats) p.recalcRelicStats();
         if (p.heroId === 'Mage') p._recalcThornsRate();

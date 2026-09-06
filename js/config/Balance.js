@@ -55,7 +55,6 @@ window.Balance = {
     MAX_DODGE_RATE: 0.8,             // 闪避率上限 (RewardManager secret 四风狂飙)
     CORE_RES_PER_LEVEL: 0.1,         // R235-P1: 核心共振每级加成 (Combat.js + SaveManager.Core.js)
     MAX_XP_GAIN_FACTOR: 2.0,         // EXP获取倍率上限 (Player.js relic gc_xp)
-    /* MAX_XP_GAIN_PCT: 0.50 已废弃 — 注释声称用于装备xp_gain词条上限，但代码中无引用；实际上限由 MAX_XP_GAIN_FACTOR (2.0) 统一钳制 */
     MAX_FREEZE_DURATION_BONUS: 5.0,  // ice_bonus词条累计冻结时长上限(s) (Player.js)
     MAX_SPEED_BONUS_PCT: 0.30,       // speed_pct词条累计移速加成上限(相对baseSpeed) (Player.js)
     MAX_MAGNET_RADIUS: 200,          // 磁铁半径上限 (Player.js)
@@ -111,7 +110,6 @@ window.Balance = {
     ICE_AURA_INTERVAL: 0.8,                 // 永冻套装共鸣触发间隔(s) (GameSystems.js)
     ICE_AURA_RADIUS: 60,                    // 永冻套装共鸣半径(px) (GameSystems.js)
     ICE_AURA_BASE_DURATION: 0.5,            // 永冻套装共鸣基础持续时间(s) (GameSystems.js)
-    /* THORNS_TICK_PER_SEC: 0.05 已废弃 — 荆棘在 Player.takeDamage() 中即时计算，无独立tick */
     WITHER_HP_LOSS_PCT: 0.05,               // 枯萎突变每秒HP损失比例 (GameSystems.js)
     THORN_PER_LEVEL: 0.05,                  // 太阳神巨像每级反伤率增量 (Player.js)
     PLAYER_RADIUS: 28,
@@ -139,8 +137,6 @@ window.Balance = {
     CAUSALITY_ANIM_DURATION: 0.6,
 
     /* ── 雀魂护盾 ── */
-    QUEN_SHIELD_BASE_DURATION: 5,
-    QUEN_SHIELD_DURATION_PER_LEVEL: 2,
 
     /* ── 波次 ── */
     WAVE_INTER_EVENT_CHANCE: 0.6,     // 波次间事件触发概率 (GameEngine.Loop.js)

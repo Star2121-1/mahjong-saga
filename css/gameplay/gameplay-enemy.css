@@ -549,7 +549,6 @@
     height: 100%;
     background: linear-gradient(90deg, #b62929, #ff6d00, #ffd700);
     border-radius: 4px;
-    transition: width 0.1s ease;
     box-shadow: 0 0 16px rgba(182,41,41,0.5);
 }
 #boss-hp-label {

@@ -536,7 +536,12 @@
         engine._bossLordSpawned = data.bossLordSpawned || false; /* R226-P0: 从快照恢复极速通关成就状态 */
         /* R233-P0: 恢复Boss冻结前相位，防止断点恢复后Boss回到Phase 1 */
         if (data.bossLordSavedPhase !== null && data.bossLordSavedPhase !== undefined) {
-            engine._bossLordSavedPhase = data.bossLordSavedPhase;
+            /* R255-P0: 直接应用到Boss实例，而非暂存到engine上（原engine._bossLordSavedPhase从未被Enemy.js读取） */
+            if (engine._bossLord && engine._bossLord.type === 'Boss_Lord') {
+                engine._bossLord._savedBossPhase = data.bossLordSavedPhase;
+            } else {
+                engine._bossLordSavedPhase = data.bossLordSavedPhase; /* fallback：Boss未生成时暂存，待Spawn时应用 */
+            }
         }
         engine._monsterSurgeDoubleDrops = false;
         engine._pendingBossGamble = false;

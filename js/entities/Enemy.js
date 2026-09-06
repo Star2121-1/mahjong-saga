@@ -1051,7 +1051,7 @@ window.Enemy = class Enemy {
            onClick路径已处理crit/lifesteal/freeze/explosion，通过_fctTypeOverride标记防重复。
            此处仅对非onClick来源(武器/弹道/Drone)补充属性应用。
         ── */
-        var _isPlayerSrc = (source === 'player' || (source && typeof source.x === 'number')) && source !== 'thorns'; // R156-P0: 反伤不触发武器路径proc
+        var _isPlayerSrc = (source === 'player' || source === this.player) && source !== 'thorns'; // R255-P0: 仅玩家主动攻击触发武器被动，敌方弹道/Bomber等不应误触发
         if (_isPlayerSrc && actualDmg > 0) {
             var _eng = this._eng || window.gameEngine;
             var _pg = _eng && _eng.player;
