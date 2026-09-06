@@ -841,6 +841,9 @@ Gp._showGuide = function() {
     this._guideMoveDirs = {};
     this._guideGemsPicked = 0;
     this._guideHits = 0;
+    /* R268-P1: 重置步数追踪计数器，防止跨局残留导致假触发 */
+    this._guidePrevGemCount = undefined;
+    this._guidePrevEnemyCount = undefined;
     /* R117-P0: 与所有其他面板一致，guide 激活时冻结时钟 */
     this._freezeClock();
     if (this.guideOverlay) this.guideOverlay.classList.add('active');
