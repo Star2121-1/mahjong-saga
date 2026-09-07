@@ -773,6 +773,13 @@ window.Enemy = class Enemy {
                 this.y += (dy / dist) * this.speed * dt;
                 this._clampPosition(engine);
             }
+            /* R291-P0: Boss P1阶段接触碰撞 — 原代码在phase块末尾return跳过接触伤害，导致P1/P2完全无接触伤害 */
+            var pDist1 = Math.sqrt(dx * dx + dy * dy);
+            if (pDist1 <= totalR && !this._bossContactThisFrame && this._bossContactTimer <= 0) {
+                this._bossContactThisFrame = true;
+                this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
+                player.takeDamage(this._getEffectiveAtk(), this);
+            }
             return;
         }
 
@@ -828,6 +835,14 @@ window.Enemy = class Enemy {
                         setTimeout(function () { if (dec.parentNode) dec.remove(); }, Balance.TIMEOUT_DECAY_DRAIN_MS);
                     }
                 }
+            }
+            /* R291-P0: Boss P2阶段接触碰撞 — 原代码在此return跳过接触伤害，玩家贴脸P2阶段不受伤害 */
+            var _pdx2 = player.x - this.x, _pdy2 = player.y - this.y;
+            var _pDist2 = Math.sqrt(_pdx2 * _pdx2 + _pdy2 * _pdy2);
+            if (_pDist2 <= totalR && !this._bossContactThisFrame && this._bossContactTimer <= 0) {
+                this._bossContactThisFrame = true;
+                this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
+                player.takeDamage(this._getEffectiveAtk(), this);
             }
             return;
         }
@@ -1187,7 +1202,7 @@ window.Enemy = class Enemy {
             var _engRef_check = this._eng || window.gameEngine; if (this.type === 'Splitter' && !this._splitDone && _engRef_check && _engRef_check.enemies) {
                 this._splitDone = true;
                 var engRef = this._eng || window.gameEngine;
-                var childTypes = ['Normal', 'Normal', 'Normal', 'Tanker', 'Stalker', 'Archer', 'Barrier'];
+                var childTypes = ['Normal', 'Normal', 'Normal', 'Tanker', 'Stalker', 'Archer', 'Barrier', 'Bomber', 'Shaman'];
                 /* R193-P1: 深渊渊分变体分裂数×2 */
                 var _childCount = (this._abyssVariant && this._abyssVariant.splitMult) ? 2 * this._abyssVariant.splitMult : 2;
                 for (var _sp = 0; _sp < _childCount; _sp++) {

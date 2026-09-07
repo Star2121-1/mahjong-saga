@@ -285,7 +285,10 @@
             meta.dailyQuests = dq;
             meta.metaTokens = (meta.metaTokens || 0) + (def.reward.metaTokens || 0);
             meta.bossCores = (meta.bossCores || 0) + (def.reward.bossCores || 0);
-            return self.saveMeta(meta).then(function() { return { ok: true, reward: def.reward }; });
+            return self.saveMeta(meta).then(function() {
+                self._metaCache = meta; /* R291-P1: 更新缓存，防止claim后getDailyQuests返回过期数据 */
+                return { ok: true, reward: def.reward };
+            });
         }).catch(function(e){console.warn("[Weekly] save error:",e);});
     };
 

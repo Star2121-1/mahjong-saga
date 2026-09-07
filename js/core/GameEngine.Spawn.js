@@ -374,6 +374,8 @@ Gp._rewardKill = function(enemy) {
     }
     /* R225-P1: 狂突突变金币加成应与掉落路径一致 */
     if (this._activeMutator === 'frenzy') goldAmt = Math.floor(goldAmt * Balance.MUTATOR_FRENZY_GOLD_MULT);
+    /* R291-P0: 血月突变击杀金币应翻倍，与怪物潮掉落的count*=2保持一致 */
+    if (this._activeMutator === 'bloodmoon') goldAmt = Math.floor(goldAmt * 2);
     /* R245-P1: 深渊引力combo减少击杀金币 */
     if (this._abyssActiveCombo === 'abyss_gravity') goldAmt = Math.floor(goldAmt * Balance.ABYSS_GRAVITY_COIN_REDUCTION);
     /* R273-P1: 深渊血月combo"掉落×2"需包含金币，与装备掉落路径(_tryDropEquipment)对齐 */
