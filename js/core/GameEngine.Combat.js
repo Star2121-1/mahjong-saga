@@ -200,6 +200,8 @@ Gp._showVictory = async function() {
         /* R296-P0: 死亡/胜利时保存hasSeenGuide，防止引导重放 */
         if (window.saveManager && window.saveManager._metaCache) {
             window.saveManager._metaCache.hasSeenGuide = true;
+            /* R300-P0: 强制持久化到磁盘，防止浏览器崩溃导致hasSeenGuide丢失 */
+            window.saveManager._saveMetaToStorage().catch(function(e) { console.warn('[Guide] victory saveMeta failed:', e); });
         }
     }
     window.audioManager && window.audioManager.play('victory');
@@ -734,6 +736,8 @@ Gp._gameOver = async function() {
         /* R296-P0: 死亡时保存hasSeenGuide，防止下次开局重放引导 */
         if (window.saveManager && window.saveManager._metaCache) {
             window.saveManager._metaCache.hasSeenGuide = true;
+            /* R300-P0: 强制持久化到磁盘，防止浏览器崩溃导致hasSeenGuide丢失 */
+            window.saveManager._saveMetaToStorage().catch(function(e) { console.warn('[Guide] death saveMeta failed:', e); });
         }
     }
     /* R69-P1: 清除奖励面板防止游戏结束画面叠加 */

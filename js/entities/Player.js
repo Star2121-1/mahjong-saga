@@ -209,7 +209,8 @@ class Player {
             dmg = Math.floor(dmg * _frailtyMult);
         }
 
-        if (dmg > 0 && window.audioManager) window.audioManager.play('hit');
+        /* R300-P1: 无敌帧期间不应播放受击音效，视觉/逻辑上已闪避了伤害 */
+        if (dmg > 0 && !this.invulnTimer && window.audioManager) window.audioManager.play('hit');
         this.hp -= dmg;
         this.invulnTimer = Balance.PLAYER_INVULN_ON_HIT;
         this.hitFlashTimer = Balance.PLAYER_HITFLASH_DURATION; /* H-030: 与 Combat.js 归一化分母一致 */
