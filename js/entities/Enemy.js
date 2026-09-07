@@ -181,6 +181,8 @@ window.Enemy = class Enemy {
                     this._savedBossPhase = undefined;
                     this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
                     this._bossContactThisFrame = false;
+                    /* R296-P1: 解冻时重置能力计时器，防止冻结期间计时停滞导致解冻后异常快发 */
+                    this._bossAbilityTimer = Balance.BOSS_PHASE1_ABILITY_INTERVAL;
                     /* R264-P1: 解冻时恢复对应阶段的速度，防止冻结期间phase变化导致速度残留 */
                     this.speed = this._bossPhase < 3 ? this.baseSpeed : this.baseSpeed * Balance.BOSS_PHASE3_SPEED_MULT;
                 }

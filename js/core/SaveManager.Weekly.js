@@ -232,6 +232,8 @@
                 quests: indices.map(function(ix) { return { id: pool[ix].id, completed: false }; }),
                 lastDate: today, claimed: {}
             };
+            /* R296-P0: 每日任务再生成后持久化，防止跨天刷新丢失 */
+            this.saveMeta(this._metaCache).catch(function(e) { console.warn('[Daily] saveMeta failed:', e); });
         }
         return meta.dailyQuests;
     };
