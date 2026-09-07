@@ -44,6 +44,8 @@
         return this.getMeta().then(function(meta) {
             var actualCost = cost || 100;
             if ((meta.metaTokens || 0) < actualCost) return { ok: false, reason: '元代币不足' };
+            /* R287-P1: 通胀计数器在扣费前记录，防止跳过通胀防护 */
+            self.recordInflation(actualCost);
             meta.metaTokens -= actualCost;
             if (!meta.purchasedPerks) meta.purchasedPerks = {};
             if (!meta.purchasedPerks[perkId]) meta.purchasedPerks[perkId] = 0;
@@ -234,6 +236,8 @@
             if (!season.battlePass) season.battlePass = {};
             if (season.battlePass.premium) return { ok: false, reason: '已是高级' };
             if ((meta.metaTokens || 0) < 100) return { ok: false, reason: '需要 100 元代币' };
+            /* R287-P1: 通胀计数器在扣费前记录 */
+            self.recordInflation(100);
             meta.metaTokens -= 100;
             season.battlePass.premium = true;
             meta.season = season;

@@ -100,7 +100,8 @@ Gp._updateWeapons = function(dt) {
         /* R29-C-003: 秘密宝牌引力武器冷却减免
            R52: 使用 _origBaseCd 而非 _baseCd 计算，防止与 Spawn.js 筒顺减CD双重压缩 */
         if (cdReduction > 0) {
-            var cdBase = w._baseCd || w._origBaseCd || w.cd; /* R157-P0: 优先读_baseCd（含筒顺），确保筒顺减CD不被秘密宝牌吞没 */
+            /* R287-P1: 优先使用 _origBaseCd 而非 _baseCd，防止与 Spawn.js 筒顺减CD双重压缩 */
+            var cdBase = w._origBaseCd || w._baseCd || w.cd;
             w.cd = Math.max(this.player.cdFloor || Balance.DEFAULT_CD_FLOOR, cdBase * (1 - cdReduction));
         } else {
             /* R176-P0: 确保cd不会被重置为低于floor的值 */

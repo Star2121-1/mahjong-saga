@@ -700,6 +700,7 @@ Gp._triggerHonorMeld = function (meld) {
 
 /* ════ 雀魂系统 · A4 胡牌演出（HUPAI_DESIGN.md §六） ════ */
 Gp._triggerHu = function (hu) {
+    var self = this; /* R287-P0: 声明self引用，供setTimeout闭包使用 — 缺失导致ReferenceError软锁 */
     var B = window.Balance, p = this.player;
     if (!p || this._huLock || this.gameOver) return;
     this._huLock = true;
@@ -764,8 +765,6 @@ Gp._triggerHu = function (hu) {
     } catch (e) { console.warn('hu buff error:', e); }
 
     if (this.triggerShake) this.triggerShake(3, 500);
-
-    if (window.toastSystem) window.toastSystem.success('—— ' + name + ' ——');
 
     /* 清手牌重开一轮收集 */
     this._handTiles = [];

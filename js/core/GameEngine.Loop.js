@@ -304,6 +304,12 @@ Gp._loop = function(timestamp) {
                             this._activeCoins[_lci].el.remove();
                         }
                         this.player.addGold(Math.max(1, Math.floor(refundTotal)));
+                        /* R287-P1: Boss死亡金币退款也应受_tempGoldMult加成，与正常拾取路径一致 */
+                        if (this._tempGoldMult > 1) {
+                            var _goldBonus = Math.floor((this._tempGoldMult - 1) * refundTotal);
+                            if (_goldBonus > 0) this.player.addGold(_goldBonus);
+                            this._tempGoldMult = 1;
+                        }
                         this._activeCoins = [];
                         if (this.bossHpBar) this.bossHpBar.classList.remove('active');
                         if (this.bossHpFill) this.bossHpFill.style.width = '0%';

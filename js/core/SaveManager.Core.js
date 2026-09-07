@@ -442,6 +442,7 @@
             discardMode: engine._discardMode || false,
             discardSel: engine._discardSel !== undefined ? engine._discardSel : -1,
             huLock: engine._huLock || false,
+            handFullToastAt: engine._handFullToastAt || 0, /* R287-P1: 保存手牌满提示计时，防止断点恢复后toast状态异常 */
             bossLordSpawned: engine._bossLordSpawned || false, /* R226-P0: 保存极速通关成就关键状态，防止断点恢复后丢失 */
             bossLordSavedPhase: (engine._bossLord && engine._bossLord._savedBossPhase !== undefined) ? engine._bossLord._savedBossPhase : null, /* R233-P0: 保存Boss冻结前相位，防止断点恢复后相位回退 */
             player: engine.player.snapshot()
@@ -529,6 +530,7 @@
         engine._discardMode = !!data.discardMode;
         engine._discardSel = (data.discardSel !== null && data.discardSel !== undefined) ? data.discardSel : -1;
         engine._huLock = !!data.huLock;
+        engine._handFullToastAt = data.handFullToastAt || 0; /* R287-P1: 恢复手牌满提示计时 */
         var levelId = data.levelId || 'level_1';
         engine._currentLevelId = levelId;
         engine._totalWaves = data.totalWaves != null ? data.totalWaves : ((window.levelConfig[levelId] && window.levelConfig[levelId].maxWaves) || 5); /* R226-P0: 恢复波次总数，防止结算界面显示错误分母 — R228-P0: 优先使用快照值而非levelConfig兜底 */

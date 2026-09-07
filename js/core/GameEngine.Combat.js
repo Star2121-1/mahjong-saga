@@ -569,6 +569,9 @@ Gp._settleRun = async function(tokens) {
                 meta.metaTokens = (meta.metaTokens || 0) + (vaultResult.reward.metaTokens || 0);
                 meta.bossCores = (meta.bossCores || 0) + (vaultResult.reward.bossCores || 0);
                 this._spawnCausalityText('🏆 金库挑战完成: +' + (vaultResult.reward.metaTokens || 0) + '代币 +' + (vaultResult.reward.bossCores || 0) + '核心');
+                /* R287-P0: 结算后立即清除reward防止hub端claimWeeklyVaultReward二次发放 */
+                var _vm = await window.saveManager.getMeta();
+                if (_vm.weeklyVault) { _vm.weeklyVault.reward = null; await window.saveManager.saveMeta(_vm); }
             }
         } catch(e) { console.warn('[WeeklyVault] evaluation failed:', e); }
     }
