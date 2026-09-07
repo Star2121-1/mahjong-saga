@@ -1031,9 +1031,8 @@
             } else if (c.id === 'first_kill') {
                 currentVal = (meta.totalKills || 0) >= 1 ? 1 : 0;
             }
-            /* R297-P1: "越低越好"类成就（如极速通关）进度计算取反，防止低值显示低进度 */
-            /* R298-P0: 需排除 currentVal===0（无数据或未解锁），否则 threshold/0=Infinity 导致进度条爆表 */
-            var isLowerIsBetter = (c.thresholds && c.thresholds[0] > 0 && currentVal > 0);
+            /* R301-P0: isLowerIsBetter 仅适用于 speed_demon，其他成就是「越高越好」 — 宽泛条件导致crit_master/boss_slayer/victory等进度显示取反 */
+            var isLowerIsBetter = (c.id === 'speed_demon' && currentVal > 0);
             if (isLowerIsBetter) {
                 progress = Math.min(100, Math.round((threshold / currentVal) * 100));
             } else {
