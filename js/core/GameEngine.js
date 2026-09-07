@@ -100,6 +100,7 @@ window.GameEngine = function() {
     this._origMagnetRadius = null; /* R272-P1: 引力突变存储原始磁铁范围，断点续玩必须序列化 */
     this._paused = false;
     this.pauseOverlay = null;
+    this._trailTimers = []; /* R278-P1: 追踪player trail setTimeout，防止game over后DOM泄漏 */
     this._overdriveCount = 0;
     this._maxGoldThisRun = 0;
     this._totalCritsThisRun = 0;

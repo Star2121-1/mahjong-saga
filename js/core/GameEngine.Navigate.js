@@ -25,6 +25,7 @@ Gp._goToSaveSelect = async function() {
     if (this._guideAutoAdvanceTimer) { clearTimeout(this._guideAutoAdvanceTimer); this._guideAutoAdvanceTimer = null; }
     if (this._completeGuideTimer) { clearTimeout(this._completeGuideTimer); this._completeGuideTimer = null; }
     if (this._handTileDeliverTimers) { this._handTileDeliverTimers.forEach(function(t) { clearTimeout(t); }); this._handTileDeliverTimers = []; }
+    if (this._trailTimers) { this._trailTimers.forEach(function(t) { clearTimeout(t); }); this._trailTimers = []; } /* R278-P1: 清理player trail定时器 */
     /* R264-P1: 清理音频/FCT池，防止导航后声音泄漏到hub页面 */
     if (window.audioManager) window.audioManager.stopAll();
     if (window.fxManager) window.fxManager.cleanup();

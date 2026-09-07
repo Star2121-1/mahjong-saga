@@ -192,6 +192,7 @@ Gp._showVictory = async function() {
         if (this._completeGuideTimer) { clearTimeout(this._completeGuideTimer); this._completeGuideTimer = null; }
         if (this._originalOpacities) { this._restoreOpacity(); this._originalOpacities.clear(); this._originalOpacities = null; }
         if (this._highlightTimers) { this._highlightTimers.forEach(function(t) { clearTimeout(t); }); this._highlightTimers = []; }
+        if (this._trailTimers) { this._trailTimers.forEach(function(t) { clearTimeout(t); }); this._trailTimers = []; } /* R278-P1: 清理trail定时器 */
         this.guideOverlay.classList.remove('active');
         this._guideDismissed = true;
     }
@@ -714,6 +715,7 @@ Gp._gameOver = async function() {
         if (this._completeGuideTimer) { clearTimeout(this._completeGuideTimer); this._completeGuideTimer = null; }
         if (this._originalOpacities) { this._restoreOpacity(); this._originalOpacities.clear(); this._originalOpacities = null; }
         if (this._highlightTimers) { this._highlightTimers.forEach(function(t) { clearTimeout(t); }); this._highlightTimers = []; }
+        if (this._trailTimers) { this._trailTimers.forEach(function(t) { clearTimeout(t); }); this._trailTimers = []; } /* R278-P1: 清理trail定时器 */
         this.guideOverlay.classList.remove('active');
         this._guideDismissed = true;
     }
@@ -1111,7 +1113,12 @@ Gp._syncEntities = function() {
             trail.style.top = this.player.y + 'px';
             if (this._worldLayer) this._worldLayer.appendChild(trail); /* R61-P1: null guard防止渲染失败 */
             var self = this;
-            setTimeout(function() { if (trail.parentNode) trail.remove(); }, Balance.TIMEOUT_TRAIL_REMOVE_MS);
+            var _trailTimer = setTimeout(function() {
+                if (trail.parentNode) trail.remove();
+                self._trailTimers = (self._trailTimers || []).filter(function(t) { return t !== _trailTimer; });
+            }, Balance.TIMEOUT_TRAIL_REMOVE_MS);
+            if (!this._trailTimers) this._trailTimers = [];
+            this._trailTimers.push(_trailTimer);
         }
     }
     this._lastDt = this._lastDt || 0.016;
