@@ -208,8 +208,9 @@ Gp._loop = function(timestamp) {
                     var tgx = Math.floor(t.x / GRID_SIZE);
                     var tgy = Math.floor(t.y / GRID_SIZE);
                     var tR2 = t.radius * t.radius;
-                    for (var dgx = -1; dgx <= 1; dgx++) {
-                        for (var dgy = -1; dgy <= 1; dgy++) {
+                    /* R290-P0: 扩大Totem搜索范围 — GRID_SIZE=80但totem半径=100，±1格只能覆盖80px，需要±2格覆盖160px确保检测完整 */
+                    for (var dgx = -2; dgx <= 2; dgx++) {
+                        for (var dgy = -2; dgy <= 2; dgy++) {
                             var ck = (tgx + dgx) + ',' + (tgy + dgy);
                             var cell = totemGrid[ck];
                             if (!cell) continue;
@@ -315,6 +316,8 @@ Gp._loop = function(timestamp) {
                         if (this.bossHpFill) this.bossHpFill.style.width = '0%';
                         /* R252-P1: 清理 Boss Lord 引用和红色雾霭 DOM，防止胜利界面残留 */
                         if (this._bossLord) this._bossLord = null;
+                        /* R290-P0: 记录Boss Lord已被击败，用于极速通关成就终局检查 */
+                        this._finalBossDefeatedThisRun = true;
                         if (this._bossMistEl && this._bossMistEl.parentNode) { this._bossMistEl.remove(); this._bossMistEl = null; }
                         /* R268-P1: 清理Boss P2警告圈DOM，防止快速击杀时残留 */
                         if (this._bossWarningEl && this._bossWarningEl.parentNode) { this._bossWarningEl.remove(); this._bossWarningEl = null; }

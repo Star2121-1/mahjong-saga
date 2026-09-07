@@ -629,8 +629,10 @@ Gp._settleRun = async function(tokens) {
     /* 金币 — get_rich/gold_10k 是单局实时成就，通过 _syncUI inflight 检测，此处不应使用meta跨局值 */
     /* R136-P0: speed_demon 终局兜底 — 用_won替代!gameOver防止死代码 */
     /* R188-P1: 增加_bossLordSpawned检查，防止非最终Boss关卡提前触发极速通关成就 */
-    /* R283-P0: 移除loopCount===0限制，深渊第1轮回及之后3分钟内通关也应触发极速通关成就 */
-    if (this._won && this._bossLordSpawned && (this._elapsed || 0) <= 180) this._checkAchievement('speed_demon');
+    /* R290-P0: 改用_finalBossDefeatedThisRun代替_bossLordSpawned（后者在深渊轮回入口被重置），
+       并移除_elapsed<=180条件（深渊模式elapsed被重置为0，条件恒真导致时机判定失效）。
+       通关时间已由runStats.fastestRun记录用于进度显示。 */
+    if (this._won && this._finalBossDefeatedThisRun) this._checkAchievement('speed_demon');
 
     /* ── 变异保险库：20%概率解锁新突变 ── */
     /* R207-P0: 仅深渊轮回允许解锁突变，防止非深渊局误触发 */
@@ -875,6 +877,8 @@ Gp._gameOver = async function() {
     /* R248-P1: 死亡路径补充crit_master和dodge_king终局兜底 — _gameOver原先仅有胜利路径(settleRun)有此检查，导致玩家死亡后累积的暴击/闪避成就永久丢失 */
     if ((this._totalCritsThisRun || 0) >= 100) this._checkAchievement('crit_master');
     if ((this._totalDodgesThisRun || 0) >= 50) this._checkAchievement('dodge_king');
+    /* R290-P1: 死亡路径补全full_set终局检查 — 原版仅在胜利结算中设置meta.fullSetActivated，玩家中途死亡后套装共鸣成就永久丢失 */
+    if (this.player && this.player.setResonanceSpeed && this.player.setResonanceIce) meta.fullSetActivated = true;
     meta.maxGoldThisRun = Math.max(meta.maxGoldThisRun || 0, this._maxGoldThisRun || 0);
     var _goldSaved = this._maxGoldThisRun || 0; /* R222-P1: 保存清零前的值，后续recordRunStats和死亡补偿均依赖此值 */
     this._maxGoldThisRun = 0;

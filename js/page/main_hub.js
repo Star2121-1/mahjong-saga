@@ -1025,7 +1025,8 @@
             } else if (c.id === 'full_set') {
                 currentVal = meta.fullSetActivated ? 1 : 0;
             } else if (c.id === 'speed_demon') {
-                currentVal = (meta.runStats && meta.runStats.fastestRun != null && meta.runStats.fastestRun < 9999) ? Math.round(meta.runStats.fastestRun) : 9999;
+                /* R290-P1: 移除进度显示中的9999兜底 — 该值无意义，空字符串表示"尚未完成首局通关"，与成就卡片语义一致 */
+                currentVal = (meta.runStats && meta.runStats.fastestRun != null && meta.runStats.fastestRun < 9999) ? Math.round(meta.runStats.fastestRun) : '';
             } else if (c.id === 'first_kill') {
                 currentVal = (meta.totalKills || 0) >= 1 ? 1 : 0;
             }

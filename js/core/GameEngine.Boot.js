@@ -700,6 +700,8 @@ Gp._announceWave = function(waveIdx) {
     var wa = document.getElementById('wave-announce');
     /* R168-P0: 防御性null检查 — wave-announce元素不存在时跳过，防止TypeError崩溃 */
     if (!wa) { this._announcingWave = false; return; }
+    /* R290-P1: 保存DOM引用供ESC快捷关闭路径使用 */
+    this.waveAnnounceEl = wa;
     wa.textContent = '第 ' + (waveIdx + 1) + ' 波';
     /* R180-P1: 强制回流确保动画每次重触发 — 避免forwards fill-mode残留导致动画失效 */
     wa.classList.remove('active');
@@ -713,6 +715,8 @@ Gp._announceWave = function(waveIdx) {
     var self = this;
     setTimeout(function() {
         wa.classList.remove('active');
+        /* R290-P1: 清除waveAnnounceEl引用，防止ESC路径在动画结束后误判为active */
+        if (self.waveAnnounceEl === wa) self.waveAnnounceEl = null;
         self._freezeClock();
         setTimeout(function() {
             self._announcingWave = false; /* M-030: 公告链结束，解除守卫 */
@@ -720,6 +724,12 @@ Gp._announceWave = function(waveIdx) {
             if (!self._paused && !self._pendingReward && !self._levelUpPending) self._beginLoop(); /* R61-P1: 暂停状态下不恢复循环 */
         }, 300);
     }, 1200);
+};
+
+/* R290-P0: _startNextWave 是波次公告ESC快捷关闭的目标函数，将公告链的后续步骤提取为独立方法 */
+Gp._startNextWave = function() {
+    this._unfreezeClock();
+    if (!this._paused && !this._pendingReward && !this._levelUpPending) this._beginLoop();
 };
 
 Gp._freezeClock = function() {

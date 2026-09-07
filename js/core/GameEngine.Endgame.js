@@ -339,6 +339,7 @@ Gp.restart = function() {
     this.currentWaveSpawnedCount = 0;
     this._announcingWave = false; /* R158-P1: 重置波次公告标志，防止跨restart阻塞 */
     this._bossLordSpawned = false; /* R80-P1: 防止跨局Boss领主生成标志残留 */
+    this._finalBossDefeatedThisRun = false; /* R290-P1: 重置极速通关Boss击败标志，防止跨局残留 */
     this._pendingBossLordSettle = false; /* R226-P1: 重置Boss结算标志，防止restart后胜利状态卡死 */
     this._bossLord = null; /* R135-P1: 防止restart后_bossLord残留死引用 */
     this._bossLordSavedPhase = null; /* R260-P0: 重置冻结Boss相位快照，防止跨restart泄漏 */
