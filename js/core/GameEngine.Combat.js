@@ -985,7 +985,18 @@ Gp._gameOver = async function() {
 
 Gp._removeEnemyDOM = function(enemy) {
     var el = this._enemyElements.get(enemy.id);
-    if (el && el.parentNode) el.remove();
+    if (el) {
+        /* R289-P1: 移除flash/shatter动画监听器，防止脱离DOM后内存泄漏 */
+        if (el._flashHandler) {
+            el.removeEventListener('animationend', el._flashHandler);
+            el._flashHandler = null;
+        }
+        if (el._shatterHandler) {
+            el.removeEventListener('animationend', el._shatterHandler);
+            el._shatterHandler = null;
+        }
+        if (el.parentNode) el.remove();
+    }
     this._enemyElements.delete(enemy.id);
     enemy._hpFill = null; /* R38-P2: 清除stale DOM引用 */
     enemy.el = null; /* R176-P0: 清除敌人士兵DOM引用，防止内存泄漏 */
@@ -1144,6 +1155,7 @@ Gp._syncEntities = function() {
 
     for (var _ei = 0; _ei < this.enemies.length; _ei++) {
         var enemy = this.enemies[_ei];
+        if (!enemy.alive) continue; /* R289-P1: 显式 alive 守卫，防止未来循环顺序变化时处理死亡敌人 */
         var el = this._enemyElements.get(enemy.id);
         if (!el) continue;
         el.style.left = enemy.x + 'px';

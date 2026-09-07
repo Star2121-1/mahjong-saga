@@ -169,7 +169,14 @@ window.Enemy = class Enemy {
             if (this.frozenTimer <= 0) {
                 this.frozen = false;
                 if (this.el) { this.el.classList.remove('frozen-crystal'); this.el.classList.remove('frozen'); } /* R264-P1: 同时移除.frozen类，防止自然解冻时冰霜动画残留 */
-                if (this.type === 'Boss_Lord' && this._savedBossPhase !== undefined) {
+                /* R289-P0: 解冻时恢复Stalker状态机，防止冻结期间状态丢失导致死锁 */
+                if (this.type === 'Stalker') {
+                    this._stalkerState = this._savedStalkerState || 'idle';
+                    this._stalkerTimer = this._savedStalkerTimer || 0;
+                    this._stalkerCooldown = this._savedStalkerCooldown || 0;
+                    this.attackTimer = this.attackCooldown; /* R289-P1: 重置攻击CD，防止解冻后瞬发攻击 */
+                    if (this.el) { this.el.classList.remove('stalker-charging'); this.el.style.opacity = '1'; } /* R289-P1: 清除冻结时的视觉残留 */
+                } else if (this.type === 'Boss_Lord' && this._savedBossPhase !== undefined) {
                     this._bossPhase = this._savedBossPhase;
                     this._savedBossPhase = undefined;
                     this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
@@ -1097,6 +1104,12 @@ window.Enemy = class Enemy {
                     this.frozenTimer = Balance.FROZEN_TIMER_BONUS_BASE + (_pg.iceDurationBonus || 0);
                     /* R79-P2: 记录冻结前相位，解冻时恢复 */
                     if (this.type === 'Boss_Lord') this._savedBossPhase = this._bossPhase;
+                    /* R289-P0: 保存Stalker状态机快照，解冻时恢复防止死锁 */
+                    if (this.type === 'Stalker') {
+                        this._savedStalkerState = this._stalkerState;
+                        this._savedStalkerTimer = this._stalkerTimer;
+                        this._savedStalkerCooldown = this._stalkerCooldown;
+                    }
                     if (this.el) { this.el.classList.add('frozen-crystal'); this.el.classList.add('frozen'); }
                     if (window.audioManager) window.audioManager.play('freeze'); /* R227-P0: 武器/Drone路径冰冻需播放音效，与onClick路径对齐 */
                 }

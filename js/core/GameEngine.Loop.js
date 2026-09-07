@@ -574,13 +574,10 @@ Gp._loop = function(timestamp) {
                         _ae.speed = _ae.baseSpeed;
                     }
                 }
-                if (this.player.lifestealRate < 1) {
-                    /* R46: 狂乱 combo 击杀回血 — 之前为空实现 */
-                    /* R58-P0: 移除每帧回血，改为击杀时触发（见Spawn.js _rewardKill） */
-                    if (!this._abyssFrenzyLifestealSet) {
-                        this._abyssFrenzyLifestealSet = true;
-                    }
-                }
+                /* R289-P0: 移除 lifestealRate < 1 守卫 — 全吸血Build下封印狂乱击杀回血功能 */
+                if (!this._abyssFrenzyLifestealSet) {
+                    this._abyssFrenzyLifestealSet = true; /* R46: 狂乱 combo 击杀回血 — 之前为空实现 */
+                } /* R58-P0: 移除每帧回血，改为击杀时触发（见Spawn.js _rewardKill） */
             } else if (_abyssCombo === 'abyss_gravity') {
                 /* 深渊引力: 吸附×3（使用基准值，避免每帧累积） */
                 var _baseMag = this.player._baseMagnetRadius || Balance.MAGNET_RADIUS_DEFAULT;

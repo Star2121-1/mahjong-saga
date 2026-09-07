@@ -564,7 +564,7 @@ Gp._triggerMeld = function (meld) {
         for (var i = 0; i < this.enemies.length; i++) if (this.enemies[i].alive) pool.push(this.enemies[i]);
         for (var n = 0; n < B.HUPAI_PUNG_WAN_TARGETS && pool.length > 0; n++) {
             var e = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
-            e.takeDamage(dmg, 'player');
+            e.takeDamage(dmg, 'player', p.x, p.y); /* R289-P1: 传递玩家坐标，防止Barrier/Tanker方向判定使用错误位置 */
             if (this._spawnFloatText) this._spawnFloatText(e.x, e.y, '万' + dmg, true);
         }
         this._meldFx('🀄 万箭齐发' + (isKong ? '·杠！' : ''), isKong);
@@ -658,7 +658,7 @@ Gp._triggerHonorMeld = function (meld) {
             case 'feng_nan': /* 离火燎原：全场灼烧（MVP 即时 8%×kongMult maxHp） */
                 for (var j = 0; j < this.enemies.length; j++) {
                     var e2 = this.enemies[j];
-                    if (e2.alive) e2.takeDamage(Math.floor(e2.maxHp * Balance.HUPAI_FENG_NAN_HP_DMG_PCT * kongMult), 'player');
+                    if (e2.alive) e2.takeDamage(Math.floor(e2.maxHp * Balance.HUPAI_FENG_NAN_HP_DMG_PCT * kongMult), 'player', p.x, p.y); /* R289-P1: 传递玩家坐标，防止Barrier方向判定错误 */
                 }
                 break;
             case 'feng_xi': /* 肃杀之风：全场迟滞（MVP 冰封0.8s代理） */
@@ -674,7 +674,7 @@ Gp._triggerHonorMeld = function (meld) {
             case 'jian_zhong': /* 红中贯日：全屏冲击波 atk×4×kongMult + 怒气+30 */
                 var zdmg = Math.floor(p.atk * 4 * kongMult);
                 for (var z = 0; z < this.enemies.length; z++) {
-                    if (this.enemies[z].alive) this.enemies[z].takeDamage(zdmg, 'player');
+                    if (this.enemies[z].alive) this.enemies[z].takeDamage(zdmg, 'player', p.x, p.y); /* R289-P1: 传递玩家坐标，防止Barrier方向判定错误 */
                 }
                 p.rage = Math.min(p.maxRage, p.rage + 30);
                 if (this.triggerShake) this.triggerShake(3, 400);

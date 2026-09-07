@@ -382,6 +382,7 @@
 /* .game-clock-frozen .weather-fog 规则已移除 */
 /* R144-P1: rage bar双动画在面板打开时应继续运行 */
 .game-clock-frozen #rage-bar-container.rage-full,
+.game-clock-frozen #rage-bar-container.rage-full *,
 .game-clock-frozen #rage-bar-fill {
     animation-play-state: running !important;
 }
@@ -461,10 +462,12 @@
 .game-clock-frozen .enemy.tile-crack::after {
     animation-play-state: running !important;
 }
-/* R222-P1: 成就弹出动画在面板打开时应继续播放 */
-.game-clock-frozen .achieve-pop {
+/* R289-P0: damage-float 是 FxManager 不可用时的降级路径，必须在冻结时继续播放 */
+.game-clock-frozen .damage-float,
+.game-clock-frozen .damage-float.crit {
     animation-play-state: running !important;
 }
+/* R289-P1: achieve-pop 无实际使用（JS用inline style），移除死规则 */
 /* R222-P1: FCT飘字动画在面板打开时应继续播放 */
 .game-clock-frozen #fct-layer .fct-node,
 .game-clock-frozen #fct-layer .fct-normal,
