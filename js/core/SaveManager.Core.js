@@ -435,7 +435,7 @@
             abyssComboActivated: engine._abyssComboActivated || false, /* R228-P1: 保存深渊combo激活标志，防止断点续玩后combo永久无法再次激活 */
             witherAbyssTimer: engine._witherAbyssTimer || 0,
             handTiles: (engine._handTiles && engine._handTiles.length > 0) ? engine._handTiles.slice() : [],
-            formedMelds: (engine._formedMelds && Object.keys(engine._formedMelds).length > 0) ? engine._formedMelds : {},
+            formedMelds: (engine._formedMelds && Object.keys(engine._formedMelds).length > 0) ? Object.assign({}, engine._formedMelds) : {},
             jokersDropped: engine._jokersDropped || 0,
             mainSuit: engine._mainSuit || 'wan',
             /* R221-P1: 保存打牌模式/胡牌锁定状态，防止断点恢复后状态残留 */
@@ -509,8 +509,8 @@
                 if (engine.container) engine.container.style.boxShadow = '';
             }, engine._shieldTimer * 1000);
         }
-        engine._tempShieldEnd = data.tempShieldEnd || 0;
-        engine._tempShield = data.tempShield || 0;
+        engine._tempShieldEnd = _posOrZero(data.tempShieldEnd, 0);
+        engine._tempShield = _posOrZero(data.tempShield, 0);
         engine._eliteModeActive = data.eliteModeActive || false;
         engine._eliteMultiplier = data.eliteMultiplier || null;
         engine._activeMutator = data.activeMutator || null;

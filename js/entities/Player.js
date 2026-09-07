@@ -479,7 +479,7 @@ class Player {
             /* R256-P1: 动态读取对应英雄的cdFloor，防止mo_pa_cd天赋减免被硬编码Hero覆盖 */
             var _hCfg = window.heroConfig[p.heroId];
             p.cdFloor = Math.max(0.05, (_hCfg && _hCfg.cdFloor != null ? _hCfg.cdFloor : Balance.DEFAULT_CD_FLOOR)); /* R260-P1: 仅Hero英雄有cdFloor*0.9的被动，recalc时不应错误缩放其他英雄 */
-            if (p.heroId === 'Hero') p.cdFloor = Math.max(0.05, p.cdFloor * Balance.HERO_CD_FLOOR_REDUCTION);
+            if (p.heroId === 'Hero') { /* R295-P0: 仅在_initFromConfig中应用cdFloor缩减，recalcRelicStats不应再次乘算 */ }
             /* R265-P1: 恢复已发现秘密圣物的持久加成 — wind_fury速度/闪避 + gravity_mastery武器CD */
             var _secrets = p._discoveredSecrets || [];
             if (_secrets.indexOf('wind_fury') !== -1) {
@@ -702,8 +702,8 @@ class Player {
         this.setResonanceIce = !!data.setResonanceIce;
         this.mapAffinityLevel = data.mapAffinityLevel || 0;
         /* R227-P0: 恢复深渊combo运行时状态 */
-        this._abyssFrailtyOrigAtk = data._abyssFrailtyOrigAtk;
-        this._abyssFrailtyAtk = data._abyssFrailtyAtk;
+        this._abyssFrailtyOrigAtk = (data._abyssFrailtyOrigAtk !== null && data._abyssFrailtyOrigAtk !== undefined) ? data._abyssFrailtyOrigAtk : undefined;
+        this._abyssFrailtyAtk = (data._abyssFrailtyAtk !== null && data._abyssFrailtyAtk !== undefined) ? data._abyssFrailtyAtk : undefined;
         this._abyssBloodmoonApplied = !!data._abyssBloodmoonApplied;
         this._abyssBloodmoonOrigMaxHp = data._abyssBloodmoonOrigMaxHp;
         this._abyssBloodmoonAtkBonus = data._abyssBloodmoonAtkBonus;

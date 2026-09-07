@@ -47,7 +47,8 @@ Fp.spawnText = function(x, y, text, typeOrColor) {
     var color = typeOrColor;
     if (typeof typeOrColor === 'string' && typeOrColor.startsWith('#')) color = typeOrColor;
     type = type || 'normal';
-    node.textContent = text;
+    var textStr = (typeof text === 'number' && !isNaN(text)) ? String(text) : (text || '');
+    node.textContent = textStr;
     node.className = 'fct-node fct-' + type;
     if (typeof color === 'string' && color.startsWith('#')) node.style.color = color; /* R226-P0: 仅hex颜色设inline color，避免'normal'等字符串被当作CSS颜色 */
     node.style.left = x + 'px';
