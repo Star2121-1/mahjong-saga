@@ -170,6 +170,8 @@ Gp.init = async function() {
                     self._activeWeapons[_wi].fireAt(clickWX, clickWY, self.player, self);
                 }
             }
+            /* R282-P1: 摇杆释放后100ms内屏蔽战场点击位移，防止手指拖出摇杆区再松开时意外移动角色 */
+            if (self._joystickLastReleaseTime && Date.now() - self._joystickLastReleaseTime < 100) { e.preventDefault(); return; }
 
             var enemyEl = e.target.closest('.enemy');
             if (enemyEl) {
@@ -1000,7 +1002,7 @@ Gp._initJoystick = function() {
         if (dist > o.maxR) { dx = (dx / dist) * o.maxR; dy = (dy / dist) * o.maxR; }
         knob.style.left = (50 + (dx / (base.offsetWidth / 2)) * 50) + '%';
         knob.style.top = (50 + (dy / (base.offsetHeight / 2)) * 50) + '%';
-        if (dist > 6) { self._joystickDX = dx / o.maxR; self._joystickDY = dy / o.maxR; }
+        if (dist > Math.max(6, o.maxR * 0.05)) { self._joystickDX = dx / o.maxR; self._joystickDY = dy / o.maxR; }
         else { self._joystickDX = 0; self._joystickDY = 0; }
         /* R237-P0: 触摸设备移动指引 — 将joystick方向同步到_guideMoveDirs，防止移动端无法完成第一步 */
         if (self._guideMoveDirs && !self._guideDismissed) {
@@ -1060,6 +1062,8 @@ Gp._initJoystick = function() {
             if (!found) return;
             _touchId = null;
         }
+        /* R282-P1: 记录摇杆释放时间，防止后续pointerdown误触发click-to-move */
+        self._joystickLastReleaseTime = Date.now();
         resetKnob();
     };
     this._joystickTouchCancel = function(e) {

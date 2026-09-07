@@ -578,6 +578,7 @@ class Player {
             evolvedVamp: this.evolvedVamp,
             thornsLifesteal: !!this.thornsLifesteal,
             _knightSlamCooldown: this._knightSlamCooldown || 0, /* R218-P1: 骑士闪避冲击波冷却计时需跨run持久化，防止断点续玩后冷却清零 */
+            _dodgeAspdTimer: this._dodgeAspdTimer || 0, /* R282-P1: 暗影步攻速加成计时器需跨存档持久化，防止断点续玩时临时buff丢失 */
             invulnTimer: this.invulnTimer,
             hitFlashTimer: this.hitFlashTimer,
             currentLvl: this.currentLvl,
@@ -708,7 +709,7 @@ class Player {
         this._thornCritY = undefined;
         this._healAmount = 0;
         this._dodgeSignal = false;
-        this._dodgeAspdTimer = 0; /* A-030: 暗影步闪避后攻速加成计时 */
+        this._dodgeAspdTimer = data._dodgeAspdTimer || 0; /* R282-P1: 从快照恢复暗影步攻速加成计时，防止断点续玩后临时buff丢失 */
         this._knightSlamCooldown = data._knightSlamCooldown || 0; /* R218-P1: 从快照恢复骑士闪避冲击波冷却计时，防止断点续玩后冷却清零 */
 
         /* R220-P0: 恢复七对子速度/磁铁加成，防止跨局残留叠加 */
