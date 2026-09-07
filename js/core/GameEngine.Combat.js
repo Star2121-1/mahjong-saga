@@ -666,7 +666,8 @@ Gp._settleRun = async function(tokens) {
     /* Epoch 18: 每周超级挑战 — 提前到胜利路径之前，确保胜利/失败都使用同一份数据 */
     var weeklyCompleted = [];
     try {
-        var weeklyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: _goldSaved, hitsTaken: this._playerHitCountThisRun || 0, bossKills: this._bossKillsThisRun || 0, abyssDepth: this.loopCount || 0, dodges: this._totalDodgesThisRun || 0, crits: this._totalCritsThisRun || 0, won: this._won, wins: (this._won ? 1 : 0) };
+        /* R299-P0: _goldSaved 仅在 _gameOver 内定义，_settleRun 中应使用 _dailyGold，防止 ReferenceError 导致周常进度永不更新 */
+        var weeklyStats = { kills: this.kills, elapsed: this._elapsed, overdriveCount: this._overdriveCount || 0, maxGold: _dailyGold, hitsTaken: this._playerHitCountThisRun || 0, bossKills: this._bossKillsThisRun || 0, abyssDepth: this.loopCount || 0, dodges: this._totalDodgesThisRun || 0, crits: this._totalCritsThisRun || 0, won: this._won, wins: (this._won ? 1 : 0) };
         if (typeof window.saveManager.checkWeeklyCompletion === 'function') {
             var wc = window.saveManager.checkWeeklyCompletion(weeklyStats);
             weeklyCompleted = wc.completed || [];

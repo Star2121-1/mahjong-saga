@@ -394,7 +394,8 @@ class Player {
                     /* Mage被动在基础反伤之上增加，R38-P0: 包含affix加成防止丢失 */
                     this._recalcThornsRate();
                 } else {
-                    this.thornsRate = _baseThorns;
+                    /* R299-P0: 非 Mage 英雄也应继承 thorn_armor 圣物等级对反伤率的加成 */
+                    this.thornsRate = Math.max(_baseThorns, _baseThorns + (this.relicLevels.thorn_armor || 0) * Balance.THORN_PER_LEVEL);
                 }
                 break;
             case 'evolved_speed':
@@ -445,6 +446,7 @@ class Player {
         p.lifestealRate = 0;
         p.explosionChance = 0;
         p.freezeChance = 0;
+        p._thornsAffixBonus = 0; /* R299-P0: 献祭降阶时重置反伤词条累加器，防止反复献祭导致 thornsRate 无限叠加 */
         p.dodgeRate = p.baseDodge || 0;
         p.magnetRadius = p._baseMagnetRadius || Balance.MAGNET_RADIUS_DEFAULT;
         p.hasDrone = false;

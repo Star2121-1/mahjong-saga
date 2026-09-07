@@ -36,6 +36,10 @@ Sys.triggerOverdrive = function(engine) {
             if (oe.type === 'Boss_Lord' && oe._savedBossPhase === undefined) {
                 oe._savedBossPhase = oe._bossPhase;
             }
+            /* R299-P0: 保存自然冰冻敌人的frozenTimer，overdrive结束后正确恢复 */
+            if (oe.frozen && oe._overdriveOrigFrozenTimer === undefined) {
+                oe._overdriveOrigFrozenTimer = oe.frozenTimer;
+            }
         }
     }
 
@@ -103,6 +107,11 @@ Sys.endOverdrive = function(engine) {
             oe._overdriveOrigSpeed = undefined;
             oe.frozen = false; /* R268-P1: 恢复frozen状态，防止战后敌人永久冻结 */
             oe._overdriveFrozen = false;
+            /* R299-P0: 恢复自然冰冻敌人的frozenTimer，防止解冻后立即获得完整行动能力 */
+            if (oe._overdriveOrigFrozenTimer !== undefined) {
+                oe.frozenTimer = oe._overdriveOrigFrozenTimer;
+                oe._overdriveOrigFrozenTimer = undefined;
+            }
         }
     }
     /* R205-P0: 二次扫描清除过驱动期间新刷出敌人的残留冻结状态 — 首次迭代时不在数组中的敌人未被恢复 */

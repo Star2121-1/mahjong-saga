@@ -703,9 +703,10 @@ Gp._updateEnemyProjectiles = function(dt) {
                                 var projDmg = p.damage;
                                 /* R208-P0: mapAffinityReduction only applied once in Enemy.takeDamage() */
                                 if (_pe.takeDamage) _pe.takeDamage(projDmg, p._owner || this, p.x, p.y);
+                                /* R299-P0: 穿透弹道需递减pierceCount而非立即break，与Render.js正确实现对齐 */
+                                if (p.pierceCount > 0) { p.pierceCount--; } else { p.alive = false; }
                             }
                             _hitAny = true;
-                            break;
                         }
                     }
                     if (_hitAny) break;
