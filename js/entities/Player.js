@@ -626,6 +626,7 @@ class Player {
             /* R227-P0: 深渊combo运行时状态序列化，防止断点恢复后ATK/HP倍率重算 */
             _abyssFrailtyOrigAtk: this._abyssFrailtyOrigAtk !== undefined ? this._abyssFrailtyOrigAtk : null,
             _abyssFrailtyAtk: this._abyssFrailtyAtk !== undefined ? this._abyssFrailtyAtk : null,
+            _abyssFrailtyDmgMult: this._abyssFrailtyDmgMult !== undefined ? this._abyssFrailtyDmgMult : null, /* R308-P0: 序列化深渊脆弱伤害debuff */
             _abyssBloodmoonApplied: this._abyssBloodmoonApplied || false,
             _abyssBloodmoonOrigMaxHp: this._abyssBloodmoonOrigMaxHp !== undefined ? this._abyssBloodmoonOrigMaxHp : null,
             _abyssBloodmoonAtkBonus: this._abyssBloodmoonAtkBonus !== undefined ? this._abyssBloodmoonAtkBonus : null
@@ -711,6 +712,7 @@ class Player {
         /* R227-P0: 恢复深渊combo运行时状态 */
         this._abyssFrailtyOrigAtk = (data._abyssFrailtyOrigAtk !== null && data._abyssFrailtyOrigAtk !== undefined) ? data._abyssFrailtyOrigAtk : undefined;
         this._abyssFrailtyAtk = (data._abyssFrailtyAtk !== null && data._abyssFrailtyAtk !== undefined) ? data._abyssFrailtyAtk : undefined;
+        this._abyssFrailtyDmgMult = (data._abyssFrailtyDmgMult !== null && data._abyssFrailtyDmgMult !== undefined) ? data._abyssFrailtyDmgMult : undefined; /* R308-P0: 恢复深渊脆弱伤害debuff */
         this._abyssBloodmoonApplied = !!data._abyssBloodmoonApplied;
         this._abyssBloodmoonOrigMaxHp = data._abyssBloodmoonOrigMaxHp;
         this._abyssBloodmoonAtkBonus = data._abyssBloodmoonAtkBonus;

@@ -1169,7 +1169,14 @@ Gp._syncEntities = function() {
         this.playerEl.style.filter = '';
     } else {
         this.playerEl.style.opacity = '1';
-        this.playerEl.style.filter = 'drop-shadow(0 0 6px rgba(26,83,54,0.4))';
+        /* R308-P1: 根据英雄种类应用对应的filter，防止固定绿色覆盖英雄专属颜色 */
+        var _heroFilter = '#d4af37'; /* Hero默认金色 */
+        if (this.player && this.player.heroId) {
+            if (this.player.heroId === 'Knight') _heroFilter = '#1565c0';
+            else if (this.player.heroId === 'Mage') _heroFilter = '#2e7d32';
+            else if (this.player.heroId === 'Assassin') _heroFilter = '#7b1fa2';
+        }
+        this.playerEl.style.filter = 'drop-shadow(0 0 6px ' + _heroFilter + ')';
     }
 
     for (var _ei = 0; _ei < this.enemies.length; _ei++) {
@@ -1343,8 +1350,10 @@ Gp._syncExpBar = function() {
 };
 
 Gp._moveTo = function(wx, wy) {
-    this.player.targetX = wx;
-    this.player.targetY = wy;
+    /* R308-P0: 钳制点击目标到地图边界内，防止越界点击导致player卡在边缘且_movingToTarget永久为true */
+    var p = this.player;
+    this.player.targetX = Math.max(p.radius, Math.min(this._mapW - p.radius, wx));
+    this.player.targetY = Math.max(p.radius, Math.min(this._mapH - p.radius, wy));
     this.player._movingToTarget = true;
 };
 

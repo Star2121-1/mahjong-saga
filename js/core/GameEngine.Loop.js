@@ -596,6 +596,8 @@ Gp._loop = function(timestamp) {
                     this.player.atk = Math.floor(this.player._abyssFrailtyOrigAtk * _frailtyMult);
                     this.player._abyssFrailtyAtk = _frailtyMult;
                     this.player._frailtyDebuff = true;
+                    /* R308-P0: 标记深渊脆弱伤害debuff，使Enemy.takeDamage可应用ABYSS_FRAILTY_DMG_MULT */
+                    this.player._abyssFrailtyDmgMult = Balance.ABYSS_FRAILTY_DMG_MULT;
                 }
             } else if (_abyssCombo === 'abyss_bloodmoon') {
                 /* 深渊血月: HP+60%, ATK+80%, 掉落×2 */

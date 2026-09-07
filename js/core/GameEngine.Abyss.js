@@ -53,6 +53,7 @@ Gp._initAbyssState = function() {
     if (this.player) {
         this.player._abyssFrailtyOrigAtk = undefined;
         this.player._abyssFrailtyAtk = undefined;
+        this.player._abyssFrailtyDmgMult = undefined; /* R308-P0: 清理深渊脆弱伤害debuff标记 */
         this.player._abyssBloodmoonApplied = false;
         this.player._abyssBloodmoonAtkBonus = undefined;
         this.player._abyssBloodmoonOrigMaxHp = undefined; /* R147-P1: 初始化血月原始HP字段，防止跨局污染 */
@@ -278,6 +279,7 @@ Gp._applyAbyssCombo = function(comboId) {
             this.player.atk = this.player._abyssFrailtyOrigAtk;
             this.player._abyssFrailtyOrigAtk = undefined;
             this.player._abyssFrailtyAtk = undefined;
+            this.player._abyssFrailtyDmgMult = undefined; /* R308-P0: 清理深渊脆弱伤害debuff标记 */
             this.player._frailtyDebuff = false;
         }
         if (combo.id === 'abyss_bloodmoon' && this.player) {

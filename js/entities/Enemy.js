@@ -786,6 +786,8 @@ window.Enemy = class Enemy {
                 this._bossContactThisFrame = true;
                 this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
                 player.takeDamage(this._getEffectiveAtk(), this);
+            } else {
+                this._bossContactThisFrame = false; /* R308-P0: 离开接触范围后重置标志，防止标志永久卡死导致接触伤害单发 */
             }
             return;
         }
@@ -850,6 +852,8 @@ window.Enemy = class Enemy {
                 this._bossContactThisFrame = true;
                 this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
                 player.takeDamage(this._getEffectiveAtk(), this);
+            } else {
+                this._bossContactThisFrame = false; /* R308-P0: P2阶段同样需要重置接触标志 */
             }
             return;
         }
@@ -1010,6 +1014,11 @@ window.Enemy = class Enemy {
         var _eng = this._eng || window.gameEngine;
         if (_eng && _eng._mapAffinityReduction) {
             actualDmg = Math.max(1, Math.floor(actualDmg * (1 - _eng._mapAffinityReduction)));
+        }
+        /* R308-P0: 深渊脆弱debuff — 玩家攻击时额外+50%伤害 */
+        var _player = _eng && _eng.player;
+        if (_player && _player._abyssFrailtyDmgMult !== undefined) {
+            actualDmg = Math.floor(actualDmg * _player._abyssFrailtyDmgMult);
         }
         /* Barrier 正面无敌: 检查攻击方向 */
         if (this.type === 'Barrier') {
@@ -1256,7 +1265,7 @@ window.Enemy = class Enemy {
                         }
                     }
                     child.speed = child.baseSpeed * Balance.SPLITTER_CHILD_SPEED_MULT;
-                    child.baseSpeed = child.speed;
+                    /* R308-P1: 不覆盖baseSpeed，保持原始值作为速度锚点，防止后续修改speed时baseSpeed不同步 */
                     /* R268-P1: 继承父体frozen状态，防止frozen死亡时子体以正常速度移动 */
                     if (this.frozen) { child.frozen = true; child.frozenTimer = this.frozenTimer; }
                     engRef.enemies.push(child);

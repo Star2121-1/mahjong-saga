@@ -505,6 +505,23 @@
 .game-clock-frozen .enemy.draw-aim::after {
     animation-play-state: running !important;
 }
+/* R308-P1: 雀魂牌型指示器动画在面板打开时应继续播放 */
+.game-clock-frozen .ting-mark.ting-pulse,
+.game-clock-frozen .ting-mark.ting-kong,
+.game-clock-frozen .ting-mark.ting-run {
+    animation-play-state: running !important;
+}
+/* R308-P1: 奖励卡片翻转粒子动画不应被暂停 */
+.game-clock-frozen .reward-card-inner.flipping,
+.game-clock-frozen .reward-card-inner.flipping::after {
+    animation-play-state: running !important;
+}
+/* R308-P1: 新武器/献祭横幅动画不应被暂停 */
+.game-clock-frozen .new-weapon-banner::before,
+.game-clock-frozen .new-weapon-banner::after,
+.game-clock-frozen .sacrifice-banner span {
+    animation-play-state: running !important;
+}
 /* R221-P0: Boss P1蓄力辉光在面板打开时应继续播放 */
 .game-clock-frozen .enemy.p1-charging,
 .game-clock-frozen .enemy.p1-charging::before,

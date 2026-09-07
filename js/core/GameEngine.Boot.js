@@ -137,7 +137,7 @@ Gp.init = async function() {
                 var d = e.deltaY > 0 ? -0.1 : 0.1;
                 self._zoomLevel = Math.max(1, Math.min(1.5, (self._zoomLevel || 1) + d));
             }, { passive: false });
-        this.battlefield.addEventListener('pointerdown', function(e) {
+        var _bpHandler = function(e) {
             /* R238-P0: 触屏设备e.button为undefined，需同时允许touch/pen指针类型 */
             if (e.pointerType !== 'touch' && e.pointerType !== 'pen' && e.button !== 0) return;
             if (e.target.closest && e.target.closest('#joystick-container')) return;
@@ -201,7 +201,10 @@ Gp.init = async function() {
             }
 
             self._moveTo(clickWX, clickWY);
-        }, { passive: false });
+        };
+        this.battlefield.addEventListener('pointerdown', _bpHandler, { passive: false });
+        /* R308-P0: 存储handler引用以便restart时移除，防止多次restart累积监听器导致点击触发多次 */
+        this._battlefieldPointerHandler = _bpHandler;
     }
 
     if (window.rewardManager) {
@@ -960,10 +963,13 @@ Gp._initKeyboard = function() {
         }
         if (!self.running || self.gameOver || self._announcingWave || self._gambleActive) {
             /* R214-P1: preventDefault 移至守卫前，防止 overlay 期间箭头键触发页面滚动 */
-            if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyW','KeyA','KeyS','KeyD'].includes(e.code)) e.preventDefault();
+            /* R308-P0: 补充Numpad键位，防止暂停/死亡时小键盘滚动页面 */
+            if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyW','KeyA','KeyS','KeyD',
+                 'Numpad8','Numpad2','Numpad4','Numpad5','Numpad6','Numpad1','Numpad3','Numpad7','Numpad9'].includes(e.code)) e.preventDefault();
             return;
         }
-        if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyW','KeyA','KeyS','KeyD'].includes(e.code)) e.preventDefault();
+        if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyW','KeyA','KeyS','KeyD',
+             'Numpad8','Numpad2','Numpad4','Numpad5','Numpad6','Numpad1','Numpad3','Numpad7','Numpad9'].includes(e.code)) e.preventDefault();
         if (e.code === 'Space' && self.player && self.player.rage >= self.player.maxRage && !self._overdriveActive && !self._paused && !self._announcingWave && !self._discardMode && !self._huLock && !self._pendingReward && !self._levelUpPending && !self._gambleActive && !self._activeMutator && !(self.guideOverlay && self.guideOverlay.classList.contains('active'))) {
             self._pressedKeys[e.code] = false;
             self._triggerOverdrive();
@@ -1089,6 +1095,8 @@ Gp._initJoystick = function() {
     };
     this._joystickTouchCancel = function(e) {
         if (_touchId !== null) { _touchId = null; resetKnob(); }
+        /* R308-P1: touchcancel也应记录释放时间，防止系统中断后100ms内意外触发click-to-move */
+        self._joystickLastReleaseTime = Date.now();
     };
     this._joystickMouseLeave = function() { if (self._joystickActive) resetKnob(); };
     document.addEventListener('touchmove', this._joystickTouchMove, { passive: false });
@@ -1100,10 +1108,10 @@ Gp._initJoystick = function() {
 Gp._getInputVector = function() {
     var rawX = 0;
     var rawY = 0;
-    if (this._pressedKeys['KeyW'] || this._pressedKeys['ArrowUp']) rawY -= 1;
-    if (this._pressedKeys['KeyS'] || this._pressedKeys['ArrowDown']) rawY += 1;
-    if (this._pressedKeys['KeyA'] || this._pressedKeys['ArrowLeft']) rawX -= 1;
-    if (this._pressedKeys['KeyD'] || this._pressedKeys['ArrowRight']) rawX += 1;
+    if (this._pressedKeys['KeyW'] || this._pressedKeys['ArrowUp'] || this._pressedKeys['Numpad8']) rawY -= 1;
+    if (this._pressedKeys['KeyS'] || this._pressedKeys['ArrowDown'] || this._pressedKeys['Numpad2']) rawY += 1;
+    if (this._pressedKeys['KeyA'] || this._pressedKeys['ArrowLeft'] || this._pressedKeys['Numpad4']) rawX -= 1;
+    if (this._pressedKeys['KeyD'] || this._pressedKeys['ArrowRight'] || this._pressedKeys['Numpad6']) rawX += 1;
     if (rawX === 0 && rawY === 0) {
         rawX = this._joystickDX;
         rawY = this._joystickDY;
