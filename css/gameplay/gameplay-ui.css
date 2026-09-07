@@ -104,6 +104,8 @@
     pointer-events: none;
     z-index: 9;
     border: 1px solid rgba(255,255,255,0.3);
+    /* R293-P1: 护盾球每帧通过JS更新位置，需要compositor层以提升合成性能 */
+    will-change: transform;
 }
 .orbit-shield-orb::after {
     content: '';
@@ -133,6 +135,8 @@
         0 0 24px rgba(112,214,255,0.5),
         0 0 48px rgba(255,255,255,0.2),
         inset 0 0 18px rgba(255,255,255,0.12);
+    /* R293-P1: 震环每帧通过JS更新scale，需要compositor层以提升合成性能 */
+    will-change: transform;
 }
 
 /* 全屏脉冲 — 红中爆裂 */
@@ -145,6 +149,8 @@
     transform: translate(-50%, -50%);
     border: 3px solid rgba(211,47,47,0.5);
     box-shadow: 0 0 30px rgba(211,47,47,0.4), inset 0 0 20px rgba(255,215,0,0.2);
+    /* R293-P1: 脉冲球每帧通过JS更新scale，需要compositor层以提升合成性能 */
+    will-change: transform;
 }
 
 /* 持续线杀 — 孔雀蓝电弧（C1 去金化） */

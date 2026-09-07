@@ -46,7 +46,7 @@ Ap._ensureContext = function() {
         var self = this;
         if (!this._visibilityListenerAdded) {
             this._visibilityListenerAdded = true;
-            document.addEventListener('visibilitychange', function() {
+            document.addEventListener('visibilitychange', this._visibilityListener = function() {
                 if (!document.hidden && self._ctx) {
                     /* R159-P0: 恢复对'closed'状态的处理，extended tab switch后AudioContext可能变为closed */
                     if (self._ctx.state === 'suspended' || self._ctx.state === 'closed') {
@@ -74,6 +74,12 @@ Ap._ensureContext = function() {
  * 用于 setMuted(false) 或页面恢复可见时主动触发
  */
 Ap.tryReinit = function() {
+    /* R293-P1: 在尝试重建前先移除监听器，防止restart后旧visibilitychange回调仍残留 */
+    if (this._visibilityListenerAdded && this._visibilityListener) {
+        document.removeEventListener('visibilitychange', this._visibilityListener);
+        this._visibilityListener = null;
+        this._visibilityListenerAdded = false;
+    }
     /* R54-P1: 检查ctx状态而非仅initialized标志，防止浏览器回收后永久失效 */
     if (this._ctx) {
         /* R261-P1: 无论ctx状态如何，始终清理振荡器和关闭旧context，防止running状态时泄漏 */
@@ -195,7 +201,7 @@ Ap._noise = function(dur, vol) {
     var self = this; /* R173-P0: capture this to avoid self resolving to window.self in onended closure */
     try {
         var bufSize = Math.ceil(this._ctx.sampleRate * dur);
-        var buf = this._noiseBuffer && this._noiseBuffer.length >= bufSize ? this._noiseBuffer : this._ctx.createBuffer(1, bufSize, this._ctx.sampleRate);
+        var buf = this._noiseBuffer && this._noiseBuffer.sampleRate === this._ctx.sampleRate && this._noiseBuffer.length >= bufSize ? this._noiseBuffer : this._ctx.createBuffer(1, bufSize, this._ctx.sampleRate);
         var data = buf.getChannelData(0);
         if (buf !== this._noiseBuffer) {
             for (var i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;

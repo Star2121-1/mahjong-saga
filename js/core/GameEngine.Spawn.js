@@ -813,6 +813,8 @@ Gp._confirmDiscard = function () {
     this._unfreezeClock();
     if (this.battlefield) this.battlefield.classList.remove('discard-mode');
     /* 增益不撤（roguelike 标准）：已触发面子签名保留 */
+    /* R293-P1: 守卫MahjongHand可能未加载时的引用，防止TypeError崩溃 */
+    if (!window.MahjongHand) return;
     var info = window.MahjongHand.faceInfo(discarded);
     if (this._spawnFloatText && this.player) {
         this._spawnFloatText(this.player.x, this.player.y - 40, '打出 ' + (info ? info.label : ''), false);

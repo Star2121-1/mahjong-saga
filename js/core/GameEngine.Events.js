@@ -493,6 +493,21 @@ Gp._spawnBossLordFromGamble = function() {
         lord.hp = Math.floor(lord.hp * Balance.VAULT_BLOODMOON_HP_MULT);
     }
 
+    /* R293-P1: Boss Lord也应应用活跃波次突变效果，与普通敌人保持一致 */
+    if (this._activeMutator === 'bloodmoon') {
+        lord._bloodmoonStored = true;
+        lord._bloodmoonOrigAtk = lord.atk;
+        lord._bloodmoonOrigMaxHp = lord.maxHp;
+        lord._bloodmoonOrigHp = lord.hp;
+        lord.maxHp = Math.floor(lord.maxHp * Balance.MUTATOR_BLOODMOON_HP_MULT);
+        lord.hp = lord.maxHp;
+        lord.atk = Math.floor(lord.atk * Balance.MUTATOR_BLOODMOON_ATK_MULT);
+    } else if (this._activeMutator === 'frenzy') {
+        lord._frenzyStored = true;
+        lord._frenzyOrigSpeed = lord.speed;
+        lord.speed = Math.round(lord.speed * Balance.MUTATOR_FRENZY_SPEED_MULT);
+    }
+
     var el = document.createElement('div');
     el.className = 'enemy boss boss-lord';
     el.dataset.id = id;

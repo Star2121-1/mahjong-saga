@@ -44,7 +44,7 @@ Gp._goToSaveSelect = async function() {
     /* R137-P0: await确保存档写入完成后再跳转，防止竞态导致"继续游戏"误判 */
     if (window.saveManager) await window.saveManager.clearActiveRun();
     window.location.href = 's2_main_hub.html';
-    } catch(e) { console.warn('[Navigate] _goToSaveSelect error:', e); }
+    } catch(e) { console.warn('[Navigate] _goToSaveSelect error:', e); window.location.href = 's2_main_hub.html'; }
     finally { this._navSaving = false; }
 };
 

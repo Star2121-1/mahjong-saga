@@ -205,7 +205,7 @@ class SaveManager {
         var eng = window.gameEngine;
         if (eng && eng.player && eng.player._recalcSetResonance) eng.player._recalcSetResonance();
         /* R290-P1: 换装后同步更新玩家基础属性 — _recalcSetResonance仅更新共鸣标志，_reapplyMetaBonuses重算atk/maxHp/magnetRadius等战斗属性 */
-        if (eng && eng.player && eng.player._reapplyMetaBonuses) eng.player._reapplyMetaBonuses(true);
+        if (eng && eng.player && eng.player._reapplyMetaBonuses) eng.player._reapplyMetaBonuses(false); /* R293-P0: 换装路径需应用装备加成，不应跳过 */
         return;
     }
 
@@ -219,7 +219,7 @@ class SaveManager {
         var eng = window.gameEngine;
         if (eng && eng.player && eng.player._recalcSetResonance) eng.player._recalcSetResonance();
         /* R290-P1: 卸下装备后同步更新玩家基础属性 */
-        if (eng && eng.player && eng.player._reapplyMetaBonuses) eng.player._reapplyMetaBonuses(true);
+        if (eng && eng.player && eng.player._reapplyMetaBonuses) eng.player._reapplyMetaBonuses(false); /* R293-P0: 卸下路径同样需重新计算装备加成 */
         return;
     }
 

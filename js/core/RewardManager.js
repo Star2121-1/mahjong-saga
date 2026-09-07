@@ -644,7 +644,7 @@ class RewardManager {
         p.relicLevels[bestRelic] = bestLevel - 1;
         if (p.relicLevels[bestRelic] <= 0) {
             delete p.relicLevels[bestRelic];
-            delete p._relicAffixes && delete p._relicAffixes[bestRelic]; /* R255-P0: 圣物降至Lv.0后清理词条，防止效果残留 */
+            delete p._relicAffixes && (delete p._relicAffixes[bestRelic]); /* R293-P0: 括号确保在relicAffixes存在时才删除key，防止undefined访问崩溃 */
         }
         /* R230-P1: 圣物降级后全量重算基础属性，防止 atk/maxHp/critRate/speedMultiplier 等残留 */
         if (p.recalcRelicStats) p.recalcRelicStats();

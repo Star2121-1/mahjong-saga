@@ -735,6 +735,9 @@ window.Enemy = class Enemy {
             this.attackTimer = 0; /* R226-P0: 冻结时清零attackTimer，确保解冻后正常CD重置 */
         }
 
+        /* R293-P0: totalR声明提升至Phase块外 — var hoisting不初始化，导致P1/P2使用totalR时为undefined使接触碰撞失效 */
+        var totalR = player.radius + this.radius;
+
         /* ── Phase 1：弹幕压制（B4: 每三轮一次蓄力齐射演出） ── */
         if (this._bossPhase === 1) {
             this._bossAbilityTimer -= dt;
@@ -773,8 +776,10 @@ window.Enemy = class Enemy {
                 this.y += (dy / dist) * this.speed * dt;
                 this._clampPosition(engine);
             }
-            /* R291-P0: Boss P1阶段接触碰撞 — 原代码在phase块末尾return跳过接触伤害，导致P1/P2完全无接触伤害 */
-            var pDist1 = Math.sqrt(dx * dx + dy * dy);
+            /* R293-P1: 接触碰撞在移动后重新计算距离，避免使用移动前的旧坐标 */
+            var pDx1 = player.x - this.x;
+            var pDy1 = player.y - this.y;
+            var pDist1 = Math.sqrt(pDx1 * pDx1 + pDy1 * pDy1);
             if (pDist1 <= totalR && !this._bossContactThisFrame && this._bossContactTimer <= 0) {
                 this._bossContactThisFrame = true;
                 this._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
@@ -919,7 +924,6 @@ window.Enemy = class Enemy {
         var pdx = player.x - this.x;
         var pdy = player.y - this.y;
         var pDist = Math.sqrt(pdx * pdx + pdy * pdy);
-        var totalR = player.radius + this.radius;
         if (pDist <= totalR && !this._bossContactThisFrame) {
             this._bossContactThisFrame = true;
             if (pDist > 0.01) {
