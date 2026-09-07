@@ -482,6 +482,10 @@ class Player {
             var _hCfg = window.heroConfig[p.heroId];
             p.cdFloor = Math.max(0.05, (_hCfg && _hCfg.cdFloor != null ? _hCfg.cdFloor : Balance.DEFAULT_CD_FLOOR)); /* R260-P1: 仅Hero英雄有cdFloor*0.9的被动，recalc时不应错误缩放其他英雄 */
             if (p.heroId === 'Hero') { /* R295-P0: 仅在_initFromConfig中应用cdFloor缩减，recalcRelicStats不应再次乘算 */ }
+            /* R299-P1: 重新应用Hero的cdFloor缩减被动，防止recalcRelicStats重置后丢失0.9x效果 */
+            if (p.heroId === 'Hero') {
+                p.cdFloor = Math.max(0.05, p.cdFloor * Balance.HERO_CD_FLOOR_REDUCTION);
+            }
             /* R265-P1: 恢复已发现秘密圣物的持久加成 — wind_fury速度/闪避 + gravity_mastery武器CD */
             var _secrets = p._discoveredSecrets || [];
             if (_secrets.indexOf('wind_fury') !== -1) {
