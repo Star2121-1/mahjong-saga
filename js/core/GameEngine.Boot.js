@@ -84,7 +84,8 @@ Gp.init = async function() {
             if (window.SpawnSystem) window.SpawnSystem.reset(this);
             /* R274-P0: 断点续玩深渊局时同步缩放因子，防止循环层数恢复但HP/ATK倍率仍为×1 */
             if (typeof this._updateAbyssScaling === 'function') this._updateAbyssScaling();
-            /* R206-P1: 恢复路径补全视口resize监听，防止restart后再恢复时相机追踪失效 */
+            /* R279-P0: 恢复前先移除旧监听器再重新注册，防止重启后再恢复时累积双份监听 */
+            this._removeViewportResize();
             this._initViewportResize();
             /* R189-P1: 重置_announcingWave，防止崩溃时处于wave公告状态导致resume后死锁 */
             this._announcingWave = false;
@@ -409,10 +410,13 @@ Gp._initViewportResize = function() {
     window.addEventListener('resize', _invalidateVp);
     /* 移动端 visualViewport 变化（键盘弹出、地址栏收缩等） */
     if (window.visualViewport) {
-        this._vpVvResizeHandler = _invalidateVp;
-        this._vpVvChangeHandler = _invalidateVp;
-        window.visualViewport.addEventListener('resize', _invalidateVp);
-        window.visualViewport.addEventListener('change', _invalidateVp);
+        /* R279-P1: 拆分为独立闭包，避免同一引用导致 removeEventListener 误移除另一事件 */
+        var _vpResizeFn = function() { self._vpW = self.battlefield.clientWidth; self._vpH = self.battlefield.clientHeight; };
+        var _vpChangeFn = _vpResizeFn;
+        this._vpVvResizeHandler = _vpResizeFn;
+        this._vpVvChangeHandler = _vpChangeFn;
+        window.visualViewport.addEventListener('resize', _vpResizeFn);
+        window.visualViewport.addEventListener('change', _vpChangeFn);
     }
 };
 
