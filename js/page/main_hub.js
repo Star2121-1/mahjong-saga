@@ -1030,7 +1030,13 @@
             } else if (c.id === 'first_kill') {
                 currentVal = (meta.totalKills || 0) >= 1 ? 1 : 0;
             }
-            progress = Math.min(100, Math.round((currentVal / threshold) * 100));
+            /* R297-P1: "越低越好"类成就（如极速通关）进度计算取反，防止低值显示低进度 */
+            var isLowerIsBetter = (c.thresholds && c.thresholds[0] > 0 && currentVal !== '' && typeof currentVal === 'number');
+            if (isLowerIsBetter) {
+                progress = Math.min(100, Math.round((threshold / currentVal) * 100));
+            } else {
+                progress = Math.min(100, Math.round((currentVal / threshold) * 100));
+            }
             html +=
                 '<div class="achievement-card' + (unlocked ? ' unlocked' : ' locked') + '">' +
                 '<div class="achievement-icon">' + c.icon + '</div>' +
