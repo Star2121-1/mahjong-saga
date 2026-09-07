@@ -497,8 +497,11 @@
         engine._shieldActive = data.shieldActive || false;
         engine._shieldTimer = data.shieldTimer || 0;
         /* R234-P1: 恢复雀魂护盾超时时钟，防止存档中护盾激活状态下恢复后永远无法再次触发 */
+        if (engine._qqueenShieldTimer) clearTimeout(engine._qqueenShieldTimer); /* R283-P1: 先清除旧timer再建新timer，防止损坏数据绕过条件判断导致旧回调泄漏 */
+        engine._qqueenShieldTimer = null;
         if (engine._shieldActive && engine._shieldTimer > 0) {
-            if (engine._qqueenShieldTimer) clearTimeout(engine._qqueenShieldTimer);
+            /* R283-P1: 恢复时同步设置boxShadow视觉反馈，与Combat.js:177激活路径一致 */
+            if (engine.container) engine.container.style.boxShadow = '0 0 60px rgba(30,111,66,0.6)';
             var _shieldLv = (window.saveManager && (window.saveManager._metaCache || {}).talents || {}).que_spirit_shield || 0;
             engine._qqueenShieldTimer = setTimeout(function() {
                 engine._shieldActive = false;

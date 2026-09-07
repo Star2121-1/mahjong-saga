@@ -76,7 +76,10 @@ Gp.init = async function() {
             this.cameraX = Math.max(0, Math.min(this._mapW - vpW, this.player.x - vpW / 2));
             this.cameraY = Math.max(0, Math.min(this._mapH - vpH, this.player.y - vpH / 2));
 
-            this.player.invulnTimer = Balance.REVIVE_INVULN_DURATION;
+            /* R283-P1: 仅在快照中无敌计时为0时才施加复活无敌窗口，防止覆盖断点续玩时存档中的有效invulnTimer值 */
+            if (this.player.invulnTimer <= 0) {
+                this.player.invulnTimer = Balance.REVIVE_INVULN_DURATION;
+            }
             this.gameOver = false;
 
             if (window.rewardManager) window.rewardManager.hidePanel();
