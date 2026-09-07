@@ -264,6 +264,21 @@ window.ShotgunBurst = class extends window.Weapon {
             ? Math.min(Balance.HERO_ASSASSIN_DODGE_ASPD_MULT, Balance.WEAPON_ASPD_CAP)
             : 1.0;
         this.cooldownTimer -= dt * aspdMult;
+        /* R309-P0: 七对散牌需要自动追踪最近敌人发射弹丸，update()原先仅递减CD从未调用fireAt() */
+        if (this.cooldownTimer <= 0 && player && enemies && engine) {
+            var nearest = null;
+            var nearDist = Infinity;
+            for (var _si = 0; _si < enemies.length; _si++) {
+                if (!enemies[_si].alive) continue;
+                var ex = enemies[_si].x - player.x;
+                var ey = enemies[_si].y - player.y;
+                var d = ex * ex + ey * ey;
+                if (d < nearDist) { nearDist = d; nearest = enemies[_si]; }
+            }
+            if (nearest) {
+                this.fireAt(nearest.x, nearest.y, player, engine);
+            }
+        }
     }
     reset() { super.reset();
         /* No resources to clean */
@@ -466,7 +481,7 @@ window.NovaPulse = class extends window.Weapon {
                 if (!e.alive) continue;
                 var dx = e.x - p.x;
                 var dy = e.y - p.y;
-                if (dx * dx + dy * dy <= (e.radius + radius) * (e.radius + radius)) {
+                if (dx * dx + dy * dy < (e.radius + radius) * (e.radius + radius)) {
                     if (!p.hitEnemies.has(e.id)) {
                         p.hitEnemies.add(e.id);
                         e.takeDamage(dmg, 'player', p.x, p.y);

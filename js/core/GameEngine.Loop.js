@@ -236,7 +236,8 @@ Gp._loop = function(timestamp) {
             }
 
             /* Epoch 47: 深渊变异组合自动激活（每局仅一次） */
-            if (this.loopCount > 0 && this._abyssUnlockedCombos && this._abyssUnlockedCombos.length > 0 && !this._abyssActiveCombo && !this._abyssComboActivated) {
+            /* R309-P0: 添加面板守卫，防止深渊组合在活跃面板期间误触发 */
+            if (this.loopCount > 0 && this._abyssUnlockedCombos && this._abyssUnlockedCombos.length > 0 && !this._abyssActiveCombo && !this._abyssComboActivated && !this._pendingReward && !this._levelUpPending && !this._activeMutator && !this._announcingWave) {
                 this._abyssComboActivated = true;
                 /* R225-P0: 随机选择深渊组合，避免永远固定取第一个（最早解锁）的combo */
                 var _abyssPool = this._abyssUnlockedCombos;
@@ -538,14 +539,16 @@ Gp._loop = function(timestamp) {
         }
 
         /* ── 套装共鸣：焰痕 + 永冻（委托给 Systems）── */
-        if ((this.player.setResonanceSpeed || this.player.setResonanceIce) && !this._pendingReward) {
+        /* R309-P0: 添加_overdriveActive守卫，防止Overdrive期间共鸣光环造成双倍伤害 */
+        if ((this.player.setResonanceSpeed || this.player.setResonanceIce) && !this._pendingReward && !this._overdriveActive) {
             if (this._systems && this._systems.updateResonanceAuras) {
                 this._systems.updateResonanceAuras(this, dt);
             }
         }
 
         /* ── 突变·枯萎：全体敌人周期性损血 ── */
-        if (this._activeMutator === 'wither' && !this._pendingReward) {
+        /* R309-P0: 添加_overdriveActive守卫，防止Overdrive期间枯萎DOT对冰冻敌人造成双倍伤害 */
+        if (this._activeMutator === 'wither' && !this._pendingReward && !this._overdriveActive) {
             /* Epoch 5: 委托枯萎到 Systems */
             if (this._systems && this._systems.updateWither) {
                 this._systems.updateWither(this, dt);
