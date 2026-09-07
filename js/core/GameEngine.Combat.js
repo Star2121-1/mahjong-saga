@@ -456,9 +456,9 @@ Gp._buildVictoryTips = function() {
     this.victoryTipsEl.innerHTML = parts.join('<br>');
 };
 
-Gp._continueChallenge = function() {
+Gp._continueChallenge = async function() {
     this.victoryOverlay.classList.remove('active');
-    this._enterAbyss();
+    await this._enterAbyss(); /* R286-P1: 使用async/await防止面板关闭与深渊初始化之间的竞态 */
 };
 
 Gp._spawnCausalityText = function(text) {

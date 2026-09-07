@@ -483,6 +483,7 @@ class Player {
             var _secrets = p._discoveredSecrets || [];
             if (_secrets.indexOf('wind_fury') !== -1) {
                 p.speedMultiplier = Math.min(1 + Balance.MAX_SPEED_BONUS_PCT, (p.speedMultiplier || 1) + 0.25);
+                p.speed = Math.min(Balance.PLAYER_MAX_SPEED, p.baseSpeed * p.speedMultiplier); /* R286-P1: recalcRelicStats路径必须同步刷新speed，否则献祭降阶后速度永久卡旧值 */
                 p.dodgeRate = Math.min(Balance.MAX_DODGE_RATE, (p.dodgeRate || 0) + 0.1);
             }
             if (_secrets.indexOf('gravity_mastery') !== -1) {

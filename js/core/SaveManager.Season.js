@@ -36,7 +36,7 @@
             meta.prestigeLevel = level + 1;
             meta.prestigeCoresSpent = (meta.prestigeCoresSpent || 0) + cost;
             return self.saveMeta(meta).then(function() { return { ok: true, newLevel: meta.prestigeLevel }; });
-        }).catch(function(e){console.warn("[Season] save error:",e); return { ok: false, reason: String(e); }});
+        }).catch(function(e){console.warn("[Season] save error:",e); return { ok: false, reason: String(e) }; });
     };
 
     SaveManager.prototype.spendMetaTokens = async function(perkId, cost) {
@@ -48,7 +48,7 @@
             if (!meta.purchasedPerks) meta.purchasedPerks = {};
             if (!meta.purchasedPerks[perkId]) meta.purchasedPerks[perkId] = 0;
             meta.purchasedPerks[perkId]++;
-            return self.saveMeta(meta).then(function() { return { ok: true }; });
+            return self.saveMeta(meta).then(function() { self._metaCache = meta; return { ok: true }; }); /* R286-P1: 保存成功后更新缓存，防止UI显示过期代币数 */
         }).catch(function(e){console.warn("[Season] save error:",e);});
     };
 
@@ -68,6 +68,7 @@
         if (!meta.inflationGuard) meta.inflationGuard = {};
         meta.inflationGuard.totalMetaTokens = (meta.inflationGuard.totalMetaTokens || 0) + (metaTokensSpent || 0);
         meta.inflationGuard.lastReset = Date.now();
+        this._metaCache = meta; /* R286-P1: 更新缓存，防止页面刷新后通胀计数器回零导致通胀保护失效 */
     };
 
     SaveManager.prototype.resetInflationCounter = function() {
