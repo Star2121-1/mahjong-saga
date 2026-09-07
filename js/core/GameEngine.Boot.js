@@ -82,6 +82,8 @@ Gp.init = async function() {
             if (window.rewardManager) window.rewardManager.hidePanel();
             /* R132-P1: resume路径统一调用reset()即可，init()的赋值会被reset()覆盖且语义冗余 */
             if (window.SpawnSystem) window.SpawnSystem.reset(this);
+            /* R274-P0: 断点续玩深渊局时同步缩放因子，防止循环层数恢复但HP/ATK倍率仍为×1 */
+            if (typeof this._updateAbyssScaling === 'function') this._updateAbyssScaling();
             /* R206-P1: 恢复路径补全视口resize监听，防止restart后再恢复时相机追踪失效 */
             this._initViewportResize();
             /* R189-P1: 重置_announcingWave，防止崩溃时处于wave公告状态导致resume后死锁 */
