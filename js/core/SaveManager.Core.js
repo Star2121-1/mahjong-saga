@@ -655,9 +655,15 @@
             if (!this._validateImportData(data)) {
                 return { success: false, error: '存档格式不合法，拒绝导入' };
             }
-            /* R183-P0: 移除重复写入 — 第一次写入后直接检查返回值，不再第二次写入 */
+            /* R279-P0: importSaveFile 两步写入原子性 — 先备份再写入，active_run写入失败时恢复meta */
+            var _origMeta = localStorage.getItem('cr_meta.json');
             var metaWriteOk = this._writeJSON('meta.json', data.meta);
             var metaOk = this._writeJSON('active_run.json', data.activeRun);
+            if (!metaOk && metaWriteOk) {
+                /* R279-P0: active_run写入失败，恢复原meta防止状态不一致 */
+                try { localStorage.setItem('cr_meta.json', _origMeta); } catch(e) {}
+                console.warn('SaveManager: importSaveFile partial write — active_run failed, meta restored');
+            }
             this._metaCache = null;
             /* R30-H-003: 导入成功后清除 .bak 防止回滚到旧数据 */
             try { localStorage.removeItem('cr_meta.json.bak'); } catch(e) {}
