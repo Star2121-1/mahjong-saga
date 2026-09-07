@@ -626,7 +626,8 @@ Gp._settleRun = async function(tokens) {
     /* 金币 — get_rich/gold_10k 是单局实时成就，通过 _syncUI inflight 检测，此处不应使用meta跨局值 */
     /* R136-P0: speed_demon 终局兜底 — 用_won替代!gameOver防止死代码 */
     /* R188-P1: 增加_bossLordSpawned检查，防止非最终Boss关卡提前触发极速通关成就 */
-    if (this._won && this._bossLordSpawned && this.loopCount === 0 && (this._elapsed || 0) <= 180) this._checkAchievement('speed_demon');
+    /* R283-P0: 移除loopCount===0限制，深渊第1轮回及之后3分钟内通关也应触发极速通关成就 */
+    if (this._won && this._bossLordSpawned && (this._elapsed || 0) <= 180) this._checkAchievement('speed_demon');
 
     /* ── 变异保险库：20%概率解锁新突变 ── */
     /* R207-P0: 仅深渊轮回允许解锁突变，防止非深渊局误触发 */

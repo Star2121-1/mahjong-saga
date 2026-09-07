@@ -53,6 +53,12 @@ Gp.init = async function() {
             this._discardMode = !!data.discardMode;
             this._discardSel = (data.discardSel !== null && data.discardSel !== undefined) ? data.discardSel : -1;
             this._huLock = !!data.huLock;
+            /* R283-P1: 断点恢复时若huLock=true，原setTimeout可能已过期未触发，加1s安全超时防止永久死锁 */
+            if (this._huLock) {
+                setTimeout(function() {
+                    if (!self.gameOver && self.running) { self._huLock = false; if (self._handTileBar) self._handTileBar.classList.remove('hu-flash'); }
+                }, 1000);
+            }
             /* R233-P1: 恢复后退出打牌模式，防止存档中处于打牌状态导致新游戏无法操作 */
             if (this._discardMode) this._exitDiscardMode();
             /* P1-1 修复：断点恢复路径补齐手牌 UI 槽位与点击绑定（防打牌模式软锁） */

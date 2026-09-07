@@ -279,6 +279,10 @@ Gp._triggerOverdrive = function() {
             /* R259-P0: 设置frozen=true而非speed=0，确保Enemy.update()完整跳过AI和攻击计时器，防止Boss在过驱动期间继续发射弹幕 */
             _en.frozen = true;
             _en._overdriveFrozen = true;
+            /* R283-P0: Overdrive冻结不经过takeDamage，需手动保存Boss相位快照，防止解冻后相位状态丢失 */
+            if (_en.type === 'Boss_Lord' && _en._savedBossPhase === undefined) {
+                _en._savedBossPhase = _en._bossPhase;
+            }
         }
     }
 };
@@ -309,6 +313,11 @@ Gp._endOverdrive = function() {
             _oe.speed = _oe._overdriveOrigSpeed !== undefined ? _oe._overdriveOrigSpeed : _oe.baseSpeed; /* R235-P1: 使用!==undefined防止0速敌人被解冻 */
             /* R259-P0: 解冻所有被过驱动冻结的敌人 */
             if (_oe._overdriveFrozen) { _oe.frozen = false; _oe._overdriveFrozen = false; }
+            /* R283-P1: Overdrive解冻后重置Boss接触伤害标志和CD，防止解冻瞬间触发接触伤害 */
+            if (_oe.type === 'Boss_Lord') {
+                _oe._bossContactThisFrame = false;
+                _oe._bossContactTimer = Balance.BOSS_CONTACT_COOLDOWN;
+            }
             _oe._overdriveStored = false;
             _oe._overdriveOrigSpeed = undefined;
         }

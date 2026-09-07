@@ -507,7 +507,7 @@ Gp._triggerFlowerEvent = function (id) {
             case 'hua_xia': p._tempAtkBoost = Math.min(Balance.TEMP_ATK_BOOST_CAP, (p._tempAtkBoost || 0) + Balance.HUPAI_HUA_XIA_ATK_BOOST); p._tempBuffTimeLeft = Math.max(p._tempBuffTimeLeft || 0, Balance.HUPAI_HUA_XIA_BUFF_DURATION); break; /* P2-6: 5s 对齐设计表 */
             case 'hua_qiu': p.addGold(Balance.HUPAI_HUA_QIU_GOLD_PER_WAVE * Math.max(1, this._waveCount)); break;
             case 'hua_dongJ':
-                for (var i = 0; i < this.enemies.length; i++) { this.enemies[i].frozen = true; this.enemies[i].frozenTimer = B.HUPAI_HUA_DONGJ_FREEZE_DUR + (this.player.iceDurationBonus || 0); }
+                for (var i = 0; i < this.enemies.length; i++) { if (this.enemies[i].alive) { this.enemies[i].frozen = true; this.enemies[i].frozenTimer = B.HUPAI_HUA_DONGJ_FREEZE_DUR + (this.player.iceDurationBonus || 0); } }
                 break;
             case 'hua_mei': {
                 var ws = this._activeWeapons || [];
