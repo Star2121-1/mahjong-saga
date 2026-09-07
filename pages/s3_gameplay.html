@@ -6,59 +6,59 @@
     <meta name="theme-color" content="#0a1d12">
     <title>麻将江湖 - 血战到底</title>
     <!-- CSS: 全局基础 + 模块化战场样式 -->
-    <link rel="stylesheet" href="../css/common.css?v=20260907D">
-    <link rel="stylesheet" href="../css/gameplay/gameplay-layout.css?v=20260907D">
-    <link rel="stylesheet" href="../css/gameplay/gameplay-player.css?v=20260907D">
-    <link rel="stylesheet" href="../css/gameplay/gameplay-enemy.css?v=20260907D">
-    <link rel="stylesheet" href="../css/gameplay/gameplay-overlay.css?v=20260907D">
-    <link rel="stylesheet" href="../css/gameplay/gameplay-weapon.css?v=20260907D">
-    <link rel="stylesheet" href="../css/gameplay/gameplay-effects.css?v=20260907D">
-    <link rel="stylesheet" href="../css/gameplay/gameplay-ui.css?v=20260907D">
-    <link rel="stylesheet" href="../css/gameplay/gameplay-responsive.css?v=20260907D">
+    <link rel="stylesheet" href="../css/common.css?v=20260907E">
+    <link rel="stylesheet" href="../css/gameplay/gameplay-layout.css?v=20260907E">
+    <link rel="stylesheet" href="../css/gameplay/gameplay-player.css?v=20260907E">
+    <link rel="stylesheet" href="../css/gameplay/gameplay-enemy.css?v=20260907E">
+    <link rel="stylesheet" href="../css/gameplay/gameplay-overlay.css?v=20260907E">
+    <link rel="stylesheet" href="../css/gameplay/gameplay-weapon.css?v=20260907E">
+    <link rel="stylesheet" href="../css/gameplay/gameplay-effects.css?v=20260907E">
+    <link rel="stylesheet" href="../css/gameplay/gameplay-ui.css?v=20260907E">
+    <link rel="stylesheet" href="../css/gameplay/gameplay-responsive.css?v=20260907E">
     <!-- 核心服务层 (低层依赖) -->
-    <script src="../js/core/SaveManager.js?v=20260907D"></script>
-    <script src="../js/core/SaveManager.Core.js?v=20260907D"></script>
-    <script src="../js/core/SaveManager.Season.js?v=20260907D"></script>
-    <script src="../js/core/SaveManager.Weekly.js?v=20260907D"></script>
-    <script src="../js/core/SaveManager.Compendium.js?v=20260907D"></script>
-    <script src="../js/core/SaveManager.RunStats.js?v=20260907D"></script>
-    <script src="../js/core/FxManager.js?v=20260907D"></script>
-    <script src="../js/core/AudioManager.js?v=20260907D"></script>
-    <script src="../js/core/RewardManager.js?v=20260907D"></script>
+    <script src="../js/core/SaveManager.js?v=20260907E"></script>
+    <script src="../js/core/SaveManager.Core.js?v=20260907E"></script>
+    <script src="../js/core/SaveManager.Season.js?v=20260907E"></script>
+    <script src="../js/core/SaveManager.Weekly.js?v=20260907E"></script>
+    <script src="../js/core/SaveManager.Compendium.js?v=20260907E"></script>
+    <script src="../js/core/SaveManager.RunStats.js?v=20260907E"></script>
+    <script src="../js/core/FxManager.js?v=20260907E"></script>
+    <script src="../js/core/AudioManager.js?v=20260907E"></script>
+    <script src="../js/core/RewardManager.js?v=20260907E"></script>
     <!-- 数值常量 (所有模块依赖) -->
-    <script src="../js/config/Balance.js?v=20260907D"></script>
+    <script src="../js/config/Balance.js?v=20260907E"></script>
     <!-- 委托系统 -->
     <!-- R241-P0: 恢复GameSpawner.js — 否则敌人不生成（R183-P0误移除） -->
-    <script src="../js/core/GameSpawner.js?v=20260907D"></script>
-    <script src="../js/core/GameCombat.js?v=20260907D"></script>
-    <script src="../js/core/GameSystems.js?v=20260907D"></script>
+    <script src="../js/core/GameSpawner.js?v=20260907E"></script>
+    <script src="../js/core/GameCombat.js?v=20260907E"></script>
+    <script src="../js/core/GameSystems.js?v=20260907E"></script>
     <!-- 实体层 -->
-    <script src="../js/entities/EquipmentRegistry.js?v=20260907D"></script>
-    <script src="../js/config/HeroConfig.js?v=20260907D"></script>
-    <script src="../js/entities/HeroRegistry.js?v=20260907D"></script>
-    <script src="../js/config/LevelConfig.js?v=20260907D"></script>
-    <script src="../js/entities/Player.js?v=20260907D"></script>
-    <script src="../js/entities/Enemy.js?v=20260907D"></script>
-    <script src="../js/entities/ExpGem.js?v=20260907D"></script>
-    <script src="../js/entities/Weapon.js?v=20260907D"></script>
+    <script src="../js/entities/EquipmentRegistry.js?v=20260907E"></script>
+    <script src="../js/config/HeroConfig.js?v=20260907E"></script>
+    <script src="../js/entities/HeroRegistry.js?v=20260907E"></script>
+    <script src="../js/config/LevelConfig.js?v=20260907E"></script>
+    <script src="../js/entities/Player.js?v=20260907E"></script>
+    <script src="../js/entities/Enemy.js?v=20260907E"></script>
+    <script src="../js/entities/ExpGem.js?v=20260907E"></script>
+    <script src="../js/entities/Weapon.js?v=20260907E"></script>
     <!-- 引擎拆分 (最后加载，依赖以上所有) -->
-    <script src="../js/core/GameEngine.js?v=20260907D"></script>
-    <script src="../js/core/GameEngine.Boot.js?v=20260907D"></script>
-    <script src="../js/core/GameEngine.NewRun.js?v=20260907D"></script>
-    <script src="../js/core/GameEngine.Loop.js?v=20260907D"></script>
-    <script src="../js/core/MahjongHand.js?v=20260907D"></script>
-    <script src="../js/core/GameEngine.Spawn.js?v=20260907D"></script>
-    <script src="../js/core/GameEngine.Combat.js?v=20260907D"></script>
-    <script src="../js/config/AchievementConfig.js?v=20260907D"></script>
-    <script src="../js/core/GameEngine.Endgame.js?v=20260907D"></script>
-    <script src="../js/core/GameEngine.Render.js?v=20260907D"></script>
-    <script src="../js/core/GameEngine.Weapons.js?v=20260907D"></script>
-    <script src="../js/core/GameEngine.Events.js?v=20260907D"></script>
-    <script src="../js/core/GameEngine.Guide.js?v=20260907D"></script>
-    <script src="../js/core/GameEngine.Navigate.js?v=20260907D"></script>
-    <script src="../js/core/GameEngine.Abyss.js?v=20260907D"></script>
+    <script src="../js/core/GameEngine.js?v=20260907E"></script>
+    <script src="../js/core/GameEngine.Boot.js?v=20260907E"></script>
+    <script src="../js/core/GameEngine.NewRun.js?v=20260907E"></script>
+    <script src="../js/core/GameEngine.Loop.js?v=20260907E"></script>
+    <script src="../js/core/MahjongHand.js?v=20260907E"></script>
+    <script src="../js/core/GameEngine.Spawn.js?v=20260907E"></script>
+    <script src="../js/core/GameEngine.Combat.js?v=20260907E"></script>
+    <script src="../js/config/AchievementConfig.js?v=20260907E"></script>
+    <script src="../js/core/GameEngine.Endgame.js?v=20260907E"></script>
+    <script src="../js/core/GameEngine.Render.js?v=20260907E"></script>
+    <script src="../js/core/GameEngine.Weapons.js?v=20260907E"></script>
+    <script src="../js/core/GameEngine.Events.js?v=20260907E"></script>
+    <script src="../js/core/GameEngine.Guide.js?v=20260907E"></script>
+    <script src="../js/core/GameEngine.Navigate.js?v=20260907E"></script>
+    <script src="../js/core/GameEngine.Abyss.js?v=20260907E"></script>
     <!-- 页面初始化 -->
-    <script src="../js/main.js?v=20260907D"></script>
+    <script src="../js/main.js?v=20260907E"></script>
 </head>
 <body>
     <!-- 屏幕阅读器通知区域 -->
@@ -198,6 +198,6 @@
             <button id="pause-btn" aria-label="暂停游戏">⏸ 暂停</button>
         </div>
     </div>
-    <script src="../js/responsive.js?v=20260907D"></script>
+    <script src="../js/responsive.js?v=20260907E"></script>
 </body>
 </html>
