@@ -360,7 +360,9 @@
 .game-clock-frozen .boss-enraged::after,
 .game-clock-frozen .enemy.abyss-variant,
 .game-clock-frozen .enemy.abyss-variant::before,
-.game-clock-frozen .enemy.abyss-variant::after {
+.game-clock-frozen .enemy.abyss-variant::after,
+.game-clock-frozen #player.frozen,
+.game-clock-frozen #player.frozen-crystal {
     animation-play-state: running !important;
 }
 /* R125-P1: Boss持续动画不应在面板打开时冻结 */
@@ -414,7 +416,9 @@
 .game-clock-frozen .ground-crack,
 .game-clock-frozen .ground-crack::before,
 .game-clock-frozen .ground-crack::after,
-.game-clock-frozen .boss-slam-ring {
+.game-clock-frozen .boss-slam-ring,
+.game-clock-frozen .shockwave,
+.game-clock-frozen .nova-pulse {
     animation-play-state: running !important;
 }
 

@@ -36,7 +36,7 @@ Gp._loop = function(timestamp) {
                 p._tempAtkBoost = 0;
                 p._tempHpBonus = 0;
                 /* R148-P1: 双币buff仅在拾取时消费，不在过期时清零，防止buff到期但金币未拾取时丢失效果 */
-                p._tempBuffTimeLeft = 0;
+                p._tempBuffTimeLeft = undefined; /* R292-P1: 重置为undefined防止每帧重复进入if块做无用比较 */
             }
         }
 

@@ -40,7 +40,7 @@ Ap._ensureContext = function() {
         this._ctx = new AC();
         /* Epoch 16: iOS 12.2+ 需要 resume() 才能播放 */
         if (this._ctx.state === 'suspended') {
-            this._ctx.resume().catch(function(e) { console.warn('[Audio] resume failed:', e); });
+            this._ctx.resume().catch(function(e) { console.warn('[Audio] resume failed:', e); self.tryReinit(); });
         }
         /* P0: 页面可见性恢复机制 — R62-P2: 添加guard防止重复监听 */
         var self = this;
@@ -86,6 +86,7 @@ Ap.tryReinit = function() {
         }
         try { this._ctx.close(); } catch(e) {}
         this._ctx = null;
+        this._noiseBuffer = null; /* R292-P1: 清空旧buffer引用，防止tryReinit后新ctx与旧buffer sampleRate不匹配导致getChannelData崩溃 */
     }
     /* R207-P0: 无论ctx当前state如何，在reinit前清空引用防止leak — setMuted(false)时ctx可能为running状态，旧context从未被关闭 */
     this._initialized = false;

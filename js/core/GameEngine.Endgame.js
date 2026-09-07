@@ -106,7 +106,7 @@ Gp._spawnFloatText = function(x, y, text, isCrit, _isDamage) {
         el.style.color = '#1e6f42';
     }
     this._worldLayer.appendChild(el);
-    setTimeout(function() { el.remove(); }, 650);
+    setTimeout(function(el) { if (el && el.parentNode) el.remove(); }, 650, el);
 };
 
 Gp._spawnHealText = function(x, y, amount) {
@@ -121,7 +121,7 @@ Gp._spawnHealText = function(x, y, amount) {
     el.style.left = x + 'px';
     el.style.top = (y - 20) + 'px';
     this._worldLayer.appendChild(el);
-    setTimeout(function() { el.remove(); }, 650);
+    setTimeout(function(el) { if (el && el.parentNode) el.remove(); }, 650, el);
 };
 
 Gp._spawnExpText = function(x, y, amount) {
@@ -135,7 +135,7 @@ Gp._spawnExpText = function(x, y, amount) {
     el.style.left = (x - 10) + 'px';
     el.style.top = (y - 40) + 'px';
     this._worldLayer.appendChild(el);
-    setTimeout(function() { el.remove(); }, 650);
+    setTimeout(function(el) { if (el && el.parentNode) el.remove(); }, 650, el);
 };
 
 Gp._spawnExplosion = function(x, y, radius, damage, excludeId) {
