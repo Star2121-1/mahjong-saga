@@ -32,6 +32,10 @@ Sys.triggerOverdrive = function(engine) {
             oe.speed = 0;
             oe.frozen = true; /* R268-P1: 必须同步设置frozen=true，确保Enemy.update()完整跳过AI和攻击计时器 */
             oe._overdriveFrozen = true; /* R268-P1: 与Events.js fallback路径保持一致 */
+            /* R298-P0: 冻结 Boss 时快照相位，解冻时恢复，防止 boss 解冻后误回 phase1 */
+            if (oe.type === 'Boss_Lord' && oe._savedBossPhase === undefined) {
+                oe._savedBossPhase = oe._bossPhase;
+            }
         }
     }
 

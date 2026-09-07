@@ -408,8 +408,9 @@
     animation: freezeRingExpand 0.8s ease-out forwards;
 }
 @keyframes freezeRingExpand {
-    0% { width: 40px; height: 40px; opacity: 1; border-width: 4px; transform: translate(-50%, -50%) scale(0.25); }
-    100% { width: 40px; height: 40px; opacity: 0; border-width: 1px; transform: translate(-50%, -50%) scale(3); }
+    /* R298-P1: 移除首尾相同的 width/height — 两值相等，动画期间浏览器无需重排，属死代码 */
+    0% { opacity: 1; border-width: 4px; transform: translate(-50%, -50%) scale(0.25); }
+    100% { opacity: 0; border-width: 1px; transform: translate(-50%, -50%) scale(3); }
 }
 
 /* 冰晶碎片 */

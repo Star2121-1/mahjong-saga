@@ -1026,12 +1026,14 @@
                 currentVal = meta.fullSetActivated ? 1 : 0;
             } else if (c.id === 'speed_demon') {
                 /* R290-P1: 移除进度显示中的9999兜底 — 该值无意义，空字符串表示"尚未完成首局通关"，与成就卡片语义一致 */
-                currentVal = (meta.runStats && meta.runStats.fastestRun != null && meta.runStats.fastestRun < 9999) ? Math.round(meta.runStats.fastestRun) : '';
+                /* R298-P0: 无数据时 currentVal 置 0 而非 ''，防止后续 '' / threshold = NaN 导致进度条 width:NaN% */
+                currentVal = (meta.runStats && meta.runStats.fastestRun != null && meta.runStats.fastestRun < 9999) ? Math.round(meta.runStats.fastestRun) : 0;
             } else if (c.id === 'first_kill') {
                 currentVal = (meta.totalKills || 0) >= 1 ? 1 : 0;
             }
             /* R297-P1: "越低越好"类成就（如极速通关）进度计算取反，防止低值显示低进度 */
-            var isLowerIsBetter = (c.thresholds && c.thresholds[0] > 0 && currentVal !== '' && typeof currentVal === 'number');
+            /* R298-P0: 需排除 currentVal===0（无数据或未解锁），否则 threshold/0=Infinity 导致进度条爆表 */
+            var isLowerIsBetter = (c.thresholds && c.thresholds[0] > 0 && currentVal > 0);
             if (isLowerIsBetter) {
                 progress = Math.min(100, Math.round((threshold / currentVal) * 100));
             } else {

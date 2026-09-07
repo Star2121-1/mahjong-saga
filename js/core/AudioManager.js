@@ -40,7 +40,9 @@ Ap._ensureContext = function() {
         this._ctx = new AC();
         /* Epoch 16: iOS 12.2+ 需要 resume() 才能播放 */
         if (this._ctx.state === 'suspended') {
-            this._ctx.resume().catch(function(e) { console.warn('[Audio] resume failed:', e); this.tryReinit(); });
+            /* R298-P0: .catch 是独立函数，this 指向 window 而非 AudioManager — 用闭包 self 调用 */
+            var self = this;
+            this._ctx.resume().catch(function(e) { console.warn('[Audio] resume failed:', e); self.tryReinit(); });
         }
         /* P0: 页面可见性恢复机制 — R62-P2: 添加guard防止重复监听 */
         var self = this;

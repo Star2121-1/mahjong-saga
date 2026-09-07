@@ -207,8 +207,13 @@ Gp._buyAbyssItem = function(item) {
             break;
         case 'cdReduce':
             if (this._activeWeapons) {
+                var _abyssCdFloor = p.cdFloor || Balance.DEFAULT_CD_FLOOR;
                 for (var i = 0; i < this._activeWeapons.length; i++) {
-                    this._activeWeapons[i].cd = Math.max(p.cdFloor || Balance.DEFAULT_CD_FLOOR, this._activeWeapons[i].cd * 0.8);
+                    var _aw = this._activeWeapons[i];
+                    /* P0: 写入_origBaseCd而非cd，防止_render每帧覆写回滚 */
+                    _aw._origBaseCd = Math.max(_abyssCdFloor, (_aw._origBaseCd || _aw._baseCd || _aw.cd) * 0.8);
+                    _aw._baseCd = _aw._origBaseCd;
+                    _aw.cd = _aw._origBaseCd;
                 }
             }
             this._spawnCausalityText('⏱️ 武器CD-20%');
