@@ -339,7 +339,7 @@ Sys.updateWither = function(engine, dt) {
                 var we = engine.enemies[wi];
                 if (!we.alive) continue;
                 var dmg = Math.max(1, Math.floor(we.maxHp * Balance.WITHER_HP_LOSS_PCT));
-                we.takeDamage(dmg, 'wither');
+                we.takeDamage(dmg, 'wither', engine.player.x, engine.player.y); /* R288-P0: 显式传递伤害源坐标，防止Barrier错误地用玩家位置作为判定基准 */
             }
         }
     }

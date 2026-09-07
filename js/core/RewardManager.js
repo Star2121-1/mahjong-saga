@@ -24,7 +24,7 @@ class RewardManager {
             TrackingBlade: { name: '飞牌切', desc: '自动追踪最近敌人，穿透+3，远程飞牌切割', color: '#ff8f00', category: '切牌', synergizes: ['auto_drone', 'weapon_amplify'], atkFactor: 1.0, cd: 0.8 },
             OrbitShield:   { name: '三面环伺', desc: '3 枚宝牌 120° 公转，持续摩擦伤害', color: '#2962ff', category: '巡巡', synergizes: ['explosive_core', 'frost_core'], atkFactor: 0.5, cd: 0.3 },
             ShotgunBurst:  { name: '七对子', desc: '点击打出 7 张散牌，近距叠吃多段', color: '#ff6d00', category: '对对', synergizes: ['golden_finger', 'sharp_edge'], atkFactor: 0.6, cd: 0.4 },
-            GroundSlammer: { name: '碰碰胡', desc: '4s 冷却大范围碰牌震波扩散 + 击退', color: '#ffc107', category: '碰碰', synergizes: ['wind_walker', 'gravity_core'], atkFactor: 1.5, cd: 1.8 },
+            GroundSlammer: { name: '碰碰胡', desc: '1.8s 冷却大范围碰牌震波扩散 + 击退', color: '#ffc107', category: '碰碰', synergizes: ['wind_walker', 'gravity_core'], atkFactor: 1.5, cd: 1.8 },
             LaserBeam:     { name: '一气贯通', desc: '300px 一气打通牌列高频融化，朝鼠标方向', color: '#ff1744', category: '一气', synergizes: ['vamp_ring', 'weapon_amplify'], atkFactor: 1.2, cd: 0.3 },
             NovaPulse:     { name: '大四喜', desc: '7s 蓄力大四喜清场蒸发级伤害', color: '#d50000', category: '大四', synergizes: ['explosive_core', 'frost_core', 'weapon_amplify'], atkFactor: 5.0, cd: 7.0 }
         };

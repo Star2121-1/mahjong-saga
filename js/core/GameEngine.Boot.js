@@ -533,6 +533,7 @@ Gp._startNewRun = function(heroId, levelId) {
     this._joystickActive = false;
     this._joystickDX = 0;
     this._joystickDY = 0;
+    this._joystickLastReleaseTime = 0; /* R288-P1: 重启时清零摇杆释放时间，防止上一局残留阻塞首点移动 */
     /* R117-P1: 清理玩家拖尾计时器，防止重启后立即产生大量拖尾节点 */
     this._trailTimer = 0;
     this._lastDt = 0.016;
@@ -737,6 +738,7 @@ Gp._unfreezeClock = function() {
     if (window.audioManager && window.audioManager._ctx) {
         window.audioManager._ctx.resume().catch(function(e) {
             console.warn('[Audio] resume failed:', e);
+            window.audioManager.tryReinit(); /* R288-P1: Safari等浏览器resume失败后尝试重建上下文，防止永久静音 */
         });
     }
 };
@@ -834,7 +836,7 @@ Gp._togglePause = function() {
         this._restoreFocus();
         /* R37-P1: 恢复时恢复 AudioContext */
         if (window.audioManager && window.audioManager._ctx && window.audioManager._ctx.state === 'suspended') {
-            window.audioManager._ctx.resume().catch(function(e) { console.warn('[Audio] resume failed:', e); });
+            window.audioManager._ctx.resume().catch(function(e) { console.warn('[Audio] resume failed:', e); window.audioManager.tryReinit(); }); /* R288-P1: resume失败时重建上下文，防止永久静音 */
         }
         this._beginLoop();
     }
@@ -1118,11 +1120,7 @@ Gp._bindAudioButton = function() {
         /* P1: 同步静音切换框，防止点击audio-btn后暂停面板显示错误状态 */
         var _mt = document.getElementById('mute-toggle');
         if (_mt) _mt.checked = muted;
-        /* 持久化到 meta */
-        try {
-            var meta = window.saveManager && window.saveManager._metaCache;
-            if (meta) { meta.audioMuted = muted; window.saveManager._saveMetaToStorage().catch(function(e) { console.warn("[Audio] mute save failed:", e); }); }
-        } catch(e) {}
+        /* setMuted()内部已持久化到meta，无需重复写入 */
     });
     /* 恢复上次状态 */
     try {

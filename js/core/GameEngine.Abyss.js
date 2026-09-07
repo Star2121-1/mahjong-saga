@@ -10,10 +10,10 @@
 
 Gp._abyssComboDefinitions = [
     { id: 'abyss_bloodmoon', name: '深渊血月', desc: '血月效果翻倍（HP+60%, ATK+80%）但掉落×2', unlockAt: 1, effects: { hpMult: Balance.ABYSS_BLOODMOON_HP_MULT, atkMult: Balance.ABYSS_BLOODMOON_ATK_MULT, dropMult: Balance.ABYSS_BLOODMOON_DROP_MULT } },
-    { id: 'abyss_frenzy', name: '深渊狂乱', desc: '敌人攻速+100%，击杀返还50%生命', unlockAt: 5, effects: { speedMult: Balance.ABYSS_FRENZY_SPEED_MULT, lifestealOnKill: 0.5 } },
-    { id: 'abyss_gravity', name: '深渊引力', desc: '经验吸附范围×3，但金币掉落-50%', unlockAt: 10, effects: { magnetMult: 3, goldPenalty: 0.5 } },
+    { id: 'abyss_frenzy', name: '深渊狂乱', desc: '敌人攻速+100%，击杀返还50%生命', unlockAt: 5, effects: { speedMult: Balance.ABYSS_FRENZY_SPEED_MULT } },
+    { id: 'abyss_gravity', name: '深渊引力', desc: '经验吸附范围×3，但金币掉落-50%', unlockAt: 10, effects: {} },
     { id: 'abyss_frailty', name: '深渊脆弱', desc: '玩家攻击+150%，受伤+50%', unlockAt: 15, effects: { playerAtkMult: Balance.ABYSS_FRAILTY_ATK_MULT, playerDamageMult: Balance.ABYSS_FRAILTY_DMG_MULT } },
-    { id: 'abyss_wither', name: '深渊凋零', desc: '每秒损失2%HP但获得等量护盾', unlockAt: 20, effects: { drainPct: 0.02, shieldGen: 0.02 } }
+    { id: 'abyss_wither', name: '深渊凋零', desc: '每秒损失2%HP但获得等量护盾', unlockAt: 20, effects: { drainPct: Balance.ABYSS_WITHER_DRAIN_HP_PCT } }
 ];
 
 /* ── 深渊专属敌人变体 ── */

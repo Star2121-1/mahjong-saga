@@ -319,6 +319,10 @@ window.Balance = {
     DEATH_REWARD_FAST_TIME_THRESHOLD: 60, // 快速死亡阈值秒 (SaveManager.RunStats.js)
     DEATH_REWARD_FAST_TOKEN_MULT: 0.5,  // 快速死亡代币减半倍数 (SaveManager.RunStats.js)
 
+    /* ── 天赋/声望加成 ── */
+    TALENT_CRIT_RATE_PER_LEVEL: 0.02,     // 听直觉每级暴击率 (Player.js ting_intuition)
+    TALENT_DAMAGE_REDUCTION_PER_LEVEL: 0.03,  // 刚硬每级减伤 (Player.js gang_hardiness)
+    TALENT_CD_REDUCTION_PER_LEVEL: 0.01,  // 摩帕CD每级降低 (Player.js mo_pa_cd)
     /* ── 深渊组合惩罚 ── */
     ABYSS_GRAVITY_COIN_REDUCTION: 0.5, // 深渊引力金币-50%惩罚 (Spawn.js _updateCoins)
     ABYSS_WITHER_DRAIN_HP_PCT: 0.02,      // 深渊凋零每秒HP损失比例 (Loop.js abyss_wither combo)

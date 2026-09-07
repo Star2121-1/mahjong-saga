@@ -280,8 +280,8 @@ Gp._triggerOverdrive = function() {
             _en.frozen = true;
             _en._overdriveFrozen = true;
             /* R283-P0: Overdrive冻结不经过takeDamage，需手动保存Boss相位快照，防止解冻后相位状态丢失 */
-            if (_en.type === 'Boss_Lord' && _en._savedBossPhase === undefined) {
-                _en._savedBossPhase = _en._bossPhase;
+            if (_en.type === 'Boss_Lord') {
+                _en._savedBossPhase = _en._bossPhase; /* R288-P1: 移除undefined守卫，允许武器/过驱动双重冻结时覆盖相位快照 */
             }
         }
     }
