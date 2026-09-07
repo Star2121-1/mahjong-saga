@@ -77,7 +77,8 @@
         if (stats.totalGold > lb.mostGold) lb.mostGold = stats.totalGold;
         if (stats.perfectRuns > lb.perfectRuns) lb.perfectRuns = stats.perfectRuns;
         /* R158-P0: 排行榜更新后持久化，防止页面刷新丢失 */
-        try { this._saveMetaToStorage().catch(function(e) { console.warn('[SaveManager] leaderboard persist failed:', e); }); } catch(e) {}
+        /* R310-P0: 使用await而非fire-and-forget，确保排行榜数据写入完成后再返回 */
+        try { await this._saveMetaToStorage(); } catch(e) { console.warn('[SaveManager] leaderboard persist failed:', e); }
         return lb;
     };
 

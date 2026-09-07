@@ -43,9 +43,20 @@ Ap._ensureContext = function() {
             /* R298-P0: .catch 是独立函数，this 指向 window 而非 AudioManager — 用闭包 self 调用 */
             var self = this;
             /* R300-P1: resume() 是异步操作，在成功后才标记 initialized，防止 resume 失败后 play() 被静默丢弃 */
+            /* R310-P1: 添加重试计数器，防止Safari等环境resume持续失败导致无限循环和内存泄漏 */
+            if (!self._resumeRetryCount) self._resumeRetryCount = 0;
+            if (self._resumeRetryCount >= 3) {
+                console.warn('[Audio] resume failed 3 times, giving up');
+                self._initialized = true; /* 标记为已初始化，后续play()调用会走静音路径 */
+                return false;
+            }
             this._ctx.resume().then(function() {
                 self._initialized = true;
-            }).catch(function(e) { console.warn('[Audio] resume failed:', e); self.tryReinit(); });
+                self._resumeRetryCount = 0; /* 成功后重置计数器 */
+            }).catch(function(e) {
+                console.warn('[Audio] resume failed:', e, 'retry', ++self._resumeRetryCount, '/3');
+                if (self._resumeRetryCount < 3) { self.tryReinit(); }
+            });
             return false; /* R300-P1: resume未完成前返回false，避免后续play()被错误放行 */
         }
         /* P0: 页面可见性恢复机制 — R62-P2: 添加guard防止重复监听 */

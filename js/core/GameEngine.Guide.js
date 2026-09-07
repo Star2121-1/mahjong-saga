@@ -141,23 +141,23 @@ Gp._showGuideStep = function(stepIndex) {
 };
 
 Gp._completeGuide = function() {
-    /* R246-P0: 防止死亡/结算后取消冻结，导致CSS动画异常 */
-    if (this.gameOver) return;
     /* R46-P2: 清除检查timer，防止guide完成后interval泄漏 */
     if (this._guideCheckTimer) { clearInterval(this._guideCheckTimer); this._guideCheckTimer = null; }
     if (this._guideAutoAdvanceTimer) { clearTimeout(this._guideAutoAdvanceTimer); this._guideAutoAdvanceTimer = null; }
     this._restoreOpacity();
     this._clearHighlightTimers();
-    if (this.guideOverlay) this.guideOverlay.classList.remove('active'); /* R199-P2: null guard */
+    if (this.guideOverlay) this.guideOverlay.classList.remove('active');
     this._guideDismissed = true;
+    /* R310-P0: 清除guide overlay和持久化hasSeenGuide，防止死亡/结算后面板残留且引导永久重播 */
     var meta = window.saveManager && window.saveManager._metaCache;
     if (meta) {
         meta.hasSeenGuide = true;
-        /* R199-P1: await save防止hasSeenGuide未持久化导致下次重放引导 */
         if (window.saveManager && typeof window.saveManager._saveMetaToStorage === 'function') {
             window.saveManager._saveMetaToStorage().catch(function(e) { console.warn('[Guide] hasSeenGuide save failed:', e); });
         }
     }
+    /* R246-P0: 防止死亡/结算后取消冻结，导致CSS动画异常 — 仅在此处检查是否继续循环 */
+    if (this.gameOver) return;
     /* 延迟启动游戏循环 */
     var self = this;
     this._completeGuideTimer = setTimeout(function() {

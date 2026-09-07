@@ -311,6 +311,11 @@ Gp._endOverdrive = function() {
         var _oe = this.enemies[_oi];
         if (_oe._overdriveStored) {
             _oe.speed = _oe._overdriveOrigSpeed !== undefined ? _oe._overdriveOrigSpeed : _oe.baseSpeed; /* R235-P1: 使用!==undefined防止0速敌人被解冻 */
+            /* R299-P0: 恢复自然冰冻敌人的frozenTimer，防止解冻后立即获得完整行动能力 */
+            if (_oe._overdriveOrigFrozenTimer !== undefined) {
+                _oe.frozenTimer = _oe._overdriveOrigFrozenTimer;
+                _oe._overdriveOrigFrozenTimer = undefined;
+            }
             /* R259-P0: 解冻所有被过驱动冻结的敌人 */
             if (_oe._overdriveFrozen) { _oe.frozen = false; _oe._overdriveFrozen = false; }
             /* R283-P1: Overdrive解冻后重置Boss接触伤害标志和CD，防止解冻瞬间触发接触伤害 */

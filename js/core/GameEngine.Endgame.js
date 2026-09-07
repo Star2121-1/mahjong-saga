@@ -219,6 +219,7 @@ Gp.restart = function() {
             this.player._abyssBloodmoonApplied = false;
             this.player._abyssBloodmoonAtkBonus = undefined;
             this.player._abyssBloodmoonOrigMaxHp = undefined; /* R146-P1: 清理血月combo原始HP，防止跨局污染 */
+            this.player._abyssFrailtyDmgMult = undefined; /* R310-P1: 清理深渊脆弱伤害倍率字段，防止跨局残留 */
         }
     }
     /* R37-P1: 确保frailtyDebuff在所有重启路径下被清除 */

@@ -43,6 +43,13 @@ Gp._goToSaveSelect = async function() {
     if (window.saveManager && this._autoSave) await this._autoSave('nav'); /* R226-P0: await防止clearActiveRun抢先写入导致数据丢失 */
     /* R137-P0: await确保存档写入完成后再跳转，防止竞态导致"继续游戏"误判 */
     if (window.saveManager) await window.saveManager.clearActiveRun();
+    /* R310-P1: 导航前确保引导状态已清理，防止hasSeenGuide未持久化导致下次重播 */
+    if (!this._guideDismissed) {
+        var _navMeta = window.saveManager && window.saveManager._metaCache;
+        if (_navMeta) { _navMeta.hasSeenGuide = true; }
+        if (this.guideOverlay) this.guideOverlay.classList.remove('active');
+        this._guideDismissed = true;
+    }
     window.location.href = 's2_main_hub.html';
     } catch(e) { console.warn('[Navigate] _goToSaveSelect error:', e); window.location.href = 's2_main_hub.html'; }
     finally { this._navSaving = false; }

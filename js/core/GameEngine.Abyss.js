@@ -282,6 +282,10 @@ Gp._applyAbyssCombo = function(comboId) {
             this.player._abyssFrailtyDmgMult = undefined; /* R308-P0: 清理深渊脆弱伤害debuff标记 */
             this.player._frailtyDebuff = false;
         }
+        /* R310-P1: 清理 _abyssFrailtyDmgMult 字段，防止跨combo残留 */
+        if (combo.id === 'abyss_frailty') {
+            if (this.player) this.player._abyssFrailtyDmgMult = undefined;
+        }
         if (combo.id === 'abyss_bloodmoon' && this.player) {
             /* R125-P1: 关闭时还原原始maxHp，防止血月效果跨combo残留 */
             if (this.player._abyssBloodmoonOrigMaxHp !== undefined) {

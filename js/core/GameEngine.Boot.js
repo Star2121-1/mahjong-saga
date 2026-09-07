@@ -194,7 +194,9 @@ Gp.init = async function() {
             var hasKeyboard = self._pressedKeys['KeyW'] || self._pressedKeys['KeyS'] ||
                 self._pressedKeys['KeyA'] || self._pressedKeys['KeyD'] ||
                 self._pressedKeys['ArrowUp'] || self._pressedKeys['ArrowDown'] ||
-                self._pressedKeys['ArrowLeft'] || self._pressedKeys['ArrowRight'];
+                self._pressedKeys['ArrowLeft'] || self._pressedKeys['ArrowRight'] ||
+                self._pressedKeys['Numpad8'] || self._pressedKeys['Numpad2'] ||
+                self._pressedKeys['Numpad4'] || self._pressedKeys['Numpad6']; /* R310-P1: 补充小键盘方向键，与_getInputVector保持一致 */
             if (hasKeyboard || self._joystickActive) {
                 e.preventDefault();
                 return;
@@ -297,28 +299,28 @@ Gp._bindStage3Events = function() {
         if (volMaster) {
             volMaster.addEventListener('input', function() {
                 if (window.audioManager) window.audioManager.setVolume(this.value / 100);
-                var v = this.pauseOverlay.querySelector('#vol-master-val');
+                var v = s.pauseOverlay.querySelector('#vol-master-val'); /* R310-P1: 使用闭包s而非this，防止this绑定到DOM元素导致TypeError */
                 if (v) v.textContent = this.value + '%';
             });
         }
         if (volSfx) {
             volSfx.addEventListener('input', function() {
                 if (window.audioManager) window.audioManager.setCategoryVolume('sfx', this.value / 100);
-                var v = this.pauseOverlay.querySelector('#vol-sfx-val');
+                var v = s.pauseOverlay.querySelector('#vol-sfx-val'); /* R310-P1: 同上 */
                 if (v) v.textContent = this.value + '%';
             });
         }
         if (volMusic) {
             volMusic.addEventListener('input', function() {
                 if (window.audioManager) window.audioManager.setCategoryVolume('music', this.value / 100);
-                var v = this.pauseOverlay.querySelector('#vol-music-val');
+                var v = s.pauseOverlay.querySelector('#vol-music-val'); /* R310-P1: 同上 */
                 if (v) v.textContent = this.value + '%';
             });
         }
         if (volFeedback) {
             volFeedback.addEventListener('input', function() {
                 if (window.audioManager) window.audioManager.setCategoryVolume('feedback', this.value / 100);
-                var v = this.pauseOverlay.querySelector('#vol-feedback-val');
+                var v = s.pauseOverlay.querySelector('#vol-feedback-val'); /* R310-P1: 同上 */
                 if (v) v.textContent = this.value + '%';
             });
         }
@@ -886,6 +888,8 @@ Gp._showGuide = function() {
 
 /* Epoch 43: 公开方法 — 重新播放引导（调试用） */
 Gp._replayGuide = function() {
+    /* R310-P0: 深渊轮回期间禁止重放引导，防止冻结深渊游戏循环 */
+    if (this.loopCount > 0) return;
     this._guideDismissed = false;
     this._currentGuideStep = 0;
     this._defineGuideSteps();
@@ -1101,7 +1105,7 @@ Gp._initJoystick = function() {
     this._joystickMouseLeave = function() { if (self._joystickActive) resetKnob(); };
     document.addEventListener('touchmove', this._joystickTouchMove, { passive: false });
     document.addEventListener('touchend', this._joystickTouchEnd, { passive: false }); /* R236-P1: 与touchstart/touchmove保持一致，防止Android默认行为 */
-    document.addEventListener('touchcancel', this._joystickTouchCancel);
+    document.addEventListener('touchcancel', this._joystickTouchCancel, { passive: false }); /* R310-P1: 与touchmove/touchend保持一致，防止未来preventDefault静默失效 */
     base.addEventListener('mouseleave', this._joystickMouseLeave);
 };
 
