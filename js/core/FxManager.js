@@ -99,6 +99,8 @@ Fp._borrowNode = function() {
     /* R187-P0: 池已满(≥MAX_GROWTH)，创建不受池管理的临时节点保底 */
     var el = document.createElement('div');
     el.className = 'fct-node fct-normal'; /* R271-P1: 添加默认类型类，确保overflow节点有动画定义，防止动画结束后永久残留DOM */
+    /* R284-P1: 显式声明self防止闭包链隐式依赖spawnText的self变量（若未来重构可能导致ReferenceError） */
+    var self = this;
     el._fctActive = true;
     el._lastUsed = performance.now(); /* R198-P0: overflow节点同步记录使用时间，防止stale检测误扫 */
     el._fctOnEnd = function() {
@@ -137,7 +139,7 @@ Fp._returnNode = function(node) {
         this._pool.splice(poolIdx, 1);
     }
     /* R264-P2: 移除else分支 — 所有节点通过borrow路径都应已在_pool中，else分支仅在异常路径触发，cleanup()通过遍历_freeStack正确清理DOM */
-    /* 健康检查：每 50 次归还扫描一次，强制回收超过 5s 未归还的节点 */
+    /* 健康检查：每 FCT_HEALTHCHECK_MODULO 次归还扫描一次，强制回收超过 5s 未归还的节点 */
     if (++this._returnCount % window.Balance.FCT_HEALTHCHECK_MODULO === 0) this._healthCheck();
 };
 

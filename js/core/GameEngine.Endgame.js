@@ -460,8 +460,7 @@ Gp.restart = function() {
     /* R241-P0: restart后重新绑定阶段3事件，防止按钮监听器累积 */
     this._bindStage3Events();
     this._bindAudioButton(); /* R267-P1: 确保restart后音频按钮事件仍有效 */
-    /* R241-P1: 重建视口resize监听，防止窗口缩放后相机追踪失效 */
-    this._initViewportResize();
+    /* R284-P1: _startNewRun已在Boot.js:452内部调用_initViewportResize，此处无需重复 */
 };
 
 /* ══════════════════════════════════════════════
