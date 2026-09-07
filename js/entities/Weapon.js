@@ -31,9 +31,9 @@ window.Weapon = class {
         if (this._odOrigAtk !== undefined) this._odOrigAtk = Math.min(Balance.ATK_FACTOR_MAX_CAP, this._odOrigAtk + Balance.WEAPON_UPGRADE_ATK_INC);
         var playerCdFloor = (window.gameEngine && window.gameEngine.player) ? window.gameEngine.player.cdFloor : null;
         var floor = (playerCdFloor != null) ? playerCdFloor : Balance.DEFAULT_CD_FLOOR;
-        this.cd = Math.max(floor, this.cd * Balance.WEAPON_UPGRADE_CD_MULT);
-        /* R199-P0: 升级始终基于_origBaseCd，避免_tongCdReduction被二次乘算 */
+        /* R309-P1: 升级时不使用this.cd（可能已被上一级修改），改用_origBaseCd*CD_MULT确保CD线性累积 */
         this._origBaseCd = Math.max(floor, this._origBaseCd * Balance.WEAPON_UPGRADE_CD_MULT);
+        this.cd = this._origBaseCd;
         if (this._tongCdReduction > 0) {
             this._baseCd = Math.max(floor, this._origBaseCd * (1 - this._tongCdReduction));
         } else {
@@ -481,7 +481,8 @@ window.NovaPulse = class extends window.Weapon {
                 if (!e.alive) continue;
                 var dx = e.x - p.x;
                 var dy = e.y - p.y;
-                if (dx * dx + dy * dy < (e.radius + radius) * (e.radius + radius)) {
+                /* R309-P1: 统一为 <= 与 _updateProjectiles 碰撞检测保持一致，防止边界恰好相切时漏判 */
+                if (dx * dx + dy * dy <= (e.radius + radius) * (e.radius + radius)) {
                     if (!p.hitEnemies.has(e.id)) {
                         p.hitEnemies.add(e.id);
                         e.takeDamage(dmg, 'player', p.x, p.y);

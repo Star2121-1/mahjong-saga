@@ -135,6 +135,10 @@ Sys.endOverdrive = function(engine) {
     if (engine._iceAuraEl && engine._iceAuraEl.style) engine._iceAuraEl.style.visibility = 'hidden';
 };
 
+/* R309-P0: 将Sys.endOverdrive绑定到GameEngine.prototype，修复_caller的TypeError崩溃
+   调用者: Loop.js(计时器到期), Combat.js(_gameOver), SaveManager.Core.js(断点恢复), Endgame.js(restart/_enterAbyss) */
+window.GameEngine.prototype._endOverdrive = Sys.endOverdrive;
+
 /* ── 突变系统 ── */
 
 Sys.showMutatorPanel = function(engine) {
