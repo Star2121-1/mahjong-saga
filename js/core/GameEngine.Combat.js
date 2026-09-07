@@ -30,6 +30,8 @@ Gp._resumeAfterReward = function() {
     this._pendingExpGems = [];
     this._cleanAllProjectiles();
     this._cleanEnemyProjectiles();
+    /* R294-P0: 清理胡牌演出节点，防止跨波DOM泄漏 */
+    if (this._huBangEl && this._huBangEl.parentNode) { this._huBangEl.remove(); this._huBangEl = null; }
     /* R255-P0: 清理武器特效(shockwave/pulse)，防止跨波伤害泄漏 */
     if (this._activeWeapons) {
         for (var _wi = 0; _wi < this._activeWeapons.length; _wi++) {

@@ -40,7 +40,7 @@ Ap._ensureContext = function() {
         this._ctx = new AC();
         /* Epoch 16: iOS 12.2+ 需要 resume() 才能播放 */
         if (this._ctx.state === 'suspended') {
-            this._ctx.resume().catch(function(e) { console.warn('[Audio] resume failed:', e); self.tryReinit(); });
+            this._ctx.resume().catch(function(e) { console.warn('[Audio] resume failed:', e); this.tryReinit(); });
         }
         /* P0: 页面可见性恢复机制 — R62-P2: 添加guard防止重复监听 */
         var self = this;

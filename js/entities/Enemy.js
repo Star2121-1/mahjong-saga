@@ -1182,10 +1182,14 @@ window.Enemy = class Enemy {
                 this.el.classList.add('shatter-anim');
                 /* R52-P0: 动画结束后移除class，防止DOM残留与后续class冲突 */
                 var _elRef = this.el;
-                _elRef.addEventListener('animationend', function onShatterEnd() {
-                    _elRef.removeEventListener('animationend', onShatterEnd);
+                /* R294-P0: 存储handler引用供_removeEnemyDOM清理，防止动画未结束时的内存泄漏 */
+                var _onShatterEnd = function() {
+                    _elRef.removeEventListener('animationend', _onShatterEnd);
                     _elRef.classList.remove('shatter-anim');
-                });
+                    _elRef._shatterHandler = null;
+                };
+                _elRef._shatterHandler = _onShatterEnd;
+                _elRef.addEventListener('animationend', _onShatterEnd);
                 /* 生成碎裂粒子 */
                 var engRef2 = this._eng || window.gameEngine;
                 if (engRef2 && engRef2._worldLayer) {
