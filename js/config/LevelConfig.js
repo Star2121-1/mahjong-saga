@@ -85,7 +85,7 @@ window.proceduralLevelGenerator = {
         /* 程序化波次敌人数量 */
         var waveEnemyMax = [];
         for (var i = 0; i < effectiveWaves; i++) {
-            var baseCount = 20 + i * 10;
+            var baseCount = Balance.ABYSS_WAVE_BASE_COUNT + i * Balance.ABYSS_WAVE_COUNT_PER_WAVE;
             var count = Math.floor(baseCount * spawnMult);
             if (count > scaling.maxWaveEnemyCap) count = scaling.maxWaveEnemyCap; /* 单波硬上限 */
             waveEnemyMax.push(count);
@@ -105,9 +105,9 @@ window.proceduralLevelGenerator = {
             waveEnemyMax: waveEnemyMax,
             enemyTypes: base.enemyTypes,
             spawnIntervalMin: intervalReduction,
-            spawnIntervalDecay: base.spawnIntervalDecay + abyssLevel * 0.005,
+            spawnIntervalDecay: base.spawnIntervalDecay + abyssLevel * Balance.ABYSS_INTERVAL_DECAY_PER_LEVEL,
             /* R130-P1: difficultyFactor 钳制上限，防止深渊过深时数值爆炸 */
-            difficultyFactor: Math.min(5.0, base.difficultyFactor * diffMult),
+            difficultyFactor: Math.min(Balance.ABYSS_DIFF_FACTOR_CAP, base.difficultyFactor * diffMult),
             difficultyTier: base.difficultyTier,
             abyssLevel: abyssLevel,
             isProcedural: true
@@ -147,7 +147,7 @@ window.proceduralSeedGenerator = {
 
         var waveEnemyMax = [];
         for (var i = 0; i < effectiveWaves; i++) {
-            var baseCount = 20 + i * 10;
+            var baseCount = Balance.ABYSS_WAVE_BASE_COUNT + i * Balance.ABYSS_WAVE_COUNT_PER_WAVE;
             var count = Math.floor(baseCount * spawnMult * (1 + (rng() - 0.5) * 0.15));
             /* H-033: 种子关卡也需要 maxWaveEnemyCap 上限保护 */
             if (count > scaling.maxWaveEnemyCap) count = scaling.maxWaveEnemyCap;
@@ -178,11 +178,11 @@ window.proceduralSeedGenerator = {
             mapW: base.mapW,
             mapH: base.mapH,
             maxWaves: effectiveWaves,
-            difficultyFactor: Math.min(5.0, base.difficultyFactor * diffMult * hpOffset),
+            difficultyFactor: Math.min(Balance.ABYSS_DIFF_FACTOR_CAP, base.difficultyFactor * diffMult * hpOffset),
             waveEnemyMax: waveEnemyMax,
             enemyTypes: enemyTypes,
             spawnIntervalMin: intervalReduction,
-            spawnIntervalDecay: base.spawnIntervalDecay + abyssLevel * 0.005,
+            spawnIntervalDecay: base.spawnIntervalDecay + abyssLevel * Balance.ABYSS_INTERVAL_DECAY_PER_LEVEL,
             /* R130-P1: difficultyFactor 钳制上限，防止深渊过深时数值爆炸 */
             difficultyTier: base.difficultyTier,
             abyssLevel: abyssLevel,

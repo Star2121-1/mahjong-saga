@@ -85,8 +85,6 @@ window.Balance = {
     BOSS_P2_SLAM_DMG_MULT: 2.0,         // P2砸地伤害倍率 (Enemy.js)
 
     /* ── 刷怪系统 ── */
-    DEFAULT_SPAWN_INTERVAL: 1.5,
-    DEFAULT_SPAWN_INTERVAL_DECAY: 0.02,
     SPAWN_INTERVAL_MIN: 0.5,
     BOSS_SPAWN_INTERVAL: 30,
     ENEMY_SPAWN_RADIUS: 200,
@@ -116,7 +114,6 @@ window.Balance = {
     PLAYER_RADIUS: 28,
     REVIVE_HP_PERCENT: 0.3,
     REVIVE_INVULN_DURATION: 1.5,
-    /* QUEN_SHIELD_BASE_DURATION / QUEN_SHIELD_DURATION_PER_LEVEL: 已废弃 — 无代码引用 */
     REVIVE_INVULN_RESTORE_DURATION: 3.0,  // 复活恢复无敌时长 (Player.js shouldRevive)
     TEMP_HP_REGEN_PER_SEC: 2,
 
@@ -137,8 +134,11 @@ window.Balance = {
     CAUSALITY_Z_INDEX: 200,
     CAUSALITY_ANIM_DURATION: 0.6,
 
-    /* ── 雀魂护盾 ── */
-
+    /* ── 深渊程序化生成 ── */
+    ABYSS_WAVE_BASE_COUNT: 20,             // 程序化基础波次敌人数量 (LevelConfig.js)
+    ABYSS_WAVE_COUNT_PER_WAVE: 10,         // 每波敌人数量增量 (LevelConfig.js)
+    ABYSS_INTERVAL_DECAY_PER_LEVEL: 0.005, // 深渊每层刷怪间隔衰减 (LevelConfig.js)
+    ABYSS_DIFF_FACTOR_CAP: 5.0,            // 深渊难度因子上限 (LevelConfig.js)
     /* ── 波次 ── */
     WAVE_INTER_EVENT_CHANCE: 0.6,     // 波次间事件触发概率 (GameEngine.Loop.js)
     WAVE_MEDITATION_HP_RESTORE: 0.3,   // 冥想泉源 HP 恢复比例 (Events.js)
@@ -377,7 +377,9 @@ window.Balance = {
     HUPAI_HUA_ZHU_SHIELD: 0.30,
     HUPAI_HUA_ZHU_SHIELD_DUR: 8,    /* 护盾持续秒数 */
     HU_QIDUI_MAGNET: 0.80,
-    ATK_MAX_CAP: 9999, /* R56-P1: 玩家攻击力上限保护，防止胡牌增益无限叠加 */
+    ATK_MAX_CAP: 9999, // 攻击力安全上限（防无限叠加），非设计值
+    /* ── 成就阈值常量 ── */
+    ACHIEVEMENT_SPEED_DEMON_SECONDS: 180, // 极速通关阈值（秒）(AchievementConfig.js)
     HUPAI_ZI_EAST_KNOCKBACK: 250,
 
     /* ── 花牌效果数值（Spawn.js _triggerFlowerEvent）── */
