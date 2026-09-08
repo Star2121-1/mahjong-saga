@@ -287,7 +287,14 @@ Gp._loop = function(timestamp) {
                     var isLord = _re.type === 'Boss_Lord';
                     this._rewardKill(_re); // 掉落金币+经验石+怒气
                     this._tryDropEquipment(_re.x, _re.y, _re.type === 'Boss_Lord');
-                    this._removeEnemyDOM(_re);
+                    /* R313-P0: 非Boss敌人延迟移除DOM，让shatter碎裂动画（0.35s）完整播放 */
+                    if (_re.type === 'Boss_Lord') {
+                        this._removeEnemyDOM(_re);
+                    } else {
+                        setTimeout(function(enemy, self) {
+                            self._removeEnemyDOM(enemy);
+                        }, 50, _re, this);
+                    }
                     this.enemies.splice(_ri, 1);
                     if (isLord) {
                         this.triggerShake(3, 500);

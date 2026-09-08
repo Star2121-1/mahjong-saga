@@ -164,6 +164,19 @@ Fp._healthCheck = function() {
 
 /* ── 主动清理：游戏重置时回收所有活跃节点 ── */
 Fp.cleanup = function() {
+    /* R313-P0: 回收游离overflow节点 — _returnNode将overflow节点从_pool移除后加入_freeStack，
+       但cleanup()只遍历_pool重建_freeStack，导致游离节点失去所有引用而永久泄漏DOM */
+    var orphaned = [];
+    for (var i = 0; i < this._freeStack.length; i++) {
+        var node = this._freeStack[i];
+        if (node && node._fctActive !== false && !this._pool.includes(node)) {
+            orphaned.push(node);
+        }
+    }
+    for (var i = 0; i < orphaned.length; i++) {
+        var o = orphaned[i];
+        if (o && o.parentNode) o.parentNode.removeChild(o);
+    }
     for (var i = 0; i < this._pool.length; i++) {
         var n = this._pool[i];
         if (n._fctActive) {
