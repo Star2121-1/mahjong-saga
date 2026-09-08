@@ -85,6 +85,8 @@ window.Balance = {
     BOSS_P2_SLAM_DMG_MULT: 2.0,         // P2砸地伤害倍率 (Enemy.js)
 
     /* ── 刷怪系统 ── */
+    DEFAULT_SPAWN_INTERVAL: 1.5,
+    DEFAULT_SPAWN_INTERVAL_DECAY: 0.02,
     SPAWN_INTERVAL_MIN: 0.5,
     BOSS_SPAWN_INTERVAL: 30,
     ENEMY_SPAWN_RADIUS: 200,

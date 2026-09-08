@@ -692,11 +692,11 @@ class RewardManager {
         else eng._resumeAfterReward();
     }
 
-    _showFloatingText(text, color) {
+    _showFloatingText(text, color, x, y) {
         if (!window.fxManager) return;
-        var cx = window.innerWidth / 2;
-        var cy = window.innerHeight / 2;
-        var node = window.fxManager.spawnText(cx, cy, text, color || 'normal'); /* P1: 传入颜色而非硬编码'normal' */
+        var cx = x !== undefined ? x : window.innerWidth / 2;
+        var cy = y !== undefined ? y : window.innerHeight / 2;
+        var node = window.fxManager.spawnText(cx, cy, text, color || 'normal');
         /* H-015: 时钟冻结场景下 FCT 飘字需要恢复 animation-play-state */
         if (node && node.style) {
             node.style.animationPlayState = 'running';
