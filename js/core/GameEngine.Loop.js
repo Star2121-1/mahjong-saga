@@ -574,7 +574,7 @@ Gp._loop = function(timestamp) {
         }
 
         /* Epoch 47: 深渊变异组合效果持续应用 */
-        if (this._abyssActiveCombo && !this._pendingReward) {
+        if (this._abyssActiveCombo && !this._pendingReward && !this._overdriveActive) {
             var _abyssCombo = this._abyssActiveCombo;
             if (_abyssCombo === 'abyss_frenzy') {
                 /* R159-P0: 深渊狂乱 — 存储baseSpeed快照，防止combo关闭后baseSpeed被污染导致下次激活指数爆炸 */

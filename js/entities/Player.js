@@ -296,13 +296,12 @@ class Player {
             if (this._baseAtk) this._baseAtk += 2; /* R197-P1: 深渊轮回使用_baseAtk缩放，必须随升级更新 */
             leveled = true;
         }
-        if (leveled && this.heroId === 'Mage') this._recalcThornsRate();
+        if (leveled) this._recalcThornsRate();
         return leveled;
     }
 
     _recalcThornsRate() {
-        if (this.heroId !== 'Mage') return;
-        /* Epoch 42: 九筒筒纹护体 — 基础反伤率 = 5% + 等级 * 5% */
+        /* Epoch 42: 九筒筒纹护体 — 基础反伤率 = 5% + 等级 * 5% + 词条加成 (对所有英雄生效) */
         var lv = this.relicLevels.thorn_armor || 0;
         /* R136-P0: Mage获得evolvedArmor后base应为EVOLVED_ARMOR_THORNS_BASE(50%)，否则level-up时丢失50%基础反伤 */
         var _base = this.evolvedArmor ? Balance.EVOLVED_ARMOR_THORNS_BASE : 0.05;
@@ -736,7 +735,7 @@ class Player {
         this._reapplyMetaBonuses(true); /* R51-P0: skip equip affixes — snapshot已含最终值 */
         this._skipTalentBonus = false;
         this._skipRelicAffixes = false; /* R199-P1: 重置标志，允许后续代码路径正常使用relic affixes */
-        if (this.heroId === 'Mage') this._recalcThornsRate();
+        this._recalcThornsRate(); /* R316-P0: 移除Mage守卫，gf_thorns词条对所有英雄生效 */
         /* R159-P1: _reapplyMetaBonuses 已计算 setResonanceSpeed/setResonanceIce，无需二次重算 */
     }
 
@@ -1035,7 +1034,7 @@ class Player {
         this._relicAffixes = {}; /* P3: 跨局清除词条残留 */
         this.critDamageBonus = 0; /* C2: 暴击伤害加成初始化为0 */
         this.huQingyise = false; /* R52-P1: 胡清一色状态重置 */
-        if (this.heroId === 'Mage') this._recalcThornsRate();
+        this._recalcThornsRate(); /* R316-P0: 移除Mage守卫，gf_thorns词条对所有英雄生效 */
         /* R204-P0: maxWeaponSlots 从 HeroConfig 重置（无 post-reset 修改器，安全） */
         const cfg = window.heroConfig[this.heroId];
         if (cfg && cfg.weaponSlots != null) this.maxWeaponSlots = cfg.weaponSlots;
