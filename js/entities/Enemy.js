@@ -651,6 +651,8 @@ window.Enemy = class Enemy {
             /* Epoch 38: Boss 阶段过渡庆祝 */
             var phaseLabels = { 1: 'Phase 1', 2: 'Phase 2 — 能力觉醒', 3: 'Phase 3 — 暴怒！' };
             var phaseColors = { 1: '#888', 2: '#ff9800', 3: '#b62929' };
+            /* R314-P0: 重置连发弹幕计数，防止跨Phase累积导致异常齐射时机 */
+            this._bossVolleyCount = 0;
             if (engine && engine._spawnCausalityText) {
                 engine._spawnCausalityText('BOSS ' + phaseLabels[this._bossPhase], phaseColors[this._bossPhase]);
             }

@@ -11,7 +11,7 @@ Gp._spawnCoinsAt = function(x, y, isBoss, level) {
     level = level || 1;
     var count = isBoss ? Math.floor(Balance.COIN_COUNT_BOSS_BASE + level * Balance.COIN_COUNT_BOSS_PER_LVL + Math.random() * Balance.COIN_COUNT_BOSS_RANDOM_MAX) : Math.floor(Balance.COIN_COUNT_NORMAL_BASE + level * Balance.COIN_COUNT_NORMAL_PER_LVL + Math.random() * Balance.COIN_COUNT_NORMAL_RANDOM_MAX);
     var _vaultBlood = this._vaultMutations && this._vaultMutations.indexOf('bloodmoon') !== -1;
-    if (this._activeMutator === 'bloodmoon' || _vaultBlood) count *= 2;
+    if (this._activeMutator === 'bloodmoon' || _vaultBlood || this._abyssActiveCombo === 'abyss_bloodmoon') count *= 2;
     if (this._activeMutator === 'frenzy') count = Math.floor(count * Balance.MUTATOR_FRENZY_GOLD_MULT);
     /* R242-P0: 计算每枚金币价值用于baseGold存储 */
     var coinVal = Math.max(1, Math.floor((isBoss ? Balance.COIN_COUNT_BOSS_BASE : Balance.COIN_COUNT_NORMAL_BASE) / Math.max(1, count)));

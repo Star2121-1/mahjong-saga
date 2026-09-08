@@ -29,8 +29,8 @@
         var c = document.getElementById(containerId);
         if (!c) return;
         /* 使用 visualViewport 避免 iOS 地址栏跳动；fallback用clientWidth排除滚动条 */
-        var vw = window.visualViewport ? window.visualViewport.width : (window.innerWidth - (window.innerWidth - document.documentElement.clientWidth));
-        var vh = window.visualViewport ? window.visualViewport.height : (window.innerHeight - (window.innerHeight - document.documentElement.clientHeight));
+        var vw = (window.visualViewport && window.visualViewport.width != null) ? window.visualViewport.width : document.documentElement.clientWidth;
+        var vh = (window.visualViewport && window.visualViewport.height != null) ? window.visualViewport.height : document.documentElement.clientHeight;
         var sx = vw / BASE_W;
         var sy = vh / BASE_H;
         var s = Math.min(sx, sy, 1);

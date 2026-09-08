@@ -67,7 +67,7 @@
         return meta.leaderboard;
     };
 
-    SaveManager.prototype.updateLeaderboard = function(stats) {
+    SaveManager.prototype.updateLeaderboard = async function(stats) {
         var lb = this.getLeaderboard();
         if (stats.won) {
             if (lb.fastestClear === 0 || stats.elapsed < lb.fastestClear) lb.fastestClear = stats.elapsed;
