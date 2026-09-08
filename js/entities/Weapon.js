@@ -212,6 +212,7 @@ window.OrbitShield = class extends window.Weapon {
         this.orbitHitSets = [new Set(), new Set(), new Set()];
         this.initialized = false;
         this.cooldownTimer = 0; /* R131-P1: 补全OrbitShield重置，防止跨波冷却残留 */
+        this.orbitTickTimers = [0, 0.165, 0.33]; /* R315-P1: 重置orb tick时序，防止跨局首次攻击时机错乱 */
     }
     upgrade() { super.upgrade();
         /* R255-P0: 随等级缩放旋转速度，与构造函数保持一致 */
