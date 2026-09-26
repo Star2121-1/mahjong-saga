@@ -233,10 +233,18 @@ class RewardManager {
                 var player = window.gameEngine.player;
                 var currentLevel = player.relicLevels[relic.id] || 0;
                 var starsStr = this._renderStars(currentLevel);
-                var canAfford = relic.cost === 0 || player.gold >= relic.cost;
+                /* R323-P0: 升级奖励是**免费**的（标题就写着「升级奖励（免费）」），
+                   _selectReward 里也确实 `if (!isFree && ...)` 不扣钱。
+                   但卡面显示原本完全没看 isFree，于是：
+                     1) 免费奖励上标着「💰 20」，和标题自相矛盾；
+                     2) canAfford 判的是 player.gold >= relic.cost —— 金币不够就把
+                        按钮 disabled。玩家点不掉 → 面板关不掉 → _levelUpPending
+                        卡住游戏循环 → **整个游戏死锁**（实测撞到过）。
+                   免费时不该有任何金币门槛。 */
+                var canAfford = isFree || relic.cost === 0 || player.gold >= relic.cost;
                 var descHtml = isLegendary ? relic.desc : relic.desc + '<br>(Lv.' + currentLevel + ' → Lv.' + (currentLevel + 1) + ')';
-                var costHtml = isLegendary ? '🔱 传说进化' : '💰 ' + relic.cost;
-                var btnText = isLegendary ? '进化！' : '选择';
+                var costHtml = isLegendary ? '🔱 传说进化' : (isFree ? '🎁 免费' : '💰 ' + relic.cost);
+                var btnText = isLegendary ? '进化！' : (isFree ? '免费领取' : '选择');
                 front.innerHTML =
                     '<div class="relic-name">' + relic.name + '</div>' +
                     '<div class="relic-stars">' + starsStr + '</div>' +
@@ -246,7 +254,9 @@ class RewardManager {
                 (function(cardItem, mgr, cardContainer) {
                     front.querySelector('.relic-btn').addEventListener('click', function() {
                         var r = cardItem.cardData;
-                        if (r.cost > 0 && window.gameEngine.player.gold < r.cost) return;
+                        /* R323-P0: 同上 —— isFree 时不校验金币（与 _selectReward 的
+                           `if (!isFree && ...)` 保持一致，否则按钮能点但点了没反应） */
+                        if (!isFree && r.cost > 0 && window.gameEngine.player.gold < r.cost) return;
                         mgr._animateSuckIn(cardContainer, function() {
                             mgr._selectReward(cardItem, isFree, titleEl, originalTitle);
                         });

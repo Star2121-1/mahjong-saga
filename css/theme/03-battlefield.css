@@ -149,12 +149,21 @@
 }
 #exp-bar-text { font-size: 12px !important; font-family: var(--f-mono) !important; }
 
-/* (a) 怒气条：全屏条 → 底部居中定宽 520px */
+/* (a) 怒气条：全屏条 → 左下角定宽
+   R323-P0 修正：原来放在「底部居中 520px」，而手牌条也在底部居中
+   （x 564-1357 / y 952-1020），怒气条（x 700-1220 / y 986-1002）被**完全压在里面**。
+   手牌条 z-index 40 > 怒气条 22，所以怒气条本身看不见，
+   只有 #rage-bar-fill 的 `0 0 12px rgba(255,23,68,.55)` 亮光晕从半透明槽位里透出来 ——
+   看起来像一条发光金带从手牌中间穿过（截图确认）。
+   后果不只是难看：**玩家看不到怒气存量**，而引导却在教「怒气满时按空格放 Overdrive」。
+
+   改放左下：手牌条左边缘 x=564，所以 x 40~520 是空的；
+   摇杆在右下（x>1600），也不冲突。 */
 #rage-bar-container {
     position: absolute !important;
-    left: 50% !important; bottom: 78px !important;
-    transform: translateX(-50%) !important;
-    width: 520px !important; height: 16px !important;
+    left: 40px !important; bottom: 78px !important;
+    transform: none !important;
+    width: 480px !important; height: 16px !important;
     z-index: 22 !important;
     border-radius: 0 !important;
     box-shadow: inset 0 0 0 1px var(--jin-line) !important;
