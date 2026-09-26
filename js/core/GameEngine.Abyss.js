@@ -178,6 +178,10 @@ Gp._showAbyssShop = function() {
             /* R234-P1: 购买后立即关闭面板，与离开按钮行为一致 */
             panel.remove();
             self._abyssShopVisible = false;
+            /* R322-P1: 恢复循环前清理敌方弹幕（r311 P1-5）。
+               商店期间时钟是冻结的，但那之前飞在空中的敌方弹幕不会跟着冻结 ——
+               关闭后它们变成没有归属的孤儿 DOM，被下一帧继续处理。 */
+            self._cleanEnemyProjectiles();
             /* R219-P0: 购买后恢复游戏循环 */
             self._unfreezeClock();
             self._beginLoop();
@@ -188,6 +192,8 @@ Gp._showAbyssShop = function() {
     panel.querySelector('.abyss-shop-close').addEventListener('click', function() {
         panel.remove();
         self._abyssShopVisible = false;
+        /* R322-P1: 同上，购买路径也要清（r311 P1-5） */
+        self._cleanEnemyProjectiles();
         /* R214-P1: 恢复游戏循环 */
         self._unfreezeClock();
         self._beginLoop();

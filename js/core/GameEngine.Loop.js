@@ -16,7 +16,11 @@ Gp._loop = function(timestamp) {
         this._lastTime = timestamp;
         /* R116-P0: 周期性自动存档，每30秒保存一次以防崩溃丢失进度 */
         this._saveTimer = (this._saveTimer || 0) + dt;
-        if (this._saveTimer >= Balance.AUTO_SAVE_INTERVAL && !this._pendingReward && !this._paused && this._waveCount > 0) { /* R236-P1: 移除_announcingWave守卫，公告期间也可安全保存 */
+        if (this._saveTimer >= Balance.AUTO_SAVE_INTERVAL && !this._pendingReward && !this._paused && !this._navSaving /* R322-P0: 导航存档期间禁止 tick 存档 —— r311 P0-3。
+             Navigate._goToSaveSelect 是 await _autoSave('nav') → clearActiveRun()。
+             若 tick 存档与它并行，tick 可能在 clearActiveRun() 之后把
+             active_run 又写回去，或反过来被清掉 —— 两种都是丢进度。*/
+             && this._waveCount > 0) { /* R236-P1: 移除_announcingWave守卫，公告期间也可安全保存 */
             this._saveTimer = 0;
             this._autoSave('tick');
         }
@@ -237,7 +241,8 @@ Gp._loop = function(timestamp) {
 
             /* Epoch 47: 深渊变异组合自动激活（每局仅一次） */
             /* R309-P0: 添加面板守卫，防止深渊组合在活跃面板期间误触发 */
-            if (this.loopCount > 0 && this._abyssUnlockedCombos && this._abyssUnlockedCombos.length > 0 && !this._abyssActiveCombo && !this._abyssComboActivated && !this._pendingReward && !this._levelUpPending && !this._activeMutator && !this._announcingWave) {
+            if (this.loopCount > 0 && this._abyssUnlockedCombos && this._abyssUnlockedCombos.length > 0 && !this._abyssActiveCombo && !this._abyssComboActivated && !this._pendingReward && !this._levelUpPending && !this._activeMutator && !this._announcingWave
+                && !this._paused /* R322-P2: 暂停时不应激活combo（r311 P2-2）—— 守卫链里其它暂停态都查了，唯独漏了 _paused */) {
                 this._abyssComboActivated = true;
                 /* R225-P0: 随机选择深渊组合，避免永远固定取第一个（最早解锁）的combo */
                 var _abyssPool = this._abyssUnlockedCombos;
@@ -522,7 +527,7 @@ Gp._loop = function(timestamp) {
         /* 设计决策：面板打开时游戏循环暂停，Overdrive 计时随之暂停。
            面板关闭后倒计时从剩余时间继续。不按真实时间流逝。
            R38: Sys.updateOverdrive 是死代码（从未被调用），此处是唯一活跃计时器 */
-        if (this._overdriveActive && !this._pendingReward && !this._levelUpPending && !this._activeMutator && !this._announcingWave) { /* R235-P1/R242-P1: 添加_mutator守卫，防止突变面板打开时overdrive计时继续流逝 */ /* R259-P1: 添加_announcingWave守卫，防止波次公告期间overdrive计时继续流逝 */
+        if (this._overdriveActive && !this._pendingReward && !this._levelUpPending && !this._activeMutator && !this._announcingWave && !this._abyssShopVisible) { /* R235-P1/R242-P1: 添加_mutator守卫，防止突变面板打开时overdrive计时继续流逝 */ /* R259-P1: 添加_announcingWave守卫，防止波次公告期间overdrive计时继续流逝 */ /* R322-P1: 添加_abyssShopVisible守卫（r311 P1-1）—— 商店同样 _freezeClock()，不加守卫等于玩家在商店里翻页时怒气悄悄流走 */
             this._overdriveTimer -= dt;
             if (this._overdriveTimer <= 0) this._endOverdrive();
         }
@@ -555,7 +560,7 @@ Gp._loop = function(timestamp) {
 
         /* ── 突变·枯萎：全体敌人周期性损血 ── */
         /* R309-P0: 添加_overdriveActive守卫，防止Overdrive期间枯萎DOT对冰冻敌人造成双倍伤害 */
-        if (this._activeMutator === 'wither' && !this._pendingReward && !this._overdriveActive) {
+        if (this._activeMutator === 'wither' && !this._pendingReward && !this._overdriveActive && !this._abyssShopVisible) { /* R322-P1: 深渊商店冻结时钟期间 wither 不应继续结算（r311 P1-1） */
             /* Epoch 5: 委托枯萎到 Systems */
             if (this._systems && this._systems.updateWither) {
                 this._systems.updateWither(this, dt);
@@ -709,7 +714,10 @@ Gp._loop = function(timestamp) {
         var targetCamY = Math.max(0, Math.min(this._mapH - vpH, this.player.y - vpH / 2));
         var lerpFactor = 1 - Math.exp(-10 * dt);
         /* R171-P0: 长时间tab暂停后dt被cap在0.05，camera严重滞后 — 超过阈值直接snap */
-        if (dt >= 0.048) {
+        /* R322-P1: 0.048 → 0.0495（r311 P1-4）。dt 被 cap 在 0.05，原阈值离 cap 只差 2ms，
+           意味着 19.2fps 就开始 snap —— 玩家看到的不是「卡顿时跳一下」而是「持续抖动」。
+           贴到 cap 附近后，只有真正撞上 cap 的帧（长时间挂起）才 snap。 */
+        if (dt >= 0.0495) {
             this.cameraX = targetCamX;
             this.cameraY = targetCamY;
         } else {

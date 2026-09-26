@@ -51,6 +51,10 @@ Gp._showGuideStep = function(stepIndex) {
     if (!this.guideOverlay) return;
     /* R199-P1: 清除上一步残留的自动推进计时器 */
     if (this._guideAutoAdvanceTimer) { clearTimeout(this._guideAutoAdvanceTimer); this._guideAutoAdvanceTimer = null; }
+    /* R322-P2: 连 _guideCheckTimer 一起清（r311 P2-4）。
+       原来只在函数后半段清 checkTimer；如果 stepIndex 越界提前走 _completeGuide，
+       或 interactive 步骤提前返回，checkTimer 就会漏清 —— 教程关掉后仍在轮询。 */
+    if (this._guideCheckTimer) { clearInterval(this._guideCheckTimer); this._guideCheckTimer = null; }
     var steps = this._guideSteps || [];
     if (stepIndex >= steps.length) {
         this._completeGuide();

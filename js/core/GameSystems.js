@@ -36,8 +36,12 @@ Sys.triggerOverdrive = function(engine) {
             if (oe.type === 'Boss_Lord' && oe._savedBossPhase === undefined) {
                 oe._savedBossPhase = oe._bossPhase;
             }
-            /* R299-P0: 保存自然冰冻敌人的frozenTimer，overdrive结束后正确恢复 */
-            if (oe.frozen && oe._overdriveOrigFrozenTimer === undefined) {
+            /* R299-P0/R322-P2: 保存 frozenTimer，overdrive结束后正确恢复。
+               R322 改动：原来的守卫 `oe.frozen && _overdriveOrigFrozenTimer === undefined`
+               在本行的**上一行**已经设了 oe.frozen = true，所以这个 frozen 判据恒真、
+               等于没有判据；而 undefined 守卫又导致「overdrive 期间才被冰冻」的敌人
+               沿用第一次的快照值。现在改成：只要还没有快照就存，且不再判 oe.frozen。 */
+            if (oe._overdriveOrigFrozenTimer === undefined) {
                 oe._overdriveOrigFrozenTimer = oe.frozenTimer;
             }
         }

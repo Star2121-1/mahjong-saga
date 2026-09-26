@@ -39,31 +39,28 @@ const seen = await p.evaluate(async () => {
 });
 
 /* 直接调 player.takeDamage(1, 敌人实例) 验证 lunge 钩子 ——
-   等敌人自然走到玩家身边要十几秒，而且各 AI 的接近行为不同（实测 dist 一直 182），
-   探针等不起也不稳定。走真实伤害入口即可精确验证这一行。 */
-let lunge = null;
-await p.evaluate(() => {
+   等敌人自然走到玩家身边要十几秒，而且各 AI 的接近行为不同（实测 dist 一直 182）。
+
+   用 MutationObserver 而不是轮询采样：`.attacking` 只活 0.19s（animationend 自动清理），
+   轮询必然是采样竞态 —— 同一份代码连跑会时绿时红。flaky 的测试比没有测试更糟，
+   因为它会让人不再相信测试结果。观察 class 属性变更则没有这个竞态。 */
+const lunge = await p.evaluate(async () => {
   const g = window.gameEngine;
   const en = g.enemies.find(e => e && e.el);
-  if (en) g.player.takeDamage(1, en);
+  if (!en) return { ok: false, why: '没有带 DOM 的敌人' };
+  const seen = [];
+  const mo = new MutationObserver(muts => {
+    for (const m of muts) {
+      const v = m.target.getAttribute('class') || '';
+      if (v.includes('attacking')) seen.push(v);
+    }
+  });
+  document.querySelectorAll('.enemy').forEach(e => mo.observe(e, { attributes: true, attributeFilter: ['class'] }));
+  g.player.takeDamage(1, en);
+  await new Promise(r => setTimeout(r, 700));
+  mo.disconnect();
+  return { ok: seen.length > 0, 触发次数: seen.length, 样例: seen[0] || null };
 });
-for (let i = 0; i < 30; i++) {          /* .attacking 只活 0.19s，要快采样 */
-  await p.waitForTimeout(50);
-  const hit = await p.evaluate(() => {
-    const e = document.querySelector('.enemy.attacking');
-    return e ? { cls: e.className, anim: getComputedStyle(e).animationName } : null;
-  });
-  if (hit) { lunge = hit; break; }
-}
-if (!lunge) {
-  const why = await p.evaluate(() => {
-    const g = window.gameEngine;
-    const en = g.enemies.find(e => e && e.el);
-    return { 有敌人: !!en, attacker参数名: en ? typeof en.el.classList.contains : null,
-             玩家无敌帧: g.player.invulnTimer, 玩家HP: g.player.hp };
-  });
-  console.log('未触发，排查:', JSON.stringify(why));
-}
 
 /* 受击反应由既有的 flash-hit 负责，这里只确认它没被我搞坏 */
 const hitSeen = await p.evaluate(async () => {
@@ -85,5 +82,5 @@ await p.screenshot({ path: '/tmp/opencode/enemy.png' });
 console.log(JSON.stringify({ 采样: seen, 主动扣血: hitSeen, 受击瞬间: hitNow, 攻击瞬间: lunge }, null, 1));
 console.log('errors', errs.length, errs.slice(0, 3).join(' | '));
 await b.close();
-const ok = seen.moving > 0 && !errs.length && !!lunge;
+const ok = seen.moving > 0 && !errs.length && lunge.ok;
 process.exit(ok ? 0 : 1);

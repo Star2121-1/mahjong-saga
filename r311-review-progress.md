@@ -5,6 +5,36 @@
 
 ---
 
+## ✅ R322 复核结论（2026-09-26，逐条核对当前代码后）
+
+这份报告写于 R311，代码已到 R322。**不要照单全收** —— 逐条核对结果：
+
+| 编号 | 结论 | 说明 |
+|---|---|---|
+| **P0-1** | ❌ **已过时，非 bug** | `_frenzyApplied` 守卫（R159-P0）已防住每帧复利；overdrive 的 `_overdriveOrigSpeed` 存取也是对的（先存后清零）。报告基于更早的代码。 |
+| **P0-2** | ❌ **已过时，非 bug** | `_completeGuide` 的 overlay 移除（149 行）确实在 `gameOver` 早退（160 行）**之前**，R310 已修。死亡时不解冻时钟是 R246 有意为之。 |
+| **P0-3** | ✅ **已修** | tick 存档缺 `!_navSaving` 守卫，会与 `Navigate._goToSaveSelect` 竞态丢进度。**丢玩家进度，最高风险。** |
+| **P1-1** | ✅ 已修 | 深渊商店 `_freezeClock()` 期间 overdrive 计时器与 wither 仍在跑。 |
+| **P1-2** | ❌ **误报** | 报告假设「click 处理器在 rAF 回调执行期间插入」—— JS 单线程，事件处理器不可能插进正在执行的 rAF 回调。`running=false` 在下一帧生效，而下一帧开头就 `if (!this.running) return`。 |
+| **P1-3** | ✅ 已修 | 赌博超时缺 `gameOver`/`_paused` 守卫（同文件 interWave 超时本来就查）。死亡后超时照样生成 Boss 并 `_beginLoop()` 把对局拉起来。 |
+| **P1-4** | ✅ 已修 | 相机 snap 阈值 0.048 离 dt cap 0.05 只差 2ms → 19.2fps 就开始抖动。改 0.0495。 |
+| **P1-5** | ✅ 已修 | 商店关闭未 `_cleanEnemyProjectiles()`，留下孤儿弹幕 DOM。 |
+| **P1-6** | ✅ 已修 | 排行榜持久化缺 `_metaCache` 空守卫 → 静默失败。 |
+| **P2-1** | ✅ 已修 | `if (oe.frozen && ...)` 的 `frozen` 判据恒真（上一行刚设 `frozen = true`），等于没判据。 |
+| **P2-2** | ✅ 已修 | 深渊 combo 激活守卫链里唯独漏了 `!_paused`。 |
+| **P2-3** | — 报告自判非 bug | 未动。 |
+| **P2-4** | ✅ 已修 | `_showGuideStep` 只清 `_guideAutoAdvanceTimer`，漏清 `_guideCheckTimer`。 |
+
+**净结果：3 条 P0 里 2 条是过时误报、1 条（真正会丢进度）已修；
+6 条 P1 修 5 条、1 条是误报；4 条 P2 修 3 条。**
+
+**方法论教训**（比这些修复本身更值得记）：
+一份一个月前的审计报告，**近半数条目在写出来时就已经不成立了**。
+所以处理这类报告的正确姿势是：先逐条核对当前代码，再决定改不改。
+报告的价值在于指出「该查哪里」，不在于「该改什么」。
+
+---
+
 ## P0 Findings
 
 ### P0-1: Abyss Frenzy Combo + Overdrive Double-Speed Stack

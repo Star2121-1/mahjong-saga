@@ -355,8 +355,17 @@ Gp._showBossGamble = function() {
     /* H-001: 超时机制 — 10 秒无操作自动选择 safe */
     var self = this;
     var panel; /* R96-P0: 提前声明避免setTimeout回调中ReferenceError */
-    this._gambleTimeout = setTimeout(function() {
+    /* R322-P1: 具名函数而不是匿名 + arguments.callee ——
+       严格模式下 arguments.callee 是语法错误，而且暂停续期需要能重新调度自己。 */
+    function onGambleTimeout() {
         if (!self._pendingBossGamble) return; /* click handler已resolve，超时已过期 */
+        /* R322-P1: 补 gameOver / _paused 守卫（r311 P1-3）。
+           同文件的 interWave 超时（Events.js:58）本来就查这两个，这里漏了。
+           漏掉的实际后果：玩家在 10 秒窗口内死亡或暂停，超时照样触发 ——
+           于是死亡后凭空生成 Boss Lord，还会 _unfreezeClock() + _beginLoop()
+           把已经结束的对局重新拉起来。 */
+        if (self.gameOver) { self._pendingBossGamble = false; self._pendingReward = false; return; }
+        if (self._paused) { self._gambleTimeout = setTimeout(onGambleTimeout, 1000); return; }
         if (!panel || !panel.parentNode) {
             /* Panel已被点击移除 — 手动路径已处理，跳过 */
             self._pendingBossGamble = false;
@@ -372,7 +381,8 @@ Gp._showBossGamble = function() {
         self._spawnBossLordFromGamble();
         self._unfreezeClock();
         self._beginLoop();
-    }, 10000);
+    }
+    this._gambleTimeout = setTimeout(onGambleTimeout, 10000);
 
     var meta = window.saveManager._metaCache || {};
     var tokens = meta.metaTokens || 0;
