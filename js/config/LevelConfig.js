@@ -42,6 +42,12 @@ window.levelConfig = {
     /* Epoch 4: 程序化生成关卡 */
     level_procedural: {
         id: 'level_procedural',
+        /* R321: 这个标记之前是缺的。
+           refreshLevelDetail() 靠 cfg.isProcedural 走程序化分支
+           （用 proceduralLevelGenerator.generate(abyssLevel) 现算名字/难度/波数），
+           缺了它就掉进普通分支，显示静态的 name/desc —— 也就是「入口失效」：
+           选深渊层数不同，界面上的情报完全不变。 */
+        isProcedural: true,
         name: '程序裂隙',
         desc: '基于深渊层数的程序化关卡，难度无限增长。',
         mapW: 2000, mapH: 2000,

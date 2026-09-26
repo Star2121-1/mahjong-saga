@@ -640,6 +640,11 @@
             var levelId = levelIds[i];
             var cfg = window.levelConfig[levelId];
             if (!cfg) continue;
+            /* R321: level_procedural 下面有一张专用的 procCard（名字里带当前深渊层数），
+               这里必须跳过，否则右栏会出现两张「程序裂隙」。
+               同时用它自己的 cfg.isProcedural 判定，不要硬编码 id ——
+               以后再加程序化关卡就会又漏一次。 */
+            if (cfg.isProcedural) continue;
             var card = document.createElement('div');
             card.className = 'level-card' + (levelId === _currentLevelId ? ' selected' : '');
             card.dataset.levelId = levelId;

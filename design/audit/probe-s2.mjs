@@ -39,6 +39,8 @@ const r = await p.evaluate(() => {
     出征摘要: (document.getElementById('hero-name-display') || {}).textContent,
     英雄状态: (document.getElementById('hero-status-display') || {}).textContent,
     关卡卡: document.querySelectorAll('#level-cards > *').length,
+    关卡卡名: [...document.querySelectorAll('#level-cards .level-card-name')].map(e => e.textContent.trim()),
+    关卡详情: (document.getElementById('level-detail-panel') || {}).textContent,
     关卡卡可见: [...document.querySelectorAll('#level-cards > *')].filter(vis).length,
     出征按钮: (document.getElementById('btn-hub-start') || {}).textContent,
     出征按钮可见: vis(document.getElementById('btn-hub-start')),
@@ -46,6 +48,23 @@ const r = await p.evaluate(() => {
     右栏溢出: rail ? rail.scrollHeight > rail.clientHeight : null,
   };
 });
+/* 程序化关卡必须走自己的分支（动态层数/难度）且不与普通卡重复。
+   R321 之前两处都是坏的：cfg.isProcedural 缺失导致永远进不了程序化分支，
+   buildLevelCards 又把它渲染两遍。 */
+const proc = [];
+for (const nm of ['程序裂隙 · 深渊 Lv.1', '烈焰深渊']) {
+  const ok = await p.evaluate((name) => {
+    const c = [...document.querySelectorAll('#level-cards .level-card')]
+      .find(x => x.querySelector('.level-card-name').textContent.trim() === name);
+    if (!c) return false; c.click(); return true;
+  }, nm);
+  await p.waitForTimeout(450);
+  const d = await p.evaluate(() => document.getElementById('level-detail-panel').textContent);
+  proc.push({ 关卡: nm, 点得到: ok, 详情: d.slice(0, 60) });
+}
+r.程序化关卡 = proc;
+await p.evaluate(() => { const c = document.querySelector('#level-cards .level-card'); if (c) c.click(); });
+await p.waitForTimeout(400);
 await p.screenshot({ path: '/tmp/opencode/s2.png' });
 
 /* 端到端：出征必须还能进 s3 且引擎活着。
@@ -62,6 +81,7 @@ r.出征进图 = e2e;
 console.log(JSON.stringify(r, null, 1));
 console.log('errors', errs.length, errs.slice(0, 3).join(' | '));
 await b.close();
-const bad = !r.右栏可见 || r.右栏.w < 300 || r.重叠 > 0 || !r.关卡卡 || !r.出征按钮可见
+const dup = r.关卡卡名 && new Set(r.关卡卡名).size !== r.关卡卡名.length;
+const bad = !r.右栏可见 || r.右栏.w < 300 || r.重叠 > 0 || !r.关卡卡 || !r.出征按钮可见 || dup
   || errs.length || !e2e.url.includes('s3_gameplay') || e2e.engine !== 'object' || !e2e.hand;
 process.exit(bad ? 1 : 0);

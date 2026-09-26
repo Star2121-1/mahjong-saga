@@ -451,3 +451,20 @@ CSS 解析器把 `21. s2 … */ #hub-right-canvas` 整段当成**一个选择器
 **教训**：「无 console 错误」和「规则写在文件里」都不能证明规则生效。
 定位这类问题用 `design/audit/stylediff.mjs` —— 同会话内两套 CSS 各取一次全量计算样式
 再对比，直接列出「哪个元素的哪个属性被谁覆盖」。比读 900 行 CSS 快一个数量级。
+
+### 程序化关卡 `level_procedural`（R321 修好「入口失效」+「卡重复」）
+
+两个都是既有缺陷，只是之前没人点那张卡：
+
+- **入口失效**：`refreshLevelDetail()` 靠 `cfg.isProcedural` 走程序化分支
+  （用 `proceduralLevelGenerator.generate(abyssLevel)` 现算名字/难度/波数），
+  而 `LevelConfig.level_procedural` **没设这个标记** → 永远掉进普通分支，
+  显示静态 name/desc：不管深渊层数是多少，界面情报完全一样。
+  现在显示「程序裂隙 · 第 1 层 — 深渊层数 x1，难度系数 x1.00 (难度 x2.00, 15波)」。
+- **卡重复**：`level_procedural` 既是 `levelConfig` 的 key（循环会渲染一张），
+  `buildLevelCards` 下面又追加一张带层数的专用 `procCard` → 右栏两张同名卡。
+  现在循环里 `if (cfg.isProcedural) continue;` ——
+  **用标记判定而不是硬编码 id**，否则以后再加程序化关卡会又漏一次。
+
+**教训**：这两个 bug 都不会报错。「进不去」和「多一张卡」都是纯视觉/交互问题，
+只能靠探针点一下看结果 —— `probe-s2.mjs` 现在会点每张卡并断言详情跟着变。
