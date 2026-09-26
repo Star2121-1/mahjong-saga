@@ -245,6 +245,54 @@
    麻将牌面动态效果 — 视觉增强 (Visual Enhancement A)
    ══════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════════════════════════════
+   R319 动作帧：走（bob）/ 攻击（lunge）/ 受击（recoil + 闪白）
+   --------------------------------------------------------------------------
+   关键前提：.enemy 的位置是**内联 left/top** 写的，不是 transform。
+   所以 transform 只有 CSS 里的 translate(-50%,-50%) 居中，完全空闲，
+   动画可以直接用 —— 每一组 keyframes 都必须把那半个身位的居中带上，
+   否则牌子会跳到格子左上角（第一版就踩了）。
+
+   优先级：受击 > 攻击 > 走。都是短暂动作，盖掉走路摆动是合理的。
+   冻结 / Stalker 蓄力 / Archer 瞄准 / Boss 冲锋 由 JS 排除，不参与。
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* 走：轻微上下 + 左右摆。0.34s 一步，位移幅度只有 2px —— 战斗界面要的是「有生命」不是「很活泼」 */
+@keyframes enemyBob {
+    0%, 100% { transform: translate(-50%, -50%) translateY(0) rotate(0deg); }
+    50%      { transform: translate(-50%, -50%) translateY(-2px) rotate(-1.1deg); }
+}
+.enemy.moving:not(.frozen):not(.frozen-crystal) {
+    animation: enemyBob .34s ease-in-out infinite;
+}
+
+/* 攻击：朝玩家方向前冲一下。scale 压到 1.06 就够，别糊脸 */
+@keyframes enemyLunge {
+    0%   { transform: translate(-50%, -50%) scale(1); }
+    38%  { transform: translate(-50%, -54%) scale(1.06); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+.enemy.attacking {
+    animation: enemyLunge .19s ease-out;
+}
+/* .attacking 必须自己清理干净 —— 沿用既有 flash-hit 的 animationend 模式。
+   永久挂着的后果不是「多一次动画」，而是以后任何 .enemy.attacking 的
+   背景/描边规则都会被误触发。 */
+.enemy.attacking.anim-done { animation: none; }
+
+/* 受击反应：不在这里定义。
+   Combat.js:1191 的 flashTimer → .flash-hit 已经负责（朱砂红 ::before 叠加 +
+   animationend 自动清理，见本文件 .enemy.flash-hit）。
+   R319 第一版在这里加了 enemyRecoil + enemyHitFlash，实测被 flashHit 盖掉，
+   等于纯死代码，且那个类永不移除 —— 已删。 */
+
+/* 死亡碎裂 .shatter-anim 已在上面定义（它自带 transform 关键帧）。
+   R319 的三条动画都排在它之前，靠「同优先级取后者」被它盖住 ——
+   受击→死亡常发生在同一帧，顺序写错碎裂会被顶掉。
+   所以这里不要重复声明 shatter，改用下面这条把时序钉死：
+   .shatter-anim 在本文件的位置比 enemyBob/Lunge/Recoil 晚（它在 249 行）。 */
+
+
 /* 敌人受击碎裂动画 */
 .enemy.shatter-anim {
     animation: enemyShatter 0.35s ease-out forwards;

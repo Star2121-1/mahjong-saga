@@ -162,6 +162,23 @@ window.Enemy = class Enemy {
 
     update(dt, player, engine) {
         if (!this.alive) return;
+        /* R319: 走路状态推导 —— 对比上一帧快照，一个敌人一个 update 入口，
+           覆盖全部 AI 分支（散落到各个 _update* 的话，新增 AI 一定会漏）。
+           攻击 lunge 不在这里做：各 AI 分支重置 attackTimer 的方式不一致
+           （置 cooldown / 继续递减 / 被外部改回 0 都有），
+           靠数值推断会漏触发 —— 改挂在 Player.takeDamage 的 source 上。
+           —— .enemy 的位置是内联 left/top（不是 transform！），
+              所以 transform 完全空闲，CSS 动画可以直接用。 */
+        var _pose = this._posePrev;
+        if (_pose && this.el) {
+            var _dxp = this.x - _pose.x, _dyp = this.y - _pose.y;
+            var _moved = (_dxp * _dxp + _dyp * _dyp) > 0.25;
+            /* 冻结 / 蓄力 / 瞄准时不摆动：那些状态自己已有动画 */
+            var _busy = this.frozen || this.el.classList.contains('stalker-charging')
+                || this.el.classList.contains('draw-aim') || this.el.classList.contains('p1-charging');
+            this.el.classList.toggle('moving', _moved && !_busy);
+        }
+        this._posePrev = { x: this.x, y: this.y, atk: this.attackTimer };
         this._freezeHitDecayed = false;
         /* R250-P1: 冻结检查优先于击退 — 冻结状态应完全阻止移动，包括击退位移 */
         if (this.frozen) {
@@ -1169,7 +1186,15 @@ window.Enemy = class Enemy {
         }
 
         /* R160-P0: 延迟扣血至所有伤害修改器（暴击/刺客/骑士连击/冰冻加成）执行完毕 */
-        if (actualDmg > 0) this.hp -= actualDmg;
+        if (actualDmg > 0) {
+            this.hp -= actualDmg;
+            /* R319 注：受击反应**没有**在这里加。
+               Combat.js:1191 已有完整机制：flashTimer 驱动 .flash-hit，
+               带朱砂红 ::before 叠加层 + animationend 自动清理。
+               在这里再加一套不仅重复，还会因为永不清理而累积脏 class，
+               且每次受击都 void offsetWidth 强制回流 = 热路径同步布局。
+               受击动画不要重复造。 */
+        }
         /* R233-P1: 敌人受击音频反馈 — 与Player.takeDamage保持一致 */
         if (actualDmg > 0 && window.audioManager) window.audioManager.play('hit');
 

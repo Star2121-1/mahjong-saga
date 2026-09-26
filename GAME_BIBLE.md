@@ -376,3 +376,33 @@ WebGL 技术验证结论见该目录 README（结论：不采用，瓶颈在美�
   中文一律加 `word-break: keep-all` 防逐字断行。
 - **自检**：`probe-s2.mjs` 量三栏盒子/重叠/内容填充 + 出征端到端进 s3。
   三个探针都已加 `Network.setCacheDisabled` —— 浏览器缓存让改前改后截图完全一样，栽过两次。
+
+### 敌人动作帧（R319）
+
+- **两个动作 + 一个刻意不做的**：
+  - `.enemy.moving` → `enemyBob` 走（0.34s 一步，位移 2px）
+  - `.enemy.attacking` → `enemyLunge` 攻击前冲（0.19s）
+  - 受击**不做** —— `Combat.js:1191` 的 `flashTimer → .flash-hit` 已经是完整方案
+    （朱砂红 `::before` 叠加 + `animationend` 自动清理）。
+- **关键前提**：`.enemy` 的位置是**内联 `left`/`top`** 写的，不是 transform。
+  所以 `transform` 只有 CSS 的 `translate(-50%,-50%)` 居中，完全空闲。
+  **每组 keyframes 都必须带上那半个身位的居中**，否则牌子跳到格子左上角。
+- **触发点的选法（比动画本身更重要）**：
+  - 走路：在 `Enemy.update()` 开头对比上一帧快照。
+    不散落到各个 `_update*` —— 散落的话以后新增 AI 一定会漏，而且漏了不报错，
+    只是「有的敌人会动有的不会」。
+  - 攻击：挂在 `Player.takeDamage(dmg, attacker)` 的 `attacker` 上。
+    **第一版挂在 Enemy.update 里推断 `attackTimer` 跳变，实测从不触发** ——
+    各 AI 分支重置 attackTimer 的方式不一致（置 cooldown / 继续递减 / 被外部改回 0 都有）。
+    `attacker` 语义唯一确定：「这个敌人刚打中玩家」，且 5 个攻击点全部经过这一行。
+  - 受击：第一版也加了 `hit-react`，被 `flashHit` 盖掉，等于纯死代码，
+    而且那个类**永不移除**（累积脏状态）+ 每次受击 `void offsetWidth`
+    强制回流（热路径同步布局）。已删。**受击动画不要重复造。**
+- **CSS 顺序即优先级**：`.shatter-anim`（死亡碎裂）必须排在 bob/lunge **之后**，
+  否则同优先级取后者 → 走/攻击动画会顶掉死亡碎裂（受击→死亡常在同一帧）。
+  实际生效优先级：受击 `flashHit` > 攻击 `enemyLunge` > 走 `enemyBob` > 死亡 `enemyShatter`
+  （死亡时其它 class 已被移除）。
+- **临时 class 必须自动清理**：`attacking` 沿用既有 `flash-hit` 的 `animationend` 模式，
+  否则永久挂着 → 以后任何 `.enemy.attacking` 的背景/描边规则都会被误触发。
+- **自检**：`probe-enemy.mjs` 用 `animationstart` 事件统计 + 直接调
+  `player.takeDamage(1, 敌人实例)` 验证 lunge（等敌人自然走过来要十几秒且不稳定）。

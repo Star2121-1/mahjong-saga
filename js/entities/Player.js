@@ -211,6 +211,26 @@ class Player {
 
         /* R300-P1: 无敌帧期间不应播放受击音效，视觉/逻辑上已闪避了伤害 */
         if (dmg > 0 && !this.invulnTimer && window.audioManager) window.audioManager.play('hit');
+        /* R319: 攻击者前冲动画。
+           触发点选在这里而不是 Enemy.update 里推断 attackTimer ——
+           各 AI 分支重置 attackTimer 的方式不一致（有的置 cooldown、
+           有的继续递减、有的会被外部改回 0），靠数值推断会漏触发。
+           这里语义唯一确定：「这个敌人刚刚打中了玩家」，且 source 就是攻击者。
+           5 个 Enemy 攻击点全部经过这里，一行覆盖全部 AI。 */
+        if (dmg > 0 && attacker && attacker.el && attacker.el.classList.contains('enemy')) {
+            var _atkEl = attacker.el;
+            _atkEl.classList.remove('attacking');
+            void _atkEl.offsetWidth;   /* 强制回流，让连续攻击能重新触发 */
+            _atkEl.classList.add('attacking');
+            if (!_atkEl._atkAnimHandler) {
+                _atkEl._atkAnimHandler = function() {
+                    _atkEl.classList.remove('attacking');
+                    _atkEl.removeEventListener('animationend', _atkEl._atkAnimHandler);
+                    _atkEl._atkAnimHandler = null;
+                };
+                _atkEl.addEventListener('animationend', _atkEl._atkAnimHandler);
+            }
+        }
         this.hp -= dmg;
         this.invulnTimer = Balance.PLAYER_INVULN_ON_HIT;
         this.hitFlashTimer = Balance.PLAYER_HITFLASH_DURATION; /* H-030: 与 Combat.js 归一化分母一致 */
