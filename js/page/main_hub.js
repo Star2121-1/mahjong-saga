@@ -14,7 +14,12 @@
     function $(id) { return document.getElementById(id); }
 
     window.HubTabController = {
-        _currentPanel: 'tavern',
+        /* R318: 必须是 null 而不是某个面板名。
+           switchTo() 第一行是 `if (panelId === this._currentPanel) return;`，
+           所以初值一旦等于 init() 想显示的面板名，那次调用就被静默早退、
+           面板永远不显示（HTML 里恰好带着 .active 才没被发现）。
+           初值表达「还没显示过任何面板」，让第一次 switchTo 一定执行。 */
+        _currentPanel: null,
         _previousPanel: null,
 
         reset: function() {
@@ -36,7 +41,9 @@
                     if (panelId) self.switchTo(panelId);
                 });
             }
-            this.switchTo('expedition');
+            /* R318: 出征面板已搬到右栏常驻（#hub-expedition-rail），
+               不再是「一次只显示一个」的 tab，所以默认面板给雀坛。 */
+            this.switchTo('tavern');
         },
 
         switchTo: function(panelId) {
@@ -360,12 +367,30 @@
         var isUnlocked = unlocked.indexOf(heroId) !== -1;
         var isSelected = meta.currentSelectedHero === heroId;
 
-        var isExpedition = (window.HubTabController._currentPanel === 'expedition');
-        var portrait = isExpedition ? DOM.heroPortrait : (document.getElementById('panel-hero-portrait') || DOM.heroPortrait);
-        var nameDisp = isExpedition ? DOM.heroNameDisplay : (document.getElementById('panel-hero-name-display') || DOM.heroNameDisplay);
-        var statusDisp = isExpedition ? DOM.heroStatusDisplay : (document.getElementById('panel-hero-status-display') || DOM.heroStatusDisplay);
-        var mainAction = isExpedition ? DOM.btnHeroMainAction : (document.getElementById('panel-btn-hero-main-action') || DOM.btnHeroMainAction);
-        var detailBtn = isExpedition ? DOM.btnHeroDetails : (document.getElementById('panel-btn-hero-details') || DOM.btnHeroDetails);
+        /* R318: 出征摘要搬进右栏后是「常驻」元素，必须永远刷新 ——
+           旧逻辑用 _currentPanel === 'expedition' 三元来选元素，
+           面板不再是 tab 之后这个条件恒为 false，右栏就会一直停在空状态。
+           现在两处都写：右栏（常驻）+ 雀坛面板内的副本（仅在雀坛激活时）。 */
+        var inTavern = (window.HubTabController._currentPanel === 'tavern');
+        var targets = [{
+            portrait: DOM.heroPortrait, nameDisp: DOM.heroNameDisplay,
+            statusDisp: DOM.heroStatusDisplay, mainAction: DOM.btnHeroMainAction,
+            detailBtn: DOM.btnHeroDetails, live: true
+        }];
+        if (inTavern) {
+            targets.push({
+                portrait: document.getElementById('panel-hero-portrait'),
+                nameDisp: document.getElementById('panel-hero-name-display'),
+                statusDisp: document.getElementById('panel-hero-status-display'),
+                mainAction: document.getElementById('panel-btn-hero-main-action'),
+                detailBtn: document.getElementById('panel-btn-hero-details'),
+                live: false
+            });
+        }
+        for (var _t = 0; _t < targets.length; _t++) {
+        var t = targets[_t];
+        var portrait = t.portrait, nameDisp = t.nameDisp, statusDisp = t.statusDisp;
+        var mainAction = t.mainAction, detailBtn = t.detailBtn;
 
         if (nameDisp) nameDisp.textContent = cfg.name;
         if (statusDisp) statusDisp.textContent = isUnlocked ? cfg.desc : '???';
@@ -392,6 +417,7 @@
 
         if (detailBtn) {
             detailBtn.style.display = isUnlocked ? '' : 'none';
+        }
         }
     }
 

@@ -35,6 +35,8 @@ let fail = 0;
 for (const id of PAGES) {
   const ctx = await b.newContext({ viewport: { width: 1920, height: 1080 } });
   const p = await ctx.newPage();
+  const cdp = await ctx.newCDPSession(p);
+  await cdp.send('Network.setCacheDisabled', { cacheDisabled: true });
   const errs = [];
   p.on('pageerror', e => errs.push(e.message.slice(0, 160)));
   p.on('console', m => { if (m.type() === 'error') errs.push(m.text().slice(0, 160)); });

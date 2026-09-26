@@ -5,6 +5,8 @@ import { chromium } from '../../node_modules/playwright/index.mjs';
 const b = await chromium.launch();
 const ctx = await b.newContext({ viewport: { width: 1920, height: 1080 } });
 const p = await ctx.newPage();
+const cdp = await ctx.newCDPSession(p);
+await cdp.send('Network.setCacheDisabled', { cacheDisabled: true });
 const errs = [];
 p.on('console', m => { if (m.type() === 'error') errs.push(m.text().slice(0, 140)); });
 p.on('requestfailed', r => errs.push('FAILED ' + r.url().split('/').pop()));

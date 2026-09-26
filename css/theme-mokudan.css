@@ -762,3 +762,145 @@ button:focus-visible, [tabindex]:focus-visible {
 /* 图加载失败时回落：文字已经作为 .tk-rank/.tk-suit 备好了，
    img 是 absolute 覆盖层，不可用时底下的文字自然露出。 */
 .hand-tile-slot .tk-art:not([src]), .hand-tile-slot img.tk-art[src=""] { display: none; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   21. s2 右栏「出征准备」常驻（UI_SPEC §7 第三栏）
+   --------------------------------------------------------------------------
+   改法：不重构 flex 树，而是照左轨的成熟做法把右栏也绝对定位。
+   #hub-right-canvas 本来就已被定位在 #main-hub-screen 内
+   （left:168px; right:0），这里只把 right 从 0 改成 400px 让出右栏。
+
+   为什么必须搬：出征内容原来在中栏 panel-expedition 里，
+   切到「天赋」就整块消失 —— 而它恰恰是玩家唯一需要反复确认的东西
+   （选将 → 选关 → 词条）。常驻之后，切任何面板都在右手边。
+   ══════════════════════════════════════════════════════════════════════ */
+#hub-right-canvas {
+    right: 400px !important;   /* 让出右栏 */
+}
+
+#hub-expedition-rail {
+    position: absolute !important;
+    right: 0 !important; top: 76px !important; bottom: 0 !important;
+    width: 400px !important;
+    overflow-y: auto !important; overflow-x: hidden !important;
+    padding: 16px 18px 20px 14px !important;
+    background:
+        linear-gradient(180deg, rgba(10,20,26,.5) 0%, rgba(8,14,18,.72) 100%),
+        var(--ink-800) !important;
+    box-shadow: inset 1px 0 0 var(--ink-500) !important;
+    animation: railIn .32s var(--ease) both;
+}
+@keyframes railIn { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
+
+/* 右栏里的出征面板不再是「tab 面板」，去掉画布那套显隐/透视 */
+#hub-expedition-rail .hub-panel#panel-expedition {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+    perspective: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    background: none !important;
+    border: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    height: 100% !important;
+}
+
+/* 三段递进：选将 → 选关 → 词条，用发丝线分隔，不用卡片套卡片 */
+#hub-expedition-rail .expedition-hero-zone {
+    padding-bottom: 14px !important;
+    border-bottom: 1px solid var(--ink-500) !important;
+}
+#hub-expedition-rail .expedition-levels { flex: 0 0 auto !important; }
+#hub-expedition-rail .expedition-previews {
+    margin-top: auto !important;      /* 词条组吸底 */
+    padding-top: 14px !important;
+    border-top: 1px solid var(--ink-500) !important;
+    grid-template-columns: 1fr !important;
+}
+/* 右栏窄，关卡卡改成一行摘要而不是大卡 */
+#hub-expedition-rail #level-cards { gap: 6px !important; }
+
+/* 底栏主行动：右栏里只留一个实心金按钮 */
+#hub-expedition-rail #btn-hub-start {
+    width: 100% !important;
+    margin-top: 12px !important;
+}
+
+/* ── 右栏内部布局：400px 装不下横排 ──────────────────────────────────
+   两处是宽度逼出来的，不是我审美偏好：
+   1) .expedition-hero-zone 原本是「头像 | 文字 | 按钮」三栏横排，
+      400px 里头像就吃掉 96px，名字被压成每行一个字（截图实测）。
+      改成竖排：头像居中 → 名字 → 描述 → 按钮一行。
+   2) #level-cards 是 flex 横排 + .level-card{flex:1}，
+      5 张卡平分 400px → 每张 72px → 「试炼森林」竖成一列。
+      改成单列列表，每张卡内部横排：名字左，难度徽章右。 */
+#hub-expedition-rail .expedition-hero-zone {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 8px !important;
+    text-align: center !important;
+}
+#hub-expedition-rail .expedition-hero-tile-wrap { margin: 0 auto !important; }
+#hub-expedition-rail #hero-name-display {
+    font-size: 19px !important;
+    line-height: 1.3 !important;
+    white-space: normal !important;
+    word-break: keep-all !important;   /* 中文不许逐字断行 */
+}
+#hub-expedition-rail #hero-status-display {
+    font-size: 12px !important;
+    line-height: 1.6 !important;
+    color: var(--ink-200) !important;
+    max-width: 30ch !important;
+    word-break: keep-all !important;
+}
+#hub-expedition-rail .expedition-hero-actions {
+    display: flex !important; flex-direction: row !important; gap: 8px !important;
+    justify-content: center !important;
+}
+#hub-expedition-rail .expedition-hero-actions > * { flex: 0 0 auto !important; width: auto !important; }
+
+/* 关卡：单列列表，卡内横排 */
+#hub-expedition-rail #level-cards {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5px !important;
+}
+#hub-expedition-rail .level-card {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    padding: 8px 10px !important;
+    text-align: left !important;
+}
+#hub-expedition-rail .level-card-name {
+    flex: 1 1 auto !important;
+    font-size: 15px !important;
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    overflow: hidden !important; text-overflow: ellipsis !important;
+}
+#hub-expedition-rail .level-tier-badge { flex: 0 0 auto !important; }
+#hub-expedition-rail .level-card-sub { flex: 0 0 auto !important; font-size: 11px !important; }
+
+/* 关卡详情行：原本 JS 一直在算（refreshLevelDetail）但 HTML 里没有这个元素，
+   函数每次 early-return。R318 把它放进右栏，顺带删掉两个没人填充的
+   .expedition-preview-card 死盒子。 */
+#hub-expedition-rail .hub-level-detail {
+    margin-top: 8px !important;
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+    line-height: 1.65 !important;
+    color: var(--ink-200) !important;
+    background: rgba(0,0,0,.28) !important;
+    box-shadow: inset 2px 0 0 var(--jin) !important;
+    border-radius: 0 3px 3px 0 !important;
+    word-break: keep-all !important;
+}

@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="../css/main_hub.css?v=20260908I">
     <!-- R317 墨底丹青主题：设计令牌 + 覆盖层，必须在所有旧 CSS 之后 -->
     <link rel="stylesheet" href="../css/tokens.css?v=20260926B">
-    <link rel="stylesheet" href="../css/theme-mokudan.css?v=20260926B">
+    <link rel="stylesheet" href="../css/theme-mokudan.css?v=20260926E">
     <script src="../js/core/SaveManager.js?v=20260908I"></script>
     <script src="../js/core/SaveManager.Core.js?v=20260908I"></script>
     <script src="../js/core/SaveManager.Season.js?v=20260908I"></script>
@@ -40,8 +40,7 @@
 
         <!-- ═══ 横向导航条 ═══ -->
         <nav id="hub-top-nav">
-            <div class="nav-item active" data-panel="expedition" tabindex="0" role="button" aria-label="出征" aria-current="true">⚔️ 血战到底</div>
-            <div class="nav-item" data-panel="tavern" tabindex="0" role="button" aria-label="雀坛招募">🀄 雀坛招募</div>
+            <div class="nav-item active" data-panel="tavern" tabindex="0" role="button" aria-label="雀坛招募" aria-current="true">🀄 雀坛招募</div>
             <div class="nav-item" data-panel="talents" tabindex="0" role="button" aria-label="牌浪洗练">🔮 牌浪洗练</div>
             <div class="nav-item" data-panel="forge" tabindex="0" role="button" aria-label="百宝牌箩">⚒️ 百宝牌箩</div>
             <div class="nav-item" data-panel="mutation" tabindex="0" role="button" aria-label="变异保险库">🧬 变异保险库</div>
@@ -68,44 +67,6 @@
                 </div>
             </div>
 
-            <!-- ═══ 出征面板（默认） ═══ -->
-            <div id="panel-expedition" class="hub-panel active">
-                <!-- 英雄信息区 -->
-                <div class="expedition-hero-zone">
-                    <div class="expedition-hero-tile-wrap">
-                        <div id="hero-portrait" class="hero-portrait shape-circle"></div>
-                    </div>
-                    <div class="expedition-hero-info">
-                        <div id="hero-name-display">雀圣浪人</div>
-                        <div id="hero-status-display">均衡型战士</div>
-                        <div class="expedition-hero-stats" id="expedition-hero-stats"></div>
-                    </div>
-                    <div class="expedition-hero-actions">
-                        <button id="btn-hero-main-action" class="relic-btn" disabled>—</button>
-                        <button id="btn-hero-details" class="hub-secondary-btn">详情</button>
-                    </div>
-                </div>
-
-                <!-- 关卡选择 -->
-                <div class="expedition-levels">
-                    <div id="level-cards"></div>
-                </div>
-
-                <!-- 出征按钮 -->
-                <button id="btn-hub-start">轰 然 出 征</button>
-
-                <!-- 底部功能预览 -->
-                <div class="expedition-previews">
-                    <div class="expedition-preview-card">
-                        <div class="expedition-preview-title">🔮 牌浪洗练</div>
-                        <div id="expedition-talent-previews"></div>
-                    </div>
-                    <div class="expedition-preview-card">
-                        <div class="expedition-preview-title">🀄 雀坛招募</div>
-                        <div id="expedition-hero-previews"></div>
-                    </div>
-                </div>
-            </div>
 
             <!-- ═══ 雀坛招募 ═══ -->
             <div id="panel-tavern" class="hub-panel" style="display:none">
@@ -221,6 +182,40 @@
             </div>
         </main>
     </div>
+            <!-- ═══ 右栏：出征准备（R318 从中栏搬来，常驻不随面板切换） ═══ -->
+            <aside id="hub-expedition-rail" aria-label="出征准备">
+                <!-- ═══ 出征面板（默认） ═══ -->
+                <div id="panel-expedition" class="hub-panel">
+                    <!-- 英雄信息区 -->
+                    <div class="expedition-hero-zone">
+                        <div class="expedition-hero-tile-wrap">
+                            <div id="hero-portrait" class="hero-portrait shape-circle"></div>
+                        </div>
+                        <div class="expedition-hero-info">
+                            <div id="hero-name-display">雀圣浪人</div>
+                            <div id="hero-status-display">均衡型战士</div>
+                            <div class="expedition-hero-stats" id="expedition-hero-stats"></div>
+                        </div>
+                        <div class="expedition-hero-actions">
+                            <button id="btn-hero-main-action" class="relic-btn" disabled>—</button>
+                            <button id="btn-hero-details" class="hub-secondary-btn">详情</button>
+                        </div>
+                    </div>
+
+                    <!-- 关卡选择 -->
+                    <div class="expedition-levels">
+                        <div id="level-cards"></div>
+                    </div>
+
+                    <!-- 关卡详情（复活 #level-detail-panel：JS 一直在算，但 HTML 里从来没这个元素，
+                         refreshLevelDetail() 因此每次都 early-return） -->
+                    <div id="level-detail-panel" class="hub-level-detail">选择关卡查看情报</div>
+
+                <!-- 出征按钮 -->
+                    <button id="btn-hub-start">轰 然 出 征</button>
+
+                </aside>
+
 
     <script src="../js/entities/EquipmentRegistry.js?v=20260908B"></script>
     <script src="../js/config/HeroConfig.js?v=20260908B"></script>
@@ -228,7 +223,7 @@
     <script src="../js/config/LevelConfig.js?v=20260908B"></script>
     <script src="../js/config/AchievementConfig.js?v=20260908B"></script>
     <script src="../js/core/ToastSystem.js?v=20260908B"></script>
-    <script src="../js/page/main_hub.js?v=20260908B"></script>
+    <script src="../js/page/main_hub.js?v=20260926C"></script>
     <script src="../js/responsive.js?v=20260908B"></script>
         <!-- 屏幕阅读器通知区 -->
         <div aria-live="assertive" aria-atomic="true" class="sr-only" id="game-announcements"></div>

@@ -346,3 +346,33 @@ WebGL 技术验证结论见该目录 README（结论：不采用，瓶颈在美�
   8 张花图目前只在 `design/audit/mj-preview/` 预览页使用。
 - **自检**：`verify.mjs` 有一项静态断言检查映射完整性 + 孤儿文件（不依赖服务器，很快）；
   `probe-art.mjs` 做浏览器端解码与截图复核。
+
+### s2 右栏「出征准备」常驻（UI_SPEC §7 第三栏）
+
+- **结构**：`#hub-expedition-rail`（400px，absolute）是 `#hub-right-canvas` 的兄弟节点，
+  照左轨的成熟做法做绝对定位，不重构 flex 树。画布 `right: 0` → `right: 400px`。
+- **为什么要搬**：出征内容原来在中栏 `#panel-expedition` 里，切到「天赋」就整块消失 ——
+  而它恰恰是玩家唯一需要反复确认的东西。常驻后切任何面板都在右手边。
+- **`#panel-expedition` 的 id 保留**：所有 `getElementById` 绑定与 `refreshLevelCards()` 照常工作。
+- **导航**：去掉「血战到底」这一项（9 项 → 8 项 + 返回首页），中栏默认面板改为雀坛。
+- **两个坑（都踩过）**：
+  1. `HubTabController._currentPanel` 初值曾写成 `'tavern'`，而 `switchTo()` 第一行是
+     `if (panelId === this._currentPanel) return;` —— 初值一旦等于 `init()` 想显示的面板名，
+     那次调用就被**静默早退**，面板永远不显示（当初 HTML 恰好带 `.active` 才没暴露）。
+     现在初值是 `null`，表达「还没显示过任何面板」。
+  2. 搬移 HTML 时多留了一个 `</div>` → 解析器提前闭合 `#main-hub-screen` 与 `#hub-right-canvas`，
+     8 个 panel 全被弹到 `<body>` 下（`#hub-right-canvas` 里查不到任何 `.hub-panel`）。
+     **症状是「中栏整片空白」而不是报错**。教训：改 HTML 结构后必须用浏览器查
+     `element.parentElement` 链，别只信 `verify.mjs` 的「无 console 错误」。
+- **`refreshHeroCarousel` 的 `isExpedition` 三元已废**：右栏常驻后没有「当前面板是出征」这回事，
+  改成「右栏永远刷新 + 雀坛激活时额外刷新它自己的副本」。
+- **复活一个死引用**：`#level-detail-panel` 在 JS 里被 `refreshLevelDetail()` 写，
+  但 HTML 里从来没这个元素 → 函数每次 early-return。已放进右栏，现在显示
+  「关卡名 — 描述 (难度 xN, M波)」。同时删掉两个 `.expedition-preview-card`
+  （全项目 grep 无任何 JS 填充，纯死盒子）。
+- **右栏 400px 逼出来的布局**（不是审美偏好）：英雄区从「头像|文字|按钮」三栏横排改竖排
+  （横排时名字被压成每行一个字）；`#level-cards` 从 flex 横排改单列列表
+  （5 张卡平分 400px → 每张 72px →「试炼森林」竖成一列）。
+  中文一律加 `word-break: keep-all` 防逐字断行。
+- **自检**：`probe-s2.mjs` 量三栏盒子/重叠/内容填充 + 出征端到端进 s3。
+  三个探针都已加 `Network.setCacheDisabled` —— 浏览器缓存让改前改后截图完全一样，栽过两次。
