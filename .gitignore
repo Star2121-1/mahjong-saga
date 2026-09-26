@@ -38,3 +38,11 @@ cycle*_*.js
 
 # Logs
 logs/
+
+# 测试产物目录（design/audit/*.mjs 会重新生成）
+test-results/
+tmp/
+screenshots/
+design/audit/after-fix/
+design/audit/_cmp/
+design/audit/before-fix/

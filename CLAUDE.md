@@ -136,7 +136,12 @@ Two localStorage keys:
   所以源 CSS 里的 `@media` 断点按真实视口判断时会造成**双重缩小**，
   主题层 15 处 `!important` 恰好压死它们。**不要为了「修好响应式」去掉那些 `!important`。**
   `design/audit/probe-viewport.mjs` 守着这个不变量。
-- **Primary doc**: `GAME_BIBLE.md` is the single consolidated reference (architecture, data tables, iron laws, known issues, active workstream). Historical docs are archived in `_archive/` when they exist.
+- **Primary doc**: `GAME_BIBLE.md` is the single consolidated reference (architecture, data tables, iron laws, known issues, active workstream). Historical docs are archived in `_archive/docs/` when they exist.
+- **Self-check tooling** (`design/audit/`, all cache-disabled):
+  - `verify.mjs` — runtime + static assertions; `reverse.sh` — injects 4 bugs to prove the check goes red
+  - `shoot-all.mjs` — 12 fixed screenshot states for pixel diffing; `stylediff.mjs` — pinpoints cascade conflicts
+  - `probe-art/s2/enemy/viewport.mjs` — artwork decoding, s2 three-column layout + e2e 出征, enemy animation classes, fixed-canvas invariant
+  - **`verify.mjs` does NOT check CSS syntax.** A botched CSS edit that unbalances braces passes every check silently — always run `shoot-all.mjs` + pixel compare after touching CSS.
 - **Epoch tracking**: history in `_archive/docs/mahjong_saga_evolution.md` (read-only). Current branch: `feat/fix-flash-and-waves`.
 - **Active design**: 胡牌系统 spec lives in `HUPAI_DESIGN.md` — read before touching collection/reward systems. The 雀魂 system (MahjongHand.js) is Active and fully wired into s3_gameplay.html.
 
