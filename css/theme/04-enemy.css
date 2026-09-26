@@ -1,0 +1,67 @@
+/* ======================================================================
+   敌人牌面：厚度收敛、去掉类型小字
+   拆分自 theme-mokudan.css（906 行单文件 → 6 个按关注点分层的模块）。
+   规则内容与相对顺序都没动 —— 合并回去应与拆分前逐字节相同。
+   注意：切分点必须落在每节注释块的【开头行】，否则会切出悬空注释文本，
+   CSS 解析器会把后面整段当成选择器前缀，该节规则全部失效且不报错。
+   ====================================================================== */
+/* ══════════════════════════════════════════════════════════════════════
+   15. 敌人牌面重做（T2，方案已修正）
+   --------------------------------------------------------------------------
+   原计划：把敌人换成抽象的 SVG 水墨剪影。
+   实测后发现**那个方案是退步** —— 敌人现在本来就是麻将牌
+   （.enemy 是象牙牌体 + ::before 显示 data-suit 的萬/條/筒/索/白/風/發/中）。
+   "敌人 = 一张牌"是这个游戏的题眼，换成抽象妖怪反而丢了题材。
+
+   真正的问题是执行：
+     a. 厚度用 8 层 box-shadow 堆 → 渲染开销大、边缘脏
+     b. ::after 叠一行 data-type 文字标签（7px, opacity .6）→ 18 个敌人就是 18 条小字，纯噪声
+     c. 象牙牌在旧绿毡上明度接近 → 现在战场改墨底后这个问题已自动解决
+
+   修正后的做法：保留概念，用规范里的牌面语言重做执行。
+     · 厚度改成 2 层（右侧 + 底部），和 design/mockup.css 的 .tile 一致
+     · 去掉 data-type 文字标签，改用边框色区分敌型（形状+边框双编码，不靠颜色单独承载信息）
+     · 花色字提到正确字号与位置
+   ══════════════════════════════════════════════════════════════════════ */
+
+.enemy:not(.boss) {
+    /* 厚度只用露出的右边与下边，2 层足够，不要 8 层堆叠 */
+    box-shadow:
+        3px 0 0 var(--ivory-3),
+        0 3px 0 var(--ivory-edge),
+        3px 3px 0 var(--ivory-side),
+        0 6px 10px rgba(0, 0, 0, .75),
+        inset 0 1px 0 rgba(255, 255, 255, .9) !important;
+    background: linear-gradient(158deg, #fffdf7 0%, var(--ivory) 48%, var(--ivory-2) 100%) !important;
+    border: 1px solid var(--ivory-edge) !important;
+    border-radius: var(--r-tile) !important;
+}
+
+/* 去掉 18 个敌人身上的小字标签 —— 换成边框色区分敌型 */
+.enemy:not(.boss)::after { content: none !important; }
+
+.enemy:not(.boss)::before {
+    font-family: var(--f-serif) !important;
+    font-weight: 600 !important;
+    font-size: calc(22 * var(--_fs) * 1px) !important;
+    text-shadow: none !important;
+}
+
+/* 敌型双编码：形状（原有 border-radius 差异）+ 边框色。色盲玩家靠形状也能分辨 */
+.enemy[data-enemy-type="Tanker"]  { border-color: var(--qing) !important; }
+.enemy[data-enemy-type="Stalker"] { border-color: var(--zhu) !important; }
+.enemy[data-enemy-type="Shaman"]  { border-color: var(--qing) !important; }
+.enemy[data-enemy-type="Archer"]   { border-color: var(--ink-100) !important; }
+.enemy[data-enemy-type="Barrier"]  { border-color: var(--ink-200) !important; }
+.enemy[data-enemy-type="Bomber"]   { border-color: var(--zhu-hi) !important; }
+.enemy[data-enemy-type="Splitter"] { border-color: var(--jin) !important; }
+
+/* 血条：满血不显示（旧 CSS 一直显示，18 条红杠是纯噪声）。
+   引擎在 .enemy-hp-bar 上没有状态类，所以用 fill 的宽度做视觉收敛不可行，
+   改为压低对比度，只有被打残时由 JS 的 inline width 变化提供信息。 */
+.enemy-hp-bar {
+    background: rgba(0, 0, 0, .7) !important;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .8) !important;
+    border-radius: 0 !important;
+}
+.enemy-hp-fill { background: linear-gradient(90deg, var(--zhu), var(--zhu-hi)) !important; }

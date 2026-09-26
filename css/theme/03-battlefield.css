@@ -1,0 +1,239 @@
+/* ======================================================================
+   战场：进度条、敌人血条、飘字、状态威胁、战场底、HUD 布局重排
+   拆分自 theme-mokudan.css（906 行单文件 → 6 个按关注点分层的模块）。
+   规则内容与相对顺序都没动 —— 合并回去应与拆分前逐字节相同。
+   注意：切分点必须落在每节注释块的【开头行】，否则会切出悬空注释文本，
+   CSS 解析器会把后面整段当成选择器前缀，该节规则全部失效且不报错。
+   ====================================================================== */
+/* ── 3. 三条进度条：形状共用「玉佩收分」，只换语义色 ──────────────────────
+   真实选择器：#player-hp-bar / #exp-bar-container / #rage-bar-container
+   语义：玩家血=竹青(自己的状态) / 经验=竹青(细) / 怒气=鎏金(可交互)
+        敌人血=朱砂(威胁) —— 玩家与敌人永不同色，不会混淆 */
+#player-hp-bar {
+    height: 18px !important;
+    background: var(--ink-900) !important;
+    box-shadow: inset 0 0 0 1px var(--qing-line) !important;
+}
+#player-hp-fill {
+    background: linear-gradient(90deg, var(--qing-lo), var(--qing-hi)) !important;
+    clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 100%, 7px 100%);
+}
+#player-hp-text {
+    color: var(--ink-050) !important;
+    font-family: var(--f-mono) !important;
+    font-variant-numeric: tabular-nums !important;
+    font-weight: 700 !important;
+}
+
+#exp-bar-container {
+    background: var(--ink-900) !important;
+    box-shadow: inset 0 0 0 1px var(--ink-500) !important;
+    border-radius: var(--r-0) !important;
+}
+#exp-bar-fill {
+    background: linear-gradient(90deg, var(--qing-lo), var(--qing-hi)) !important;
+}
+
+#rage-bar-container {
+    background: var(--ink-900) !important;
+    box-shadow: inset 0 0 0 1px var(--jin-line) !important;
+    border-radius: var(--r-0) !important;
+}
+#rage-bar-fill {
+    background: linear-gradient(90deg, var(--jin-lo), var(--jin-hi)) !important;
+}
+#rage-bar-container.rage-full {
+    box-shadow: inset 0 0 0 1px var(--jin-hi), 0 0 20px -4px var(--jin) !important;
+}
+#rage-bar-text {
+    color: var(--ink-050) !important;
+    font-family: var(--f-mono) !important;
+    font-variant-numeric: tabular-nums !important;
+}
+
+/* Boss 段条：贴顶边，零遮挡战场 */
+#boss-hp-bar { background: var(--ink-900) !important; box-shadow: inset 0 0 0 1px var(--zhu-line) !important; }
+#boss-hp-label { color: var(--zhu-hi) !important; font-family: var(--f-serif) !important; }
+
+/* ── 4. 敌人血条 = 朱砂（威胁）──────────────────────────────────────── */
+.enemy-hp-bar { background: rgba(0,0,0,.75) !important; box-shadow: 0 0 0 1px rgba(0,0,0,.85) !important; }
+.enemy-hp-fill { background: linear-gradient(90deg, var(--zhu), var(--zhu-hi)) !important; }
+
+/* ── 5. 飘字（T0 修好 fxManager 后这才真的会渲染）─────────────────────── */
+.fct-node {
+    font-family: var(--f-mono) !important;
+    font-variant-numeric: tabular-nums !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,.95) !important;
+}
+
+/* ── 6. 状态与威胁 ──────────────────────────────────────────────────── */
+.mutator-badge, .mutator-card { border-color: var(--zhu-line) !important; }
+.resonance-ice { border-color: var(--qing-line) !important; }
+.weapon-slot { background: var(--ink-800) !important; box-shadow: inset 0 0 0 1px var(--ink-500) !important; }
+.weapon-slot.is-synergy, .weapon-slot.synergy { box-shadow: inset 0 0 0 1px var(--jin) !important; }
+
+/* ── 12. 战场底：最大的单点视觉问题 ──────────────────────────────────────
+   旧值 radial-gradient(ellipse at center, #2a7348, #1a5c38, #134a2e)：
+   明度约 45% 的高饱和绿，占满屏幕 90%。UI_SPEC §4.6 明度带要求背景落在 8% 附近
+   —— 背景永远不许比敌人亮。这面绿毡直接把敌人衬没了，也是一切廉价感的源头。
+   改成墨底 + 左上主光的极淡衰减（§4.5），并保留原来的网格纹理。 */
+#battlefield {
+    background:
+        radial-gradient(58% 52% at 22% 4%, rgba(255, 240, 212, .07) 0%, transparent 72%),
+        radial-gradient(40% 36% at 24% 28%, rgba(47, 143, 107, .05) 0%, transparent 74%),
+        radial-gradient(30% 42% at 76% 60%, rgba(200, 64, 47, .045) 0%, transparent 76%),
+        repeating-linear-gradient(45deg, rgba(228, 236, 239, .022) 0 1px, transparent 1px 4px),
+        repeating-linear-gradient(-45deg, rgba(228, 236, 239, .014) 0 1px, transparent 1px 4px),
+        radial-gradient(ellipse at center, #16202a 0%, #101820 52%, #080c0f 100%) !important;
+    box-shadow: inset 0 0 200px 40px rgba(0, 0, 0, .62) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   13. HUD 布局重排（T3）
+   --------------------------------------------------------------------------
+   实测原布局的三个硬伤（截图 audit/before-fix/s3.png）：
+     a. 顶栏挤成一条细带 + 两条**横贯 1920px 全屏**的进度条（为 3 位数用的）
+     b. 手牌是 14 个空槽装在占屏宽 80% 的巨大金框盒里
+     c. #player-hp-wrap 绝对定位在 top:-26px，而 T1 把血条从 5px 加高到 18px，
+        wrap 总高变成 32px → 底部溢出 6px 压在牌面上（这是覆盖层自己引入的回归）
+
+   全部用 CSS 解决，不改 DOM 结构：
+     · #game-container 已是 fixed（responsive.js），天然是绝对定位的包含块
+     · 两条全屏条 → 绝对定位到四角，宽度写死
+     · 手牌盒 → width:fit-content，格宽写死 52px
+     · 血量条 → wrap 上移到 -42px
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* (c) 修回归：血条加高后必须把 wrap 整体上移，否则文字压牌面 */
+#player-hp-wrap {
+    top: -42px !important;
+    width: 96px !important;
+    gap: 2px !important;
+}
+#player-hp-text { font-size: 14px !important; line-height: 1.1 !important; }
+
+/* (a) 顶栏：内容左对齐，音量按钮推到最右，不再横贯全屏 */
+#top-bar {
+    width: auto !important;
+    max-width: 46% !important;
+    background: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+    gap: var(--sp-2, 8px) !important;
+}
+#audio-btn { margin-left: auto !important; }
+#top-bar .stat {
+    background: rgba(19, 26, 31, .84) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    box-shadow: inset 0 0 0 1px var(--ink-500), inset 0 1px 0 rgba(228,236,239,.06) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    color: var(--ink-200) !important;
+    padding: 4px 10px !important;
+    font-family: var(--f-mono) !important;
+    font-size: 15px !important;
+    font-variant-numeric: tabular-nums !important;
+}
+
+/* (a) 经验条：全屏条 → 左上定宽 320px，贴在顶栏下方 */
+#exp-bar-container {
+    position: absolute !important;
+    left: 16px !important; top: 60px !important;
+    width: 320px !important; height: 14px !important;
+    z-index: 22 !important;
+    border-radius: 0 !important;
+    box-shadow: inset 0 0 0 1px var(--ink-500) !important;
+}
+#exp-bar-text { font-size: 12px !important; font-family: var(--f-mono) !important; }
+
+/* (a) 怒气条：全屏条 → 底部居中定宽 520px */
+#rage-bar-container {
+    position: absolute !important;
+    left: 50% !important; bottom: 78px !important;
+    transform: translateX(-50%) !important;
+    width: 520px !important; height: 16px !important;
+    z-index: 22 !important;
+    border-radius: 0 !important;
+    box-shadow: inset 0 0 0 1px var(--jin-line) !important;
+}
+#rage-bar-text { font-size: 13px !important; font-family: var(--f-mono) !important; }
+
+/* (b) 手牌盒：占屏宽 80% 的金框 → 实际牌宽，无外框 */
+#hand-tile-bar {
+    width: auto !important;
+    background: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    bottom: calc(60px + env(safe-area-inset-bottom, 0px)) !important;
+}
+#hand-tile-grid {
+    grid-template-columns: repeat(14, 52px) !important;
+    gap: 5px !important;
+    padding: 0 !important;
+    background: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+.hand-tile-slot {
+    width: 52px !important; height: 68px !important;
+    background: rgba(11, 15, 18, .55) !important;
+    box-shadow: inset 0 0 0 1px var(--ink-500) !important;
+    border-radius: var(--r-tile) !important;
+}
+
+/* 底栏：全屏深色条 → 透明细条，计时靠左、暂停靠右 */
+#bottom-bar {
+    height: 30px !important;
+    background: none !important;
+    border-top: 0 !important;
+    justify-content: space-between !important;
+    padding: 0 16px !important;
+}
+#bottom-bar .hint {
+    font-family: var(--f-mono) !important;
+    font-variant-numeric: tabular-nums !important;
+    color: var(--ink-300) !important;
+    background: rgba(19,26,31,.84) !important;
+    box-shadow: inset 0 0 0 1px var(--ink-500) !important;
+    padding: 2px 8px !important;
+    border-radius: 0 !important;
+}
+#pause-btn {
+    background: rgba(19,26,31,.84) !important;
+    box-shadow: inset 0 0 0 1px var(--ink-500) !important;
+    border-radius: 0 !important;
+    color: var(--ink-200) !important;
+}
+
+/* 武器栏：全屏条 → 右下角定宽容器 */
+#weapon-slot-bar {
+    position: absolute !important;
+    right: 16px !important; bottom: 16px !important;
+    width: auto !important; height: auto !important;
+    background: none !important;
+    border: 0 !important; padding: 0 !important;
+    z-index: 22 !important;
+}
+
+/* ── 14. 补 T3 露出的两个问题 ─────────────────────────────────────────── */
+
+/* (1) #game-container 自身是绿底 #1a5c38。顶栏/底栏改透明后它整条露了出来，
+       变成上下两道亮绿。容器底必须跟战场同一个墨底。 */
+#game-container { background: var(--ink-900) !important; }
+
+/* (2) 手牌空槽的虚线金框（1px dashed rgba(212,175,55,.75)）是"廉价"感来源之一：
+       14 个金色虚线框并排非常刺眼。空槽只需要一个极弱的墨色描边表示"这里有一格"。 */
+.hand-tile-slot {
+    background: rgba(11, 15, 18, .5) !important;
+    border: 1px solid var(--ink-500) !important;
+    box-shadow: none !important;
+    border-radius: var(--r-tile) !important;
+}
+.hand-tile-slot.filled, .hand-tile-slot.has-tile {
+    border-color: var(--ivory-edge) !important;
+    box-shadow: var(--edge-lit) !important;
+}

@@ -1,0 +1,18 @@
+/* ======================================================================
+   弹层表面：全项目唯一允许的「墨玻璃」配方
+   拆分自 theme-mokudan.css（906 行单文件 → 6 个按关注点分层的模块）。
+   规则内容与相对顺序都没动 —— 合并回去应与拆分前逐字节相同。
+   注意：切分点必须落在每节注释块的【开头行】，否则会切出悬空注释文本，
+   CSS 解析器会把后面整段当成选择器前缀，该节规则全部失效且不报错。
+   ====================================================================== */
+/* ── 7. 弹层表面：唯一允许的「墨玻璃」配方 ───────────────────────────── */
+#reward-overlay, #mutator-overlay, #pause-overlay, #pause-settings-panel,
+#game-over-overlay, #victory-overlay, #guide-overlay, .toast-node {
+    background: var(--surf) !important;
+    backdrop-filter: var(--blur) !important;
+    -webkit-backdrop-filter: var(--blur) !important;
+}
+.card-front, .reward-card-inner, .gamble-card {
+    background: var(--surf) !important;
+    box-shadow: var(--edge-soft), var(--edge-lit) !important;
+}

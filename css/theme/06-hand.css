@@ -1,0 +1,161 @@
+/* ======================================================================
+   天命手牌：14 张真牌面、花色差异化、数牌上下拆分、公版 artwork 接入
+   拆分自 theme-mokudan.css（906 行单文件 → 6 个按关注点分层的模块）。
+   规则内容与相对顺序都没动 —— 合并回去应与拆分前逐字节相同。
+   注意：切分点必须落在每节注释块的【开头行】，否则会切出悬空注释文本，
+   CSS 解析器会把后面整段当成选择器前缀，该节规则全部失效且不报错。
+   ====================================================================== */
+/* ══════════════════════════════════════════════════════════════════════
+   17. 手牌 14 张：画成真正的麻将牌（T4b）
+   --------------------------------------------------------------------------
+   改前：每格是一个深色空槽 + 里面一个彩色字符（`3万` / `5筒` / `东`）。
+   问题：① 不像牌 ② 万/筒/条三种花色除了颜色几乎没有区别，扫不出点数
+        ③ 象牙是麻将的身份色，却只用在玩家和敌人身上，手牌反而是深色 —— 搞反了
+
+   已在 GameEngine.Spawn.js 把牌 id 暴露到 slot 的 data-id（wan3 / tong5 / feng_dong …），
+   于是 CSS 可以按花色画真实牌面。
+   ══════════════════════════════════════════════════════════════════════ */
+
+.hand-tile-slot {
+    width: 52px !important; height: 68px !important;
+    background: rgba(11, 15, 18, .45) !important;
+    border: 1px solid var(--ink-500) !important;
+    box-shadow: none !important;
+    border-radius: var(--r-tile) !important;
+    padding: 0 !important;
+    overflow: visible !important;
+}
+
+/* 有牌时：整格变成一张象牙骨牌，厚度只画露出的右边与下边（2 层） */
+.hand-tile-slot.occupied {
+    background: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+.hand-tile-slot .tile-body {
+    position: absolute; inset: 0;
+    display: flex !important;
+    align-items: center; justify-content: center;
+    border-radius: var(--r-tile) !important;
+    background: linear-gradient(158deg, #fffdf7 0%, var(--ivory) 48%, var(--ivory-2) 100%) !important;
+    border: 1px solid var(--ivory-edge) !important;
+    box-shadow:
+        3px 0 0 var(--ivory-3),
+        0 3px 0 var(--ivory-side),
+        3px 3px 0 var(--ivory-edge),
+        0 6px 10px rgba(0, 0, 0, .7),
+        inset 0 1px 0 rgba(255, 255, 255, .9) !important;
+    font-family: var(--f-serif) !important;
+    font-weight: 600 !important;
+    font-size: 26px !important;
+    line-height: 1 !important;
+    text-shadow: none !important;
+    overflow: hidden !important;   /* 配合下面 .tk-art 的 scale 裁掉 SVG 自带描边 */
+    transition: transform var(--t-fast) var(--ease) !important;
+}
+.hand-tile-slot.occupied:hover .tile-body { transform: translateY(-5px); }
+
+/* 数字牌：把「3万」拆成上下的「3 / 萬」，这是真牌的排版 */
+.hand-tile-slot[data-id^="wan"] .tile-body,
+.hand-tile-slot[data-id^="tong"] .tile-body,
+.hand-tile-slot[data-id^="tiao"] .tile-body {
+    flex-direction: column !important;
+    justify-content: center !important;
+    gap: 0 !important;
+}
+
+/* ── 花色差异化：不给每种点数写 27 条规则，用「数字 + 底纹」两档区分 ──
+   低档(1-3) / 中档(4-6) / 高档(7-9)，是 engine 里 tierIndex 的同一套分档。 */
+.hand-tile-slot[data-id$="1"], .hand-tile-slot[data-id$="2"], .hand-tile-slot[data-id$="3"] { opacity: 1; }
+.hand-tile-slot[data-id$="7"], .hand-tile-slot[data-id$="8"], .hand-tile-slot[data-id$="9"] .tile-body {
+    box-shadow:
+        3px 0 0 var(--ivory-3), 0 3px 0 var(--ivory-side), 3px 3px 0 var(--ivory-edge),
+        0 6px 10px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.9),
+        inset 0 0 0 1px rgba(184,145,47,.5) !important;   /* 高档加一道鎏金内框 */
+}
+
+/* 筒子：加一层圆点底纹，与万/条区分开 */
+.hand-tile-slot[data-id^="tong"] .tile-body {
+    background-image:
+        radial-gradient(circle 2.5px at 22% 24%, currentColor 98%, transparent),
+        radial-gradient(circle 2.5px at 78% 24%, currentColor 98%, transparent),
+        radial-gradient(circle 2.5px at 50% 12%, currentColor 98%, transparent),
+        linear-gradient(158deg, #fffdf7 0%, var(--ivory) 48%, var(--ivory-2) 100%) !important;
+}
+/* 条子：加一层竹节竖纹 */
+.hand-tile-slot[data-id^="tiao"] .tile-body {
+    background-image:
+        repeating-linear-gradient(90deg, transparent 0 12px, rgba(30,111,66,.16) 12px 15px),
+        linear-gradient(158deg, #fffdf7 0%, var(--ivory) 48%, var(--ivory-2) 100%) !important;
+}
+
+/* 字牌（风/箭）：牌面居中、无底纹，天然就和数牌不同 */
+.hand-tile-slot[data-id^="feng_"] .tile-body,
+.hand-tile-slot[data-id^="jian_"] .tile-body { font-size: 30px !important; }
+/* 白板：画一个双线空框 */
+.hand-tile-slot[data-id="jian_bai"] .tile-body { color: transparent !important; }
+/* 白板双线框：仅在 artwork 加载失败（回落纯文字）时才由 CSS 画，
+   有 SVG 时它会和 SVG 自带描边叠成双框。 */
+.hand-tile-slot[data-id="jian_bai"]:not(:has(img.tk-art)) .tile-body::after {
+    content: ""; position: absolute; inset: 11px 9px;
+    border: 2px solid #2a3f6b; box-shadow: inset 0 0 0 1px rgba(42,63,107,.3);
+}
+/* 癞子 */
+.hand-tile-slot[data-id="joker"] .tile-body {
+    background: linear-gradient(158deg, #f3eaff, #ded0f5 60%, #c9b8e8) !important;
+    border-color: #7c4dff !important;
+}
+
+/* 听牌角标 / 打出选中：改用鎏金三角与金环，形状+颜色双编码 */
+.ting-mark { box-shadow: none !important; }
+.hand-tile-slot.discard-sel .tile-body {
+    box-shadow: 0 0 0 2px var(--jin), 3px 0 0 var(--ivory-3), 0 3px 0 var(--ivory-side),
+               3px 3px 0 var(--ivory-edge), 0 6px 10px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.9) !important;
+    transform: translateY(-8px);
+}
+/* 清一色进度条：改成竹青 */
+.hand-tile-bar .qingyise-progress, .qingyise-progress { background: var(--qing) !important; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   20. 公版牌面 artwork 接入
+   --------------------------------------------------------------------------
+   素材：assets/tiles/ 42 张，Wikimedia Commons / Shizhao / PD-self。
+   牌面只回答「画什么」，牌体（象牙面 / 厚度 / 受光 / 落影）仍由 CSS 控制 ——
+   所以换主题时形制跟着变，artwork 不用重画。这是 design/UI_SPEC.md §4.8
+   「inline SVG 是标记不是文件」的延续：这里用外链文件是为了缓存友好，
+   授权与体积已在 commit df6fa28 里登记。
+
+   色调做成变量，方便你在不改素材的前提下试不同档：
+     --tile-art-filter: none | 轻微收敛 | 贴合墨底丹青 | 近单色
+   ══════════════════════════════════════════════════════════════════════ */
+:root {
+  /* 当前档：贴合墨底丹青（saturate .62 + contrast 1.10 + 轻 sepia）。
+     牌面仍认得出是麻将，但饱和度压到不跟墨底界面打架。 */
+  --tile-art-filter: saturate(.62) contrast(1.10) brightness(.94) sepia(.10);
+}
+
+.hand-tile-slot .tk-art {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain;
+  display: block;
+  /* 公版 SVG 自带白色牌面底 + 一圈深色描边。直接 contain 塞进来会变成
+     「象牙牌体里嵌一张带框白卡」的双层框，牌子的立体感就废了。
+     做法：放大 12% 让 SVG 自带的边框被 tile-body 的 overflow 裁掉，
+     只留下「印刷面」，牌体（象牙/厚度/受光/落影）完全交给 CSS。 */
+  transform: scale(1.02);   /* 1.12 会把「三萬」的「三」切掉一截 —— 宁留 1px 边也别切字 */
+  transform-origin: center;
+  filter: var(--tile-art-filter);
+  -webkit-user-drag: none; user-select: none;
+}
+/* 癞子没有公版图，保持 CSS 紫调 + 癞字 */
+.hand-tile-slot[data-id="joker"] .tile-body {
+  background: linear-gradient(158deg, #f3eaff, #ded0f5 60%, #c9b8e8) !important;
+  border-color: #7c4dff !important;
+  font-family: var(--f-serif) !important;
+  font-size: 26px !important;
+  color: #5b21b6 !important;
+}
+/* 图加载失败时回落：文字已经作为 .tk-rank/.tk-suit 备好了，
+   img 是 absolute 覆盖层，不可用时底下的文字自然露出。 */
+.hand-tile-slot .tk-art:not([src]), .hand-tile-slot img.tk-art[src=""] { display: none; }

@@ -1,0 +1,385 @@
+/* ======================================================================
+   大本营 s2：主 CTA 限宽鎏金、左轨化、右栏「出征准备」常驻
+   拆分自 theme-mokudan.css（906 行单文件 → 6 个按关注点分层的模块）。
+   规则内容与相对顺序都没动 —— 合并回去应与拆分前逐字节相同。
+   注意：切分点必须落在每节注释块的【开头行】，否则会切出悬空注释文本，
+   CSS 解析器会把后面整段当成选择器前缀，该节规则全部失效且不报错。
+   ====================================================================== */
+/* ══════════════════════════════════════════════════════════════════════
+   16. 大本营 s2（T4）
+   --------------------------------------------------------------------------
+   实测原页面的三个硬伤（截图 audit/before-fix/s2.png）：
+     a. 「轰然出征」是**横贯 1920px 全屏的红色巨条**（`padding:13px 0` + `flex:1` 式布局）。
+        红色在语义契约里是「威胁」，而它是主行动 —— 语义反了，且为 4 个字占满全屏。
+     b. 5 块关卡卡是奶油色大字板（明度约 88%），一排 5 块把整屏注意力吃干，
+        而它们只是「可选关卡」，不该是最亮的东西。
+     c. 页面底是绿毡（#0a1f14 一系），与 s3 不一致。
+   ══════════════════════════════════════════════════════════════════════ */
+
+#main-hub-screen {
+    background:
+        radial-gradient(58% 46% at 22% 0%, rgba(255, 240, 212, .05) 0%, transparent 72%),
+        radial-gradient(130% 100% at 22% 4%, #16202a 0%, #101820 44%, #080c0f 100%) !important;
+}
+#save-select-screen {
+    background:
+        radial-gradient(120% 90% at 50% 8%, #1a242c 0%, #101820 46%, #080c0f 100%) !important;
+}
+
+/* (a) 主 CTA：红色巨条 → 鎏金、限宽 320px、不再通栏 */
+#btn-hub-start {
+    align-self: center !important;
+    width: auto !important;
+    min-width: 320px !important;
+    padding: 16px 56px !important;
+    background: linear-gradient(180deg, var(--jin-hi), var(--jin)) !important;
+    border: 1px solid var(--jin-lo) !important;
+    border-radius: 0 !important;
+    color: var(--ink-900) !important;
+    font-family: var(--f-serif) !important;
+    font-weight: 600 !important;
+    letter-spacing: .3em !important;
+    text-indent: .3em !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 2px 0 var(--ink-900) !important;
+    transition: filter var(--t-fast) var(--ease), transform var(--t-fast) var(--ease) !important;
+}
+#btn-hub-start:hover { filter: brightness(1.08); }
+#btn-hub-start:active { transform: translateY(2px); box-shadow: none !important; }
+#btn-hub-start:focus-visible { outline: 2px solid var(--ink-050) !important; outline-offset: 3px; }
+
+/* (b) 关卡卡：奶油色大字板 → 墨色卡 + 鎏金选中态。
+       卡片只是「可选项」，明度必须低于主 CTA。 */
+.level-card {
+    background: linear-gradient(180deg, var(--ink-700), var(--ink-800)) !important;
+    border: 1px solid var(--ink-500) !important;
+    border-radius: 0 !important;
+    color: var(--ink-100) !important;
+    box-shadow: inset 0 1px 0 rgba(228,236,239,.06) !important;
+    transition: border-color var(--t-fast) var(--ease), background var(--t-fast) var(--ease) !important;
+}
+.level-card:hover { border-color: var(--ink-400) !important; background: var(--ink-650) !important; }
+.level-card.selected, .level-card.active, .level-card.is-selected {
+    border-color: var(--jin) !important;
+    background: var(--jin-wash) !important;
+    color: var(--ink-050) !important;
+}
+.level-card-name, .level-card-sub { color: inherit !important; }
+.level-card.selected .level-card-name, .level-card.active .level-card-name { color: var(--ink-050) !important; }
+
+/* 顶部资源条 */
+.hub-res-pill {
+    background: rgba(19, 26, 31, .84) !important;
+    border: 1px solid var(--ink-500) !important;
+    border-radius: 0 !important;
+    box-shadow: inset 0 1px 0 rgba(228,236,239,.06) !important;
+}
+.hub-res-label { color: var(--ink-300) !important; }
+.hub-res-icon { filter: grayscale(.55) brightness(1.15); }
+
+/* 导航：去掉描边胶囊感，改成左轨式分隔的扁平项 */
+.nav-item {
+    font-family: var(--f-sans) !important;
+    font-weight: 400 !important;
+    color: var(--ink-200) !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-left: 2px solid transparent !important;
+    border-radius: 0 !important;
+    transition: color var(--t-fast) var(--ease), background var(--t-fast) var(--ease) !important;
+}
+.nav-item:hover { color: var(--ink-050) !important; background: var(--ink-800) !important; }
+.nav-item.active, .nav-item.is-active, .nav-item.selected {
+    color: var(--ink-050) !important;
+    background: var(--ink-700) !important;
+    border-left-color: var(--jin) !important;
+}
+
+/* 面板与卡片族：统一墨玻璃 */
+.hub-panel, .hero-node, .talent-node, .tech-node, .equip-card,
+.perk-row, .achievement-card, .compendium-weapon-card, .challenge-card,
+.vault-card, .mutation-vault-card, .history-entry, .battlepass-card,
+.stat-row, .forge-slot, .btn-action, .btn-perk-buy, .btn-tech-upgrade,
+.btn-talent-upgrade, .btn-hero-unlock, .btn-hero-deploy, .hub-secondary-btn,
+.elite-toggle, .elite-btn, .forge-affix-btn, .vault-tier-btn, .mutation-vault-toggle,
+.weekly-challenge, .mutation-vault-remove {
+    background: var(--ink-800) !important;
+    border: 1px solid var(--ink-500) !important;
+    border-radius: 0 !important;
+    color: var(--ink-100) !important;
+    box-shadow: none !important;
+}
+.hub-panel:hover, .hero-node:hover, .talent-node:hover, .tech-node:hover,
+.equip-card:hover, .perk-row:hover {
+    background: var(--ink-700) !important;
+    border-color: var(--ink-400) !important;
+}
+
+/* 数字一律等宽 */
+.stat-value, .hero-node-cost, .talent-node-cost, .tech-cost, .tech-level,
+.perk-count, .hub-res-pill, .progress-text, .achievement-progress-text,
+.level-tier-badge, .compendium-weapon-stats, .expedition-hero-stat {
+    font-family: var(--f-mono) !important;
+    font-variant-numeric: tabular-nums !important;
+}
+
+/* 标题用衬线 */
+.tavern-title, .forge-title, .stats-title, .compendium-title,
+.talent-market-title, .mutation-vault-title, .vault-title, .stats-section-title,
+.history-reward, .level-card-name, .hero-portrait, .talent-branch-header {
+    font-family: var(--f-serif) !important;
+}
+
+/* 进度条：统一成墨槽 + 鎏金填充 */
+.progress-bar, .achievement-progress-bar, .battlepass-bar, .talent-cores-bar {
+    background: var(--ink-900) !important;
+    border: 1px solid var(--ink-500) !important;
+    border-radius: 0 !important;
+}
+.progress-fill, .achievement-progress-bar > div, .battlepass-bar-fill,
+.talent-cores-bar > div {
+    background: linear-gradient(90deg, var(--jin-lo), var(--jin-hi)) !important;
+    border-radius: 0 !important;
+}
+
+/* 英雄名牌：象牙只留给牌面 */
+.panel-hero-header, .expedition-hero-zone { background: var(--ink-850) !important; }
+.expedition-hero-name, .hero-portrait, .panel-hero-header h1, .panel-hero-header h2 {
+    font-family: var(--f-serif) !important;
+    color: var(--ink-050) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   18. 大营���左轨化（T4c）—— 纯 CSS，不改 DOM
+   --------------------------------------------------------------------------
+   原结构（三块兄弟节点）：
+       #main-hub-screen
+         header#hub-top-stats      顶栏
+         nav#hub-top-nav           9 个 .nav-item，水平排成一行
+         main#hub-right-canvas     9 个 .panel-*，一次只显示一个
+
+   改法：nav 从「顶栏下方的横排」变成「左侧竖排轨」，画布整体右移 168px。
+   这就是 UI_SPEC §7 的「左=导航 / 中=当前面板 / 右=出征准备」里的前两栏。
+   ══════════════════════════════════════════════════════════════════════ */
+
+#main-hub-screen { position: relative !important; }
+
+#hub-top-nav {
+    position: absolute !important;
+    left: 0 !important;
+    top: 76px !important;                 /* 让开顶栏 */
+    bottom: 0 !important;
+    width: 168px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 1px !important;
+    padding: var(--sp-4, 12px) 0 !important;
+    background: rgba(11, 15, 18, .55) !important;
+    box-shadow: inset -1px 0 0 var(--ink-500) !important;
+    z-index: 6 !important;
+    overflow-y: auto !important;
+}
+#hub-top-nav .nav-item {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    padding: 12px 16px !important;
+    text-align: left !important;
+    white-space: nowrap !important;
+    border-left: 2px solid transparent !important;
+    font-size: 15px !important;
+}
+#hub-top-nav .nav-item.active,
+#hub-top-nav .nav-item.is-active,
+#hub-top-nav .nav-item.selected {
+    border-left-color: var(--jin) !important;
+    background: var(--ink-700) !important;
+    color: var(--ink-050) !important;
+}
+/* 分隔符在竖轨里改成一条细横线 */
+#hub-top-nav .nav-sep {
+    width: calc(100% - 32px) !important;
+    height: 1px !important;
+    margin: 6px 16px !important;
+    background: var(--ink-500) !important;
+    border: 0 !important;
+}
+/* 「返回首页」在竖轨底部 */
+#hub-top-nav .btn-hub-home { margin-top: auto !important; }
+
+/* 画布让出左轨 */
+#hub-right-canvas {
+    position: absolute !important;
+    left: 168px !important; right: 0 !important;
+    top: 76px !important; bottom: 0 !important;
+    overflow-y: auto !important;
+}
+
+/* ── 19. 数牌上下拆分：点数在上、花色在下（真牌的排版）─────────────────
+   GameEngine.Spawn.js 已把 label 拆成 .tk-rank / .tk-suit 两个节点。 */
+.hand-tile-slot .tk-rank {
+    font-size: 15px !important;
+    line-height: 1 !important;
+    font-weight: 600 !important;
+    margin-bottom: 1px !important;
+}
+.hand-tile-slot .tk-suit {
+    font-size: 30px !important;
+    line-height: 1 !important;
+    font-weight: 600 !important;
+}
+/* 筒子的圆点底纹现在要避开上下文字，压到两侧 */
+.hand-tile-slot[data-id^="tong"] .tile-body {
+    background-image:
+        radial-gradient(circle 2.2px at 20% 50%, currentColor 98%, transparent),
+        radial-gradient(circle 2.2px at 80% 50%, currentColor 98%, transparent),
+        linear-gradient(158deg, #fffdf7 0%, var(--ivory) 48%, var(--ivory-2) 100%) !important;
+}
+/* 条子的竹节竖纹同样收到两侧 */
+.hand-tile-slot[data-id^="tiao"] .tile-body {
+    background-image:
+        repeating-linear-gradient(90deg, transparent 0 10px, rgba(30,111,66,.18) 10px 13px),
+        linear-gradient(158deg, #fffdf7 0%, var(--ivory) 48%, var(--ivory-2) 100%) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   21. s2 右栏「出征准备」常驻（UI_SPEC §7 第三栏）
+   --------------------------------------------------------------------------
+   改法：不重构 flex 树，而是照左轨的成熟做法把右栏也绝对定位。
+   #hub-right-canvas 本来就已被定位在 #main-hub-screen 内
+   （left:168px; right:0），这里只把 right 从 0 改成 400px 让出右栏。
+
+   为什么必须搬：出征内容原来在中栏 panel-expedition 里，
+   切到「天赋」就整块消失 —— 而它恰恰是玩家唯一需要反复确认的东西
+   （选将 → 选关 → 词条）。常驻之后，切任何面板都在右手边。
+   ══════════════════════════════════════════════════════════════════════ */
+#hub-right-canvas {
+    right: 400px !important;   /* 让出右栏 */
+}
+
+#hub-expedition-rail {
+    position: absolute !important;
+    right: 0 !important; top: 76px !important; bottom: 0 !important;
+    width: 400px !important;
+    overflow-y: auto !important; overflow-x: hidden !important;
+    padding: 16px 18px 20px 14px !important;
+    background:
+        linear-gradient(180deg, rgba(10,20,26,.5) 0%, rgba(8,14,18,.72) 100%),
+        var(--ink-800) !important;
+    box-shadow: inset 1px 0 0 var(--ink-500) !important;
+    animation: railIn .32s var(--ease) both;
+}
+@keyframes railIn { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
+
+/* 右栏里的出征面板不再是「tab 面板」，去掉画布那套显隐/透视 */
+#hub-expedition-rail .hub-panel#panel-expedition {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+    perspective: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    background: none !important;
+    border: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    height: 100% !important;
+}
+
+/* 三段递进：选将 → 选关 → 词条，用发丝线分隔，不用卡片套卡片 */
+#hub-expedition-rail .expedition-hero-zone {
+    padding-bottom: 14px !important;
+    border-bottom: 1px solid var(--ink-500) !important;
+}
+#hub-expedition-rail .expedition-levels { flex: 0 0 auto !important; }
+#hub-expedition-rail .expedition-previews {
+    margin-top: auto !important;      /* 词条组吸底 */
+    padding-top: 14px !important;
+    border-top: 1px solid var(--ink-500) !important;
+    grid-template-columns: 1fr !important;
+}
+/* 右栏窄，关卡卡改成一行摘要而不是大卡 */
+#hub-expedition-rail #level-cards { gap: 6px !important; }
+
+/* 底栏主行动：右栏里只留一个实心金按钮 */
+#hub-expedition-rail #btn-hub-start {
+    width: 100% !important;
+    margin-top: 12px !important;
+}
+
+/* ── 右栏内部布局：400px 装不下横排 ──────────────────────────────────
+   两处是宽度逼出来的，不是我审美偏好：
+   1) .expedition-hero-zone 原本是「头像 | 文字 | 按钮」三栏横排，
+      400px 里头像就吃掉 96px，名字被压成每行一个字（截图实测）。
+      改成竖排：头像居中 → 名字 → 描述 → 按钮一行。
+   2) #level-cards 是 flex 横排 + .level-card{flex:1}，
+      5 张卡平分 400px → 每张 72px → 「试炼森林」竖成一列。
+      改成单列列表，每张卡内部横排：名字左，难度徽章右。 */
+#hub-expedition-rail .expedition-hero-zone {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 8px !important;
+    text-align: center !important;
+}
+#hub-expedition-rail .expedition-hero-tile-wrap { margin: 0 auto !important; }
+#hub-expedition-rail #hero-name-display {
+    font-size: 19px !important;
+    line-height: 1.3 !important;
+    white-space: normal !important;
+    word-break: keep-all !important;   /* 中文不许逐字断行 */
+}
+#hub-expedition-rail #hero-status-display {
+    font-size: 12px !important;
+    line-height: 1.6 !important;
+    color: var(--ink-200) !important;
+    max-width: 30ch !important;
+    word-break: keep-all !important;
+}
+#hub-expedition-rail .expedition-hero-actions {
+    display: flex !important; flex-direction: row !important; gap: 8px !important;
+    justify-content: center !important;
+}
+#hub-expedition-rail .expedition-hero-actions > * { flex: 0 0 auto !important; width: auto !important; }
+
+/* 关卡：单列列表，卡内横排 */
+#hub-expedition-rail #level-cards {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5px !important;
+}
+#hub-expedition-rail .level-card {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    padding: 8px 10px !important;
+    text-align: left !important;
+}
+#hub-expedition-rail .level-card-name {
+    flex: 1 1 auto !important;
+    font-size: 15px !important;
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    overflow: hidden !important; text-overflow: ellipsis !important;
+}
+#hub-expedition-rail .level-tier-badge { flex: 0 0 auto !important; }
+#hub-expedition-rail .level-card-sub { flex: 0 0 auto !important; font-size: 11px !important; }
+
+/* 关卡详情行：原本 JS 一直在算（refreshLevelDetail）但 HTML 里没有这个元素，
+   函数每次 early-return。R318 把它放进右栏，顺带删掉两个没人填充的
+   .expedition-preview-card 死盒子。 */
+#hub-expedition-rail .hub-level-detail {
+    margin-top: 8px !important;
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+    line-height: 1.65 !important;
+    color: var(--ink-200) !important;
+    background: rgba(0,0,0,.28) !important;
+    box-shadow: inset 2px 0 0 var(--jin) !important;
+    border-radius: 0 3px 3px 0 !important;
+    word-break: keep-all !important;
+}

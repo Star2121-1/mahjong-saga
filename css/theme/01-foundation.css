@@ -1,0 +1,73 @@
+/* ======================================================================
+   全局地基：令牌落地、圆角统一、焦点环、砍辉光、等宽数字、尊重减弱动效
+   拆分自 theme-mokudan.css（906 行单文件 → 6 个按关注点分层的模块）。
+   规则内容与相对顺序都没动 —— 合并回去应与拆分前逐字节相同。
+   注意：切分点必须落在每节注释块的【开头行】，否则会切出悬空注释文本，
+   CSS 解析器会把后面整段当成选择器前缀，该节规则全部失效且不报错。
+   ====================================================================== */
+/* ==========================================================================
+   墨底丹青 · 主题覆盖层 (v1)
+   --------------------------------------------------------------------------
+   为什么要覆盖层而不是改那 4000 行：
+   实测发现 css/ 里 --mj-* 令牌只被用了 1 次，真实情况是 685 处硬编码 hex +
+   651 处 rgba、236 种唯一色值、15 种 border-radius。令牌层是摆设。
+   无人值守时原地重写 4000 行风险过高，所以这里用「最后加载的覆盖层」重定义
+   取值 —— 删掉本文件即 100% 回滚。
+
+   加载位置：三页最后一个 <link>，在所有旧 CSS 之后。
+   配套：css/tokens.css（设计令牌唯一真相源）
+
+   铁律（见 design/UI_SPEC.md）：
+     朱砂=威胁 / 竹青=状态 / 鎏金=价值与可交互 / 象牙=牌与主文字 / 墨=结构
+   ========================================================================== */
+
+/* ── 1. 全局地基 ─────────────────────────────────────────────────────── */
+
+html, body {
+    background: var(--ink-900) !important;
+    color: var(--ink-100) !important;
+}
+
+/* 旧 display 字体是 KaiTi/STKaiti（毛笔体），笔画在暗底上糊成一片。
+   换成宋体栈：笔画有粗细对比，暗底上更清楚。 */
+:root {
+    --mj-font-display: var(--f-serif);
+    --mj-font-body: var(--f-sans);
+    --mj-radius-tile: var(--r-tile);
+    --mj-radius-panel: var(--r-pop);
+}
+
+/* ── 2. 圆角统一（旧 CSS 用了 11 种，是"乱"的主因之一）───────────────── */
+#reward-overlay, #mutator-overlay, #pause-overlay, #game-over-overlay,
+#victory-overlay, #guide-overlay, .gamble-card, .mutator-card, .settings-section {
+    border-radius: var(--r-pop) !important;
+}
+.hand-tile-slot, .weapon-slot { border-radius: var(--r-tile) !important; }
+button, .btn, .gamble-btn, .relic-btn, .abyss-shop-btn, input, select {
+    border-radius: var(--r-0) !important;
+}
+.enemy, .enemy-hp-bar, .enemy-hp-fill { border-radius: 50% !important; }
+
+/* ── 8. 焦点环 ──────────────────────────────────────────────────────── */
+button:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--jin-hi) !important;
+    outline-offset: 2px !important;
+}
+
+/* ── 9. 砍掉彩色辉光：旧 CSS 大量 text-shadow，是"廉价手游感"主因 ───────── */
+.game-clock-frozen *, .game-clock-frozen { animation-play-state: paused !important; }
+#top-bar, #bottom-bar, .hand-tile-bar, #weapon-slot-bar { border-color: var(--ink-500) !important; }
+
+/* ── 10. 数字等宽 ───────────────────────────────────────────────────── */
+#player-hp-text, #exp-bar-text, #rage-bar-text, #top-bar span, #bottom-bar span {
+    font-variant-numeric: tabular-nums !important;
+}
+
+/* ── 11. 尊重减弱动效偏好 ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+}
