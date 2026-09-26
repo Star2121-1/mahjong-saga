@@ -94,6 +94,23 @@ Gp._restoreHandState = function() {
     }.bind(this));
 };
 
+/* R323-P0 教学死锁修复 —— 根因与修法
+
+   症状：新档进战斗页后卡死在引导第 2 步，「下一步」按钮永久禁用，整个游戏玩不了。
+
+   根因（结构矛盾，不是笔误）：
+     - `_showGuide()` 调 `_freezeClock()` 并且**不启动游戏循环**（running=false）
+     - 而引导第 2/4 步的门控条件 `_guideGemsPicked` / `_guideHits`
+       **只在 GameEngine.Loop.js 里自增**（:452 / :459）
+   也就是：引导在等一个「只有游戏循环才会产生」的状态，而它自己关掉了游戏循环。
+   实测：冻结=true、running=false、敌人=0、elapsed=0 —— 移动能过（按键不依赖循环），
+   但击杀/拾取永远做不到。
+
+   修法三处：
+     1. 本文件：把「攻击」挪到「拾取」之前。
+        原来第 2 步就要求靠击杀达成，而「攻击」到第 4 步才教 —— 顺序本身是错的。
+     2. 给需要玩法的步骤加 `needsGameplay: true`，由 Guide.js 为这些步骤解冻并启动循环。
+     3. Guide.js：交互式步骤加超时兜底强制推进 —— 教学卡死比偶尔跳过更糟。 */
 Gp._defineGuideSteps = function() {
     var self = this;
     this._guideSteps = [
@@ -124,16 +141,21 @@ Gp._defineGuideSteps = function() {
             }
         },
         {
-            highlight: '#exp-bar-container',
-            dimExcept: ['#exp-bar-container'],
+            highlight: null,
+            dimExcept: [],
             items: [
-                '<div class="guide-item">💰 <strong>第二步：拾取</strong></div>',
-                '<div class="guide-item">击杀妖牌掉落铜筹码和经验石</div>',
-                '<div class="guide-item">靠近它们自动吸附，拾取后升级</div>'
+                '<div class="guide-item">🎯 <strong>第二步：攻击</strong></div>',
+                '<div class="guide-item">鼠标点击范围内妖牌触发攻击</div>',
+                '<div class="guide-item">空格键在怒气满时触发 Overdrive</div>'
             ],
             interactive: true,
+            /* R323-P0: 关键标记。_guideHits 只在 GameEngine.Loop.js:459 自增，
+               而 _showGuide 会 _freezeClock() + 不启动循环 ——
+               于是「等一次攻击」在等一个只有循环能产生的状态 = 死锁。
+               标记后 _showGuideStep 会为这一步解冻并启动循环。 */
+            needsGameplay: true,
             checkFn: function() {
-                return (self._guideGemsPicked || 0) >= 1;
+                return (self._guideHits || 0) >= 1;
             }
         },
         {
@@ -149,16 +171,18 @@ Gp._defineGuideSteps = function() {
             autoAdvance: true
         },
         {
-            highlight: null,
-            dimExcept: [],
+            highlight: '#exp-bar-container',
+            dimExcept: ['#exp-bar-container'],
             items: [
-                '<div class="guide-item">🎯 <strong>第四步：攻击</strong></div>',
-                '<div class="guide-item">鼠标点击范围内妖牌触发攻击</div>',
-                '<div class="guide-item">空格键在怒气满时触发 Overdrive</div>'
+                '<div class="guide-item">💰 <strong>第四步：拾取</strong></div>',
+                '<div class="guide-item">击杀妖牌掉落铜筹码和经验石</div>',
+                '<div class="guide-item">靠近它们自动吸附，拾取后升级</div>'
             ],
             interactive: true,
+            /* R323-P0: 同上，_guideGemsPicked 只在 Loop.js:452 自增 */
+            needsGameplay: true,
             checkFn: function() {
-                return (self._guideHits || 0) >= 1;
+                return (self._guideGemsPicked || 0) >= 1;
             }
         },
         {

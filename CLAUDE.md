@@ -140,7 +140,7 @@ Two localStorage keys:
 - **Self-check tooling** (`design/audit/`, all cache-disabled):
   - `verify.mjs` — runtime + static assertions; `reverse.sh` — injects 4 bugs to prove the check goes red
   - `shoot-all.mjs` — 12 fixed screenshot states for pixel diffing; `stylediff.mjs` — pinpoints cascade conflicts
-  - `probe-art/s2/enemy/viewport/playthrough.mjs` — artwork decoding, s2 three-column layout, enemy animation classes, fixed-canvas invariant, **full playable-path smoke test**
+  - `probe-art/s2/enemy/viewport/playthrough.mjs` — artwork decoding, s2 three-column layout, enemy animation classes, fixed-canvas invariant, **full playable-path smoke test**; `probe-guide.mjs` — **walks the tutorial without the `_completeGuide()` shortcut** (R323: the guide used to deadlock new saves while every other gate stayed green)
   - **`verify.mjs` does NOT check CSS syntax.** A botched CSS edit that unbalances braces passes every check silently — always run `shoot-all.mjs` + pixel compare after touching CSS.
 - **Epoch tracking**: history in `_archive/docs/mahjong_saga_evolution.md` (read-only). Current branch: `feat/fix-flash-and-waves`.
 - **Active design**: 胡牌系统 spec lives in `HUPAI_DESIGN.md` — read before touching collection/reward systems. The 雀魂 system (MahjongHand.js) is Active and fully wired into s3_gameplay.html.

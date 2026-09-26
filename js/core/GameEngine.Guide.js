@@ -115,6 +115,17 @@ Gp._showGuideStep = function(stepIndex) {
         }
     }
 
+    /* R323-P0: 需要真实玩法的步骤必须让游戏循环跑起来。
+       _showGuide 冻结时钟且不启动循环，而 _guideHits / _guideGemsPicked
+       只在 Loop.js 里自增 —— 引导在等一个自己关掉的东西产生的状态 = 死锁。
+       实测卡死：冻结=true running=false 敌人=0，第 2 步永远无法满足。 */
+    if (step.needsGameplay) {
+        this._unfreezeClock();
+        /* _beginLoop 内部有 gameOver / running / announcingWave 三重守卫，
+           重复调用安全（running 为 true 时直接返回）。 */
+        this._beginLoop();
+    }
+
     /* Epoch 43: 交互式步骤 — 自动推进 */
     if (step.interactive && step.checkFn) {
         /* R32-G-001: 先清除旧timer，防止多timer并行 */
@@ -131,6 +142,25 @@ Gp._showGuideStep = function(stepIndex) {
                 }
             }
         }, 300);
+
+        /* R323-P0: 防死锁兜底 —— 交互式步骤最多等 60 秒。
+           教学把「下一步」按钮硬禁用（防跳过引导，R199-P1），所以一旦条件
+           永远无法满足，玩家就彻底动不了。引导卡死比偶尔跳过严重得多，
+           所以这里必须有兜底：超时则强制推进并留下警告日志。
+           只要 needsGameplay 那条修好了，这个兜底正常情况下不会触发。 */
+        if (this._guideStepTimeout) { clearTimeout(this._guideStepTimeout); this._guideStepTimeout = null; }
+        this._guideStepTimeout = setTimeout(function() {
+            self._guideStepTimeout = null;
+            if (self._currentGuideStep !== stepIndex) return;   /* 已推进 */
+            console.warn('[Guide] 步骤 ' + stepIndex + ' 等待 60s 未满足条件，强制推进以避免卡死');
+            clearInterval(self._guideCheckTimer); self._guideCheckTimer = null;
+            if (stepIndex < steps.length - 1) {
+                self._currentGuideStep = stepIndex + 1;
+                self._showGuideStep(stepIndex + 1);
+            } else {
+                self._completeGuide();
+            }
+        }, 60000);
     }
     /* R160-P0: autoAdvance 步骤无需交互，3秒后自动进入下一步，防止永久卡死 */
     else if (step.autoAdvance && stepIndex < steps.length - 1) {
@@ -148,6 +178,7 @@ Gp._completeGuide = function() {
     /* R46-P2: 清除检查timer，防止guide完成后interval泄漏 */
     if (this._guideCheckTimer) { clearInterval(this._guideCheckTimer); this._guideCheckTimer = null; }
     if (this._guideAutoAdvanceTimer) { clearTimeout(this._guideAutoAdvanceTimer); this._guideAutoAdvanceTimer = null; }
+    if (this._guideStepTimeout) { clearTimeout(this._guideStepTimeout); this._guideStepTimeout = null; } /* R323-P0 */
     this._restoreOpacity();
     this._clearHighlightTimers();
     if (this.guideOverlay) this.guideOverlay.classList.remove('active');
