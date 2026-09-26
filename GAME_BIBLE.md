@@ -29,6 +29,12 @@
 | 金色强调 | — | `#ffd700` |
 | 危险色 | — | `#ff1744` |
 
+> ⚠️ **2026-09-26 起上表已被 `css/tokens.css` 取代**（R317）。
+> 上表是历史值，且实测发现它几乎没被 CSS 真正使用：`css/` 里 `--mj-*` 令牌只出现 **1 次**，
+> 真实情况是 **685 处硬编码 hex + 651 处 rgba、236 种唯一色值、15 种 border-radius**。
+> 现役规则见 `design/UI_SPEC.md`（语义色契约：朱砂=威胁 / 竹青=状态 / 鎏金=价值 /
+> 象牙=牌 / 墨=结构）。新代码一律从 `css/tokens.css` 取色，不要再硬编码。
+
 ### 美术工艺
 
 - 2.5D 骨雕麻将牌：12 层 `box-shadow` 夹心模拟象牙质感；米白渐变 `linear-gradient(135deg,#fefcf6,#f5eedc)` + 绿边
@@ -220,6 +226,9 @@ Lv3/Lv5 有 20% 概率掷随机词条（存 `player._relicAffixes`，支持 rest
 | 3 | 错别字 `'暴击反商!'` | Loop.js L165 | ✅ 已修复→`'暴击反伤!'` |
 | 4 | 视觉体检发现的错位/粗糙特效 | 见下方"视觉修复记录" | ✅ 第一轮已完成 |
 | 5 | main_hub.js 过长(~90KB)、CSS 断点分散 5+ 文件 | — | 低优 |
+| 7 | **脚本加载顺序导致 `window.fxManager` 为 undefined → 全部伤害飘字永久失效** | `pages/s3_gameplay.html`：`FxManager.js` 第 7 个脚本、`Balance.js` 第 10 个，而 FxManager 求值时 self-instantiate 并读 `window.Balance` | ✅ 已修复（R317：把 `Balance.js` 提前） |
+| 8 | **脚本加载顺序抛异常导致 `GameSystems.js` 145 行后整段丢失 → 突变面板 `showMutatorPanel` 消失** | 同上：该文件第 12 个脚本在求值时写 `window.GameEngine.prototype`，而 `GameEngine.js` 是第 22 个 | ✅ 已修复（R317：延后绑定到 `DOMContentLoaded`。**不能调脚本顺序** —— `GameEngine.js:6-8` 用 `if (window.SpawnSystem)` 守卫，反过来会打断委托链） |
+| 9 | **`FxManager.cleanup()` 读未初始化字段 → `[Boot] initialization failed` → 整局 setup 中断** | `js/core/FxManager.js:166`：`_freeStack` 在 `init()` 里初始化，而 `Boot.initNewRun` 开局就调 `cleanup()` | ✅ 已修复（R317：防御式补齐 `_pool` / `_freeStack`） |
 | 6 | 无单元测试 | — | 低优 |
 
 ### 视觉修复记录（2026-08-22 第一轮，全部截图验证）
@@ -292,3 +301,22 @@ Lv3/Lv5 有 20% 概率掷随机词条（存 `player._relicAffixes`，支持 rest
 
 **`_archive/` 归档**（历史完整版，需要细节时查阅）：
 ENGINE_SPEC.md（引擎规格）· PROJECT_DOCS.md（35章技术文档·最详尽）· HANDOVER.md（移交文档）· SYSTEM_INTEGRITY_REPORT.md（49轮审计终报）· SWARM_AUDIT_PLAN/SWARM_BUG_LOG.md（蜂群审计62条明细）· Mahjong_Saga_GDD_v5.0.md（设计文档）· mahjong_saga_evolution.md（Epoch 1-49 总表）· logs/（各 epoch 迭代日志）· 作品说明.md（比赛提交稿）· 作者的话.txt · Prompt汇总.docx · audit-scripts/（蜂群审计遗留脚本）· legacy-snapshot/（重构期旧代码快照）
+
+---
+
+## 附：2026-09-26 视觉重设计落地（R317）
+
+计划 `design/PLAN.md`，进度 `design/PROGRESS.md`，规范 `design/UI_SPEC.md`。
+新增 `css/tokens.css`（令牌）+ `css/theme-mokudan.css`（可回滚覆盖层，三页最后加载）。
+自检 `node design/audit/verify.mjs`（8 项断言，退出码 0/1），取证 `design/audit/`。
+
+**做法**：不改那 4082 行既有 CSS，改用最后加载的覆盖层重定义取值 —— 删掉一个文件即 100% 回滚。
+
+**已落地**：战场底改墨底（原 `#2a7348` 明度约 45% 的高饱和绿占屏 90%）；
+HUD 改四角锚点（两条横贯 1920px 全屏的进度条改定宽、手牌盒缩到实际牌宽）；
+敌人牌面厚度 8 层 `box-shadow` → 2 层并去掉 `data-type` 小字标签；
+s2 主 CTA 由「全屏红条」改「限宽鎏金」（红色在语义契约里是「威胁」，用在主行动上是反的）。
+
+**未完成**：敌人动作帧（行走/攻击/受击）仍是静态牌；s2 中部在部分 Tab 下有大片空白
+（属 `main_hub.js` 的面板切分逻辑，不是 CSS 能解决的）；`design/spike-webgl/` 的
+WebGL 技术验证结论见该目录 README（结论：不采用，瓶颈在美术不在引擎）。

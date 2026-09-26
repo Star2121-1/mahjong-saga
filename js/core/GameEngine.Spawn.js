@@ -476,7 +476,20 @@ Gp._renderHandTiles = function () {
             var cls = MH.isJoker(id) ? 'joker' : (id.replace(/[0-9]/g, '') === 'wan' ? 'wan' : id.indexOf('tong') === 0 ? 'tong' : id.indexOf('tiao') === 0 ? 'tiao' : (id.indexOf('feng_') === 0 ? 'wind' : 'arrow'));
             var marker = tingMap[id] ? '<span class="ting-mark ' + tingMap[id] + '"></span>' : '';
             slot.classList.add('occupied');
-            slot.innerHTML = marker + '<div class="tile-body ' + cls + '" style="color:' + (info.color || '#b62929') + '">' + (info.label || '?') + '</div>';
+            /* R317: 暴露牌 id 到 data-id，让 CSS 能按花色/点数画真实牌面
+               （此前只有 label 文本，CSS 无法区分「3万」和「8筒」的画法）。
+               数牌再把 label 拆成「点数 / 花色」两个节点 —— 真牌是点数在上、
+               花色在下，单个文本节点没法用 flex 上下排。 */
+            slot.setAttribute('data-id', id);
+            var lbl = info.label || '?';
+            var body;
+            if ((cls === 'wan' || cls === 'tong' || cls === 'tiao') && lbl.length === 2) {
+                body = '<span class="tk-rank">' + lbl.charAt(0) + '</span>' +
+                       '<span class="tk-suit">' + lbl.charAt(1) + '</span>';
+            } else {
+                body = lbl;
+            }
+            slot.innerHTML = marker + '<div class="tile-body ' + cls + '" style="color:' + (info.color || '#b62929') + '">' + body + '</div>';
         } else {
             slot.classList.remove('occupied');
             slot.innerHTML = '';

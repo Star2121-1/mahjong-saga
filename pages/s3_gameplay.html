@@ -15,6 +15,9 @@
     <link rel="stylesheet" href="../css/gameplay/gameplay-effects.css?v=20260908I">
     <link rel="stylesheet" href="../css/gameplay/gameplay-ui.css?v=20260908I">
     <link rel="stylesheet" href="../css/gameplay/gameplay-responsive.css?v=20260908I">
+    <!-- R317 墨底丹青主题：设计令牌 + 覆盖层，必须在所有旧 CSS 之后 -->
+    <link rel="stylesheet" href="../css/tokens.css?v=20260926A">
+    <link rel="stylesheet" href="../css/theme-mokudan.css?v=20260926A">
     <!-- 核心服务层 (低层依赖) -->
     <script src="../js/core/SaveManager.js?v=20260908I"></script>
     <script src="../js/core/SaveManager.Core.js?v=20260908I"></script>
@@ -22,11 +25,16 @@
     <script src="../js/core/SaveManager.Weekly.js?v=20260908I"></script>
     <script src="../js/core/SaveManager.Compendium.js?v=20260908I"></script>
     <script src="../js/core/SaveManager.RunStats.js?v=20260908I"></script>
+    <!-- R317-P0: Balance.js 必须早于 FxManager.js。
+         FxManager.js 在脚本求值时就 self-instantiate，其构造读 window.Balance.FCT_POOL_SIZE_INIT。
+         原顺序（Fx #7 / Balance #10）导致 window.Balance 尚不存在 → 抛 TypeError →
+         window.fxManager 整个为 undefined → 全部伤害飘字永久失效。
+         Balance.js 零依赖，提前加载安全。 -->
+    <!-- 数值常量 (所有模块依赖) -->
+    <script src="../js/config/Balance.js?v=20260908I"></script>
     <script src="../js/core/FxManager.js?v=20260908I"></script>
     <script src="../js/core/AudioManager.js?v=20260908I"></script>
     <script src="../js/core/RewardManager.js?v=20260908I"></script>
-    <!-- 数值常量 (所有模块依赖) -->
-    <script src="../js/config/Balance.js?v=20260908I"></script>
     <!-- 委托系统 -->
     <!-- R241-P0: 恢复GameSpawner.js — 否则敌人不生成（R183-P0误移除） -->
     <script src="../js/core/GameSpawner.js?v=20260908I"></script>

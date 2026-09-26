@@ -164,6 +164,13 @@ Fp._healthCheck = function() {
 
 /* ── 主动清理：游戏重置时回收所有活跃节点 ── */
 Fp.cleanup = function() {
+    /* R317-P0: _pool 在构造里初始化，但 _freeStack 是在 init() 里初始化的。
+       Boot.js 的 initNewRun 会在任何飘字产生之前就调 cleanup()（"R74-P1 重启清理"），
+       此时 _freeStack 还是 undefined → cleanup 抛 TypeError →
+       "[Boot] initialization failed" → 整局 setup 中断。
+       防御式补齐：cleanup 可能先于 init 被调用。 */
+    this._pool = this._pool || [];
+    this._freeStack = this._freeStack || [];
     /* R313-P0: 回收游离overflow节点 — _returnNode将overflow节点从_pool移除后加入_freeStack，
        但cleanup()只遍历_pool重建_freeStack，导致游离节点失去所有引用而永久泄漏DOM */
     var orphaned = [];

@@ -1,0 +1,50 @@
+{
+  "at": "2026-09-25T18:03:56.996Z",
+  "tag": "before-fix",
+  "pages": {
+    "s1": {
+      "url": "/pages/s1_save_select.html",
+      "nodes": 36,
+      "overflowX": false,
+      "over": [],
+      "uniqueColors": 21,
+      "radii": 4,
+      "radiusValues": [],
+      "fx": "undefined",
+      "engine": "undefined",
+      "mutator": "undefined",
+      "consoleErrors": []
+    },
+    "s2": {
+      "url": "/pages/s2_main_hub.html",
+      "nodes": 306,
+      "overflowX": false,
+      "over": [],
+      "uniqueColors": 41,
+      "radii": 12,
+      "radiusValues": [],
+      "fx": "undefined",
+      "engine": "undefined",
+      "mutator": "undefined",
+      "consoleErrors": []
+    },
+    "s3": {
+      "url": "/pages/s3_gameplay.html",
+      "nodes": 146,
+      "overflowX": false,
+      "over": [],
+      "uniqueColors": 44,
+      "radii": 10,
+      "radiusValues": [],
+      "fx": "undefined",
+      "engine": "object",
+      "mutator": "undefined",
+      "consoleErrors": [
+        "Cannot read properties of undefined (reading 'FCT_POOL_SIZE_INIT')",
+        "Cannot read properties of undefined (reading 'prototype')",
+        "Cannot read properties of undefined (reading 'FCT_POOL_SIZE_INIT')",
+        "Cannot read properties of undefined (reading 'prototype')"
+      ]
+    }
+  }
+}

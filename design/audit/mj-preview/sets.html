@@ -1,0 +1,88 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<title>麻将牌面 · 三版对比 + 色调微调</title>
+<style>
+:root{--ink-900:#0b0f12;--ink-800:#131a1f;--ink-700:#1a232a;--ink-500:#33424c;
+      --ink-200:#9fb1bb;--ink-300:#7b8d97;--ink-050:#e4ecef;--ivory:#f2ece0;--ivory-2:#e4dbc9;
+      --ivory-3:#cfc3ab;--ivory-edge:#b6a98f;--ivory-side:#d6cab2;--jin:#e2be5c;--qing:#3fb587}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--ink-900);color:var(--ink-200);padding:30px;
+     font:15px/1.65 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+h1{font-size:25px;color:var(--ink-050);font-weight:400;margin-bottom:6px}
+.lead{font-size:13px;color:var(--ink-300);max-width:100ch;margin-bottom:24px}
+.lead b{color:var(--jin);font-weight:400}
+h2{font-size:18px;color:var(--ink-050);font-weight:400;margin:30px 0 10px;padding-bottom:7px;border-bottom:1px solid var(--ink-500)}
+.sets{display:grid;gap:22px}
+.card{background:var(--ink-800);box-shadow:inset 0 0 0 1px var(--ink-500);padding:16px}
+.card__h{display:flex;align-items:baseline;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.card__n{font-size:15px;color:var(--ink-050)}
+.card__m{font-size:12px;color:var(--ink-300)}
+.lic{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--qing);margin-left:10px}
+.tr{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start}
+.tr__b{text-align:center}
+.tr__l{font-size:11px;color:var(--ink-300);margin-top:6px;letter-spacing:.08em}
+.tile{--tw:52px;--th:68px;position:relative;width:var(--tw);height:var(--th);
+  border-radius:3px;background:linear-gradient(158deg,#fffdf7 0%,var(--ivory) 48%,var(--ivory-2) 100%);
+  border:1px solid var(--ivory-edge);
+  box-shadow:2px 0 0 var(--ivory-3),0 2px 0 var(--ivory-side),2px 2px 0 var(--ivory-edge),
+             0 5px 9px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.9);
+  display:grid;place-items:center;overflow:hidden}
+.tile img{width:100%;height:100%;object-fit:contain;display:block}
+.tx-0 img{filter:none}
+.tx-1 img{filter:saturate(.86) contrast(1.04) brightness(.98)}
+.tx-2 img{filter:saturate(.62) contrast(1.10) brightness(.94) sepia(.10)}
+.tx-3 img{filter:saturate(.30) contrast(1.18) brightness(.92)}
+.row{display:flex;gap:3px;padding:8px;background:var(--ink-800);box-shadow:inset 0 0 0 1px var(--ink-500)}
+.sheet{image-rendering:pixelated;width:256px;height:256px;background:var(--ink-800);
+       box-shadow:inset 0 0 0 1px var(--ink-500)}
+.verdict{background:var(--ink-800);box-shadow:inset 0 0 0 1px var(--ink-500);
+         border-left:2px solid var(--jin);padding:14px 16px;margin-top:14px}
+.verdict h3{font-size:14px;color:var(--ink-050);font-weight:400;margin-bottom:8px}
+.verdict p{font-size:12.5px;color:var(--ink-200);line-height:1.85;margin-bottom:6px}
+.verdict b{color:var(--jin);font-weight:400}
+code{font-family:ui-monospace,Menlo,monospace;color:#9fe0c0}
+</style></head><body>
+<h1>麻将牌面 · 三版对比 + 色调微调</h1>
+<p class="lead">全部为<b>可商用且许可干净</b>的来源。每版都用<b>同一套牌体</b>（象牙面 + 厚度 + 落影，纯 CSS），
+只有牌面 artwork 不同 —— 这样比才公平。四种色调处理叠在同一套 artwork 上。</p>
+<div class="sets" id="root"></div>
+<div class="verdict">
+<h3>我的判断（你可以否决）</h3>
+<p><b>版本 A + tx-2（降饱和 + 轻 sepia）</b> 最平衡：牌面仍认得出是麻将，但饱和度压到不跟界面打架；
+象牙牌体在墨底上是全画面唯一的暖色与唯一有质感的东西，视觉焦点自然落在手牌上。</p>
+<p><b>版本 C（CC0 像素）</b> 许可最干净（连署名都不要求）、体积小 18 倍、42 张齐全 ——
+但像素风和「墨底丹青」是两种语言，放一起像贴错文件。除非你决定整体走像素路线。</p>
+<p><b>版本 B</b> 是 A 的高清重绘版，但 Wikimedia 上部分条目 404，只拿到 17 张，不完整。</p>
+</div>
+<script>
+const A=['MJ3wan','MJ7wan','MJ1bing','MJ5bing','MJ9bing','MJ2tiao','MJ8tiao',
+         '0401東風','0403南風','0405中','0406發','0407白','0505梅'];
+const B=['0101一萬','0201一餅','0301一條','0401東風','0405中','0406發','0407白','0505梅'];
+const SETS=[
+  {n:'版本 A · Shizhao / Wikimedia Commons',m:'75 × 95 SVG · 41 张 · gzip 137KB',
+   lic:'PD-self（著作权人放弃著作权）',list:A,dir:'',tx:true},
+  {n:'版本 B · Shizhao 高清重绘版',m:'140 × 200 SVG · 仅 17 张（Wikimedia 部分条目 404）',
+   lic:'PD-self',list:B,dir:'B/',tx:true},
+  {n:'版本 C · /dev/urandom / OpenGameArt',m:'256 × 256 整张 sprite · 7.5KB',
+   lic:'CC0（连署名都不要求）',gif:true,tx:false},
+];
+const TX=[['tx-0','原样'],['tx-1','轻微收敛'],['tx-2','贴合墨底丹青'],['tx-3','近单色']];
+const tile=(f,cls)=>`<div class="tile ${cls}"><img src="${f}" alt=""></div>`;
+let h='';
+for(const s of SETS){
+  h+=`<div class="card"><div class="card__h"><span class="card__n">${s.n}</span>
+      <span class="lic">${s.lic}</span><span class="card__m">${s.m}</span></div>`;
+  if(s.gif){
+    h+=`<div class="tr"><div class="tr__b"><img class="sheet" src="oga.gif"><div class="tr__l">整张 sheet（原尺寸）</div></div>
+        <div class="tr__b"><div style="transform:scale(1.6);transform-origin:top left">
+        <img class="sheet" src="oga.gif"></div><div class="tr__l">放大 1.6× 看像素</div></div></div>`;
+  } else {
+    h+='<div class="tr">';
+    for(const [cls,label] of (s.tx?TX:[['tx-0','']]))
+      h+=`<div class="tr__b"><div class="row">${s.list.map(f=>tile(s.dir+f+'.svg',cls)).join('')}</div>
+          ${label?`<div class="tr__l">${label}</div>`:''}</div>`;
+    h+='</div>';
+  }
+  h+='</div>';
+}
+document.getElementById('root').innerHTML=h;
+</script></body></html>

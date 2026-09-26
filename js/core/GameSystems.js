@@ -136,8 +136,22 @@ Sys.endOverdrive = function(engine) {
 };
 
 /* R309-P0: 将Sys.endOverdrive绑定到GameEngine.prototype，修复_caller的TypeError崩溃
-   调用者: Loop.js(计时器到期), Combat.js(_gameOver), SaveManager.Core.js(断点恢复), Endgame.js(restart/_enterAbyss) */
-window.GameEngine.prototype._endOverdrive = Sys.endOverdrive;
+   调用者: Loop.js(计时器到期), Combat.js(_gameOver), SaveManager.Core.js(断点恢复), Endgame.js(restart/_enterAbyss)
+
+   R317-P0 修复加载顺序 bug：本文件在 s3 里是第 12 个脚本，GameEngine.js 是第 22 个。
+   原写法 `window.GameEngine.prototype._endOverdrive = Sys.endOverdrive;` 在求值时
+   window.GameEngine 尚不存在 → 抛 TypeError → 本行之后整个文件（Sys.showMutatorPanel
+   突变面板等）全部丢失。改为：能立刻绑就绑，否则等 DOMContentLoaded
+   （此时所有 classic script 都已执行完，GameEngine 一定存在）。 */
+(function bindEndOverdrive() {
+    if (window.GameEngine) {
+        window.GameEngine.prototype._endOverdrive = Sys.endOverdrive;
+        return;
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.GameEngine) window.GameEngine.prototype._endOverdrive = Sys.endOverdrive;
+    });
+})();
 
 /* ── 突变系统 ── */
 
