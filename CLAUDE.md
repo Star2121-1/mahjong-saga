@@ -132,6 +132,10 @@ Two localStorage keys:
 - **Responsive base**: `transform: scale()` 缩放。**设计分辨率按页面不同** ——
   `js/responsive.js:14-18`：s1 存档页 480×720，s2 大本营 / s3 战斗页 1920×1080。
   坐标数学按各自基准算。`--_fs` CSS 变量补偿缩放。
+  **容器尺寸被钉死为 BASE_W×BASE_H，只有 transform 在变**（实测 4 个视口全部如此）——
+  所以源 CSS 里的 `@media` 断点按真实视口判断时会造成**双重缩小**，
+  主题层 15 处 `!important` 恰好压死它们。**不要为了「修好响应式」去掉那些 `!important`。**
+  `design/audit/probe-viewport.mjs` 守着这个不变量。
 - **Primary doc**: `GAME_BIBLE.md` is the single consolidated reference (architecture, data tables, iron laws, known issues, active workstream). Historical docs are archived in `_archive/` when they exist.
 - **Epoch tracking**: history in `_archive/docs/mahjong_saga_evolution.md` (read-only). Current branch: `feat/fix-flash-and-waves`.
 - **Active design**: 胡牌系统 spec lives in `HUPAI_DESIGN.md` — read before touching collection/reward systems. The 雀魂 system (MahjongHand.js) is Active and fully wired into s3_gameplay.html.
