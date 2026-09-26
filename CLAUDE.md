@@ -80,12 +80,12 @@ JS:  SaveManager → SaveManager.Core → SaveManager.Season → SaveManager.Wee
 | `config/` | `LevelConfig.js` | Level definitions + procedural generation |
 | `config/` | `AchievementConfig.js` | Achievement definitions + detection |
 | `config/` | `Balance.js` | 170+ magic number constants centralized |
-| `page/` | `main_hub.js` | Main hub controller (10 tabs: tavern/talents/forge/expedition/mutation/compendium/achievements/stats/history) |
+| `page/` | `main_hub.js` | Main hub controller. 8 tabs (tavern/talents/forge/mutation/compendium/achievements/stats/history) + 右侧常驻「出征准备」栏 `#hub-expedition-rail`（原 expedition 面板，R319 起不再是 tab） |
 | `page/` | `save_select.js` | Save select controller |
 | `utils/` | `dom-utils.js` | DOM helper functions |
 | `utils/` | `format-utils.js` | Time/string formatting |
 | `utils/` | `math-utils.js` | Math utility functions |
-| Root | `responsive.js` | 480×720 viewport scaling |
+| Root | `js/responsive.js` | 视口缩放。设计分辨率按页分：s1 = 480×720，s2/s3 = 1920×1080 |
 
 ### Key Global Singles
 
@@ -125,10 +125,13 @@ Two localStorage keys:
 
 - **No build tools** — raw HTML/CSS/JS. Any change to script load order in HTML must propagate to all three HTML files.
 - **Global namespace** — all modules attach to `window`. No `import`/`export`. Respect dependency order.
-- **GameEngine is split into 12 files** — never edit the monolith. The base file is only ~130 lines of constructor + delegation stubs.
+- **GameEngine is split into 13 files** (12 sub-modules + base) — never edit the monolith.
+  The base file is only ~130 lines of constructor + delegation stubs.
 - **Balance.js** — all magic numbers must go through `window.Balance.*`. Do not add new hardcoded numbers.
 - **CSS-only graphics** — mahjong tile appearance uses layered `box-shadow` sandwich technique. Do not introduce image assets.
-- **Responsive base**: 480×720 container scaled via `transform: scale()`. All coordinate math assumes this base size. `--_fs` CSS variable compensates for scale.
+- **Responsive base**: `transform: scale()` 缩放。**设计分辨率按页面不同** ——
+  `js/responsive.js:14-18`：s1 存档页 480×720，s2 大本营 / s3 战斗页 1920×1080。
+  坐标数学按各自基准算。`--_fs` CSS 变量补偿缩放。
 - **Primary doc**: `GAME_BIBLE.md` is the single consolidated reference (architecture, data tables, iron laws, known issues, active workstream). Historical docs are archived in `_archive/` when they exist.
 - **Epoch tracking**: history in `_archive/docs/mahjong_saga_evolution.md` (read-only). Current branch: `feat/fix-flash-and-waves`.
 - **Active design**: 胡牌系统 spec lives in `HUPAI_DESIGN.md` — read before touching collection/reward systems. The 雀魂 system (MahjongHand.js) is Active and fully wired into s3_gameplay.html.

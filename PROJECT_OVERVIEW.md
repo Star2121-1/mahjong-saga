@@ -58,7 +58,7 @@ index.html（纯落地页）
     ↓ 点击「开始游戏」
 pages/s1_save_select.html（存档选择 / 设置）
     ↓ 选择存档或新建
-pages/s2_main_hub.html（大本营 — 10 个面板）
+pages/s2_main_hub.html（大本营 — 8 个面板 + 右侧常驻「出征准备」栏）
     ↓ 点击「轰然出征」
 pages/s3_gameplay.html（核心战斗场景）
 ```
@@ -136,7 +136,8 @@ pages/s3_gameplay.html（核心战斗场景）
 
 ### 雀魂胡牌系统（进行中）
 
-- **144张标准麻将**：数牌108 + 字牌28 + 花牌8
+- **42 种牌**：数牌 27（万/筒/条 各 1-9）+ 字牌 7（东南西北中发白）+ 花牌 8；
+  每种 5 张 → 178 张。`assets/tiles/` 的 42 张公版牌面 artwork 与牌种一一对应
 - **掉落管线**：普通怪6%掉落 + 精英硬锁主花色 + Boss必掉癞子（上限3）
 - **14格上阵手牌**：刻子=即时爆发 / 顺子=本局永久成长
 - **字牌事件**：东(击退眩晕) / 南(灼烧) / 西(减速) / 北(冰冻) / 中(全屏冲击) / 发(金币雨) / 白(清弹幕回血)
@@ -209,7 +210,7 @@ JS:  SaveManager → Core → Season → Weekly → Compendium → RunStats
 | `config/` | `HeroConfig.js` | 4英雄定义 |
 | `config/` | `LevelConfig.js` | 关卡定义 + 波次配置 |
 | `config/` | `AchievementConfig.js` | 成就定义 + 检测 |
-| `page/` | `main_hub.js` | 大本营控制器（10个tab） |
+| `page/` | `main_hub.js` | 大本营控制器（8 个 tab + 右栏常驻出征准备） |
 | `page/` | `save_select.js` | 存档选择控制器 |
 | `utils/` | `dom-utils.js` | DOM辅助函数 |
 | `utils/` | `format-utils.js` | 时间/字符串格式化 |
@@ -324,7 +325,7 @@ JS:  SaveManager → Core → Season → Weekly → Compendium → RunStats
 ### 版本信息
 
 - **当前版本**：v=20260827S
-- **文件总数**：86个项目文件（不含.git/.claude）
+- **文件总数**：214 个项目文件（不含 `.git` / `.claude` / `node_modules`）
 - **总大小**：约 29 MB
 - **活跃分支**：`feat/fix-flash-and-waves`
 
