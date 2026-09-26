@@ -61,7 +61,8 @@ for (let i = 0; i < 50; i++) {
 await log('战斗+走位后');
 
 // 最后一步不 autoAdvance（守卫 stepIndex < steps.length-1），设计上要玩家点「完成出征 ✓」
-for (let i = 0; i < 30; i++) { const s = await st(); if (!s.active) break; await p.waitForTimeout(500); }
+const dl3 = Date.now() + 20000;
+while (Date.now() < dl3) { const s = await st(); if (!s.active) break; await p.waitForTimeout(500); }
 if ((await st()).active) {
   const btn = await p.evaluate(() => { const n = document.getElementById('guide-next-btn');
     return n ? { 文字: n.textContent.trim(), 禁用: n.disabled, 可见: n.offsetParent !== null } : null; });

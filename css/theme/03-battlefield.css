@@ -218,10 +218,20 @@
     color: var(--ink-200) !important;
 }
 
-/* 武器栏：全屏条 → 右下角定宽容器 */
+/* 武器栏：全屏条 → 左下角（怒气条上方）
+   R323-P0 修正：原来放「右下角 right:16 bottom:16」，但右下角已经被占了两处 ——
+     #pause-btn      x 1821-1904, y 1049-1081
+     #joystick       x 1796-1896, y  926-1026
+   武器栏落在 x 1753-1904 / y 1039-1064，和暂停按钮**重叠 83px**，
+   两者文字叠在一起糊成一团（截图确认：「飞牌切 Lv.1 1s 1/6」和「⏸ 暂停」互相压字）。
+
+   改放左下、怒气条正上方：
+     武器栏  y 955-980  (bottom:100px)
+     怒气条  y 986-1002 (bottom: 78px)
+   两行贴在一起不重叠，且都在 x=40 起始，和手牌条（x≥564）、摇杆（x≥1796）都不冲突。 */
 #weapon-slot-bar {
     position: absolute !important;
-    right: 16px !important; bottom: 16px !important;
+    left: 40px !important; bottom: 100px !important; right: auto !important;
     width: auto !important; height: auto !important;
     background: none !important;
     border: 0 !important; padding: 0 !important;
@@ -245,4 +255,28 @@
 .hand-tile-slot.filled, .hand-tile-slot.has-tile {
     border-color: var(--ivory-edge) !important;
     box-shadow: var(--edge-lit) !important;
+}
+
+/* ── 摇杆：主题化 + 只在触摸设备显示 ──────────────────────────────────
+   R323 视觉游玩发现：摇杆是 `rgba(255,255,255,.08)` 底 + `2px solid rgba(255,255,255,.35)`
+   边框的一个纯白圆圈，和墨底丹青完全不像一家人；而且全项目没有任何触摸检测，
+   所以桌面端（用鼠标 + WASD）右下角也常驻一个手机虚拟摇杆。
+
+   修法：
+     1) 换成墨底 + 鎏金描边，和手牌/血条同一套语言；
+     2) `(hover:hover) and (pointer:fine)` = 有真鼠标的设备 → 隐藏。
+        触摸笔记本（pointer:coarse 不成立）仍会显示，不会误伤。 */
+#joystick-base {
+    background: radial-gradient(circle at 50% 42%, rgba(226,190,92,.10) 0%, rgba(11,15,18,.62) 70%) !important;
+    border: 1px solid var(--jin-line) !important;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.5), 0 2px 10px rgba(0,0,0,.45) !important;
+}
+#joystick-knob {
+    background: radial-gradient(circle at 42% 36%, #f0e6cf 0%, #cdbb95 45%, #8d7c5c 100%) !important;
+    border: 1px solid var(--jin-line) !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.5) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+    /* 有鼠标：移动靠 WASD / 点击地面，虚拟摇杆纯占地方 */
+    #joystick-container { display: none !important; }
 }
