@@ -559,6 +559,7 @@ button:focus-visible, [tabindex]:focus-visible {
     font-size: 26px !important;
     line-height: 1 !important;
     text-shadow: none !important;
+    overflow: hidden !important;   /* 配合下面 .tk-art 的 scale 裁掉 SVG 自带描边 */
     transition: transform var(--t-fast) var(--ease) !important;
 }
 .hand-tile-slot.occupied:hover .tile-body { transform: translateY(-5px); }
@@ -602,7 +603,9 @@ button:focus-visible, [tabindex]:focus-visible {
 .hand-tile-slot[data-id^="jian_"] .tile-body { font-size: 30px !important; }
 /* 白板：画一个双线空框 */
 .hand-tile-slot[data-id="jian_bai"] .tile-body { color: transparent !important; }
-.hand-tile-slot[data-id="jian_bai"] .tile-body::after {
+/* 白板双线框：仅在 artwork 加载失败（回落纯文字）时才由 CSS 画，
+   有 SVG 时它会和 SVG 自带描边叠成双框。 */
+.hand-tile-slot[data-id="jian_bai"]:not(:has(img.tk-art)) .tile-body::after {
     content: ""; position: absolute; inset: 11px 9px;
     border: 2px solid #2a3f6b; box-shadow: inset 0 0 0 1px rgba(42,63,107,.3);
 }
@@ -715,3 +718,47 @@ button:focus-visible, [tabindex]:focus-visible {
         repeating-linear-gradient(90deg, transparent 0 10px, rgba(30,111,66,.18) 10px 13px),
         linear-gradient(158deg, #fffdf7 0%, var(--ivory) 48%, var(--ivory-2) 100%) !important;
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   20. 公版牌面 artwork 接入
+   --------------------------------------------------------------------------
+   素材：assets/tiles/ 42 张，Wikimedia Commons / Shizhao / PD-self。
+   牌面只回答「画什么」，牌体（象牙面 / 厚度 / 受光 / 落影）仍由 CSS 控制 ——
+   所以换主题时形制跟着变，artwork 不用重画。这是 design/UI_SPEC.md §4.8
+   「inline SVG 是标记不是文件」的延续：这里用外链文件是为了缓存友好，
+   授权与体积已在 commit df6fa28 里登记。
+
+   色调做成变量，方便你在不改素材的前提下试不同档：
+     --tile-art-filter: none | 轻微收敛 | 贴合墨底丹青 | 近单色
+   ══════════════════════════════════════════════════════════════════════ */
+:root {
+  /* 当前档：贴合墨底丹青（saturate .62 + contrast 1.10 + 轻 sepia）。
+     牌面仍认得出是麻将，但饱和度压到不跟墨底界面打架。 */
+  --tile-art-filter: saturate(.62) contrast(1.10) brightness(.94) sepia(.10);
+}
+
+.hand-tile-slot .tk-art {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain;
+  display: block;
+  /* 公版 SVG 自带白色牌面底 + 一圈深色描边。直接 contain 塞进来会变成
+     「象牙牌体里嵌一张带框白卡」的双层框，牌子的立体感就废了。
+     做法：放大 12% 让 SVG 自带的边框被 tile-body 的 overflow 裁掉，
+     只留下「印刷面」，牌体（象牙/厚度/受光/落影）完全交给 CSS。 */
+  transform: scale(1.02);   /* 1.12 会把「三萬」的「三」切掉一截 —— 宁留 1px 边也别切字 */
+  transform-origin: center;
+  filter: var(--tile-art-filter);
+  -webkit-user-drag: none; user-select: none;
+}
+/* 癞子没有公版图，保持 CSS 紫调 + 癞字 */
+.hand-tile-slot[data-id="joker"] .tile-body {
+  background: linear-gradient(158deg, #f3eaff, #ded0f5 60%, #c9b8e8) !important;
+  border-color: #7c4dff !important;
+  font-family: var(--f-serif) !important;
+  font-size: 26px !important;
+  color: #5b21b6 !important;
+}
+/* 图加载失败时回落：文字已经作为 .tk-rank/.tk-suit 备好了，
+   img 是 absolute 覆盖层，不可用时底下的文字自然露出。 */
+.hand-tile-slot .tk-art:not([src]), .hand-tile-slot img.tk-art[src=""] { display: none; }

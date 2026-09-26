@@ -1,4 +1,22 @@
 (function() {
+
+    /* R317: 牌 id → assets/tiles/ 文件名。
+       素材：Wikimedia Commons，作者 Shizhao，PD-self（著作权人放弃著作权，可商用免署名）。
+       42 张（27 数牌 + 7 字牌 + 8 花牌）。癞子无公版图，走 CSS 紫调。 */
+    var TILE_ART = {
+        wan1:'MJ1wan.svg', wan2:'MJ2wan.svg', wan3:'MJ3wan.svg', wan4:'MJ4wan.svg', wan5:'MJ5wan.svg',
+        wan6:'MJ6wan.svg', wan7:'MJ7wan.svg', wan8:'MJ8wan.svg', wan9:'MJ9wan.svg',
+        tong1:'MJ1bing.svg', tong2:'MJ2bing.svg', tong3:'MJ3bing.svg', tong4:'MJ4bing.svg', tong5:'MJ5bing.svg',
+        tong6:'MJ6bing.svg', tong7:'MJ7bing.svg', tong8:'MJ8bing.svg', tong9:'MJ9bing.svg',
+        tiao1:'MJ1tiao.svg', tiao2:'MJ2tiao.svg', tiao3:'MJ3tiao.svg', tiao4:'MJ4tiao.svg', tiao5:'MJ5tiao.svg',
+        tiao6:'MJ6tiao.svg', tiao7:'MJ7tiao.svg', tiao8:'MJ8tiao.svg', tiao9:'MJ9tiao.svg',
+        feng_dong:'0401東風.svg', feng_xi:'0402西風.svg',
+        feng_nan:'0403南風.svg', feng_bei:'0404北風.svg',
+        jian_zhong:'0405中.svg', jian_fa:'0406發.svg', jian_bai:'0407白.svg',
+        hua_chun:'0501春.svg', hua_xia:'0502夏.svg', hua_qiu:'0503秋.svg',
+        hua_dongJ:'0504冬.svg', hua_mei:'0505梅.svg', hua_lan:'0506蘭.svg',
+        hua_ju:'0507菊.svg', hua_zhu:'0508竹.svg'
+    };
     'use strict';
     var Gp = window.GameEngine.prototype;
 
@@ -482,13 +500,18 @@ Gp._renderHandTiles = function () {
                花色在下，单个文本节点没法用 flex 上下排。 */
             slot.setAttribute('data-id', id);
             var lbl = info.label || '?';
-            var body;
-            if ((cls === 'wan' || cls === 'tong' || cls === 'tiao') && lbl.length === 2) {
-                body = '<span class="tk-rank">' + lbl.charAt(0) + '</span>' +
-                       '<span class="tk-suit">' + lbl.charAt(1) + '</span>';
-            } else {
-                body = lbl;
-            }
+            /* R317: 接入公版牌面 artwork（assets/tiles/，Wikimedia Shizhao，PD-self）。
+               牌面只提供「画什么」，牌体（象牙面/厚度/受光/落影）仍由 CSS 控制 ——
+               这样换主题时形制跟着变，artwork 不用重画。
+               保留 .tk-rank/.tk-suit 作为 img 加载失败时的文字回落。 */
+            /* 路径必须以 ../ 开头：游戏页在 pages/ 下，素材在仓库根的 assets/tiles/。
+               写成 'assets/tiles/...' 会解析成 /pages/assets/... → 404（踩过）。 */
+            var art = (id === 'joker') ? '' : '../assets/tiles/' + TILE_ART[id];
+            var body = art
+                ? '<img class="tk-art" src="' + art + '" alt="' + lbl + '" draggable="false">'
+                : ((cls === 'wan' || cls === 'tong' || cls === 'tiao') && lbl.length === 2
+                    ? '<span class="tk-rank">' + lbl.charAt(0) + '</span><span class="tk-suit">' + lbl.charAt(1) + '</span>'
+                    : lbl);
             slot.innerHTML = marker + '<div class="tile-body ' + cls + '" style="color:' + (info.color || '#b62929') + '">' + body + '</div>';
         } else {
             slot.classList.remove('occupied');

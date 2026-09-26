@@ -320,3 +320,29 @@ s2 主 CTA 由「全屏红条」改「限宽鎏金」（红色在语义契约里
 **未完成**：敌人动作帧（行走/攻击/受击）仍是静态牌；s2 中部在部分 Tab 下有大片空白
 （属 `main_hub.js` 的面板切分逻辑，不是 CSS 能解决的）；`design/spike-webgl/` 的
 WebGL 技术验证结论见该目录 README（结论：不采用，瓶颈在美术不在引擎）。
+
+### 公版麻将牌面素材（assets/tiles/）
+
+- **来源**：Wikimedia Commons，作者 Shizhao，**PD-self**（著作权人放弃著作权，可商用免署名）。
+- **内容**：42 张 SVG（27 数牌 + 7 字牌 + 8 花牌），`assets/tiles/`，656KB / gzip 138KB。
+- **接入方式**：`GameEngine.Spawn.js` 的 `TILE_ART` 表把牌 id 映射到文件名；
+  `_addTileToHand` → `_renderHandTiles` 渲染 `<img class="tk-art">`。
+- **关键约定 —— 牌面只回答「画什么」，牌体形制完全由 CSS 控制**
+  （象牙面 / 厚度 / 受光 / 落影）。所以换主题时形制跟着变，artwork 不用重画。
+  这是 `UI_SPEC.md §4.8`「inline SVG 是标记不是文件」的延续。
+- **坑**：
+  1. 路径必须 `../assets/tiles/`（游戏页在 `pages/` 下，写 `assets/tiles/` 会解析成
+     `/pages/assets/...` → 整排牌 404 且**不报错**，img 失败是静默的）。
+  2. 公版 SVG 自带白色牌面底 + 一圈深色描边。直接 `object-fit:contain` 塞进象牙牌体
+     会变成「牌体里嵌一张带框白卡」的双层框。做法：`.tk-art { transform: scale(1.02) }`
+     + `.tile-body { overflow:hidden }` 裁掉自带描边。**不要超过 1.05** ——
+     1.12 会把「三萬」的「三」切掉一截。
+  3. 表里写 `'0401\u6771\u98a8.svg'` 运行时没问题（浏览器会解转义），但静态自检
+     比对的是源码字面量 → 报「缺文件 + 孤儿文件」。**表里一律写字面中文名。**
+- **色调**：`--tile-art-filter` 变量控制，当前 `saturate(.62) contrast(1.10) brightness(.94) sepia(.10)`
+  （贴合墨底丹青）。想试其他档改这一个变量即可，不用动素材。
+- **癞子**：无公版图，走 CSS 紫调。
+- **花牌不进手牌**（`_addTileToHand` 里 `isFlower` → `_triggerFlowerEvent` 直接 return），
+  8 张花图目前只在 `design/audit/mj-preview/` 预览页使用。
+- **自检**：`verify.mjs` 有一项静态断言检查映射完整性 + 孤儿文件（不依赖服务器，很快）；
+  `probe-art.mjs` 做浏览器端解码与截图复核。

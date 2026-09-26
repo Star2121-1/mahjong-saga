@@ -2,6 +2,31 @@
    用法：node design/audit/verify.mjs [s1|s2|s3]   不传则三页都查 */
 import { chromium } from '../../node_modules/playwright/index.mjs';
 
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
+
+/* ── 静态检查：牌面素材映射 ────────────────────────────────────────────
+   TILE_ART 在 GameEngine.Spawn.js 的 IIFE 里，没导出，所以从源码正则取。
+   比在浏览器里跑一遍再数 <img> 早得多，也不受时序影响。
+   风险场景：素材被改名/误删 → 手牌整排空白且不报错（img 404 是静默的）。 */
+function checkTileArt() {
+  const out = { name: '牌面素材映射完整', ok: true, got: '' };
+  try {
+    const src = readFileSync('js/core/GameEngine.Spawn.js', 'utf8');
+    const tbl = src.match(/var TILE_ART = \{([\s\S]*?)\n    \};/);
+    if (!tbl) { out.ok = false; out.got = 'Spawn.js 里找不到 TILE_ART'; return out; }
+    const pairs = [...tbl[1].matchAll(/(\w+)\s*:\s*'([^']+)'/g)];
+    const missing = pairs.filter(([, , f]) => !existsSync('assets/tiles/' + f)).map(([, id, f]) => id + '→' + f);
+    const onDisk = readdirSync('assets/tiles').filter(f => f.endsWith('.svg'));
+    out.got = `${pairs.length} 映射 / ${onDisk.length} 文件` + (missing.length ? ' | 缺: ' + missing.join(', ') : '');
+    out.ok = !missing.length;
+    /* 反向：磁盘上多出来的孤儿文件（改了 id 但没删旧图）也要报出来 */
+    const used = new Set(pairs.map(([, , f]) => f));
+    const orphan = onDisk.filter(f => !used.has(f));
+    if (orphan.length) { out.ok = false; out.got += ' | 孤儿: ' + orphan.join(','); }
+  } catch (e) { out.ok = false; out.got = e.message; }
+  return out;
+}
+
 const PAGES = process.argv[2] ? [process.argv[2]] : ['s1', 's2', 's3'];
 const URLS = { s1: 's1_save_select', s2: 's2_main_hub', s3: 's3_gameplay' };
 const b = await chromium.launch();
@@ -66,5 +91,14 @@ for (const id of PAGES) {
   await ctx.close();
 }
 await b.close();
+
+/* 静态检查不依赖服务器，任何时候都跑 */
+{
+  const c = checkTileArt();
+  if (!c.ok) fail++;
+  console.log(`\n── 静态`);
+  console.log(`   ${c.ok ? '✔' : '✘'} ${c.name}${c.ok ? '   → ' + c.got : '   → ' + c.got}`);
+}
+
 console.log(fail ? `\n✘ ${fail} 项未通过` : '\n✔ 全部通过');
 process.exit(fail ? 1 : 0);
