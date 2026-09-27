@@ -31,7 +31,20 @@ const st = () => p.evaluate(() => { const g = window.gameEngine;
   return { step: g._currentGuideStep, running: g.running,
            frozen: (document.getElementById('game-container')||{}).classList.contains('game-clock-frozen'),
            enemies: g.enemies.filter(e=>e.alive).length, hits: g._guideHits, gems: g._guideGemsPicked,
-           active: !!document.querySelector('#guide-overlay.active') }; });
+           active: !!document.querySelector('#guide-overlay.active'),
+           突变面板: !!document.querySelector('#mutator-overlay.active') }; });
+
+/* R323-P0 修复后「生成计数器」会自增了，于是**突变面板可能在教学期间弹出**
+   （此前 mutatorTriggered 恒为 false，5 个突变全是死内容，从未在正常游玩出现过）。
+   面板会 _freezeClock() 停住游戏循环 —— 探针不处理就表现为「教学卡住」的 flake。 */
+const dismissMutator = async () => {
+  if (!(await p.locator('#mutator-overlay.active').count())) return false;
+  const o = p.locator('#mutator-overlay .mutator-option, #mutator-overlay [data-mutator], #mutator-overlay button').first();
+  if (await o.count()) await o.click({ force: true }).catch(() => {});
+  await p.waitForTimeout(400);
+  return true;
+};
+
 const log = async (t) => { const s = await st(); console.log(`  ${t.padEnd(26)} 步=${s.step} running=${s.running?'✔':'✘'} 冻结=${s.frozen?'是':'否'} 敌=${s.enemies} 命中=${s.hits} 拾取=${s.gems} 面板=${s.active?'开':'关'}`); return s; };
 
 await log('刚进战斗页');
@@ -62,7 +75,11 @@ await log('战斗+走位后');
 
 // 最后一步不 autoAdvance（守卫 stepIndex < steps.length-1），设计上要玩家点「完成出征 ✓」
 const dl3 = Date.now() + 20000;
-while (Date.now() < dl3) { const s = await st(); if (!s.active) break; await p.waitForTimeout(500); }
+while (Date.now() < dl3) {
+  if (await dismissMutator()) continue;
+  const s = await st(); if (!s.active) break;
+  await p.waitForTimeout(500);
+}
 if ((await st()).active) {
   const btn = await p.evaluate(() => { const n = document.getElementById('guide-next-btn');
     return n ? { 文字: n.textContent.trim(), 禁用: n.disabled, 可见: n.offsetParent !== null } : null; });

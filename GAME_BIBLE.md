@@ -682,3 +682,71 @@ R323 的三处 P0（怒气条被压住、武器栏压暂停按钮、免费奖励
 - **`takeDamage` 会被无敌帧静默吃掉**：`player.invulnTimer > 0` 时伤害无效，
   前面的战斗环节很容易留下它 → 这一击被吞 → 误判成「结算坏了」。
   测试致命一击前必须 `invulnTimer = 0`。
+
+### R324：真实游玩挖出的两个 P0（门禁全绿也照样存在）
+
+这一轮的教训一句话：**「能进得去、能动得了」和「游戏能玩完」是两件事。**
+前面十个探针全部只验证前者。
+
+---
+
+#### P0-1 Overdrive 一用就废掉这局
+
+`Sys.endOverdrive = function(engine) { if (!engine._overdriveActive) return; ... }`
+
+**所有调用点都是 `this._endOverdrive()`**（Loop.js:532 / Combat.js:363,749 /
+Endgame.js:208 / SaveManager.Core.js:541）—— 也就是把 `this` 当第一个参数传，
+而签名要的是 `engine`。于是 `engine` 恒为 `undefined`，第 2 行直接抛 TypeError，
+错误被主循环 try/catch 吞成「Game loop error」**每帧刷屏**。
+
+后果比报错严重：抛在 `engine._overdriveActive = false` **之前**，所以
+**Overdrive 永远不会结束** —— 敌人速度永久停在 0、特效永不消失、
+`_overdriveTimer` 归零后每帧重试。实测：3 秒的 Overdrive，4.5 秒后
+`active` 仍为 true、敌人速度仍为 0；真实游玩 45 秒刷出 **256 条**同款错误。
+**用过一次 Overdrive，这一局就废了。**
+
+**为什么绑定的是坏版本**：`GameSystems.js` 是 s3 第 12 个脚本、`GameEngine.js` 是第 22 个，
+所以 `window.GameEngine` 当时不存在 → 走**延后绑定**（`DOMContentLoaded`）→
+把 `Sys.endOverdrive` 写回原型，**覆盖掉 `Events.js` 里正确的 `Gp._endOverdrive`**。
+这和 R317 修的三个加载顺序 bug 是同一类，我修了三个漏了这个。
+
+**为什么所有门禁都没抓到**：
+- `verify.mjs` 只断言 `typeof _endOverdrive === 'function'` —— 坏函数也是 function
+- 只有怒气真正攒满、Overdrive 真正触发才会走到这条路径 —— 之前的探针从没打到
+
+修法：`engine = engine || this`，同时接受两种调用约定。
+
+#### P0-2 生成计数器从不自增 → 敌人无限刷 + 波次永不推进 + 游戏无法通关
+
+`Ss._spawnEnemy`（`GameSpawner.js:124`，真正的刷怪路径）**从头到尾没有自增任何计数器**。
+那句 `if (!enemy.isBoss) this.currentWaveSpawnedCount++;` 还留在**一个没人调用的旧
+`spawn()`** 里（第 249 行）—— 刷怪路径迁移时落下了。
+
+**一个根因，三个后果**：
+1. `GameSpawner.js:126` 的 cap 守卫读的就是这个计数器 → 永不触发
+   → **敌人无限刷新**（实测同屏敌 6→12→持续增长，从不清空）
+2. `GameEngine.Loop.js:701` 的波次推进门要求
+   `currentWaveSpawnedCount >= _getWaveEnemyMax()`（level_1 = 20），而引擎那份也是 0
+   → **波次永不推进 → Boss 不出现 → 游戏无法通关**
+3. `Loop.js:233` 的突变触发条件是 `currentWaveSpawnedCount > 0` → 恒为 false
+   → **血月/狂乱/引力/脆弱/枯萎 5 个突变在正常游玩中从未出现过，是死内容**
+
+修法：在 `_spawnEnemy` 里同时自增两份计数（spawner 那份给 cap 守卫，
+engine 那份给波次门与突变触发）。修复后实测：计数正常爬升并在 cap 处停住、
+同屏敌稳定、突变首次能触发、第 1 波能推进到第 2 波。
+
+#### 连带影响：两个探针需要跟着改
+
+- `probe-guide` 变 flaky：突变以前从不触发，修复后会在教学期间弹面板并冻结时钟。
+  已加 `dismissMutator()`，连跑 3 次稳定。
+- `probe-realplay` 也要处理突变面板，否则表现为「游戏时间不走」。
+
+#### 还没做到的
+
+`probe-realplay` 想让机器人**从第 1 波打到第 3 波**，但我写的战斗 AI
+打不中移动中的敌人（点过去时坐标已失效），45 秒才攒到 2 点经验。
+`probe-progression` 改用引擎的击杀路径清场，能推进到第 2 波，
+但 `enemy.takeDamage()` 在脚本注入的大伤害下没走完整死亡流程，尸体仍留在数组里。
+
+**所以「连续多波的真实节奏」目前仍未被自动化验证** —— 这是测试工具的限制，
+不是已知的产品缺陷。**需要你实际玩一下确认波次能正常推进到 Boss。**

@@ -87,7 +87,25 @@ Sys.triggerOverdrive = function(engine) {
 };
 
 Sys.endOverdrive = function(engine) {
-    if (!engine._overdriveActive) return;
+    /* R323-P0 关键修复：所有调用点都是 `this._endOverdrive()`（Loop.js:532 /
+       Combat.js:363,749 / Endgame.js:208 / SaveManager.Core.js:541），
+       也就是**把 this 当作第一个参数传**，而函数签名是 function(engine) ——
+       于是 engine 恒为 undefined，第 2 行 `engine._overdriveActive` 直接抛
+       TypeError，错误被主循环 try/catch 吞成「Game loop error」每帧刷屏。
+
+       后果比报错严重得多：抛在 `engine._overdriveActive = false` **之前**，
+       所以 Overdrive 永远不会结束 —— 敌人速度永久停在 0、特效永不消失、
+       _overdriveTimer 归零后每帧重试。**用过一次 Overdrive，这一局就废了。**
+       实测：3 秒的 Overdrive，4.5 秒后 active 仍为 true、敌人速度仍为 0；
+       真实游玩 45 秒刷出 256 条同款错误。
+
+       为什么之前所有门禁都没抓到：
+         - verify.mjs 只断言 `typeof _endOverdrive === 'function'`，坏函数也是 function；
+         - 只有怒气真正攒满、Overdrive 真正触发时才会走到这条路径 ——
+           之前的探针从没打到这个条件。
+       修法：同时接受两种调用约定（this / 显式参数）。 */
+    engine = engine || this;
+    if (!engine || !engine._overdriveActive) return;
     engine._overdriveActive = false;
     engine._overdriveTimer = 0;
 

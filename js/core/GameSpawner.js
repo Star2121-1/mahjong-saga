@@ -203,6 +203,30 @@ Ss._spawnEnemy = function(engine, isBoss) {
 
     this.engine.enemies.push(enemy);
 
+    /* R323-P0 关键修复：本函数**原先完全不自增波次生成计数器**。
+       那句 `if (!enemy.isBoss) this.currentWaveSpawnedCount++;` 还留在下面
+       一个**没人调用的旧 spawn()** 里（GameSpawner.js:249）——
+       刷怪路径迁移到 Ss._spawnEnemy 时落下了。
+
+       一个根因，两个致命后果：
+       1) 上面第 126 行的 cap 守卫读的就是这个计数器 → 永不触发
+          → **敌人无限刷新**（实测同屏敌 6→12→持续增长，从不清空）
+       2) GameEngine.Loop.js:701 的波次推进门要求
+          `currentWaveSpawnedCount >= this._getWaveEnemyMax()`（level_1 是 20）
+          而引擎那份计数也永远是 0 → **波次永不推进 → Boss 不出现 → 游戏无法通关**
+
+       为什么所有门禁都没抓到：
+         - verify.mjs 只断言符号存在；
+         - probe-endgame 直接调 `_showVictory()` 跳过了波次；
+         - probe-playthrough 只验证「动得了」，没验证「能推进」。
+       只有**真的从第 1 波打到第 3 波**才会暴露。
+
+       两份计数都要动：spawner 那份给 cap 守卫用，engine 那份给波次门和突变触发用。 */
+    if (!enemy.isBoss) {
+        this.currentWaveSpawnedCount++;
+        this.engine.currentWaveSpawnedCount++;
+    }
+
     /* R129-P1: 超驱动期间新刷出的敌人也应冻结，防止机制遗漏 */
     if (this.engine._overdriveActive && enemy && enemy.alive) {
         enemy._overdriveStored = true;
