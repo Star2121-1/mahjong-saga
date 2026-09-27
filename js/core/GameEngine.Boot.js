@@ -974,7 +974,12 @@ Gp._initKeyboard = function() {
         }
         if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyW','KeyA','KeyS','KeyD',
              'Numpad8','Numpad2','Numpad4','Numpad5','Numpad6','Numpad1','Numpad3','Numpad7','Numpad9'].includes(e.code)) e.preventDefault();
-        if (e.code === 'Space' && self.player && self.player.rage >= self.player.maxRage && !self._overdriveActive && !self._paused && !self._announcingWave && !self._discardMode && !self._huLock && !self._pendingReward && !self._levelUpPending && !self._gambleActive && !self._activeMutator && !(self.guideOverlay && self.guideOverlay.classList.contains('active'))) {
+        /* R324-P1: 补 running 守卫。原守卫链查了 _paused/_announcingWave/_discardMode/_huLock/
+           _pendingReward/_levelUpPending/_gambleActive/_activeMutator/guide，**唯独没查 running**。
+           而 Loop.js:5 是 `if (!this.running) return` —— 面板开启期间主循环是停摆的，
+           此时按 Space 仍会执行 _triggerOverdrive()：怒气被清零、计时器开始，
+           但没人 tick 它。玩家看到的是「按了没反应，过一会儿自己开始」。 */
+        if (e.code === 'Space' && self.player && self.running && !self.gameOver && self.player.rage >= self.player.maxRage && !self._overdriveActive && !self._paused && !self._announcingWave && !self._discardMode && !self._huLock && !self._pendingReward && !self._levelUpPending && !self._gambleActive && !self._activeMutator && !(self.guideOverlay && self.guideOverlay.classList.contains('active'))) {
             self._pressedKeys[e.code] = false;
             self._triggerOverdrive();
             return;
