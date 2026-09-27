@@ -230,7 +230,15 @@ Gp._loop = function(timestamp) {
             }
 
             /* ── 波次突变触发器（Boss Lord 波次跳过） ── */
-            if (!this._bossLordWave && !this._mutatorTriggered && this._activeMutator === null && this.currentWaveSpawnedCount > 0 && !this._pendingReward && !this._levelUpPending && !this._overdriveActive && !this._announcingWave) {
+            /* R324-P0: 补引导守卫。第1步加了 needsGameplay 之后，游戏从教程第1步就开始跑，
+               于是突变（血月/狂乱/引力/脆弱/枯萎）可能在玩家还在学 WASD 时就弹面板，
+               盖在新手指引上、游戏 running=false 冻住 —— 用户看着教程最后一步，
+               底下压着一个必须选的突变面板。
+               突变是「难度调味」，教学期不该上。→ 引导**结束后**才允许触发。
+               注意条件是 `_guideDismissed`（true = 已结束），我第一版误写成
+               `!this._guideDismissed` —— 引导进行中它恰好是 true，等于放行，守卫完全无效。
+               （另一个诱因是 R324-P0-2 修好了生成计数器，突变这才第一次真的会触发。） */
+            if (!this._bossLordWave && !this._mutatorTriggered && this._activeMutator === null && this.currentWaveSpawnedCount > 0 && !this._pendingReward && !this._levelUpPending && !this._overdriveActive && !this._announcingWave && this._guideDismissed) {
                 var cap = this._getWaveEnemyMax();
                 if (cap > 0 && this.currentWaveSpawnedCount >= Math.ceil(cap * 0.5)) {
                     this._mutatorTriggered = true;

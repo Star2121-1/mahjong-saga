@@ -20,22 +20,41 @@ Gp._highlightElement = function(selector, duration) {
     return el;
 };
 
-Gp._dimExcept = function(selectorArray) {
+/* R324-P0 重写。旧实现只遍历 #battlefield 的**直接子元素**，而所有真正要高亮的东西
+   （#player / #hand-tile-bar / #exp-bar-container）都在 #world-layer 或更深处 ——
+   于是 `dimExcept: ['#player']` 永远匹配不到任何直接子元素，
+   **整个 #world-layer 被压到 opacity 0.15**：玩家、妖牌、全部实体一起变暗。
+   用户实测截图就是「一进游戏全黑，只有一张引导卡」。
+   **高亮功能从来没有生效过。**
+
+   改成两步：
+   1) 把每个 dimExcept 选择器解析成实际元素，沿 parentElement 一路向上收集
+      「需要保持可见」的祖先链（#player → #world-layer → #battlefield）。
+   2) 遍历直接子元素时，命中这条链的保持 opacity 1，其余才压暗。
+   3) needsGameplay 的步骤额外**完全不压暗战场** —— 玩家正要在这几步里真的
+      操作（移动/点妖牌/捡掉落），把要操作的东西调暗是本末倒置。 */
+Gp._dimExcept = function(selectorArray, opts) {
     var self = this;
     if (!this._originalOpacities) {
         this._originalOpacities = new Map();
     }
     var battlefield = this.battlefield;
     if (!battlefield) return;
+    /* 1) 收集需要保持可见的祖先链 */
+    var keep = new Set();
+    (selectorArray || []).forEach(function(sel) {
+        var el = null;
+        try { el = battlefield.querySelector(sel) || document.querySelector(sel); } catch (e) { el = null; }
+        while (el && el !== document.body) { keep.add(el); el = el.parentElement; }
+    });
+    /* 2) 遍历直接子元素 */
     battlefield.querySelectorAll(':scope > *:not(#guide-overlay):not(#pause-overlay):not(#reward-overlay):not(#mutator-overlay):not(#victory-overlay):not(#game-over-overlay):not(#boss-hp-bar)').forEach(function(child) {
-        var id = child.id || (child.className || "").baseVal || child.className || "";
-        if (selectorArray.some(function(s) { return child.matches(s); })) {
-            self._originalOpacities.set(child, child.style.opacity || '1');
-            child.style.opacity = '1';
-        } else {
-            self._originalOpacities.set(child, child.style.opacity || '1');
-            child.style.opacity = '0.15';
-        }
+        self._originalOpacities.set(child, child.style.opacity || '1');
+        if (keep.has(child)) { child.style.opacity = '1'; return; }
+        /* needsGameplay 步骤：战场保持全亮，别把玩家正要操作的东西调暗 */
+        if (opts && opts.keepWorldBright && child.id === 'world-layer') { child.style.opacity = '1'; return; }
+        /* 0.15 太狠了：压暗是「引导视线」，不是「关掉游戏」 */
+        child.style.opacity = '0.42';
     });
 };
 
@@ -66,7 +85,7 @@ Gp._showGuideStep = function(stepIndex) {
 
     var step = steps[stepIndex];
     if (step.highlight) this._highlightElement(step.highlight, 4000);
-    if (step.dimExcept && step.dimExcept.length > 0) this._dimExcept(step.dimExcept);
+    if (step.dimExcept && step.dimExcept.length > 0) this._dimExcept(step.dimExcept, { keepWorldBright: !!step.needsGameplay });
 
     /* 更新引导面板内容 */
     var body = this.guideOverlay.querySelector('.guide-body');
@@ -119,6 +138,14 @@ Gp._showGuideStep = function(stepIndex) {
        _showGuide 冻结时钟且不启动循环，而 _guideHits / _guideGemsPicked
        只在 Loop.js 里自增 —— 引导在等一个自己关掉的东西产生的状态 = 死锁。
        实测卡死：冻结=true running=false 敌人=0，第 2 步永远无法满足。 */
+    /* R324-P0: 需要真实玩法的步骤，遮罩必须**可穿透**。
+       #guide-overlay 是 `position:fixed; inset:0` + `pointer-events:auto`，
+       铺满全屏且吃掉所有点击 —— 而第2步恰恰在教「鼠标点击妖牌触发攻击」，
+       第1步在教「按 WASD 移动」。玩家**物理上点不到/走不动**（键盘另有守卫），
+       只能等 checkFn 被别的东西满足。实测用户截图：战场被压暗到近乎全黑。
+       → 这类步骤给遮罩加 .guide-playable：本体 pointer-events:none + 大幅降低遮罩浓度，
+         只有 .guide-panel 保留 pointer-events:auto（上一步/下一步 按钮照常可点）。 */
+    if (this.guideOverlay) this.guideOverlay.classList.toggle('guide-playable', !!step.needsGameplay);
     if (step.needsGameplay) {
         this._unfreezeClock();
         /* _beginLoop 内部有 gameOver / running / announcingWave 三重守卫，

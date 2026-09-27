@@ -84,12 +84,84 @@ if ((await st()).active) {
   const btn = await p.evaluate(() => { const n = document.getElementById('guide-next-btn');
     return n ? { 文字: n.textContent.trim(), 禁用: n.disabled, 可见: n.offsetParent !== null } : null; });
   console.log('  最后一步按钮:', JSON.stringify(btn));
-  if (btn && !btn.禁用) { await p.click('#guide-next-btn').catch(()=>{}); await p.waitForTimeout(1500); }
+  /* R324-P0：按钮在面板冻结期间是禁用的。原来只检查一次，撞上就放弃 →
+     误报「教学结束? ✘ 仍开着」。改成轮询等解禁（最长 12 秒），
+     期间顺手关掉可能压着的突变面板。解禁就点。 */
+  let waited = 0;
+  while (waited < 12000) {
+    if (await p.locator('#mutator-overlay.active').count()) {
+      const mo = p.locator('#mutator-overlay .mutator-option, #mutator-overlay [data-mutator], #mutator-overlay button').first();
+      if (await mo.count()) await mo.click({ force: true }).catch(() => {});
+      await p.waitForTimeout(400); waited += 400; continue;
+    }
+    const b2 = await p.evaluate(() => { const b = document.getElementById('guide-next-btn');
+      return b ? { 禁用: b.disabled, 文字: b.textContent } : null; });
+    if (!b2) break;
+    if (!b2.禁用) { await p.click('#guide-next-btn').catch(()=>{}); await p.waitForTimeout(1500); break; }
+    await p.waitForTimeout(500); waited += 500;
+  }
 }
-await p.waitForTimeout(1200);
+/* R324-P0：教程是 5 步、靠玩家动作推进的流程，最后一步还是 autoAdvance(3s)。
+   固定等 1200ms 就断言「教学结束?」偶尔会太早 → 误报「仍开着」。
+   改成轮询等它关闭（最长 15 秒），期间继续处理突变面板。 */
+let closed = false;
+for (let w = 0; w < 30; w++) {
+  if (await p.locator('#mutator-overlay.active').count()) {
+    const mo = p.locator('#mutator-overlay .mutator-option, #mutator-overlay [data-mutator], #mutator-overlay button').first();
+    if (await mo.count()) await mo.click({ force: true }).catch(() => {});
+    await p.waitForTimeout(400); continue;
+  }
+  if (!(await p.locator('#guide-overlay.active').count())) { closed = true; break; }
+  /* 还在引导里就把最后一步的按钮点掉 */
+  const nb = await p.evaluate(() => { const b = document.getElementById('guide-next-btn');
+    return b && !b.disabled; });
+  if (nb) { await p.click('#guide-next-btn').catch(() => {}); await p.waitForTimeout(700); }
+  else await p.waitForTimeout(500);
+}
 const fin = await log('最终');
 console.log(`\n  教学结束? ${fin.active ? '✘ 仍开着' : '✔ 已关闭'}`);
-console.log(`  循环运行中? ${fin.running ? '✔ 是（可以正常游戏）' : '✘ 否'}`);
+/* R324-P0：引导结束后不能断言得太早。
+   _completeGuide() 里有一个**故意的 500ms setTimeout**（解冻 + _announceWave(0)），
+   而波次公告期间 running 本来就是 false（Loop.js:5 `if (!this.running) return`）。
+   我原来在延迟到期前就断言「循环运行中」→ 3 次里挂 1 次的 flake。
+   现在改成「轮询等它真的恢复，最长 12 秒，并确认 _elapsed 在推进」：
+   真死锁仍然会红，纯粹是时序就放行。 */
+let loopResumed = false, waitedMs = 0;
+while (waitedMs < 12000) {
+  /* 引导结束后若还压着突变面板，游戏 running=false 冻住是**正确行为**（等玩家选）。
+     机器人得替玩家做这个选择，否则会误报成死锁。 */
+  if (await p.locator('#mutator-overlay.active').count()) {
+    const mo = p.locator('#mutator-overlay .mutator-option, #mutator-overlay [data-mutator], #mutator-overlay button').first();
+    if (await mo.count()) await mo.click({ force: true }).catch(() => {});
+    await p.waitForTimeout(400);
+  }
+  const s2 = await p.evaluate(() => ({ running: gameEngine.running, gameOver: gameEngine.gameOver }));
+  if (s2.running && !s2.gameOver) { loopResumed = true; break; }
+  if (s2.gameOver) break;
+  await p.waitForTimeout(500); waitedMs += 500;
+}
+const eA = await p.evaluate(() => gameEngine._elapsed);
+await p.waitForTimeout(900);
+const eB = await p.evaluate(() => gameEngine._elapsed);
+console.log(`  循环运行中? ${loopResumed ? '✔ 是' : '✘ 否'} (等待 ${waitedMs}ms)` +
+  ` | 时间在推进? ${eB > eA ? '✔ +' + (eB - eA).toFixed(2) + 's' : '✘ 停在 ' + eA.toFixed(2) + 's'}`);
+/* 失败时把现场状态打出来 —— 这个死锁只在「真的玩过教程」后出现，
+   跳过教程（_completeGuide 立刻调用）6/6 都正常，不打印状态根本无从查起。 */
+if (!loopResumed || eB <= eA) {
+  const stuck = await p.evaluate(() => { const g = window.gameEngine; return {
+    running: g.running, 公告中: g._announcingWave, 暂停: g._paused, 待奖励: g._pendingReward,
+    升级挂起: g._levelUpPending, 卡牌: g._discardMode, 胡锁: g._huLock, 赌局: g._gambleActive,
+    波次: g._waveCount, 面板活敌: g.enemies.filter(e => e.alive).length,
+    容器类: (document.getElementById('game-container') || {}).className,
+    激活遮罩: [...document.querySelectorAll('.active')].map(e => e.id).filter(Boolean),
+    悬着计时器: { 完整引导: !!g._completeGuideTimer, 步骤: !!g._guideStepTimeout,
+                   检查: !!g._guideCheckTimer, 自动推进: !!g._guideAutoAdvanceTimer },
+    引导步: g._currentGuideStep, 引导已关: !!g._guideDismissed }; });
+  console.log('  ⛔ 卡死现场: ' + JSON.stringify(stuck));
+}
 console.log('  错误:', errs.length, errs.slice(0,3).join(' | '));
 await b.close();
-process.exit(fin.active || !fin.running || errs.length ? 1 : 0);
+/* R324-P0：退出码原来用 `fin`（"最终" 那次的快照），而那次快照常常正好撞上
+   升级面板冻结时钟（running=false），于是三条更严谨的断言全过却被判失败。
+   改用等待之后的真实结论。 */
+process.exit(fin.active || !loopResumed || eB <= eA || errs.length ? 1 : 0);

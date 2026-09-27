@@ -134,6 +134,20 @@ Gp._defineGuideSteps = function() {
                 '<div class="guide-item">向四个方向各移动一次 → 完成！</div>'
             ],
             interactive: true,
+            /* R324-P0 关键：这一步之前**漏了** needsGameplay，与 R323 修的
+               第2步(攻击)/第4步(拾取)是同一个死锁的漏网之鱼。
+               表现（用户实测截图）：一进 s3 就是一张引导卡，
+               **战场全黑、玩家元素根本没被创建、主循环没启动**
+               （running=false、_elapsed=0、player.el 为 null）——
+               整个画面只有这张卡浮在黑底上，HUD/血条/手牌条全是空的。
+               而第 1 步恰恰在教「按 WASD 移动雀士」——**没有任何东西可移动**。
+               为什么没被发现：_guideMoveDirs 由 Boot.js:955 的 keydown 处理器写入，
+               **不在主循环里**，所以按四下方向键判定就会通过、教程自动跳到第 2 步，
+               而第 2 步有 needsGameplay 会把循环启动起来 —— 于是「表面能过」，
+               但玩家一步都没动过。probe-guide 也没抓到，因为它一进去就发方向键，
+               恰好把这条死锁路径跳过去了。
+               加上后主循环在第 1 步就启动，玩家被创建、可移动，教程名副其实。 */
+            needsGameplay: true,
             checkFn: function() {
                 /* 检测玩家是否向四个方向都移动过 */
                 var m = self._guideMoveDirs;

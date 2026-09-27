@@ -798,3 +798,82 @@ engine 那份给波次门与突变触发）。修复后实测：计数正常爬�
 是我的时序问题不是游戏问题）。留一个 failing 探针比不留更糟。
 **波次推进的验证改由 `probe-realplay.mjs` 承担** —— 它用真实输入，
 证据力更强。
+
+---
+
+## R325：用户实测截图挖出的三个 P0（新玩家根本玩不了）
+
+R324 我用探针把游戏跑到第 3 波就宣布收尾。**用户打开 Firefox 玩了两分钟，
+截图指出三个当场劝退的问题。** 教训又一次是同一句：**探针验证的是「机制通不通」，
+用户验证的是「这游戏能不能玩」。**
+
+### P0-1 引导第 1 步根本没有可移动的东西
+
+用户截图：进 s3 只有一张「新手指引」卡浮在**全黑**画面上，战场/HUD/手牌条全空，
+卡上写着「按 WASD 移动雀士」。
+
+实测 `running=false`、`_elapsed=0`、`#world-layer` 被压到 **opacity 0.15**。
+
+**根因三层**：
+
+1. **第 1 步漏了 `needsGameplay: true`** —— 和 R323 修的第 2/4 步是同一个死锁的漏网之鱼。
+   为什么一直没被发现：`_guideMoveDirs` 由 `Boot.js:955` 的 **keydown 处理器**写入，
+   **不在主循环里**，所以按四下方向键判定就会通过、教程自动跳到第 2 步，
+   而第 2 步有 `needsGameplay` 会把循环启动起来 —— **表面能过，但玩家一步都没动过**。
+2. **`_dimExcept` 的粒度错了**（`Guide.js:22`）。它只遍历 `#battlefield` 的**直接子元素**，
+   而所有要高亮的东西（`#player` / `#hand-tile-bar` / `#exp-bar-container`）都在
+   `#world-layer` 或更深处 —— `dimExcept: ['#player']` **永远匹配不到任何直接子元素**，
+   于是整个 `#world-layer` 被压到 0.15。**高亮功能从来没有生效过。**
+   改成：把选择器解析成实际元素、沿 `parentElement` 收集「保持可见」的祖先链，
+   命中链的保持 opacity 1；并且 `needsGameplay` 的步骤**完全不压暗战场**
+   （玩家正要操作的东西调暗是本末倒置）。压暗下限从 0.15 提到 0.42。
+3. **主题层用 `!important` 锁死了 10px 模糊**。`css/theme/02-overlay.css:10-13` 给
+   `#guide-overlay` 强制 `backdrop-filter: var(--blur)` = `blur(10px) saturate(.85)`。
+   **我先改 `gameplay-overlay.css` 里的 background/backdrop-filter，全是死代码** ——
+   这正是 CLAUDE.md 里写的「主题层 15 处 `!important` 恰好压死它们」。
+   要动必须动在 `02-overlay.css`，已加 `#guide-overlay.guide-playable` 例外
+   （背景 0.10、模糊 none）。纯阅读步骤仍保留墨玻璃观感。
+
+顺带：`#guide-overlay` 是 `position:fixed; inset:0` + `pointer-events:auto`，
+铺满全屏吃掉所有点击 —— 而第 2 步在教「鼠标点击妖牌」、第 1 步在教移动。
+已给 `needsGameplay` 步骤加 `.guide-playable`（本体 `pointer-events:none`，
+只有 `.guide-panel` 保留 `auto`，上一步/下一步 照常可点）。卡片也从正中挪到顶部
+（原来卡片和玩家一起待在正中央，等于「没有东西可看」）。
+
+### P0-2 升级三选一的按钮被裁掉
+
+用户截图：三张卡的「免费领取 / 我拿」全被切掉一半。
+`.reward-card-container` 是**固定高度 304px**，`.card-front` 有 `overflow:hidden`，
+而 `.relic-btn` 用 `margin-top:auto` 顶到底部 —— 实测
+`scrollHeight=354 / clientHeight=302` → **溢出 52px，按钮被裁 34~53px**。
+文案最长的传奇卡（「× 大四喜 / 7s 蓄力大四喜清场蒸发级传奇 / 🎁 新武器 / NEW WEAPON UNLOCKED!」）
+最严重。
+
+改：卡片 `178×304` → `230×400`，再给 `.card-front` 加 `overflow-y:auto` 兜底
+（**任何文案长度下按钮都不会够不到**）。最恶劣文案实测 `溢出 0`、按钮余量 17px。
+
+### P0-3 我修 P0-2 引来的副作用：突变面板压在新手指引上
+
+给第 1 步加 `needsGameplay` 之后，游戏从教程第 1 步就开始跑；
+而 R324-P0-2 修好生成计数器之后**突变第一次真的会触发** ——
+于是「血月/狂乱/引力/脆弱/枯萎」可能在玩家**还在学 WASD** 时弹出来，
+盖在引导上、`running=false` 冻住整个游戏。实测 8 次里有 2 次卡死在这里。
+
+`Loop.js:233` 的触发条件补 `&& this._guideDismissed`（**引导结束后才允许**）。
+写第一版时我写成 `!this._guideDismissed` —— 引导进行中它恰好是 `true`，等于放行，
+守卫完全无效，8 次里仍挂 1 次。**布尔守卫写反了不会报错，只会静默失效。**
+
+### probe-guide 从 1/3 flake 修到 8/8 稳定
+
+这一轮它挂了 4 次，每次原因都不同，全部是**探针自己的时序假设**而不是产品缺陷：
+- `_completeGuide()` 里有**故意的 500ms setTimeout**（解冻 + `_announceWave(0)`），
+  波次公告期间 `running` 本来就是 false → 断言太早。
+- 最后一步按钮在面板冻结期间是 `禁用` 态，只检查一次就放弃。
+- 退出码用的是「最终」那次**修复前的旧快照**，恰好撞上升级面板冻结时钟，
+  三条更严谨的断言全过却被判失败。
+- 固定等 1200ms 就断言「教学结束?」，而教程是 5 步靠玩家动作推进、最后一步还是
+  `autoAdvance(3s)`。
+
+全部改成轮询等待（最长 12~15 秒），**真死锁仍然会红**。
+另外给失败分支加了现场状态转储 —— 之前「跳过教程」6/6 正常、只有「真玩过」才复现，
+不打印状态根本无从查起。

@@ -16,3 +16,17 @@
     background: var(--surf) !important;
     box-shadow: var(--edge-soft), var(--edge-lit) !important;
 }
+
+/* ── 8. 引导的可操作步骤：撤掉墨玻璃 ─────────────────────────────
+   R324-P0。上面第 7 条给 #guide-overlay 强制套了 var(--blur) = blur(10px) saturate(.85)
+   —— 整个引导期间战场一直在被 10px 模糊，用户实测「一上来就看不到后面」。
+   **因为带 !important，gameplay-overlay.css 里改 background/backdrop-filter
+   全是死代码**（我先改那里，白改一轮）。要动必须动在这一层。
+   guide-playable = Guide.js 给 needsGameplay 的步骤加的类（移动/攻击/拾取），
+   这几步玩家正要真的操作战场，把要操作的东西模糊掉是本末倒置。
+   纯阅读步骤（第3步升级说明、结尾）仍保留墨玻璃观感。 */
+#guide-overlay.guide-playable {
+    background: rgba(4, 12, 8, 0.10) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}

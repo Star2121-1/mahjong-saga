@@ -20,7 +20,15 @@
     display: flex; flex-wrap: wrap; gap: 22px;
     justify-content: center; perspective: 1000px;
 }
-.reward-card-container { width: 178px; height: 304px; animation: cardDealIn 0.5s ease-out both; will-change: transform; }
+/* R324-P0：178×304 装不下内容。
+   实测 scrollHeight=354 / clientHeight=302 → **溢出 52px**，
+   而 .relic-btn 用 margin-top:auto 顶到底部，被 overflow:hidden **裁掉 34~53px**，
+   三张卡全中（用户实测截图：三个按钮都被切，「我拿」只剩一半）。
+   传奇卡文案最长（「× 大四喜 / 7s 蓄力大四喜清场蒸发级传奇 / 🎁 新武器 / NEW WEAPON UNLOCKED!」）最严重。
+   → 加宽到 230（顺带减少描述折行）、加高到 400（354 + 46 余量），
+     再给 .card-front 加 overflow-y:auto 兜底：**任何文案长度下按钮都不会够不到**。
+   3×230 + 2×22 = 734，1920 宽度绰绰有余；标题+卡片 448 < 1080，也不碰上下边。 */
+.reward-card-container { width: 230px; height: 400px; animation: cardDealIn 0.5s ease-out both; will-change: transform; }
 @keyframes cardDealIn {
     0% { opacity: 0; transform: translateY(80px) scale(0.8); }
     100% { opacity: 1; transform: translateY(0) scale(1); }
@@ -59,7 +67,11 @@
     overflow: hidden;
     display: flex; flex-direction: column; align-items: center;
     gap: 6px; padding: 16px; text-align: center;
+    /* R324-P0 兜底：文案再长也不该把按钮推到够不到的地方 */
+    overflow-y: auto; overflow-x: hidden; scrollbar-width: thin;
 }
+.card-front::-webkit-scrollbar { width: 5px; }
+.card-front::-webkit-scrollbar-thumb { background: #2a4a3a; border-radius: 3px; }
 .card-front.quality-rare { border-color: #1b4f72; box-shadow: 0 0 15px rgba(27,79,114,0.2); }
 .card-front.quality-epic { border-color: #9c27b0; box-shadow: 0 0 20px rgba(156,39,176,0.3); animation: epicGlow 2s ease-in-out infinite alternate; }
 .card-front.quality-legendary { border-color: #ffd700; box-shadow: 0 0 30px rgba(255,215,0,0.4); animation: legendaryGlow 2s ease-in-out infinite alternate; }
@@ -260,13 +272,28 @@
 
 #guide-overlay {
     position: fixed; inset: 0;
-    background: rgba(4,12,8,0.7); z-index: 1000;
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    /* R324-P0: 0.7 + blur(6px) 把战场压到近乎全黑 —— 用户实测「一上来就看不到后面」。
+       降到 0.34 / blur(2px)：卡片自带不透明底板，可读性不受影响，
+       而战场（妖牌、血条、手牌）重新可见。 */
+    background: rgba(4,12,8,0.34); z-index: 1000;
+    backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
     display: none; flex-direction: column;
-    justify-content: center; align-items: center; padding: 16px;
+    /* R324-P0: 卡片挪到顶部。原来 justify-content:center 让卡片和玩家
+       一起待在正中央 —— 玩家在 (750,750)，卡片也盖在正中央，等于「没有东西可看」。 */
+    justify-content: flex-start; align-items: center; padding: 48px 16px 16px;
     pointer-events: auto; overflow-y: auto; /* R243-P1: 防止内容溢出视口 */
 }
 #guide-overlay.active { display: flex; }
+/* R324-P0: 需要玩家真的操作战场的那几步，遮罩本体不吃事件，只有卡片吃。
+   否则第1步走不动、第2步点不到妖牌（点击全被铺满全屏的 overlay 吃掉）。 */
+/* 需要玩家真的操作战场的几步：遮罩几乎撤掉（卡片自带不透明底板，可读性不受影响），
+   只留一点点压暗让文字仍浮在画面上。0.34 + blur(2px) 连妖牌都糊成橄榄色。 */
+#guide-overlay.guide-playable {
+    pointer-events: none;
+    background: rgba(4,12,8,0.1);
+    backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+#guide-overlay.guide-playable .guide-panel { pointer-events: auto; }
 .guide-panel {
     background: linear-gradient(180deg,#14301f 0%,#10281b 100%);
     border: 1px solid rgba(212,175,55,0.55);
