@@ -270,8 +270,13 @@ Ss._spawnEnemy = function(engine, isBoss) {
     this.engine._enemyElements.set(id, el);
     enemy.el = el;
 
-    if (!enemy.isBoss) this.currentWaveSpawnedCount++;
 };
+
+/* R326-P0 注：原来这里还有一句 `if (!enemy.isBoss) this.currentWaveSpawnedCount++;`
+   —— 是 R324 修「生成计数器不自增」时漏删的**重复自增**（新的那句已在 _spawnEnemy 里）。
+   这个旧 spawn() 目前无调用者（活路径是 Ss._spawnEnemy），所以只是埋雷：
+   一旦有人复活它，spawner 那份计数每只怪会 +2，cap 守卫提前一轮触发、单波少一只怪。
+   已删除。 */
 
 /* ── Boss Lord 生成 ── */
 /* Ss.spawnBossLord 已废弃 — 使用 GameEngine.Events.js 中的 Gp._spawnBossLordFromGamble */

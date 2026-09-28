@@ -967,3 +967,111 @@ id 分配有 **5 个点、两种约定**：
 它们不会让任何数值断言变红，只会让玩家卡住。
 **所以门禁必须包含「玩家实际能不能操作」这一层** ——
 键盘有没有位移、点击有没有伤害、目标元素在不在 DOM 里、id 有没有重复。
+
+---
+
+## R327：断点续跑 —— 完全没被测过的路径，两个通关级 P0
+
+R326 我按 bug 类别主动排查，第二轮把范围放到**计时器泄漏**和**断点续跑**。
+断点续跑这条路径此前**没有任何探针覆盖**，而它有两个 P0。
+
+### P0-1 `huLock:true` 的存档恢复后永久卡死
+
+`Boot.js` 里原本有个 1 秒兜底 `setTimeout` 试图清 `_huLock`：
+
+```js
+if (this._huLock) {
+    setTimeout(function() {
+        if (!this.gameOver && this.running) { this._huLock = false; ... }
+    }, 1000);
+}
+```
+
+**它是死代码。** 本文件是 IIFE + `'use strict'`，`setTimeout` 回调里的 `this`
+指向 **`window`** 而不是引擎实例，所以 `this.running` 恒为 `undefined`，
+条件恒假 → **这个「修复」从来没生效过**。
+
+而 `huLock: true` 完全可达：胡牌演出 1.6s 期间点「返回大本营」→ 导航存档把
+`huLock` 存下来 → 下次读档命中 `Loop.js:50` 的 `_huLock` 分支只 `_syncEntities`
+后 return，游戏逻辑永不推进；输入被 `Boot.js:148` 拦掉；ESC 也不处理 `_huLock`。
+**无解。** 紧挨着的 `_discardMode` 用的是正确写法（直接 `_exitDiscardMode()`），
+照做即可。
+
+### P0-2 最终波续跑 → **假通关**（满血、没打 Boss 就判胜利）
+
+三件事叠在一起：
+
+1. **敌人不入档、配额入档**。`Boot.js` 恢复时 `this.enemies = []`，
+   而 `currentWaveSpawnedCount` 完整恢复并已打满 cap（最终波 cap=1）
+   → 恢复瞬间这一波「看起来已经清完」。
+2. **`_bossLordWave` 恢复后恒为 false**。全库唯一把它置真的是 `Combat.js:94`
+   （`_resumeAfterReward`），而断点恢复完全绕开那条路，`SaveManager.Core.js:546`
+   还显式置 false → `GameSpawner.js:91` 的刷 Boss 门永不成立。
+3. **`Loop.js:685` 的最终波兜底判了胜利**。正常流程里最终波的胜利走
+   `Loop.js:483`（Boss 击杀结算），而 712 的波次结算门刻意带
+   `_waveCount < _getMaxWaves()-1` 把最终波排除；685 只是兜底 ——
+   结果兜底成了**没打 Boss 就通关**。
+
+实测：最终波续跑后 `_won=true`、胜利遮罩弹出、**玩家满血 120/120、
+Boss 一次都没出现**。
+
+修：① 恢复时按 `_waveCount` 重新推导 `_bossLordWave`；
+② `Loop.js:685` 的最终波胜利**必须要求 `_bossLordSpawned`**，
+Boss 没刷出来就清掉 `_pendingReward`、恢复循环，让刷怪器按
+`BOSS_SPAWN_INTERVAL`(30s) 正常刷 Boss。
+
+### P1 `_guideStepTimeout`(60s) 在五个清理入口全部漏清
+
+只有 `_completeGuide` 清它，而**死亡/胜利/返回存档页/restart/新开一局
+五个入口全都只清了 `_guideCheckTimer`**。
+
+坏法：教程第 1/2 步（`needsGameplay` + `interactive`）期间死亡 → 死亡界面弹出
+→ 60s 后旧定时器触发，守卫 `self._currentGuideStep !== stepIndex` 因为
+`_gameOver` 并不改这个字段而**通过** → `_showGuideStep(+1)` 把
+`#guide-overlay`（`position:fixed; inset:0`）重新盖在结算界面上、**吃掉全部点击**，
+新步骤又开 60s 计时 → 死亡界面最长数分钟无响应。
+
+restart 变体更糟：`_currentGuideStep` 被重置为 0，旧 `stepIndex=0` 的定时器匹配成功
+→ 新局**凭空重播一次「第 1 波」公告 + 一次自动存档**。
+
+修：抽出 `_clearGuideTimers()`，五个入口统一调用。
+
+### P1 `_announceWave` 无重入守卫
+
+公告的 `1200ms→300ms` 链是**匿名不可取消**的。公告期间按 ESC 会走
+`_tryCloseOverlay` → `_startNextWave()` 提前开跑，残留链在 +1200ms 对
+**正在运行的游戏**重新 `_freezeClock()` 300ms；若这 300ms 内玩家打开了
+突变/商店面板（它们靠 `_freezeClock`），残留链的 `_unfreezeClock()`
+会**单方面解冻已打开的面板**。加 `if (this._announcingWave) return;` 重入守卫。
+
+### P2 续跑后玩家牌面空白
+
+`_renderPlayerTile` 全库只有 `_startNewRun` 调它，
+`pages/s3_gameplay.html` 的静态 `#player` 只有血条没有字牌 span
+→ **每次断点续跑后自己的角色是一张没有字的白牌**。恢复路径补一次调用。
+
+### 我自己的一个疏漏
+
+R324 修「生成计数器不自增」时，我在 `GameSpawner._spawnEnemy` 加了自增，
+**但没删掉下面旧 `spawn()` 里的重复自增**。那个函数目前无调用者，所以只是埋雷
+（一旦有人复活它，spawner 那份每只怪会 +2，cap 提前一轮触发、单波少一只怪）。
+已删除。
+
+### 新增 `design/audit/probe-resume.mjs`
+
+覆盖三个场景（都走**真实**的 snapshot → 写 `cr_active_run.json` → `reload` → resume）：
+1. **最终波续跑** → `_bossLordWave` 正确推导、主循环推进、**Boss 真的刷得出来且在 DOM 里**
+2. **`huLock:true` 存档续跑** → 已解锁、手牌栏无残留、主循环推进
+3. **玩家牌面已重画** → `.player-tile-text` 有字
+
+刻意说明：场景 1 给玩家补满血并设长无敌 —— 我把一个 1 级无装备玩家瞬移到第 5 波，
+而最终波 cap 只有 1、`BOSS_SPAWN_INTERVAL` 有 30 秒，玩家会在 Boss 刷出来前就死
+（一开始正是这样：实测 `gameOver=true`、`bossTimer` 恒为 0，
+因为 `Ss.update` 在 `gameOver` 时直接 return）。
+**这里测的是「续跑后刷 Boss 的通路」，不是平衡性。**
+
+### 教训
+
+三个问题里有两个的共同点是：**一条「设计上不该发生的路径」被当成兜底，
+结果兜底成了假通关/永久卡死。** 判断兜底是否安全时必须问一句：
+「它成立的条件，真的能保证前置状态正确吗？」

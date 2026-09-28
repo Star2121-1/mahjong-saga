@@ -21,7 +21,7 @@ Gp._goToSaveSelect = async function() {
     if (this._qqueenShieldTimer) { clearTimeout(this._qqueenShieldTimer); this._qqueenShieldTimer = null; }
     /* R234-P0: 清理引导/手牌相关定时器，防止导航到s2后旧实例回调访问已移除DOM */
     if (this._highlightTimers) { this._highlightTimers.forEach(function(t) { clearTimeout(t); }); this._highlightTimers = []; }
-    if (this._guideCheckTimer) { clearInterval(this._guideCheckTimer); this._guideCheckTimer = null; }
+    this._clearGuideTimers(); /* R326-P0: 连 _guideStepTimeout/_guideAutoAdvanceTimer 一起清 */
     if (this._guideAutoAdvanceTimer) { clearTimeout(this._guideAutoAdvanceTimer); this._guideAutoAdvanceTimer = null; }
     if (this._completeGuideTimer) { clearTimeout(this._completeGuideTimer); this._completeGuideTimer = null; }
     if (this._handTileDeliverTimers) { this._handTileDeliverTimers.forEach(function(t) { clearTimeout(t); }); this._handTileDeliverTimers = []; }

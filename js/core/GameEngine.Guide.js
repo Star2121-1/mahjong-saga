@@ -201,11 +201,26 @@ Gp._showGuideStep = function(stepIndex) {
     }
 };
 
-Gp._completeGuide = function() {
-    /* R46-P2: 清除检查timer，防止guide完成后interval泄漏 */
+/* R326-P0: 统一的引导计时器清理。
+   原来只有 _completeGuide 清这三个定时器，而**死亡/胜利/返回存档页/restart/新开一局
+   五个入口全都只清了 _guideCheckTimer，漏掉 _guideStepTimeout（60s）和
+   _guideAutoAdvanceTimer**。具体坏法：教程第 1/2 步（needsGameplay + interactive）
+   期间死亡 → 死亡界面弹出 → 60s 后旧定时器触发，守卫 `self._currentGuideStep !== stepIndex`
+   因为 _gameOver 并不改这个字段而**通过** → _showGuideStep(+1) 把 #guide-overlay
+   （position:fixed; inset:0）重新盖在结算界面上，**吃掉全部点击**；
+   新步骤又开 60s 计时 → 死亡界面最长数分钟无响应。
+   restart 变体更糟：_currentGuideStep 被重置为 0，旧 stepIndex=0 的定时器匹配成功
+   → _showGuideStep(1) → 新局**凭空重播一次「第 1 波」公告 + 一次自动存档**。 */
+Gp._clearGuideTimers = function() {
     if (this._guideCheckTimer) { clearInterval(this._guideCheckTimer); this._guideCheckTimer = null; }
     if (this._guideAutoAdvanceTimer) { clearTimeout(this._guideAutoAdvanceTimer); this._guideAutoAdvanceTimer = null; }
-    if (this._guideStepTimeout) { clearTimeout(this._guideStepTimeout); this._guideStepTimeout = null; } /* R323-P0 */
+    if (this._guideStepTimeout) { clearTimeout(this._guideStepTimeout); this._guideStepTimeout = null; }
+    if (this._completeGuideTimer) { clearTimeout(this._completeGuideTimer); this._completeGuideTimer = null; }
+};
+
+Gp._completeGuide = function() {
+    /* R46-P2: 清除检查timer，防止guide完成后interval泄漏 */
+    this._clearGuideTimers();
     this._restoreOpacity();
     this._clearHighlightTimers();
     if (this.guideOverlay) this.guideOverlay.classList.remove('active');

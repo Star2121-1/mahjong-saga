@@ -53,11 +53,18 @@ Gp.init = async function() {
             this._discardMode = !!data.discardMode;
             this._discardSel = (data.discardSel !== null && data.discardSel !== undefined) ? data.discardSel : -1;
             this._huLock = !!data.huLock;
-            /* R283-P1: 断点恢复时若huLock=true，原setTimeout可能已过期未触发，加1s安全超时防止永久死锁 */
+            /* R326-P0 关键：原来这里是一个 1s 兜底 setTimeout 试图清 _huLock ——
+               但本文件是 IIFE + 'use strict'，setTimeout 回调里的 this 指向 **window**
+               而不是引擎实例，所以 `this.running` 恒为 undefined、条件恒假，
+               **那个兜底从来没生效过**。而存档里 huLock:true 完全可达：
+               胡牌演出 1.6s 期间点「返回大本营」→ 导航存档把 huLock 存下来
+               → 下次读档命中 Loop.js:50 的 _huLock 分支只 _syncEntities 后 return，
+               游戏逻辑永不推进；输入被 Boot.js:148 拦掉；ESC 也不处理 _huLock
+               → **永久卡死，无解**。
+               下面 `_discardMode` 的处理方式（直接退出）才是对的，这里照做。 */
             if (this._huLock) {
-                setTimeout(function() {
-                    if (!this.gameOver && this.running) { this._huLock = false; if (this._handTileBar) this._handTileBar.classList.remove('hu-flash'); }
-                }, 1000);
+                this._huLock = false;
+                if (this._handTileBar) this._handTileBar.classList.remove('hu-flash');
             }
             /* R233-P1: 恢复后退出打牌模式，防止存档中处于打牌状态导致新游戏无法操作 */
             if (this._discardMode) this._exitDiscardMode();
@@ -100,6 +107,22 @@ Gp.init = async function() {
             this._announcingWave = false;
             /* R234-P1: 恢复路径清理残留冻结状态，防止面板打开后恢复游戏时clock仍被冻结 */
             if (this.container) this.container.classList.remove('game-clock-frozen');
+            /* R326-P0 关键：按波次重新推导 _bossLordWave。
+               全库唯一把它置真的地方是 Combat.js:94（_resumeAfterReward），
+               而断点恢复走的是这条路径、完全绕开 _resumeAfterReward；
+               SaveManager.Core.js:546 还显式把它置成 false。
+               后果：**在最终波刷新/闪退 → 恢复后 _bossLordWave 恒为 false**
+               → GameSpawner.js:91 `if (bossCount < 1 && engine._bossLordWave && ...)`
+               永不成立 → **Boss 永远不出现**；
+               而 Loop.js:712 的波次结算门带 `_waveCount < _getMaxWaves() - 1`
+               把最终波排除在外 → _pendingReward 也不会置真
+               → 清完最后一只小怪后游戏彻底静止。**那一局无法通关。** */
+            this._bossLordWave = (this._waveCount >= this._getMaxWaves() - 1);
+            /* R326-P2: 恢复后重画玩家牌面。_renderPlayerTile 负责写 #player[data-hero]
+               和 .player-tile-text 的字牌（雀/一万/九筒/一条），全库只有
+               _startNewRun 调它；pages/s3_gameplay.html:102 的静态 #player 只有血条、
+               没有字牌 span → **每次断点续跑后自己的角色是一张没有字的白牌**。 */
+            if (typeof this._renderPlayerTile === 'function') this._renderPlayerTile();
             this._syncEntities();
             this._syncPlayerHP();
             this._renderWeaponSlots();
@@ -701,6 +724,12 @@ Gp._startNewRun = function(heroId, levelId) {
 };
 
 Gp._announceWave = function(waveIdx) {
+    /* R326-P1: 重入守卫。公告期间按 ESC 会走 _tryCloseOverlay → _startNextWave()
+       提前开跑，而下面那条 1200ms→300ms 的链是**匿名不可取消**的，
+       残留的 _freezeClock() 会对正在运行的游戏重新冻结 300ms；
+       如果这 300ms 里玩家打开了突变/商店面板（它们靠 _freezeClock），
+       残留链的 _unfreezeClock() 会**单方面解冻已打开的面板**。 */
+    if (this._announcingWave) return;
     this._announcingWave = true; /* M-030: 阻止 _beginLoop 在公告期间被重入 */
     this._unfreezeClock();
     var wa = document.getElementById('wave-announce');

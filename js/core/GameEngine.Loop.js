@@ -682,6 +682,25 @@ Gp._loop = function(timestamp) {
         }
 
         if (this._pendingReward && this._activeCoins.length === 0 && this._expGems.length === 0) {
+            /* R326-P0 关键：最终波的胜利**必须要求 Boss 真的出过场**。
+               断点续跑会让最终波在 Boss 从未出现的情况下满足 _pendingReward ——
+               敌人本来就不入档（Boot.js 恢复时 `this.enemies = []`），而生成配额
+               `currentWaveSpawnedCount` 完整入档并已打满 cap，于是这一波
+               「一恢复就看起来已经清完」。
+               而 Loop.js:712 那个波次结算门本来带 `_waveCount < _getMaxWaves()-1`
+               刻意把最终波排除、让胜利走 Boss 击杀结算（Loop.js:483），
+               685 这条只是兜底 —— 结果兜底成了假通关：
+               实测最终波续跑后 `_won=true`、胜利遮罩弹出、**玩家满血 120/120、
+               Boss 一次都没出现**。
+               → Boss 没刷出来时绝不判胜利：清掉 pendingReward、恢复循环，
+                 让 GameSpawner 按 BOSS_SPAWN_INTERVAL 正常刷 Boss。 */
+            if (this._waveCount >= this._getMaxWaves() - 1 && !this._bossLordSpawned) {
+                this._pendingReward = false;
+                if (window.rewardManager) window.rewardManager.hidePanel();
+                this._unfreezeClock();
+                this._beginLoop();
+                return;
+            }
             if (this._waveCount >= this._getMaxWaves() - 1) {
                 /* R234-P0: 最终波次胜利前存档，防止页面关闭时进度丢失 */
                 this._autoSave('victory').catch(function(e) { console.warn('[Loop] final wave save failed:', e); });

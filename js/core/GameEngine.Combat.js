@@ -189,7 +189,7 @@ Gp._showVictory = async function() {
     /* R207-P1: 确保胜利时引导覆盖层已关闭，防止z-index冲突阻塞交互 */
     if (this.guideOverlay && this.guideOverlay.classList.contains('active')) {
         /* R268-P0: gameOver已为true，_completeGuide会直接return无法清理 — 使用与_gameOver一致的inline清理 */
-        if (this._guideCheckTimer) { clearInterval(this._guideCheckTimer); this._guideCheckTimer = null; }
+        this._clearGuideTimers(); /* R326-P0: 连 _guideStepTimeout/_guideAutoAdvanceTimer 一起清 */
         if (this._guideAutoAdvanceTimer) { clearTimeout(this._guideAutoAdvanceTimer); this._guideAutoAdvanceTimer = null; }
         if (this._completeGuideTimer) { clearTimeout(this._completeGuideTimer); this._completeGuideTimer = null; }
         if (this._originalOpacities) { this._restoreOpacity(); this._originalOpacities.clear(); this._originalOpacities = null; }
@@ -725,7 +725,7 @@ Gp._gameOver = async function() {
        不调用 _completeGuide() — 它会调度 500ms 后的 _beginLoop（重置 gameOver），
        直接执行内联清理以确保游戏状态不被覆盖。 */
     if (this.guideOverlay && this.guideOverlay.classList.contains('active')) {
-        if (this._guideCheckTimer) { clearInterval(this._guideCheckTimer); this._guideCheckTimer = null; }
+        this._clearGuideTimers(); /* R326-P0: 连 _guideStepTimeout/_guideAutoAdvanceTimer 一起清 */
         if (this._guideAutoAdvanceTimer) { clearTimeout(this._guideAutoAdvanceTimer); this._guideAutoAdvanceTimer = null; }
         if (this._completeGuideTimer) { clearTimeout(this._completeGuideTimer); this._completeGuideTimer = null; }
         if (this._originalOpacities) { this._restoreOpacity(); this._originalOpacities.clear(); this._originalOpacities = null; }

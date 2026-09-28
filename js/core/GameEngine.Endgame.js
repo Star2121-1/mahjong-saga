@@ -245,10 +245,7 @@ Gp.restart = function() {
         this._highlightTimers.forEach(function(t) { clearTimeout(t); });
         this._highlightTimers = [];
     }
-    if (this._guideCheckTimer) {
-        clearInterval(this._guideCheckTimer);
-        this._guideCheckTimer = null;
-    }
+    this._clearGuideTimers(); /* R326-P0: 连 _guideStepTimeout/_guideAutoAdvanceTimer 一起清 */
     /* R207-P0: 清理引导自动推进定时器，防止restart后旧定时器触发导致新游戏引导步骤错乱 */
     if (this._guideAutoAdvanceTimer) { clearTimeout(this._guideAutoAdvanceTimer); this._guideAutoAdvanceTimer = null; }
     /* R226-P0: 清理技能光效，防止restart后残留DOM */
