@@ -62,6 +62,7 @@ window.GameEngine = function() {
     this._ignoreGemCollection = false;
     this._mutatorTriggered = false;
     this._activeMutator = null;
+    this._mutatorPanelVisible = false; /* R325-P1 */
     this._abyssPanelVisible = false;
     this.loopCount = 0;
     this._pendingBossLordSettle = false;

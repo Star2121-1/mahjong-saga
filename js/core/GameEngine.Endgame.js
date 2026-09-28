@@ -6,7 +6,10 @@ Gp._onClick = function(e) {
     var enemyEl = e.target.closest('.enemy');
     if (!enemyEl) return;
     /* R46-P1: 防止overlay打开时误触攻击 */
-    if (!this.running || this._paused || this._levelUpPending || this._pendingReward || this._gambleActive || this._announcingWave || this._discardMode || this._huLock || this._navSaving) return;
+    /* R325-P0: 同 Boot.js 键位守卫 —— `_gambleActive` 是「本局已下注」而非「面板开着」。
+       选完赌局后它整场为真，于是**整个 Boss 战点不出攻击**（实测 hp 202 → 202 零伤害）。
+       正确字段是 _pendingBossGamble。 */
+    if (!this.running || this._paused || this._levelUpPending || this._pendingReward || this._pendingBossGamble || this._announcingWave || this._discardMode || this._huLock || this._navSaving) return;
 
     var id = parseInt(enemyEl.dataset.id, 10);
     var enemy = null;

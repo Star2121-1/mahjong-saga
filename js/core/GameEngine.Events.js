@@ -474,7 +474,20 @@ Gp._spawnBossLordFromGamble = function() {
     x = Math.max(margin, Math.min(this._mapW - margin, x));
     y = Math.max(margin, Math.min(this._mapH - margin, y));
 
-    var id = this._enemyIdCounter++;
+    /* R325-P0 关键：这里原本是 `this._enemyIdCounter++`（**后置**递增），
+       而 GameSpawner.js:140 / GameEngine.Spawn.js:61 / Enemy.js:1256 用的是
+       `++this._enemyIdCounter`（**前置**）。同一个计数器混用两种约定**必然撞号**：
+       ++c 返回 c+1 并把 c 置为 c+1，紧接着 c++ 返回同一个值。
+       实测：Boss 领主与一个普通敌人同为 data-id=1。后果链条 ——
+         1) _enemyElements 是以 id 为键的 Map，撞号时先来那个敌人的元素引用被覆盖丢失；
+         2) 清理只遍历 Map，孤儿元素滞留在 DOM（实测看到 shatter-anim 残留）；
+         3) Endgame.js 的 _onClick 按 dataset.id 取**数组里第一个**同号敌人
+            → 点 Boss 却打中别人（或打空）；
+         4) 最严重：别的敌人死亡清理按 id 摘元素时**把 Boss 的元素一起摘掉**
+            → **Boss 隐形且点不到，但血条照常显示、武器弹道照常打它**
+            （实测截图：血条满、场上找不到 Boss）。最终波无法通过。
+       全仓统一为前置递增，序列严格单调、id 永不复用。 */
+    var id = ++this._enemyIdCounter;
     var lord = new Enemy(id, x, y, level, true, 'Boss_Lord');
     lord._eng = this; /* Inject engine ref */
     /* Boss Lord HP/ATK 不受难度系数影响（独立设计） */
@@ -598,7 +611,7 @@ Gp._spawnEnemyType = function(type) {
     cy = Math.max(margin, Math.min(this._mapH - margin, cy));
 
     var level = Math.floor(this._elapsed / 15) + 1;
-    var id = this._enemyIdCounter++;
+    var id = ++this._enemyIdCounter; /* R325-P0: 与其余 4 处统一为前置递增，防止 id 撞号 */
     var enemy = new Enemy(id, cx, cy, level, false, type);
     enemy._eng = this; /* Inject engine ref */
     /* Apply level difficulty factor (consistent with SpawnSystem) */

@@ -179,6 +179,16 @@ Sys.endOverdrive = function(engine) {
 
 Sys.showMutatorPanel = function(engine) {
     if (!engine.mutatorOverlay || !engine.mutatorChoices) return;
+    /* R325-P1: 突变面板可见性标志。
+       之前所有「面板开着吗」的守卫都去蹭 `_activeMutator` ——
+       但它的语义是「本波已选中的突变 id」，选中后**整波为真**，要到
+       _startNextWave 才清。于是「面板开着」被误判成「整波都是面板开着」：
+         - Boot.js 的 Space 守卫 → 选中突变后整波 Overdrive 无法触发
+         - Loop.js 的 overdrive 计时守卫 → 选中突变后整波怒气倒计时冻住
+         - Boot.js 的 _navBlocked → 选中突变后整波 Tab/Enter 导航被锁
+         - Loop.js 的 abyss combo 链 → 同理静默失效
+       有了这个标志，这 4 处一次性归位，且语义正确。 */
+    engine._mutatorPanelVisible = true;
     engine.running = false;
     engine._freezeClock();
     engine.mutatorChoices.innerHTML = '';
@@ -216,6 +226,7 @@ Sys.showMutatorPanel = function(engine) {
 Sys.applyMutator = function(engine, mutatorId) {
     window.audioManager && window.audioManager.play('reward'); /* R236-P0: 突变选择音频反馈 */
     engine._activeMutator = mutatorId;
+    engine._mutatorPanelVisible = false;   /* R325-P1: 面板已关 */
     engine.mutatorOverlay.classList.remove('active');
     if (mutatorId === 'gravity') {
         engine._origMagnetRadius = engine.player.magnetRadius;

@@ -535,7 +535,10 @@ Gp._loop = function(timestamp) {
         /* 设计决策：面板打开时游戏循环暂停，Overdrive 计时随之暂停。
            面板关闭后倒计时从剩余时间继续。不按真实时间流逝。
            R38: Sys.updateOverdrive 是死代码（从未被调用），此处是唯一活跃计时器 */
-        if (this._overdriveActive && !this._pendingReward && !this._levelUpPending && !this._activeMutator && !this._announcingWave && !this._abyssShopVisible) { /* R235-P1/R242-P1: 添加_mutator守卫，防止突变面板打开时overdrive计时继续流逝 */ /* R259-P1: 添加_announcingWave守卫，防止波次公告期间overdrive计时继续流逝 */ /* R322-P1: 添加_abyssShopVisible守卫（r311 P1-1）—— 商店同样 _freezeClock()，不加守卫等于玩家在商店里翻页时怒气悄悄流走 */
+        /* R325-P1: `!this._activeMutator` 是「本波已选突变」，选中后整波为真，
+               导致**选中突变后整波 overdrive 计时冻住**（怒气涨不满、Overdrive 卡住不放）。
+               改用真正的面板可见标志 _mutatorPanelVisible。 */
+            if (this._overdriveActive && !this._pendingReward && !this._levelUpPending && !this._mutatorPanelVisible && !this._announcingWave && !this._abyssShopVisible) { /* R235-P1/R242-P1: 添加_mutator守卫，防止突变面板打开时overdrive计时继续流逝 */ /* R259-P1: 添加_announcingWave守卫，防止波次公告期间overdrive计时继续流逝 */ /* R322-P1: 添加_abyssShopVisible守卫（r311 P1-1）—— 商店同样 _freezeClock()，不加守卫等于玩家在商店里翻页时怒气悄悄流走 */
             this._overdriveTimer -= dt;
             if (this._overdriveTimer <= 0) this._endOverdrive();
         }

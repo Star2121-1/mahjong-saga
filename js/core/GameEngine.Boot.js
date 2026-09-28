@@ -547,6 +547,7 @@ Gp._startNewRun = function(heroId, levelId) {
     this._ignoreGemCollection = false;
     this._mutatorTriggered = false;
     this._activeMutator = null;
+    this._mutatorPanelVisible = false; /* R325-P1: 与 _activeMutator 一起重置 */
     this._witherTimer = 0; /* R159-P0: 重置突变计时器，防止跨局残留 */
     this._clearMutatorEffects(); /* R159-P0: 清除突变效果，防止跨局状态污染 */
     this._tempEnemyAtkDebuff = 0;
@@ -764,7 +765,11 @@ Gp._tryCloseOverlay = function() {
         /* reward-levelUp 面板由 _resumeAfter* 关闭，此处无法直接处理 */
         return false;
     }
-    if (this._gambleActive && this._pendingBossGamble) {
+    /* R325-P1: 原为 `if (this._gambleActive && this._pendingBossGamble)`，
+       但两者按构造互斥（_resolveGambleChoice 先清 _pendingBossGamble 再置 _gambleActive；
+       超时路径两个都置假；SaveManager.Core 恢复时强制清前者），
+       该分支**永远进不去**，赌局保护形同虚设。只留 _pendingBossGamble。 */
+    if (this._pendingBossGamble) {
         /* gamble 超时已自动处理；手动点击已通过 button handler 关闭 */
         return false;
     }
@@ -965,7 +970,14 @@ Gp._initKeyboard = function() {
             if (!self._tryCloseOverlay()) self._togglePause();
             return;
         }
-        if (!self.running || self.gameOver || self._announcingWave || self._gambleActive) {
+        /* R325-P0: `_gambleActive` 的语义是「本局已下注」，**不是「面板开着」**。
+           Events.js:436-442 选「金币豪赌/深渊试炼」时先清 _pendingBossGamble、
+           再置 _gambleActive=true；它要到 _startNextWave(Combat.js:320) 才清。
+           也就是**整个 Boss 战期间**它恒为 true，而面板此时已关、running=true，
+           于是每个按键都在这里 return、_pressedKeys 永不被写。
+           实测：下注后按住 D 900ms，位移 0 —— **WASD 全死，Boss 战无法通过**。
+           正确字段是 _pendingBossGamble（GameSpawner.js:194 用的就是这个）。 */
+        if (!self.running || self.gameOver || self._announcingWave || self._pendingBossGamble) {
             /* R214-P1: preventDefault 移至守卫前，防止 overlay 期间箭头键触发页面滚动 */
             /* R308-P0: 补充Numpad键位，防止暂停/死亡时小键盘滚动页面 */
             if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyW','KeyA','KeyS','KeyD',
@@ -979,7 +991,7 @@ Gp._initKeyboard = function() {
            而 Loop.js:5 是 `if (!this.running) return` —— 面板开启期间主循环是停摆的，
            此时按 Space 仍会执行 _triggerOverdrive()：怒气被清零、计时器开始，
            但没人 tick 它。玩家看到的是「按了没反应，过一会儿自己开始」。 */
-        if (e.code === 'Space' && self.player && self.running && !self.gameOver && self.player.rage >= self.player.maxRage && !self._overdriveActive && !self._paused && !self._announcingWave && !self._discardMode && !self._huLock && !self._pendingReward && !self._levelUpPending && !self._gambleActive && !self._activeMutator && !(self.guideOverlay && self.guideOverlay.classList.contains('active'))) {
+        if (e.code === 'Space' && self.player && self.running && !self.gameOver && self.player.rage >= self.player.maxRage && !self._overdriveActive && !self._paused && !self._announcingWave && !self._discardMode && !self._huLock && !self._pendingReward && !self._levelUpPending && !self._gambleActive && !self._mutatorPanelVisible && !(self.guideOverlay && self.guideOverlay.classList.contains('active'))) {
             self._pressedKeys[e.code] = false;
             self._triggerOverdrive();
             return;
@@ -994,7 +1006,7 @@ Gp._initKeyboard = function() {
     /* Epoch 43: 键盘导航 */
     self._onKeyDownNav = function(e) { self._handleKeyNav(e); };
     /* R160-P0: Tab/Enter/Space 需在所有游戏状态守卫下运行，防止overlay/pause/overdrive期间误触发 */
-    var _navBlocked = function() { return !self.running || self.gameOver || self._paused || self._pendingReward || self._levelUpPending || self._gambleActive || self._activeMutator || self._announcingWave || self._discardMode || self._huLock; };
+    var _navBlocked = function() { return !self.running || self.gameOver || self._paused || self._pendingReward || self._levelUpPending || self._gambleActive || self._mutatorPanelVisible || self._announcingWave || self._discardMode || self._huLock; };
     self._onKeyDownNav = function(e) { if (_navBlocked()) return; self._handleKeyNav(e); };
     document.addEventListener('keydown', self._onKeyDown);
     document.addEventListener('keyup', self._onKeyUp);
