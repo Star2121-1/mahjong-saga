@@ -90,8 +90,13 @@ Gp._resumeAfterReward = function() {
 
     // R227-P1: 命中顿帧系统已移除，保留此处注释防止未来误用
 
-    /* ── 检测 Boss Lord 波次 ── */
-    this._bossLordWave = (this._waveCount >= this._getMaxWaves() - 1);
+    /* ── 检测 Boss Lord 波次 ──
+       R327: 原来这里是全库唯一置 `_bossLordWave = true` 的地方，
+       于是「续跑路径忘了置真」成了一个通关级 P0（R327-P0）。
+       现在走 isBossWave() 统一口径 —— 与 Loop 的最终波胜利判定、
+       Boot 的续跑推导问同一个问题，杜绝「一边认为在 Boss 波、另一边不认为」。 */
+    this._bossLordWave = window.isBossWave ? window.isBossWave(this)
+                                          : (this._waveCount >= this._getMaxWaves() - 1);
     this._bossLordSpawned = false;
     if (this._bossLord) this._bossLord = null;
 

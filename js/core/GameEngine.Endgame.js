@@ -333,89 +333,11 @@ Gp.restart = function() {
         this._handTileDeliverTimers.forEach(function(t) { clearTimeout(t); });
         this._handTileDeliverTimers = [];
     }
-    this._pendingReward = false;
-    this._pendingBossGamble = false; /* H-017: 防止 Boss Gamble 状态永久挂起 */
-    /* R171-P1: 清理Boss Gamble完整状态，防止restart后残留导致误触发 */
-    this._gambleActive = false;
-    this._gambleType = null;
-    this._gambleStaked = 0;
-    this._gambleAbyssBonus = false;
-    this._bossTimer = 0;
-    this._waveCount = 0;
-    this.currentWaveSpawnedCount = 0;
-    this._announcingWave = false; /* R158-P1: 重置波次公告标志，防止跨restart阻塞 */
-    this._bossLordSpawned = false; /* R80-P1: 防止跨局Boss领主生成标志残留 */
-    this._finalBossDefeatedThisRun = false; /* R290-P1: 重置极速通关Boss击败标志，防止跨局残留 */
-    this._pendingBossLordSettle = false; /* R226-P1: 重置Boss结算标志，防止restart后胜利状态卡死 */
-    this._bossLord = null; /* R135-P1: 防止restart后_bossLord残留死引用 */
-    this._bossLordSavedPhase = null; /* R260-P0: 重置冻结Boss相位快照，防止跨restart泄漏 */
-    this._levelUpPending = false;
-    this._ignoreGemCollection = false;
-    this._mutatorTriggered = false;
-    this._clearMutatorEffects();
-    this._clearTotems();
-    /* R240-P0: 重置共鸣计时器，防止restart后残留导致提前触发 */
-    this._flameAuraTimer = 0;
-    this._iceAuraTimer = 0;
-    if (window.rewardManager) window.rewardManager.hidePanel();
-    /* R31-E-001: 局内成就计数器重置（修复跨重启泄漏） */
-    this._totalCritsThisRun = 0;
-    this._totalDodgesThisRun = 0;
-    this._bossKillsThisRun = 0;
-    this._finalBossKillsThisRun = 0;
-    this._maxGoldThisRun = 0;
-    /* R31-E-002: 临时增益字段重置（补充 restart() 缺失路径） */
-    this._tempEnemyAtkDebuff = 0;
-    this._tempEnemySpeedDebuff = 0;
-    this._tempBerserkBonus = false;
-    this._tempGoldMult = 1;
-    this._tempCritBonus = 0;
-    /* R229-P1: 重置疾风连打攻速加成，防止跨局泄漏 */
-    this._tempAspd = 0;
-    this._tempAspdT = 0;
-    if (this.player) this.player._dodgeAspdTimer = 0; /* R230-P1: 重置刺客闪避攻速计时器防止跨局残留 */
-    this._overdriveCount = 0; /* R131-P0: 重置Overdrive计数，防止跨restart积累误报成就 */
-    this._abyssComboActivated = false; /* R173-P0: 重置深渊combo激活标志，防止跨局永久失效 */
-    this._origCdFloor = null; /* R158-P1: 清除过驱动CD基准残留，防止跨局速度异常 */
-    this._extraEliteCount = 0;
-    /* R134-P1: 重置奖励面板置换状态，防止跨局残留 */
-    if (window.rewardManager) window.rewardManager._pendingWeapon = null;
-    this._shieldActive = false;
-    this._shieldTimer = 0; /* R128-P1: 重置雀魂护盾计时器防止跨局残留 */
-    this._tempShield = 0;
-    this._witherTimer = 0; /* P1: 重置枯萎计时器防止跨局残留 */
-    /* R239-P1: 重置圣物等级，防止restart()路径不清理遗物叠加状态 */
-    if (this.player) this.player.relicLevels = {};
-    /* R106-P0: 防止怪物潮双倍掉落跨局残留 */
-    this._monsterSurgeDoubleDrops = false;
-    /* R32-G-004: 重置引导状态，防止跨局残留（断点恢复路径也会使用restart） */
-    this._guideDismissed = false;
-    this._currentGuideStep = 0;
-    this._guideSteps = null;
-    this._guideMoveDirs = {};
-    this._guideGemsPicked = 0;
-    this._guideHits = 0;
-    this._guidePrevGemCount = undefined;
-    this._guidePrevEnemyCount = undefined;
-    this._tempShieldEnd = 0;
-    this._hitStopT = 0; /* R128-P1: 重置命中停顿计时器防止跨局残留 */
-    /* R130-P0: 重置突变系统引擎级状态，防止跨局残留 */
-    this._origMagnetRadius = null; /* R130-P0: 引力突变原始磁铁半径快照 */
-    /* R264-P1: 重置局内里程碑状态，防止restart后里程碑提示和波次横幅跨局残留 */
-    this._milestonesShown = null;
-    this._milestoneShown = false;
-    if (this.mutatorOverlay) this.mutatorOverlay.classList.remove('active');
-    /* R37-P1: 重置局内增益状态，防止跨局残留 */
-    this._vaultMutations = [];
-    this._eliteModeActive = false;
-    /* R126-P1: 重置深渊状态，防止跨局残留 */
-    this._abyssActiveCombo = null;
-    this._abyssFrenzyLifestealSet = false;
-    this._abyssCoins = 0;
-    this._abyssLoopHpScale = 1;
-    this._abyssLoopAtkScale = 1;
-    this._abyssVariantEnabled = false;
-    this._witherAbyssTimer = 0; /* R128-P1: 重置深渊凋零计时器防止跨局残留 */
+    /* R327: 原本这里是 83 行手写重置（30+ 字段，每行带一条 R### 墓碑注释说明
+       「为什么临时补这个字段」）。墓碑越多说明清单越没人能维护 —— 而它和
+       Boot 续跑 / Combat 续波 两份清单各不相同，少一个字段就是一次跨局泄漏。
+       现在统一走 resetRun()：清单只有一份（js/core/GameState.js）。 */
+    this.resetRun();
     if (this.victoryOverlay) this.victoryOverlay.classList.remove('active');
     if (this.gameOverOverlay) this.gameOverOverlay.classList.remove('active');
     /* R104-P1: 清理突变面板active class，防止重启后短暂残留 */

@@ -100,6 +100,36 @@ await b.close();
   if (!c.ok) fail++;
   console.log(`\n── 静态`);
   console.log(`   ${c.ok ? '✔' : '✘'} ${c.name}${c.ok ? '   → ' + c.got : '   → ' + c.got}`);
+
+  /* R327: 局内状态字段登记表与实际代码的一致性。
+     R324–R327 的 4 个 P0 里有 3 个同源 —— 「本局状态重置」被复制了三遍，
+     少清一个字段就是一个跨局泄漏/通关 bug。这里把 R### 墓碑换成本门禁：
+     新增一个 this._xxx 局内字段却没登记进 RUN_STATE_FIELDS，门禁立刻红。 */
+  const fs2 = await import('node:fs');
+  const st = fs2.readFileSync('js/core/GameState.js', 'utf8');
+  const listBody = st.match(/RUN_STATE_FIELDS = \[([\s\S]*?)\]/);
+  const registered = new Set((listBody ? listBody[1].matchAll(/'([^']+)'/g) : []).map(m => m[1]));
+
+  /* 扫描引擎各模块，找出「疑似局内状态」的 this._xxx 字段 */
+  const SUSPECT = /^(?:_pending|_boss|_gamble|_mutator|_overdrive|_bossLord|_huLock|_discard|_temp[A-Z]|_shield|_wither|_resonance|_trail|_hand[A-Z]|_skillGlow|_announcing|_interWave|_abyss|_monsterSurge|_total|_maxGold|_playerHit|_origCd|_finalBoss|_levelUp|_ignoreGem|_vaultMut|_formedMeld|_jokers|_mainSuit|loopCount$|gameOver$|running$|_won$|_elapsed$|_paused$|_waveCount$|currentWaveSpawnedCount$|playerHitCountInLevel1$|stalkersKilledInLevel2$)/;
+  const found = new Set();
+  for (const f of fs2.readdirSync('js/core')) {
+    if (!/^GameEngine.*\.js$|^GameSpawner\.js$|^GameSystems\.js$/.test(f)) continue;
+    const txt = fs2.readFileSync('js/core/' + f, 'utf8');
+    for (const m of txt.matchAll(/(?:this|engine|self)\.(_?[A-Za-z_$][\w$]*)\s*=[^=]/g)) {
+      if (SUSPECT.test(m[1])) found.add(m[1]);
+    }
+  }
+  /* SpawnSystem/Systems 有自己的副本字段，不要求进登记表 */
+  const OWN_COPY = /^(?:_spawnTimer|_difficultyTimer|_bossTimer|_currentWaveSpawnedCount|_spawnInterval|_spawnIntervalDecay|_spawnIntervalMin|_enemyTypeWeights|_currentLevelId|_mapW|_mapH|_waveCount|_totems|_enemyProjectiles|_bossLordWave|_bossLordSpawned|_bossLord|_difficultyTimer)$/;
+  /* DOM 元素引用与监听器绑定：由各自模块管理（重置时删掉 DOM 再重新查询），
+     塞进字段表反而会毁掉引用。新增 DOM 引用字段时一并加进这里。 */
+  const DOM_REF = /^(?:_abyssMistEl|_bossWarningEl|_handClicksBound|_handTileBar|_handTileClickListener|_handTileGrid|_handTileSlots)$/;
+  const missing = [...found].filter(x => !registered.has(x) && !OWN_COPY.test(x) && !DOM_REF.test(x)).sort();
+  const ok = missing.length === 0;
+  if (!ok) fail++;
+  console.log(`   ${ok ? '✔' : '✘'} 局内状态字段已登记入 RUN_STATE_FIELDS${ok ? `   → ${registered.size} 个字段，0 漏登` : ''}`);
+  if (!ok) console.log(`      漏登: ${missing.join(', ')}\n      → 加进 js/core/GameState.js 的 RUN_STATE_FIELDS，否则三处重置会漏清它`);
 }
 
 console.log(fail ? `\n✘ ${fail} 项未通过` : '\n✔ 全部通过');

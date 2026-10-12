@@ -55,7 +55,9 @@
     <script src="../js/entities/ExpGem.js?v=20260908I"></script>
     <script src="../js/entities/Weapon.js?v=20260908I"></script>
     <!-- 引擎拆分 (最后加载，依赖以上所有) -->
-    <script src="../js/core/GameEngine.js?v=20260908I"></script>
+    <!-- R327: GameState 必须早于 GameEngine.js —— resetRun 依赖 RUN_STATE_FIELDS -->
+    <script src="../js/core/GameState.js?v=20260927A"></script>
+    <script src="../js/core/GameEngine.js?v=20260927A"></script>
     <script src="../js/core/GameEngine.Boot.js?v=20260926V"></script>
     <script src="../js/core/GameEngine.NewRun.js?v=20260926W"></script>
     <script src="../js/core/GameEngine.Loop.js?v=20260927A"></script>

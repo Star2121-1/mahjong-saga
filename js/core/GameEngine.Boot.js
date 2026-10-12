@@ -117,7 +117,7 @@ Gp.init = async function() {
                而 Loop.js:712 的波次结算门带 `_waveCount < _getMaxWaves() - 1`
                把最终波排除在外 → _pendingReward 也不会置真
                → 清完最后一只小怪后游戏彻底静止。**那一局无法通关。** */
-            this._bossLordWave = (this._waveCount >= this._getMaxWaves() - 1);
+            this._bossLordWave = window.isBossWave ? window.isBossWave(this) : false;
             /* R326-P2: 恢复后重画玩家牌面。_renderPlayerTile 负责写 #player[data-hero]
                和 .player-tile-text 的字牌（雀/一万/九筒/一条），全库只有
                _startNewRun 调它；pages/s3_gameplay.html:102 的静态 #player 只有血条、
@@ -621,6 +621,15 @@ Gp._startNewRun = function(heroId, levelId) {
     this._overdriveCount = 0;
     this._origCdFloor = null; /* R30-H-024: 重置过驱动残留CD基准 */
     this._resonanceAuraTimer = 0;
+
+    /* R327 收束：这一段原本手写了 60+ 字段的局内状态重置，且与 Endgame.restart
+       的清单各不完全一致 —— `_bossLordWave` 就是这么漏的（Combat 会置真、这里不会），
+       断点续跑于是永远停在「非 Boss 波」，最终波刷不出 Boss（R327-P0）。
+       这里保留上面逐字段的续跑专属清理（它们后面各自会被快照覆盖，语义上必须先跑），
+       再调一次 resetRun() 作为**兜底净零**：以后新增局内字段只要登记进
+       GameState.RUN_STATE_FIELDS，就三处重置自动覆盖，不可能再漏。
+       keepWave=true 是因为紧接着的 loadActiveRun 分支要按快照设 _waveCount。 */
+    this.resetRun({ keepWave: true, heroId: heroId });
 
     this.player.reset(heroId);
 

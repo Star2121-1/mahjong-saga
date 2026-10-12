@@ -149,6 +149,59 @@ window.GameEngine = function() {
     this._gambleTimeout = null; /* R234-P0: 构造函数补齐初始化，防止clearTimeout(undefined) */
 };
 
+/* ══════════════════════════════════════════════════════════════════
+   resetRun() —— 「重置本局状态」的唯一入口
+
+   R327 收束。此前 Boot 续跑 / Combat 续波 / Endgame restart 各手写一份
+   清单（字段 40+，各带 R### 墓碑注释），少清一个字段就是一个跨局 P0。
+
+   opts:
+     keepWave   true = 保留 _waveCount（断点续跑用，随后再按快照覆盖）
+     silent     true = 不打印（默认）
+   ══════════════════════════════════════════════════════════════════ */
+window.GameEngine.prototype.resetRun = function(opts) {
+    var o = opts || {};
+    var fields = window.RUN_STATE_FIELDS;
+    var defaults = window.RUN_STATE_DEFAULTS;
+
+    /* 先停一切计时器与循环 —— 否则重置过程中可能有个 pending 回调
+       读到「半重置」的状态并触发跨局逻辑（R327 的 _guideStepTimeout
+       类 bug 就是这个模式）。 */
+    this.running = false;
+    if (window.Guide && window.Guide._clearGuideTimers) window.Guide._clearGuideTimers(this);
+    if (this._qqueenShieldTimer) { clearTimeout(this._qqueenShieldTimer); this._qqueenShieldTimer = null; }
+    if (this._gambleTimeout) { clearTimeout(this._gambleTimeout); this._gambleTimeout = null; }
+    if (this._interWaveTimeout) { clearTimeout(this._interWaveTimeout); this._interWaveTimeout = null; }
+    if (this._handTileDeliverTimers) {
+        this._handTileDeliverTimers.forEach(function(t) { clearTimeout(t); });
+        this._handTileDeliverTimers = [];
+    }
+    if (this._trailTimers) {
+        this._trailTimers.forEach(function(t) { clearTimeout(t); });
+        this._trailTimers = [];
+    }
+
+    /* 实体级清理（需要方法，不在字段表里） */
+    if (this._clearTotems) this._clearTotems();
+    if (this._cleanEnemyProjectiles) this._cleanEnemyProjectiles();
+    if (this._clearMutatorEffects) this._clearMutatorEffects();
+    if (window.rewardManager) window.rewardManager.hidePanel();
+
+    /* 字段表统一复位 */
+    for (var i = 0; i < fields.length; i++) {
+        var k = fields[i];
+        if (k === '_waveCount' && o.keepWave) continue;
+        this[k] = (k in defaults) ? defaults[k] : false;
+    }
+
+    /* Boss 波次不变量：清零后必然不是 Boss 波。真正置真只发生在
+       「进入最终波」的那一刻（_beginNextWave），续跑则由调用方按快照推导。 */
+    this._bossLordWave = false;
+
+    /* 玩家 */
+    if (this.player && this.player.reset && o.heroId) this.player.reset(o.heroId);
+};
+
 /* R89-P1: 移除未使用的 Gp 局部变量，所有原型方法在独立模块中定义 */
 
 /* ══════════════════════════════════════════════
