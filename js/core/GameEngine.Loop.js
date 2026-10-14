@@ -249,8 +249,13 @@ Gp._loop = function(timestamp) {
 
             /* Epoch 47: 深渊变异组合自动激活（每局仅一次） */
             /* R309-P0: 添加面板守卫，防止深渊组合在活跃面板期间误触发 */
-            if (this.loopCount > 0 && this._abyssUnlockedCombos && this._abyssUnlockedCombos.length > 0 && !this._abyssActiveCombo && !this._abyssComboActivated && !this._pendingReward && !this._levelUpPending && !this._activeMutator && !this._announcingWave
-                && !this._paused /* R322-P2: 暂停时不应激活combo（r311 P2-2）—— 守卫链里其它暂停态都查了，唯独漏了 _paused */) {
+            /* R328-P0 修正：注释写的是「防止深渊组合在活跃面板期间误触发」，
+               但守卫查的是 `_activeMutator` —— 那是「已生效的突变 id」，不是面板可见性。
+               一旦某个突变激活过（_activeMutator = 'flame' 等）而面板随后关闭，
+               这个条件就**永久为假** → 深渊 combo 永远无法自动激活。
+               正确字段是 _mutatorPanelVisible（GameState.RUN_STATE 里已登记）。 */
+            if (this.loopCount > 0 && this._abyssUnlockedCombos && this._abyssUnlockedCombos.length > 0 && !this._abyssActiveCombo && !this._abyssComboActivated && !this._mutatorPanelVisible && !this._announcingWave
+                && !this._paused /* R322-P2 */) {
                 this._abyssComboActivated = true;
                 /* R225-P0: 随机选择深渊组合，避免永远固定取第一个（最早解锁）的combo */
                 var _abyssPool = this._abyssUnlockedCombos;

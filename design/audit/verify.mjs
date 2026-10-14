@@ -148,6 +148,44 @@ await b.close();
   if (!gOk) fail++;
   console.log(`   ${gOk ? '✔' : '✘'} 阻断判定已统一走 GameState.isBlocked()`);
   if (!gOk) console.log(`      仍有手写守卫: ${handWritten.join(', ')}\n      → 改用 window.isInputBlocked(engine)，避免同一判断多份清单互相不一致`);
+
+  /* R328-3: 「同一语义两个变量」的误用禁令。
+     `_activeMutator` = 已生效的突变 id（有值且波次中途一直为真）
+     `_mutatorPanelVisible` = 突变面板是否可见（阻断输入）
+     两者极易混用：R326 我手工改了 4 处，Loop.js:252 那处直到 R328 才被发现 ——
+     它的注释写着「防止在活跃面板期间误触发」，实际查的却是 _activeMutator，
+     导致突变激活过后深渊 combo **永久无法自动激活**。
+
+     规则：涉及面板可见 / 阻断 / 输入的语境，不得用 _activeMutator
+     （`_activeMutator === null` 当「没突变」是合法的，不在此列）。 */
+  const MUT_ID = /_activeMutator(?![\w$])/;
+  const CTX_BAD = /(?:PanelVisible|isInputBlocked|isBlocked|blocked|_paused|_pendingReward|_levelUpPending|_announcingWave|input|keydown|keyup|nav|freeze|Space)/i;
+  const misuse = [];
+  for (const f of fs2.readdirSync('js/core')) {
+    if (!/\.js$/.test(f)) continue;
+    /* 逐行扫描，但跟踪块注释状态 —— 块注释的中间行不含 '/*'，
+       只按「本行含注释符」过滤会漏掉它们（Boot.js:1028 就是这种）。 */
+    const txt = fs2.readFileSync('js/core/' + f, 'utf8');
+    let inBlock = false;
+    txt.split('\n').forEach((ln, i) => {
+      const opens = ln.indexOf('/*') >= 0, closes = ln.indexOf('*/') >= 0;
+      if (inBlock) { if (closes) inBlock = false; return; }
+      if (ln.includes('//')) return;
+      if (opens && !closes) { inBlock = true; return; }
+      if (/^\s*['"]/.test(ln)) return;                    /* 字段登记表不算 */
+      if (/^\s*[A-Z_]+:/.test(ln)) return;                /* 枚举定义不算 */
+      if (MUT_ID.test(ln) && /=\s*(null|false|true|'|\d)/.test(ln)) return;  /* 赋值不算 */
+      if (/=== '\w+'|_activeMutator === '|hasMutator|applyMutator/.test(ln)) return; /* 突变效果语境合法 */
+      if (!MUT_ID.test(ln)) return;
+      if (ln.includes('=== null') || ln.includes('!== null')) return;  /* 「没有突变」语义合法 */
+      if (!CTX_BAD.test(ln)) return;                                    /* 突变效果语境合法 */
+      misuse.push(`${f}:${i + 1}`);
+    });
+  }
+  const mOk = misuse.length === 0;
+  if (!mOk) fail++;
+  console.log(`   ${mOk ? '✔' : '✘'} 面板语境未误用 _activeMutator（应改用 _mutatorPanelVisible）`);
+  if (!mOk) console.log(`      误用: ${misuse.join(', ')}`);
   const ok = missing.length === 0;
   if (!ok) fail++;
   console.log(`   ${ok ? '✔' : '✘'} 局内状态字段已登记入 RUN_STATE_FIELDS${ok ? `   → ${registered.size} 个字段，0 漏登` : ''}`);
