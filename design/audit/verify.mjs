@@ -126,6 +126,28 @@ await b.close();
      塞进字段表反而会毁掉引用。新增 DOM 引用字段时一并加进这里。 */
   const DOM_REF = /^(?:_abyssMistEl|_bossWarningEl|_handClicksBound|_handTileBar|_handTileClickListener|_handTileGrid|_handTileSlots)$/;
   const missing = [...found].filter(x => !registered.has(x) && !OWN_COPY.test(x) && !DOM_REF.test(x)).sort();
+
+  /* R328: 「引擎是否阻断」的手写守卫禁令。
+     原来同一判断在 4 处手写，清单各不相同（keyup 比 keydown 少 3 个条件
+     → 按下时没进面板、松开时进了 → 键位悬挂，关闭面板后玩家自己往前走）。
+     现在判定表在 GameState.isBlocked()，此处禁止再有人手拼字段清单。 */
+  const GUARD_HINT = /(?:running|gameOver|_paused|_pendingReward|_levelUpPending|_discardMode|_huLock|_pendingBossGamble|_gambleActive|_mutatorPanelVisible|_announcingWave)/;
+  const handWritten = [];
+  for (const f of fs2.readdirSync('js/core')) {
+    if (!/^GameEngine.*\.js$/.test(f)) continue;
+    const txt = fs2.readFileSync('js/core/' + f, 'utf8');
+    txt.split('\n').forEach((ln, i) => {
+      if (/\/\*|\/\//.test(ln)) return;                    /* 注释行不算 */
+      if (ln.includes('isInputBlocked') || ln.includes('isBlocked')) return;  /* 已收束 */
+      /* 只抓「|| 串联 3 个以上阻断字段」的判断行 */
+      const ors = ln.split('||').filter(x => GUARD_HINT.test(x)).length;
+      if (ors >= 3) handWritten.push(`${f}:${i + 1}`);
+    });
+  }
+  const gOk = handWritten.length === 0;
+  if (!gOk) fail++;
+  console.log(`   ${gOk ? '✔' : '✘'} 阻断判定已统一走 GameState.isBlocked()`);
+  if (!gOk) console.log(`      仍有手写守卫: ${handWritten.join(', ')}\n      → 改用 window.isInputBlocked(engine)，避免同一判断多份清单互相不一致`);
   const ok = missing.length === 0;
   if (!ok) fail++;
   console.log(`   ${ok ? '✔' : '✘'} 局内状态字段已登记入 RUN_STATE_FIELDS${ok ? `   → ${registered.size} 个字段，0 漏登` : ''}`);

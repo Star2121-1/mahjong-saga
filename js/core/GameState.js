@@ -31,6 +31,73 @@ window.isBossWave = function(engine) {
     return (engine._waveCount || 0) >= (engine._getMaxWaves() - 1);
 };
 
+/* ══════════════════════════════════════════════════════════════════
+   isBlocked() —— 「引擎此刻是否不接受玩家输入/不推进游戏逻辑」
+
+   第二个病根，和「三份重置清单」同源：
+   同一个问题在 Boot.js 里被手写了 4 遍，**每遍的字段清单都不一样**：
+
+     Boot.js:1032  Space   11 个字段
+     Boot.js:1041  keyup   8 个  ← 少 _gambleActive / _mutatorPanelVisible / _announcingWave
+     Boot.js:1047  nav     11 个字段
+     Endgame.js:12  点击    10 个（又一套）
+
+   keyup 少那三个 = 按下时没进面板、松开时进了 → 面板打开状态下松手不掉键位，
+   关闭面板后玩家「莫名其妙自己往前走」。而 R326 修 _activeMutator 时，
+   就是在这堆不一致里挑几处手工改的 —— 当时已经在打补丁了。
+
+   收束：判定表只此一份，谁需要判断就调 isBlocked()，
+   也不再需要每个调用方自己拼字段清单（拼错就漏，漏就是行为不一致）。
+   ══════════════════════════════════════════════════════════════════ */
+
+/* 阻断原因的取值 → 英文键（探针/日志用）。顺序即优先级，先命中先返回。 */
+window.BLOCK_REASONS = {
+    NOT_RUNNING:  '_notRunning',   /* running === false：暂停/未开始/已结束 */
+    GAME_OVER:    'gameOver',      /* 死亡/胜利结算中 */
+    PAUSED:       '_paused',       /* 暂停菜单 */
+    REWARD:       '_pendingReward',    /* 升级/波次结算奖励面板 */
+    LEVEL_UP:     '_levelUpPending',   /* 升级面板 */
+    DISCARD:      '_discardMode',      /* 雀魂打牌（选牌） */
+    HU_LOCK:      '_huLock',       /* 胡牌演出锁定 */
+    GAMBLE:       '_pendingBossGamble', /* Boss 赌局（进行中才阻塞，已结算不再阻塞） */
+    MUTATOR:      '_mutatorPanelVisible', /* 突变面板（R325 专用：与 _activeMutator 语义不同）*/
+    ANNOUNCING:   '_announcingWave',    /* 波次公告 1.5s */
+    GUIDE:        '_guideActive'        /* 教程遮罩 */
+};
+
+/* 返回第一个命中的阻断原因；无阻断返回 null。
+   opts:
+     inGuide  true = 教程遮罩可见也算阻断（默认 false，因为有些场景
+              教程进行中玩家仍需能操作，R325 的 guide-playable 就是这个语义）
+     drop     true = 松开按键（keyup）语义：与 keydown 同一套判定，
+              避免「按下时未进面板、松开时进了」导致键位悬挂。 */
+window.isBlocked = function(engine, opts) {
+    var o = opts || {};
+    var R = window.BLOCK_REASONS;
+    if (!engine.running) return R.NOT_RUNNING;
+    if (engine.gameOver) return R.GAME_OVER;
+    if (engine._paused) return R.PAUSED;
+    if (engine._pendingReward) return R.REWARD;
+    if (engine._levelUpPending) return R.LEVEL_UP;
+    if (engine._discardMode) return R.DISCARD;
+    if (engine._huLock) return R.HU_LOCK;
+    /* R326-P0：赌局用 _pendingBossGamble 判定「还在进行中」。
+       _gambleActive 语义是「赌局流程已激活」（结算后仍为真），用它判断
+       阻塞会永久卡死输入 —— 这正是 R326 修的 bug，现在由本表统一承载。 */
+    if (engine._pendingBossGamble) return R.GAMBLE;
+    /* R325-P1：突变面板可见性用 _mutatorPanelVisible，
+       不能用 _activeMutator（后者是「已生效的突变 id」，波次中途一直为真）。 */
+    if (engine._mutatorPanelVisible) return R.MUTATOR;
+    if (engine._announcingWave) return R.ANNOUNCING;
+    if (o.inGuide && engine.guideOverlay && engine.guideOverlay.classList.contains('active')) return R.GUIDE;
+    return null;
+};
+
+/* 布尔便捷式：绝大多数调用方只需要「能不能动」。 */
+window.isInputBlocked = function(engine, opts) {
+    return window.isBlocked(engine, opts) !== null;
+};
+
 /* 一局结束时应回到的「全零状态」。
    字段 = Boot 续跑重置 ∪ Combat 续波重置 ∪ Endgame restart 重置 的并集，
    再补上构造函数字段（防止新增字段忘了进任何重置路径）。

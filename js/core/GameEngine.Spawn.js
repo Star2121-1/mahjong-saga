@@ -821,7 +821,8 @@ Gp._triggerHu = function (hu) {
 
 /* ════ 雀魂系统 · A5 打牌模式（满14未胡：冻结+点选打出） ════ */
 Gp._enterDiscardMode = function (slotIndex) {
-    if (this._discardMode || this.gameOver || this._pendingReward || this._huLock) return;
+    /* R328: 统一阻断判定。注意**故意不查 _discardMode** —— 那正是本函数要置真的状态。 */
+    if (window.isBlocked(this) === window.BLOCK_REASONS.DISCARD || this.gameOver || this._pendingReward || this._huLock) return;
     if (this._handTiles.length < window.Balance.HUPAI_HAND_MAX) return;
     this._discardMode = true;
     /* R233-P1: slotIndex=-1时自动选择第一个牌，避免玩家必须手动点选才能进入有效状态 */
@@ -868,7 +869,7 @@ Gp._bindHandTileClicks = function () {
     this._handClicksBound = true;
     var self = this;
     var handler = function (e) {
-        if (!self.running || self.gameOver || self._pendingReward) return;
+        if (window.isBlocked(self) === window.BLOCK_REASONS.NOT_RUNNING || self.gameOver || self._pendingReward) return;  /* R328 */
         var slot = e.target.closest('.hand-tile-slot');
         if (!slot) { if (self._discardMode) self._exitDiscardMode(); return; }
         var idx = Array.prototype.indexOf.call(self._handTileSlots, slot);

@@ -105,7 +105,11 @@ if ((await st()).active) {
    固定等 1200ms 就断言「教学结束?」偶尔会太早 → 误报「仍开着」。
    改成轮询等它关闭（最长 15 秒），期间继续处理突变面板。 */
 let closed = false;
-for (let w = 0; w < 30; w++) {
+/* R328-P0: 这段原本是「点掉按钮 → 固定等 700ms → 下一轮」，
+   于是总耗时取决于点了多少次按钮。R328 收束 isBlocked() 后求值路径变短，
+   定时器触发顺序发生偏移，累计耗时压过 30 轮上限 → 偶发误报「仍开着」。
+   改成**按条件等待**：轮询直到教程真的关闭，而不是猜时长。 */
+for (let w = 0; w < 60; w++) {
   if (await p.locator('#mutator-overlay.active').count()) {
     const mo = p.locator('#mutator-overlay .mutator-option, #mutator-overlay [data-mutator], #mutator-overlay button').first();
     if (await mo.count()) await mo.click({ force: true }).catch(() => {});

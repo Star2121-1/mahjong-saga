@@ -166,7 +166,7 @@ Gp.init = async function() {
             if (e.target.closest && e.target.closest('#joystick-container')) return;
             /* 排除 overlay 区域 — 防止拦截 modal 点击 */
             if (e.target.closest && (e.target.closest('#reward-overlay, #victory-overlay, #game-over-overlay, #pause-overlay, #guide-overlay, #mutator-overlay, #boss-gamble-panel, #abyss-panel, #abyss-shop-panel'))) return;
-            if (!self.running || self.gameOver || self._pendingReward) return;
+            if (!self.running || self.gameOver || self._pendingReward) return;  /* R328: 定时器回调只防结算期副作用，非输入语义，保持原样 */
             /* P1-7: 打牌/胡牌演出期间冻结战场输入 */
             if (self._discardMode || self._huLock) return;
 
@@ -1015,7 +1015,7 @@ Gp._initKeyboard = function() {
            于是每个按键都在这里 return、_pressedKeys 永不被写。
            实测：下注后按住 D 900ms，位移 0 —— **WASD 全死，Boss 战无法通过**。
            正确字段是 _pendingBossGamble（GameSpawner.js:194 用的就是这个）。 */
-        if (!self.running || self.gameOver || self._announcingWave || self._pendingBossGamble) {
+        if (window.isInputBlocked(self)) {  /* R328: 统一阻断判定（原手写 4 个字段） */
             /* R214-P1: preventDefault 移至守卫前，防止 overlay 期间箭头键触发页面滚动 */
             /* R308-P0: 补充Numpad键位，防止暂停/死亡时小键盘滚动页面 */
             if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyW','KeyA','KeyS','KeyD',
@@ -1029,7 +1029,10 @@ Gp._initKeyboard = function() {
            而 Loop.js:5 是 `if (!this.running) return` —— 面板开启期间主循环是停摆的，
            此时按 Space 仍会执行 _triggerOverdrive()：怒气被清零、计时器开始，
            但没人 tick 它。玩家看到的是「按了没反应，过一会儿自己开始」。 */
-        if (e.code === 'Space' && self.player && self.running && !self.gameOver && self.player.rage >= self.player.maxRage && !self._overdriveActive && !self._paused && !self._announcingWave && !self._discardMode && !self._huLock && !self._pendingReward && !self._levelUpPending && !self._gambleActive && !self._mutatorPanelVisible && !(self.guideOverlay && self.guideOverlay.classList.contains('active'))) {
+        /* R328 收束：这行原本是 11 个 `!self.xxx` 的手工拼接。判定表搬到
+           GameState.isBlocked() 后，Space 不可能再漏掉某个阻断态。
+           额外保留 Overdrive 未激活与怒气满两个**非阻断**条件。 */
+        if (e.code === 'Space' && self.player && !window.isInputBlocked(self, { inGuide: true }) && self.player.rage >= self.player.maxRage && !self._overdriveActive) {
             self._pressedKeys[e.code] = false;
             self._triggerOverdrive();
             return;
@@ -1038,13 +1041,17 @@ Gp._initKeyboard = function() {
     };
     self._onKeyUp = function(e) {
         /* R160-P1: keyup 需与keydown同等的状态守卫，防止overlay期间误触发移动 */
-        if (!self.running || self.gameOver || self._paused || self._pendingReward || self._levelUpPending || self._discardMode || self._huLock) return;
+        /* R328-P0：这里原本比 keydown 的守卫**少** _gambleActive /
+           _mutatorPanelVisible / _announcingWave 三个条件 —— 于是「按下时没进面板、
+           松开时进了」会让 _pressedKeys 停不下来，关闭面板后玩家自己往前走。
+           现在与 keydown 走同一张判定表，键位不可能悬挂。 */
+        if (window.isInputBlocked(self)) return;
         self._pressedKeys[e.code] = false;
     };
     /* Epoch 43: 键盘导航 */
     self._onKeyDownNav = function(e) { self._handleKeyNav(e); };
     /* R160-P0: Tab/Enter/Space 需在所有游戏状态守卫下运行，防止overlay/pause/overdrive期间误触发 */
-    var _navBlocked = function() { return !self.running || self.gameOver || self._paused || self._pendingReward || self._levelUpPending || self._gambleActive || self._mutatorPanelVisible || self._announcingWave || self._discardMode || self._huLock; };
+    var _navBlocked = function() { return window.isInputBlocked(self); };
     self._onKeyDownNav = function(e) { if (_navBlocked()) return; self._handleKeyNav(e); };
     document.addEventListener('keydown', self._onKeyDown);
     document.addEventListener('keyup', self._onKeyUp);

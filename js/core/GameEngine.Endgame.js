@@ -9,7 +9,8 @@ Gp._onClick = function(e) {
     /* R325-P0: 同 Boot.js 键位守卫 —— `_gambleActive` 是「本局已下注」而非「面板开着」。
        选完赌局后它整场为真，于是**整个 Boss 战点不出攻击**（实测 hp 202 → 202 零伤害）。
        正确字段是 _pendingBossGamble。 */
-    if (!this.running || this._paused || this._levelUpPending || this._pendingReward || this._pendingBossGamble || this._announcingWave || this._discardMode || this._huLock || this._navSaving) return;
+    /* R328 收束：原本是第 4 套手写守卫（10 个字段），与 Boot.js 的三套清单都不同。 */
+    if (window.isInputBlocked(this) || this._navSaving) return;
 
     var id = parseInt(enemyEl.dataset.id, 10);
     var enemy = null;
