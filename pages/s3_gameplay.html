@@ -19,8 +19,8 @@
     <link rel="stylesheet" href="../css/tokens.css?v=20260926B">
     <link rel="stylesheet" href="../css/theme/01-foundation.css?v=20260926K">
     <link rel="stylesheet" href="../css/theme/02-overlay.css?v=20260926Z">
-    <link rel="stylesheet" href="../css/theme/03-battlefield.css?v=20260926S">
-    <link rel="stylesheet" href="../css/theme/04-enemy.css?v=20260926K">
+    <link rel="stylesheet" href="../css/theme/03-battlefield.css?v=20260927G">
+    <link rel="stylesheet" href="../css/theme/04-enemy.css?v=20260927A">
     <link rel="stylesheet" href="../css/theme/05-hub.css?v=20260926K">
     <link rel="stylesheet" href="../css/theme/06-hand.css?v=20260926K">
     <!-- 核心服务层 (低层依赖) -->
@@ -99,6 +99,8 @@
         </div>
 
         <div id="battlefield">
+            <!-- R329: 战场明暗底（中心光池 + 边缘压暗）。纯装饰，pointer-events:none -->
+            <div class="ground-wash"></div>
             <div id="world-layer">
                 <div id="fct-layer"></div>
                 <div id="player">

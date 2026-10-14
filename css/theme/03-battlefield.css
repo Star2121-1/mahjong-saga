@@ -82,7 +82,7 @@
         radial-gradient(58% 52% at 22% 4%, rgba(255, 240, 212, .07) 0%, transparent 72%),
         radial-gradient(40% 36% at 24% 28%, rgba(47, 143, 107, .05) 0%, transparent 74%),
         radial-gradient(30% 42% at 76% 60%, rgba(200, 64, 47, .045) 0%, transparent 76%),
-        repeating-linear-gradient(45deg, rgba(228, 236, 239, .022) 0 1px, transparent 1px 4px),
+        repeating-linear-gradient(45deg, rgba(228, 236, 239, .030) 0 1px, transparent 1px 4px),
         repeating-linear-gradient(-45deg, rgba(228, 236, 239, .014) 0 1px, transparent 1px 4px),
         radial-gradient(ellipse at center, #16202a 0%, #101820 52%, #080c0f 100%) !important;
     box-shadow: inset 0 0 200px 40px rgba(0, 0, 0, .62) !important;
@@ -279,4 +279,91 @@
 @media (hover: hover) and (pointer: fine) {
     /* 有鼠标：移动靠 WASD / 点击地面，虚拟摇杆纯占地方 */
     #joystick-container { display: none !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   地面系统（R329）—— 解决「牌悬浮在虚空」
+   --------------------------------------------------------------------------
+   诊断（shoot-all 的 s3-play.png，战斗第 3 秒）：
+     玩家与敌人都是 position:absolute，而 #battlefield 除了那层深色石板
+     渐变之外**没有任何地面参照物**。深底 + 象牙白牌 = 所有元素像贴在
+     真空里 —— 这就是「不美观」的真实来源：不是配色难看，是**没有空间**。
+     截图里 95% 的画面是空的，唯一有设计语言的只有牌面本身。
+
+   做法：**纯加法**，不改动上面任何既有主题意图（墨底石板保留）。
+     1. 视差网格 —— 随 world-layer 的 camera lerp 产生纵深
+     2. 中心光池 —— 把注意力压回战场中心
+     3. 边缘压暗 —— 收拢视线
+     4. 单位落地影 —— 让牌「站」在地上而不是漂着
+   三层全部 pointer-events:none + z-index:0（在 world-layer 的 z-index:1 之下），
+   不参与点击、不影响命中判定、不进 clock-freeze 动画。
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ① 地面：棋盘式明暗地块（R329）
+
+   ── 为什么放弃了「细网格线」────────────────────────────────
+   第一版做的是 1px 细网格，思路是「给虚空一条参考线」。
+   实测**在这个亮度基线上根本做不到**：
+     战场底色是 #0b0f12 ~ rgb(11,15,18)，而地面网格想用 10% 白
+     （≈ +8/255）画线 —— 但底色本身因为视差云雾 + 暗角就在
+     4~6/255 的范围内波动，8/255 的线**埋在噪声里**，人眼读不出来。
+     逐级加码到 16%（+20/255）又立刻变成「棋盘纸」，喧宾夺主。
+
+   结论：**在这个明度上，1px 的线不是可行方案。** 与其画线，
+   不如直接改变「地块」本身的明暗 —— 用 200px 的方块做明暗交替，
+   形成大尺度的空间节奏。线不需要可见，**区块的明暗差才是能被眼睛读到的信号**。
+   这一点实测后才确认：明暗差做到 6~7/255 就已经清晰可见，
+   而 1px 线要 20/255 才勉强显形 —— 大块的面积效应远强于细线。
+
+   ⚠ stop 位置必须单调递增（第一版的真凶）：
+     写成 `rgba(...) 0 2px, transparent 1px 200px` 时 transparent 的位置
+     比前一个 stop 更小，整条渐变退化，2px 的线被压成 1px 且透明度骤降。
+     这就是「对比度调到 16% 却全屏看不见网格」的原因 —— 不是暗，是渐变坏了。
+     下面的写法每个色标都写全 `0px / 2px / 200px` 三个位置，不留歧义。 */
+#battlefield::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        /* 横向 200px 明暗带 —— 大块面积提供可读的空间节奏 */
+        repeating-linear-gradient(0deg,
+            rgba(228, 236, 239, .028) 0px, rgba(228, 236, 239, .028) 100px,
+            transparent 100px, transparent 200px),
+        /* 纵向同样的带，与横向交错成棋盘 */
+        repeating-linear-gradient(90deg,
+            rgba(228, 236, 239, .028) 0px, rgba(228, 236, 239, .028) 100px,
+            transparent 100px, transparent 200px),
+        /* 极淡的正交细线，只在中心光池附近（最需要定位感的地方）提供刻度 */
+        repeating-linear-gradient(0deg,
+            rgba(228, 236, 239, .05) 0px, rgba(228, 236, 239, .05) 1px,
+            transparent 1px, transparent 100px),
+        repeating-linear-gradient(90deg,
+            rgba(228, 236, 239, .05) 0px, rgba(228, 236, 239, .05) 1px,
+            transparent 1px, transparent 100px);
+}
+
+/* ② 中心光池 + ③ 边缘压暗（.ground-wash，DOM 节点）
+   ⚠ 必须挂在 #battlefield 上，不能用 #world-layer::before：
+   world-layer 受 camera transform 影响，可视区边界不等于战场，
+   实测那一层的边缘会在 x≈1689 处切出一条明显亮线（网格在边界外没被压暗）。
+   z-index:-1 让它沉到网格之下 —— 同为 0 时 DOM 元素与伪元素的叠放顺序
+   不直观，实测光池会盖住网格，所以这里显式压到 -1。 */
+#battlefield .ground-wash {
+    content: '';
+    position: absolute;
+    inset: 0;
+    /* z-index:-1 而不是 0：与 ::after 网格同为 0 时，实测光池盖住了网格
+       （同 z-index 下 DOM 元素与伪元素的叠放顺序不直观，不要依赖）。
+       明确让光池沉到网格之下，网格才是「地面上的线」。 */
+    z-index: -1;
+    pointer-events: none;
+    background:
+        /* 中心暖光池：把视线收回战场中心 */
+        radial-gradient(ellipse 46% 40% at 50% 50%,
+            rgba(255, 240, 212, .055) 0%, transparent 70%),
+        /* 边缘压暗：收拢视线 —— 收到战场边界外，避免露出层边界 */
+        radial-gradient(ellipse 95% 92% at 50% 50%,
+            transparent 30%, rgba(3, 7, 10, .62) 100%);
 }
