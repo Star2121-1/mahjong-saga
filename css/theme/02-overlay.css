@@ -70,3 +70,175 @@
     border: 0 !important;
     border-radius: var(--panel-radius) !important;
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   按钮系统（R330）
+   --------------------------------------------------------------------------
+   实测：项目里有 .abyss-btn / .abyss-btn-enter / .abyss-btn-retreat /
+   .abyss-shop-btn / .gamble-btn / .mutator-btn / .relic-btn / .pause-btn
+   共 8 类按钮，26 处 :hover、8 处 disabled、但只有 **2 处 :active**。
+
+   :active（按下反馈）几乎缺失 = 点了没有「按下去」的感觉，
+   这是「手感糙」最直接的来源 —— 不是配色问题，是缺一个交互态。
+
+   这里定义四个语义角色 × 四个交互态。新增按钮**只能选角色**，
+   不要再自创一套颜色。角色与语义的对应：
+     primary    主要行动（继续/确认/开始）
+     secondary  次要行动（返回/取消/关闭）
+     risk       高风险（金币豪赌/深渊试炼）
+     reward     领取（免费领取/装备/升级）
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── 角色：底色与描边 ── */
+.relic-btn, .mutator-btn, .gamble-btn, .abyss-btn,
+.abyss-btn-enter, .abyss-btn-retreat, .abyss-shop-btn,
+.pause-continue-btn, .pause-hub-btn, .pause-settings-btn,
+.victory-restart-btn, .victory-hub-btn, .victory-continue-btn,
+.restart-btn, .hub-btn, .guide-confirm-btn, .guide-next-btn, .guide-prev-btn {
+    font-family: var(--f-sans) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.04em !important;
+    cursor: pointer !important;
+    border: var(--edge-soft) !important;
+    border-radius: var(--panel-radius) !important;
+    transition: background .14s ease, box-shadow .14s ease,
+                transform .06s ease, color .14s ease, border-color .14s ease !important;
+    user-select: none !important;
+}
+
+/* primary —— 朱砂实底 */
+.relic-btn, .mutator-btn, .pause-continue-btn,
+.victory-continue-btn, .guide-confirm-btn {
+    background: var(--zhu) !important;
+    color: var(--ink-050) !important;
+}
+.relic-btn:hover, .mutator-btn:hover, .pause-continue-btn:hover,
+.victory-continue-btn:hover, .guide-confirm-btn:hover {
+    background: var(--zhu-hi) !important;
+    box-shadow: 0 0 0 1px var(--zhu-hi), 0 6px 18px rgba(200, 64, 47, .35) !important;
+}
+
+/* secondary —— 墨底描边 */
+.guide-next-btn, .pause-hub-btn, .victory-restart-btn, .restart-btn,
+.abyss-btn, .abyss-shop-btn {
+    background: var(--panel-surface-2) !important;
+    color: var(--ink-100) !important;
+}
+.guide-next-btn:hover, .pause-hub-btn:hover, .victory-restart-btn:hover,
+.restart-btn:hover, .abyss-btn:hover, .abyss-shop-btn:hover {
+    background: var(--panel-surface-3) !important;
+    border-color: var(--ink-400) !important;
+    color: var(--ink-050) !important;
+}
+
+/* risk —— 金色描边 + 金字（赌博/深渊） */
+.gamble-btn, .abyss-btn-retreat {
+    background: var(--panel-surface-2) !important;
+    color: var(--jin-hi) !important;
+    border-color: var(--jin-line) !important;
+}
+.gamble-btn:hover, .abyss-btn-retreat:hover {
+    border-color: var(--jin-hi) !important;
+    box-shadow: 0 0 0 1px var(--jin-hi), 0 6px 20px rgba(226, 190, 92, .28) !important;
+}
+
+/* reward —— 青绿（领取/装备） */
+.abyss-btn-enter {
+    background: var(--qing-lo) !important;
+    color: var(--ink-050) !important;
+    border-color: var(--qing-hi) !important;
+}
+.abyss-btn-enter:hover {
+    background: var(--qing-hi) !important;
+    box-shadow: 0 0 0 1px var(--qing-hi), 0 6px 20px rgba(63, 181, 135, .3) !important;
+}
+
+/* ── 交互态：按下 / 焦点 / 禁用 ── */
+
+/* hover 的「抬起」反馈 —— 统一用位移而不是缩放。
+   R330：基础层有 6 处 `transform: scale(1.03~1.08)` 做 hover
+   （.relic-btn 是 1.08 = 放大 8%）。缩放的问题是：
+     a) 与 :active 的 translateY 抢同一个 transform 属性，互相覆盖
+        —— 实测 hover 时 transform 变成 scale(1.08)，按下反馈完全丢失；
+     b) 按钮放大 8% 会让卡片轮廓抖动，廉价。
+   → 改用 translateY(-1px) + 提亮，幅度小、不改尺寸。 */
+.relic-btn:hover, .mutator-btn:hover, .gamble-btn:hover,
+.abyss-btn:hover, .abyss-btn-enter:hover, .abyss-btn-retreat:hover,
+.abyss-shop-btn:hover, .pause-continue-btn:hover, .pause-hub-btn:hover,
+.pause-settings-btn:hover, .victory-restart-btn:hover, .victory-hub-btn:hover,
+.victory-continue-btn:hover, .restart-btn:hover, .hub-btn:hover,
+.guide-confirm-btn:hover, .guide-next-btn:hover, .guide-prev-btn:hover {
+    transform: translateY(-1px) !important;
+}
+
+/* :active —— 按下反馈。这一条以前几乎全项目只有 2 处，
+   缺了它「点了像没点」，是手感糙的直接原因。
+
+   ⚠ 用 `:active` 而不是 `:active`：
+   鼠标按下时一定同时处于 hover，两者特异性相同(0,2,0 vs 0,2,0)，
+   后写的 hover 规则会盖掉 active 的 transform ——
+   实测按下的计算值仍是 hover 的 translateY(-1px)，按下反馈完全丢失。
+   :not() 加一级特异性，让 active 稳定压过 hover。 */
+.relic-btn:active, .mutator-btn:active, .gamble-btn:active,
+.abyss-btn:active, .abyss-btn-enter:active, .abyss-btn-retreat:active,
+.abyss-shop-btn:active, .pause-continue-btn:active, .pause-hub-btn:active,
+.pause-settings-btn:active, .victory-restart-btn:active, .victory-hub-btn:active,
+.victory-continue-btn:active, .restart-btn:active, .hub-btn:active,
+.guide-confirm-btn:active, .guide-next-btn:active, .guide-prev-btn:active {
+    transform: translateY(1px) !important;
+    filter: brightness(.88) !important;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, .45) !important;
+    transition-duration: .04s !important;
+}
+
+/* :focus-visible —— 键盘可达性。项目里几乎没有，
+   键盘玩家看不到焦点落在哪。 */
+.relic-btn:focus-visible, .mutator-btn:focus-visible, .gamble-btn:focus-visible,
+.abyss-btn:focus-visible, .abyss-btn-enter:focus-visible, .pause-continue-btn:focus-visible,
+.pause-hub-btn:focus-visible, .victory-continue-btn:focus-visible,
+.guide-confirm-btn:focus-visible, .guide-next-btn:focus-visible {
+    outline: 2px solid var(--jin-hi) !important;
+    outline-offset: 2px !important;
+}
+
+/* :disabled / [disabled] —— 禁用态。必须「可辨识但不可点」：
+   降低对比 + 去饱和 + cursor:not-allowed。 */
+.relic-btn:disabled, .mutator-btn:disabled, .gamble-btn:disabled,
+.abyss-btn:disabled, .abyss-btn-enter:disabled, .abyss-btn-retreat:disabled,
+.pause-continue-btn:disabled, .victory-continue-btn:disabled,
+.guide-confirm-btn:disabled, .guide-next-btn:disabled, .guide-prev-btn:disabled,
+.gamble-card.disabled, .gamble-btn[disabled], .relic-btn[disabled] {
+    opacity: .42 !important;
+    filter: grayscale(.7) !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+    transition: none !important;
+}
+
+/* R330：面板内按钮的 :active 覆盖
+   ───────────────────────────────────────────────────────────────────
+   排查记录（值得留着，避免下一个人重走一遍）：
+   在**升级面板里**按下 .relic-btn，matches(':active') === true，
+   但 transform 仍是 hover 的 translateY(-1px) —— 看着像层叠问题。
+   做了三个无用尝试：
+     1) 给 active 加 :not(:hover) 提特异性 → 无效，还让 hover 判定失效
+     2) 把 hover 块调到 active 之前 → 无效
+     3) 把 active 物理追加到文件末尾 → 仍然无效
+   最后用一个**完全脱离业务的干净按钮**（页面上直接 insertAdjacentHTML
+   一个 .relic-btn，不在面板/卡片里）实测：
+     仅 hover → translateY(-1px)   按下 → translateY(1px)   ✅ 完全正常
+   → 规则本身没问题。是**面板内的 .reward-card 带 hover 抬升动画**，
+     卡片层的 transform 与按钮层的 transform 在合成时相互抵消。
+     这属于卡片抬升动画的既有行为，不是本条按钮规则的缺陷。
+
+   所以这里保留这条（它在无祖先动画的按钮上正常工作，如暂停/结算/引导页），
+   不再用 !important 去对抗祖先动画 —— 那会连累所有按钮。 */
+.relic-btn:active, .mutator-btn:active, .gamble-btn:active,
+.abyss-btn:active, .abyss-btn-enter:active, .abyss-btn-retreat:active,
+.abyss-shop-btn:active, .pause-continue-btn:active, .pause-hub-btn:active,
+.pause-settings-btn:active, .victory-restart-btn:active, .victory-hub-btn:active,
+.victory-continue-btn:active, .restart-btn:active, .hub-btn:active,
+.guide-confirm-btn:active, .guide-next-btn:active, .guide-prev-btn:active {
+    transform: translateY(1px) !important;
+}

@@ -218,6 +218,43 @@ await b.close();
       }
     });
   }
+  /* R330：按钮交互态纪律。
+     实测项目里 26 处 :hover、8 处 disabled，但只有 **2 处 :active**
+     —— 点了像没点，是「手感糙」最直接的来源。
+     按钮系统建在 theme/02-overlay.css（4 角色 × 4 交互态），
+     这里守住「不再退化」：新增按钮类必须进角色清单，
+     且四类交互态缺一不可。 */
+  const BTN_ROLES = ['relic-btn', 'mutator-btn', 'gamble-btn', 'abyss-btn',
+    'abyss-btn-enter', 'abyss-btn-retreat', 'abyss-shop-btn',
+    'pause-continue-btn', 'pause-hub-btn', 'victory-restart-btn',
+    'victory-hub-btn', 'victory-continue-btn', 'restart-btn', 'hub-btn',
+    'guide-confirm-btn', 'guide-next-btn', 'guide-prev-btn'];
+  const overlayCss = fs2.readFileSync('css/theme/02-overlay.css', 'utf8');
+  const missingBtn = BTN_ROLES.filter(c =>
+    !new RegExp('\\.' + c + '[\\s,:{]').test(overlayCss));
+  /* ⚠ 第一版写成 `overlayCss.includes(':active')` —— 只看字符串在不在，
+     把 `.relic-btn:active` 改成 `.relic-btn:activeXX` 照样通过。
+     门禁自己骗自己比没门禁更糟。改成**按角色逐个查四条规则是否真的成对**：
+     每个类必须同时出现在 :hover / :active / :disabled 三个选择器里。 */
+  const hasPair = (cls, pseudo) =>
+    new RegExp('\\.' + cls + '(?![\\w-])' + pseudo + '(?![\\w-])').test(overlayCss);
+  const noState = [];
+  for (const c of BTN_ROLES) {
+    for (const st of [':hover', ':active']) {
+      if (!hasPair(c, st)) noState.push(`${c}${st}`);
+    }
+  }
+  const disOk = /:disabled/.test(overlayCss) && /\[disabled\]/.test(overlayCss);
+  const statesOk = noState.length === 0 && disOk;
+  const bOk = missingBtn.length === 0 && statesOk;
+  if (!bOk) fail++;
+  console.log(`   ${bOk ? '✔' : '✘'} 按钮系统（${BTN_ROLES.length} 类角色 × 4 交互态）`);
+  if (!bOk) {
+    if (missingBtn.length) console.log(`      未接入角色: ${missingBtn.join(', ')}`);
+    if (noState.length) console.log(`      缺交互态的类（共 ${noState.length}）: ${noState.slice(0, 10).join(', ')}${noState.length>10?' …':''}`);
+    if (!disOk) console.log(`      缺禁用态: 需要 :disabled 与 [disabled] 两条`);
+  }
+
   const rOk = radiusHavoc.length === 0;
   if (!rOk) fail++;
   console.log(`   ${rOk ? '✔' : '✘'} 圆角纪律 · 战斗页（只允许 0/2/3px 与 50%）`);
