@@ -80,7 +80,55 @@ const hitNow = await p.evaluate(() => {
 });
 await p.screenshot({ path: '/tmp/opencode/enemy.png' });
 console.log(JSON.stringify({ 采样: seen, 主动扣血: hitSeen, 受击瞬间: hitNow, 攻击瞬间: lunge }, null, 1));
+/* ══════════════════════════════════════════════════════════════════════
+   R330：敌型视觉编码门禁
+   --------------------------------------------------------------------------
+   04-enemy.css 里那句「形状 + 边框双编码，不靠颜色单独承载信息」写了很久，
+   但**形状那一半从来没实现过** —— 8 种敌人在几何上完全相同，唯一差别是
+   border-color（单通道）。LevelConfig 里 Normal 占 11~23%，一屏十几张牌时
+   玩家只能逐张读颜色；色觉障碍玩家拿不到任何区分线索。
+
+   R330 补上了顶部角标形状，这条门禁守住它：新增敌型没给形状编码、
+   或漏写 clip-path（实测 Barrier 就漏了，渲染成无形状方块），这里立刻红。
+   ══════════════════════════════════════════════════════════════════════ */
+const EXPECT = {
+  /*  敌型              形状关键词  分组                     */
+  Normal:   'polygon',  Tanker:   'polygon',  /* ▲ 冲锋 */
+  Stalker:  'polygon',  Splitter: 'polygon',
+  Archer:   'polygon',  Bomber:   'polygon',  /* ✦ 远程/自爆 */
+  Shaman:   'circle',                            /* ● 辅助 */
+  Barrier:  'polygon',                          /* ■ 结界 */
+};
+const KEYS = Object.keys(EXPECT);
+const lv = await p.evaluate((KEYS) => {
+  const e = document.querySelector('.enemy');
+  if (!e) return null;
+  const out = {};
+  for (const t of KEYS) {
+    e.dataset.enemyType = t;
+    const cs = getComputedStyle(e, '::after');
+    out[t] = { content: cs.content, clip: cs.clipPath };
+  }
+  return out;
+}, KEYS);
+
+const shapeBad = [];
+if (!lv) shapeBad.push('场景里没有 .enemy');
+else for (const t of KEYS) {
+  const v = lv[t];
+  if (!v) { shapeBad.push(`${t} 未取到`); continue; }
+  if (v.content === 'none' || !v.content)
+    shapeBad.push(`${t}: ::after 未生成（content=${v.content}）— 检查是否有 content:none !important 压制`);
+  else if (v.clip === 'none')
+    shapeBad.push(`${t}: 有 ::after 但无形状（clip-path:none）— 该类型漏写 clip-path`);
+  else if (!String(v.clip).includes(EXPECT[t]))
+    shapeBad.push(`${t}: 形状 ${v.clip} 与预期不符（应含 ${EXPECT[t]}）`);
+}
+const shapeOk = shapeBad.length === 0;
+console.log(`   ${shapeOk ? '✔' : '✘'} 敌型形状编码完整（${KEYS.length} 型：颜色 + 形状双通道）`);
+if (!shapeOk) shapeBad.forEach(x => console.log(`      ${x}`));
+
 console.log('errors', errs.length, errs.slice(0, 3).join(' | '));
 await b.close();
-const ok = seen.moving > 0 && !errs.length && lunge.ok;
+const ok = seen.moving > 0 && !errs.length && lunge.ok && shapeOk;
 process.exit(ok ? 0 : 1);

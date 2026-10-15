@@ -37,8 +37,14 @@
     border-radius: var(--r-tile) !important;
 }
 
-/* 去掉 18 个敌人身上的小字标签 —— 换成边框色区分敌型 */
-.enemy:not(.boss)::after { content: none !important; }
+/* 去掉 18 个敌人身上的小字标签 —— 换成边框色 + 顶部角标形状区分敌型。
+   R330：这里原本是 `content: none !important`，把 ::after 整个干掉。
+   那是「去掉小字」的正确做法，但后来 R330 要用 ::after 画角标形状时，
+   新规则写在文件末尾、同权重，**被这条 !important 压死** ——
+   实测 getComputedStyle 返回 content: "none"，角标根本没生成。
+   → 保留「不显示文字」的意图，但交出 content 的控制权：
+     content: '' 生成空盒子（不显示任何文字），形状由 clip-path 给。 */
+.enemy:not(.boss)::after { content: '' !important; }
 
 .enemy:not(.boss)::before {
     font-family: var(--f-serif) !important;
@@ -98,3 +104,75 @@
         0 6px 10px rgba(0, 0, 0, .75),
         inset 0 1px 0 rgba(255, 255, 255, .9) !important;
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   敌型形状编码（R330）
+   --------------------------------------------------------------------------
+   上面那段注释写着「形状 + 边框双编码，不靠颜色单独承载信息」——
+   但**形状这一半从来没实现过**：8 种敌人在几何上完全相同（同一张牌），
+   唯一差别是 border-color。而 LevelConfig 里 Normal 占 11~23%、
+   Tanker 0.13~0.15、Stalker 0.16~0.18…… 一屏十几张牌时，
+   「哪个是哪个」完全靠玩家逐张读颜色 —— 颜色是**单通道**信息，
+   色觉障碍玩家拿不到任何区分线索。
+
+   补上第二通道：**顶部角标形状**。用 clip-path 切出几何记号，
+   挂在牌的上沿，零布局影响、不遮挡花色字（花色在牌心）。
+   形状按「行为意图」分组，而不是按名字 —— 玩家需要知道的是
+   「这个会冲过来 / 这个远程 / 这个会炸」，不是它的英文名。
+
+     ▲ 尖顶   近战/冲锋类  Normal Tanker Stalker Splitter
+     ● 圆顶   支援/增益类  Shaman
+     ■ 方顶   结界类      Barrier
+     ✦ 菱顶   远程/自爆类  Archer Bomber
+
+   实现用 ::after 切形状。.enemy:not(.boss)::after 原本已被移除
+   （旧版在这里叠 data-type 小字，是纯噪声，已删），所以可以安全占用。
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* 基准：所有敌人牌的上沿角标槽 */
+.enemy:not(.boss)::after {
+    content: '';
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    margin-left: -6px;
+    background: var(--ivory-3);
+    box-shadow: 0 1px 0 var(--ivory-side);
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* ▲ 冲锋型：尖顶三角 */
+.enemy[data-enemy-type="Normal"]::after,
+.enemy[data-enemy-type="Tanker"]::after,
+.enemy[data-enemy-type="Stalker"]::after,
+.enemy[data-enemy-type="Splitter"]::after {
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+    background: var(--qing-hi);
+}
+
+/* ● 辅助型：圆顶 */
+.enemy[data-enemy-type="Shaman"]::after {
+    clip-path: circle(42% at 50% 50%);
+    background: var(--jin-hi);
+}
+
+/* ■ 结界型：方顶（略窄，与三角/菱形区分）
+   注意：必须显式给 clip-path。基础 ::after 规则不设 clip-path（默认 none），
+   所以每个类型都要自己声明 —— 漏一个，那个类型就是无形状的方块。 */
+.enemy[data-enemy-type="Barrier"]::after {
+    clip-path: polygon(22% 0%, 78% 0%, 78% 100%, 22% 100%);
+    background: var(--ink-200);
+}
+
+/* ✦ 远程/自爆型：菱形 */
+.enemy[data-enemy-type="Archer"]::after,
+.enemy[data-enemy-type="Bomber"]::after {
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    background: var(--zhu-hi);
+}
+
+/* Boss 不参与这套编码 —— 它有自己的 boss-lord 外观与血条 */
+.enemy.boss::after, .enemy.boss-lord::after { display: none !important; }
