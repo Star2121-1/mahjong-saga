@@ -115,7 +115,7 @@
 .relic-btn:hover, .mutator-btn:hover, .pause-continue-btn:hover,
 .victory-continue-btn:hover, .guide-confirm-btn:hover {
     background: var(--zhu-hi) !important;
-    box-shadow: 0 0 0 1px var(--zhu-hi), 0 6px 18px rgba(200, 64, 47, .35) !important;
+    box-shadow: 0 0 0 1px var(--zhu-hi), 0 6px 18px var(--glow-zhu) !important;
 }
 
 /* secondary —— 墨底描边 */
@@ -139,7 +139,7 @@
 }
 .gamble-btn:hover, .abyss-btn-retreat:hover {
     border-color: var(--jin-hi) !important;
-    box-shadow: 0 0 0 1px var(--jin-hi), 0 6px 20px rgba(226, 190, 92, .28) !important;
+    box-shadow: 0 0 0 1px var(--jin-hi), 0 6px 20px var(--glow-jin) !important;
 }
 
 /* reward —— 青绿（领取/装备） */
@@ -150,7 +150,7 @@
 }
 .abyss-btn-enter:hover {
     background: var(--qing-hi) !important;
-    box-shadow: 0 0 0 1px var(--qing-hi), 0 6px 20px rgba(63, 181, 135, .3) !important;
+    box-shadow: 0 0 0 1px var(--qing-hi), 0 6px 20px var(--glow-qing) !important;
 }
 
 /* ── 交互态：按下 / 焦点 / 禁用 ── */
@@ -187,7 +187,7 @@
 .guide-confirm-btn:active, .guide-next-btn:active, .guide-prev-btn:active {
     transform: translateY(1px) !important;
     filter: brightness(.88) !important;
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, .45) !important;
+    box-shadow: inset 0 2px 6px var(--shade-45) !important;
     transition-duration: .04s !important;
 }
 

@@ -255,6 +255,47 @@ await b.close();
     if (!disOk) console.log(`      缺禁用态: 需要 :disabled 与 [disabled] 两条`);
   }
 
+  /* R330：主题层色值纪律。
+     基础层（gameplay/*.css）用裸色是正常的 —— 它就是 tokens 的来源。
+     **主题层**（theme/*.css）用裸色是问题：主题层的职责是引用，
+     它定义颜色就等于绕过 tokens 改主题。
+     实测收敛前主题层有 28 处，已降到 16 处（见下方白名单）。 */
+  const THEME_WHITELIST = [
+    'theme/02-overlay.css:29',   /* 引导可操作遮罩 rgba(4,12,8,.10) —— 专有配方 */
+    'theme/03-battlefield.css:88', /* 战场大暗角 inset 0 0 200px 40px */
+    'theme/03-battlefield.css:131', /* 顶栏内高光 rgba(228,236,239,.06) */
+    'theme/03-battlefield.css:270', /* 波次公告光池 */
+    'theme/03-battlefield.css:272', /* 公告描边/投影 */
+    'theme/03-battlefield.css:275', /* 公告徽章渐变（象牙金三停） */
+    'theme/03-battlefield.css:277', /* 徽章内高光 */
+    'theme/04-enemy.css:35',      /* 敌人牌面渐变起点 #fffdf7（比 --ivory 更白） */
+    'theme/04-enemy.css:69',      /* 血条底 */
+    'theme/04-enemy.css:70',      /* 血条描边 */
+    /* s2 大本营本轮不在范围内（与圆角门禁同批延后），逐条列明而非通配。
+       模式：仅此 5 行。下一轮把 05-hub 纳入范围时把它们逐个消掉。 */
+    'theme/05-hub.css:57', 'theme/05-hub.css:71', 'theme/05-hub.css:74',
+    'theme/05-hub.css:176', 'theme/05-hub.css:381',
+  ];
+  const themeRaw = [];
+  for (const f of fs2.readdirSync('css/theme').map(x => 'theme/' + x)) {
+    const txt = fs2.readFileSync('css/' + f, 'utf8');
+    txt.split('\n').forEach((ln, i) => {
+      if (/\/\*|\/\//.test(ln)) return;
+      const key = `${f}:${i + 1}`;
+      if (THEME_WHITELIST.includes(key)) return;
+      if (!/(?:^|[^-])(color|background|border|box-shadow|outline|fill|stroke)\s*:/.test(ln)) return;
+      if (/var\(/.test(ln)) return;              /* 已用 token */
+      const bare = ln.replace(/!important/g, '');
+      const hits = (bare.match(/#[0-9a-fA-F]{3,8}/g) || []).length
+                 + (bare.match(/rgba?\([^)]*\)/g) || []).length;
+      if (hits) themeRaw.push(key);
+    });
+  }
+  const tOk = themeRaw.length === 0;
+  if (!tOk) fail++;
+  console.log(`   ${tOk ? '✔' : '✘'} 主题层色值走 tokens（白名单 ${THEME_WHITELIST.length} 处专有配方）`);
+  if (!tOk) console.log(`      裸色值 ${themeRaw.length} 处: ${themeRaw.slice(0, 8).join(', ')}${themeRaw.length > 8 ? ' …' : ''}`);
+
   const rOk = radiusHavoc.length === 0;
   if (!rOk) fail++;
   console.log(`   ${rOk ? '✔' : '✘'} 圆角纪律 · 战斗页（只允许 0/2/3px 与 50%）`);

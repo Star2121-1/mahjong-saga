@@ -66,8 +66,8 @@
    引擎在 .enemy-hp-bar 上没有状态类，所以用 fill 的宽度做视觉收敛不可行，
    改为压低对比度，只有被打残时由 JS 的 inline width 变化提供信息。 */
 .enemy-hp-bar {
-    background: rgba(0, 0, 0, .7) !important;
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, .8) !important;
+    background: var(--veil-70) !important;
+    box-shadow: 0 0 0 1px var(--veil-80) !important;
     border-radius: 0px !important;
 }
 .enemy-hp-fill { background: linear-gradient(90deg, var(--zhu), var(--zhu-hi)) !important; }

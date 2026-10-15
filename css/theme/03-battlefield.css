@@ -56,7 +56,7 @@
 #boss-hp-label { color: var(--zhu-hi) !important; font-family: var(--f-serif) !important; }
 
 /* ── 4. 敌人血条 = 朱砂（威胁）──────────────────────────────────────── */
-.enemy-hp-bar { background: rgba(0,0,0,.75) !important; box-shadow: 0 0 0 1px rgba(0,0,0,.85) !important; }
+.enemy-hp-bar { background: var(--veil-75) !important; box-shadow: 0 0 0 1px var(--veil-85) !important; }
 .enemy-hp-fill { background: linear-gradient(90deg, var(--zhu), var(--zhu-hi)) !important; }
 
 /* ── 5. 飘字（T0 修好 fxManager 后这才真的会渲染）─────────────────────── */
@@ -85,7 +85,7 @@
         repeating-linear-gradient(45deg, rgba(228, 236, 239, .030) 0 1px, transparent 1px 4px),
         repeating-linear-gradient(-45deg, rgba(228, 236, 239, .014) 0 1px, transparent 1px 4px),
         radial-gradient(ellipse at center, #16202a 0%, #101820 52%, #080c0f 100%) !important;
-    box-shadow: inset 0 0 200px 40px rgba(0, 0, 0, .62) !important;
+    box-shadow: inset 0 0 200px 40px var(--shade-62) !important;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -125,7 +125,7 @@
 }
 #audio-btn { margin-left: auto !important; }
 #top-bar .stat {
-    background: rgba(19, 26, 31, .84) !important;
+    background: var(--surface-hud) !important;
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px) !important;
     box-shadow: inset 0 0 0 1px var(--ink-500), inset 0 1px 0 rgba(228,236,239,.06) !important;
@@ -189,7 +189,7 @@
 }
 .hand-tile-slot {
     width: 52px !important; height: 68px !important;
-    background: rgba(11, 15, 18, .55) !important;
+    background: var(--veil-50) !important;
     box-shadow: inset 0 0 0 1px var(--ink-500) !important;
     border-radius: var(--r-tile) !important;
 }
@@ -206,13 +206,13 @@
     font-family: var(--f-mono) !important;
     font-variant-numeric: tabular-nums !important;
     color: var(--ink-300) !important;
-    background: rgba(19,26,31,.84) !important;
+    background: var(--surface-hud) !important;
     box-shadow: inset 0 0 0 1px var(--ink-500) !important;
     padding: 2px 8px !important;
     border-radius: 0px !important;
 }
 #pause-btn {
-    background: rgba(19,26,31,.84) !important;
+    background: var(--surface-hud) !important;
     box-shadow: inset 0 0 0 1px var(--ink-500) !important;
     border-radius: 0px !important;
     color: var(--ink-200) !important;
@@ -247,7 +247,7 @@
 /* (2) 手牌空槽的虚线金框（1px dashed rgba(212,175,55,.75)）是"廉价"感来源之一：
        14 个金色虚线框并排非常刺眼。空槽只需要一个极弱的墨色描边表示"这里有一格"。 */
 .hand-tile-slot {
-    background: rgba(11, 15, 18, .5) !important;
+    background: var(--veil-50) !important;
     border: 1px solid var(--ink-500) !important;
     box-shadow: none !important;
     border-radius: var(--r-tile) !important;
@@ -267,14 +267,14 @@
      2) `(hover:hover) and (pointer:fine)` = 有真鼠标的设备 → 隐藏。
         触摸笔记本（pointer:coarse 不成立）仍会显示，不会误伤。 */
 #joystick-base {
-    background: radial-gradient(circle at 50% 42%, rgba(226,190,92,.10) 0%, rgba(11,15,18,.62) 70%) !important;
+    background: radial-gradient(circle at 50% 42%, rgba(226,190,92,.10) 0%, var(--veil-62) 70%) !important;
     border: 1px solid var(--jin-line) !important;
-    box-shadow: inset 0 0 0 1px rgba(0,0,0,.5), 0 2px 10px rgba(0,0,0,.45) !important;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.5), 0 2px 10px var(--shade-45) !important;
 }
 #joystick-knob {
     background: radial-gradient(circle at 42% 36%, #f0e6cf 0%, #cdbb95 45%, #8d7c5c 100%) !important;
     border: 1px solid var(--jin-line) !important;
-    box-shadow: 0 2px 6px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.5) !important;
+    box-shadow: 0 2px 6px var(--shade-55), inset 0 1px 0 rgba(255,255,255,.5) !important;
 }
 @media (hover: hover) and (pointer: fine) {
     /* 有鼠标：移动靠 WASD / 点击地面，虚拟摇杆纯占地方 */
@@ -447,7 +447,7 @@
     justify-content: center !important;
     border-radius: 0px !important;
     border: 0 !important;
-    background: rgba(19, 26, 31, .84) !important;
+    background: var(--surface-hud) !important;
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px) !important;
     box-shadow: inset 0 0 0 1px var(--ink-500) !important;
@@ -463,7 +463,7 @@
 /* 原来靠 `margin-left:auto` 推到顶栏右端 —— 现在它们是独立定位，去掉这个推力 */
 #audio-btn  { margin-left: 0 !important; }
 #audio-btn:hover, #pause-btn:hover {
-    background: rgba(31, 42, 50, .94) !important;
+    background: var(--surface-hud-hi) !important;
     box-shadow: inset 0 0 0 1px var(--ink-400) !important;
 }
 

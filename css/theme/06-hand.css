@@ -18,7 +18,7 @@
 
 .hand-tile-slot {
     width: 52px !important; height: 68px !important;
-    background: rgba(11, 15, 18, .45) !important;
+    background: var(--veil-45) !important;
     border: 1px solid var(--ink-500) !important;
     box-shadow: none !important;
     border-radius: var(--r-tile) !important;
@@ -98,11 +98,11 @@
    有 SVG 时它会和 SVG 自带描边叠成双框。 */
 .hand-tile-slot[data-id="jian_bai"]:not(:has(img.tk-art)) .tile-body::after {
     content: ""; position: absolute; inset: 11px 9px;
-    border: 2px solid #2a3f6b; box-shadow: inset 0 0 0 1px rgba(42,63,107,.3);
+    border: 2px solid var(--qing-lo); box-shadow: inset 0 0 0 1px var(--qing-lo);
 }
 /* 癞子 */
 .hand-tile-slot[data-id="joker"] .tile-body {
-    background: linear-gradient(158deg, #f3eaff, #ded0f5 60%, #c9b8e8) !important;
+    background: linear-gradient(158deg, var(--joker-hi), var(--joker-mid) 60%, var(--joker-lo)) !important;
     border-color: #7c4dff !important;
 }
 
@@ -150,11 +150,11 @@
 }
 /* 癞子没有公版图，保持 CSS 紫调 + 癞字 */
 .hand-tile-slot[data-id="joker"] .tile-body {
-  background: linear-gradient(158deg, #f3eaff, #ded0f5 60%, #c9b8e8) !important;
+  background: linear-gradient(158deg, var(--joker-hi), var(--joker-mid) 60%, var(--joker-lo)) !important;
   border-color: #7c4dff !important;
   font-family: var(--f-serif) !important;
   font-size: 26px !important;
-  color: #5b21b6 !important;
+  color: var(--joker-ink) !important;
 }
 /* 图加载失败时回落：文字已经作为 .tk-rank/.tk-suit 备好了，
    img 是 absolute 覆盖层，不可用时底下的文字自然露出。 */
