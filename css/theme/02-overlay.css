@@ -30,3 +30,43 @@
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   面板表面统一（R330）
+   --------------------------------------------------------------------------
+   实测：同一个 overlay 文件里混着 11 种圆角、7 种描边写法。
+   根因不是某个人审美摇摆，是**没有「面板」这个概念** ——
+   9 种弹层各自声明 background/border/radius/shadow，
+   每加一个新弹层就发明一套配方。
+
+   这里定义三级语义表面，新增面板只能选一级：
+
+     L1  弹层本体      --panel-surface    暂停/胜利/失败/结算
+     L2  弹层内卡片    --panel-surface-2  升级卡/赌局卡/突变选项
+     L3  最内层条目    --panel-surface-3  输入槽、列表项、说明块
+
+   注意 z-index 与遮罩由各 overlay 自己的规则负责，这里只管「盒子长什么样」。
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* L1 —— 弹层本体 */
+.pause-panel, .guide-card, #pause-settings-panel, #death-compensation, #vol-feedback {
+    background: var(--panel-surface) !important;
+    border: var(--edge-soft) !important;
+    border-radius: var(--panel-radius) !important;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, .6), var(--edge-lit) !important;
+    padding: var(--panel-pad) !important;
+}
+
+/* L2 —— 弹层内的卡片 */
+.reward-card-inner, .gamble-card, .mutator-choice, .mutator-option {
+    background: var(--panel-surface-2) !important;
+    border: var(--edge-soft) !important;
+    border-radius: var(--panel-radius) !important;
+}
+
+/* L3 —— 最内层条目 */
+.gamble-card-desc, .mutator-choice-desc, .guide-item {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: var(--panel-radius) !important;
+}

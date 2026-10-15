@@ -171,7 +171,7 @@
     position: absolute;
     inset: -3px 0;
     background: linear-gradient(90deg, rgba(255,255,255,0.4), transparent);
-    border-radius: 4px;
+    border-radius: 3px;
 }
 
 /* 置换面板 weapon-card: dead CSS — compendium uses .compendium-weapon-card */
@@ -554,7 +554,7 @@
 }
 .guide-nav button {
     padding: 8px 20px; font-size: calc(13 * var(--_fs) * 1px); font-weight: 700;
-    border-radius: 6px; cursor: pointer;
+    border-radius: 3px; cursor: pointer;
     transition: transform 0.1s, background 0.2s;
 }
 .guide-nav button:hover { transform: scale(1.04); }

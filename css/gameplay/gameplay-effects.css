@@ -224,7 +224,7 @@
 .totem-pillar {
     position: absolute; width: 16px; height: 40px;
     background: linear-gradient(180deg, #8a7a6a, #5a4a3a);
-    border-radius: 4px 4px 2px 2px;
+    border-radius: 3px 3px 3px 3px;
     pointer-events: none; z-index: 4;
     box-shadow: 0 0 20px rgba(90,74,58,0.4), 0 0 60px rgba(90,74,58,0.1);
     transform: translate(-50%, -100%);

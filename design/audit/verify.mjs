@@ -182,6 +182,48 @@ await b.close();
       misuse.push(`${f}:${i + 1}`);
     });
   }
+  /* R330: 圆角纪律。
+     css/tokens.css 写着「默认全直角，只有 2 个受控例外（牌 3px / 弹层 2px），
+     除此之外不许出现圆角」—— 但 gameplay-overlay.css 一个文件里就混着
+     11 种圆角（6/10/16/8/14/50/4/3/12px）。
+     「有规范」和「守规范」是两件事，所以把它变成门禁。 */
+  const ALLOWED_RADIUS = new Set(['0px', '3px', '2px', '50%']);
+  const radiusHavoc = [];
+  /* 范围：只扫战斗页（s3）与共享层。
+     s2 大本营（css/main_hub.css + theme/05-hub.css）另有 60+ 处历史圆角，
+     它们是另一套视觉语言、另一次重排的范围 —— 一次性把 93 处全判红只会
+     让门禁变成没人看的噪音（这正是 CLAUDE.md 里「不要为了让响应式好看而
+     去掉 !important」警告过的失败模式：规则一旦大到没人执行，就等于没有）。
+     → 逐步收紧：本轮只管 s3，s2 另立一轮再纳入。 */
+  const SCAN = ['common.css', 'tokens.css',
+    ...fs2.readdirSync('css/gameplay').map(x => 'gameplay/' + x),
+    ...fs2.readdirSync('css/theme').filter(x => /0[1346]-/.test(x)).map(x => 'theme/' + x)];
+  for (const f of SCAN) {
+    const full = 'css/' + f;
+    let txt; try { txt = fs2.readFileSync(full, 'utf8'); } catch { continue; }
+    txt.split('\n').forEach((ln, i) => {
+      if (/\/\*|\/\//.test(ln)) return;
+      const m = ln.match(/border-radius:\s*([^;]+);/);
+      if (!m) return;
+      const v = m[1].trim();
+      /* var(--r-*) / calc() / inherit 直接放行 —— 它们不是「新值」 */
+      if (/^var\(|^calc\(|^inherit$/.test(v)) return;
+      /* 先剥掉 !important，否则 '0px !important' 会被切成 ['0px','!important'] */
+      const bare = v.replace(/\s*!important\s*$/, '').trim();
+      for (const part of bare.split(/\s+/)) {
+        if (!part || ALLOWED_RADIUS.has(part)) continue;
+        /* 圆形：999px / 50% 都表示「正圆」，归一化后放行 */
+        if (parseFloat(part) >= 999) continue;
+        radiusHavoc.push(`${f}:${i + 1} ${part}`);
+      }
+    });
+  }
+  const rOk = radiusHavoc.length === 0;
+  if (!rOk) fail++;
+  console.log(`   ${rOk ? '✔' : '✘'} 圆角纪律 · 战斗页（只允许 0/2/3px 与 50%）`);
+  if (!rOk) console.log(`      违规 ${radiusHavoc.length} 处: ${radiusHavoc.slice(0, 8).join(', ')}${radiusHavoc.length > 8 ? ' …' : ''}\n      → 用 var(--panel-radius) 或收进 tokens.css 的受控例外
+      注：s2 大本营（main_hub.css / theme/05-hub.css）本轮不在范围内`);
+
   const mOk = misuse.length === 0;
   if (!mOk) fail++;
   console.log(`   ${mOk ? '✔' : '✘'} 面板语境未误用 _activeMutator（应改用 _mutatorPanelVisible）`);

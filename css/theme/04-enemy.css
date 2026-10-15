@@ -68,7 +68,7 @@
 .enemy-hp-bar {
     background: rgba(0, 0, 0, .7) !important;
     box-shadow: 0 0 0 1px rgba(0, 0, 0, .8) !important;
-    border-radius: 0 !important;
+    border-radius: 0px !important;
 }
 .enemy-hp-fill { background: linear-gradient(90deg, var(--zhu), var(--zhu-hi)) !important; }
 

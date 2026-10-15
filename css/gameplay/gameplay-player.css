@@ -63,7 +63,7 @@
     position: absolute;
     width: 60px; height: 80px;
     background: #fbfbf7;
-    border-radius: 7px;
+    border-radius: 0px;
     z-index: 10;
     transform: translate(-50%, -50%);
     display: flex; align-items: center; justify-content: center;
@@ -133,7 +133,7 @@
 .player-trail {
     position: absolute;
     width: 60px; height: 80px;
-    border-radius: 6px;
+    border-radius: 3px;
     pointer-events: none;
     z-index: 9;
     transform: translate(-50%, -50%);
@@ -165,7 +165,7 @@
 .player-skill-glow {
     position: absolute;
     inset: -8px;
-    border-radius: 10px;
+    border-radius: 0px;
     pointer-events: none;
     z-index: 11;
     animation: skillGlowPulse 0.6s ease-out forwards;

@@ -74,7 +74,7 @@
 #pause-btn {
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(26,83,54,0.3);
-    border-radius: 4px; color: #ecece4; font-size: calc(16 * var(--_fs) * 1px);
+    border-radius: 3px; color: #ecece4; font-size: calc(16 * var(--_fs) * 1px);
     cursor: pointer; padding: 4px 10px; line-height: 1;
     transition: background 0.2s, border-color 0.2s; flex-shrink: 0;
 }
@@ -82,7 +82,7 @@
 #audio-btn {
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(26,83,54,0.3);
-    border-radius: 4px; color: #ecece4; font-size: calc(16 * var(--_fs) * 1px);
+    border-radius: 3px; color: #ecece4; font-size: calc(16 * var(--_fs) * 1px);
     cursor: pointer; padding: 4px 10px; line-height: 1;
     transition: background 0.2s, border-color 0.2s; flex-shrink: 0;
 }
@@ -101,7 +101,7 @@
 #exp-bar-fill {
     height: 100%;
     background: linear-gradient(180deg, #66d98a 0%, #2e9e57 45%, #1a5336 100%);
-    border-radius: 0 3px 3px 0;
+    border-radius: 0px 3px 3px 0px;
     box-shadow: 0 0 14px rgba(76,175,80,0.65), inset 0 1px 1px rgba(255,255,255,0.35);
     /* R257-P1: 移除 width transition，JS 已有脏检查，避免面板打开时跳变 */
     position: absolute; top: 0; left: 0;
@@ -127,7 +127,7 @@
 #rage-bar-fill {
     height: 100%;
     background: linear-gradient(90deg, #7a1414 0%, #b62929 40%, #ff1744 100%);
-    border-radius: 0 3px 3px 0;
+    border-radius: 0px 3px 3px 0px;
     box-shadow: 0 0 12px rgba(255,23,68,0.55), inset 0 1px 1px rgba(255,255,255,0.25);
     /* R257-P1: 移除 width transition，JS 已有脏检查，避免面板打开时跳变 */
     position: absolute; top: 0; left: 0;
@@ -169,7 +169,7 @@
 /* Mutator badge + Resonance pills */
 .mutator-badge {
     padding: 2px 8px; background: rgba(182,41,41,0.25);
-    border: 1px solid #b62929; border-radius: 4px;
+    border: 1px solid #b62929; border-radius: 3px;
     font-size: calc(11 * var(--_fs) * 1px); color: #ffab91; font-weight: 700;
     white-space: nowrap;
 }
