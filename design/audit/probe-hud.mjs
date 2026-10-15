@@ -58,7 +58,17 @@ const r = await p.evaluate(() => {
     if (ix > 4 && iy > 4) ov.push(`${A.t}[${A.el}] ✕ ${B.t}[${B.el}] ${Math.round(ix)}x${Math.round(iy)}px`);
   }
   /* 关键 HUD 区块两两重叠 */
-  const KEY = ['rage-bar-container', 'weapon-slot-bar', 'hand-tile-bar', 'pause-btn', 'joystick-container', 'time-display'];
+  /* R330: 补齐 HUD 四角分区的全部元素。
+     原来这份清单漏了 top-bar / audio-btn / exp-bar-* ——
+     而 R330 重排 HUD 时引入的三个回归（音量按钮压在 #kills-display 上、
+     等级文字压住顶栏、暂停文字竖排换行）恰好全发生在这几个漏测元素上。
+     「门禁没覆盖到的地方出 bug」比「有 bug」更值得记。 */
+  const KEY = ['rage-bar-container', 'weapon-slot-bar', 'hand-tile-bar', 'pause-btn',
+               'joystick-container', 'time-display', 'top-bar', 'audio-btn',
+               'exp-bar-container', 'exp-bar-text', 'wave-display', 'gold-display',
+               'kills-display', 'atk-display'];
+  /* 这些是撑满整行/整屏的 block，与谁「重叠」不代表视觉冲突 */
+  const FULL_BLEED = ['time-display'];
   const boxes = KEY.map(id => { const e = document.getElementById(id); if (!e) return null;
     const b = e.getBoundingClientRect(); return { id, b }; }).filter(Boolean);
   const clash = [];
@@ -66,8 +76,11 @@ const r = await p.evaluate(() => {
     const a = boxes[i].b, c = boxes[j].b;
     const ix = Math.min(a.right, c.right) - Math.max(a.left, c.left);
     const iy = Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top);
-    /* time-display 是撑满的 block，它与谁「重叠」不代表视觉冲突，跳过 */
-    if (boxes[i].id === 'time-display' || boxes[j].id === 'time-display') continue;
+    /* 撑满整行/整屏的 block 跳过 */
+    if (FULL_BLEED.includes(boxes[i].id) || FULL_BLEED.includes(boxes[j].id)) continue;
+    /* 同一个容器内部的子元素（exp-bar-text 在 exp-bar-container 里）不算冲突 */
+    const ea = document.getElementById(boxes[i].id), eb = document.getElementById(boxes[j].id);
+    if (ea && eb && (ea.contains(eb) || eb.contains(ea))) continue;
     if (ix > 2 && iy > 2) clash.push(`#${boxes[i].id} ✕ #${boxes[j].id} ${Math.round(ix)}x${Math.round(iy)}px`);
   }
   const box = id => { const e = document.getElementById(id); if (!e) return null;

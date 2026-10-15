@@ -367,3 +367,129 @@
         radial-gradient(ellipse 95% 92% at 50% 50%,
             transparent 30%, rgba(3, 7, 10, .62) 100%);
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   HUD 四角分区重排（R330）
+   --------------------------------------------------------------------------
+   改之前的实测布局（design/audit/shoot-states.mjs + getBoundingClientRect）：
+
+     #top-bar          x=0    y=0    883×44    ← 只占屏宽 46%，右侧 1037px 全空
+     #exp-bar-container x=16   y=60   320×14    ← 叠在顶栏正下方，挤成一团
+     #rage-bar-container x=40  y=986  480×16    ← 左下，和手牌抢地盘
+     #hand-tile-bar     x=564  y=952  793×68
+     #weapon-slot-bar   x=40   y=955  151×25
+     右上角：空   右下角：空（摇杆区之外）
+
+   根因不是某条 CSS 写错了，是**每一轮迭代都在已定位的元素上再加一个绝对坐标**
+   （注释里能看到 R323 → R324 → R325 一路加 left/top/bottom 覆盖）。
+   十个元素散在 6 个角落，没有分区概念，于是越加越挤。
+
+   改法：确立四角分区，每个角落有明确归属，新元素只能放进自己的区。
+   纯 CSS，不动 DOM 结构。
+
+     左上  局内状态  波次 / 金币 / 击杀 / 计时 / 等级经验
+     右上  系统      音量 / 暂停 / 设置
+     左下  战斗资源  怒气条 / 武器槽
+     下中  出牌      手牌 14 格（唯一允许占据正中的元素）
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── 左上：局内状态。顶栏与经验条合成一列，不再互相压 ── */
+#top-bar {
+    /* 用 margin 把整条状态栏推到左上，而不是 absolute。
+       原因：#audio-btn 是它的子元素，子元素 position:absolute 时的包含块是
+       「最近的 positioned 祖先」—— 顶栏一旦 absolute/relative，
+       音量按钮就被钉在顶栏内部（实测 x=260 压在 #kills-display 上）。
+       顶栏保持 static（它不是包含块），音量/暂停才能贴到真正的屏幕右上角；
+       顶栏自身用 margin 定位，同样能贴左上，且不撑满全屏。 */
+    position: static !important;
+    margin: 14px 0 0 16px !important;
+    width: fit-content !important;  /* 内容宽度，不撑满全屏 */
+    max-width: none !important;      /* 不再限制 46%，内容自然宽度 */
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    height: auto !important;
+}
+#exp-bar-container {
+    position: absolute !important;
+    left: 16px !important;
+    top: 62px !important;             /* 顶栏(14+44)之下，留 4px 气口 */
+    width: 320px !important;
+    height: 12px !important;
+}
+/* 等级文字跟在经验条右侧，形成一条完整的「成长线」 */
+#exp-bar-text {
+    /* 原来写 left:330 是想「贴着经验条右端」，但 330 已超出经验条的 320 宽度，
+       且 top:-1 让它跑到经验条上方、与顶栏抢位置（实测 y=54，压住顶栏下沿）。
+       改成：经验条下方的独立一行，left 对齐 #game-container 的 16px 内边距
+       —— 与顶栏左缘严格对齐，形成一条完整的成长线。 */
+    position: absolute !important;
+    left: 16px !important;
+    top: 79px !important;
+    margin: 0 !important;
+    transform: none !important;
+    text-align: left !important;
+    width: auto !important;
+    white-space: nowrap !important;
+    color: var(--ink-300) !important;
+    font-size: 12px !important;
+}
+
+/* ── 右上：系统控件。音量/暂停/设置归拢到一条 ── */
+#audio-btn, #pause-btn {
+    position: absolute !important;
+    z-index: 24 !important;
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    border: 0 !important;
+    background: rgba(19, 26, 31, .84) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    box-shadow: inset 0 0 0 1px var(--ink-500) !important;
+    font-size: 15px !important;
+    color: var(--ink-200) !important;
+    cursor: pointer !important;
+    transition: background .15s, box-shadow .15s !important;
+}
+#pause-btn  { right: 16px !important; top: 14px !important; }
+/* 36px 装不下「⏸ 暂停」四个字，实测文字被挤成竖排两行 → 加宽到 68px 并禁止换行 */
+#pause-btn  { width: 68px !important; white-space: nowrap !important; }
+#audio-btn  { right: 92px !important; top: 14px !important; white-space: nowrap !important; }
+/* 原来靠 `margin-left:auto` 推到顶栏右端 —— 现在它们是独立定位，去掉这个推力 */
+#audio-btn  { margin-left: 0 !important; }
+#audio-btn:hover, #pause-btn:hover {
+    background: rgba(31, 42, 50, .94) !important;
+    box-shadow: inset 0 0 0 1px var(--ink-400) !important;
+}
+
+/* ── 左下：战斗资源。怒气条在上、武器槽在下，垂直成组 ── */
+#rage-bar-container {
+    position: absolute !important;
+    left: 16px !important;
+    bottom: 92px !important;
+    transform: none !important;
+    width: 460px !important;
+    height: 16px !important;
+}
+#weapon-slot-bar {
+    position: absolute !important;
+    left: 16px !important;
+    /* 怒气条 bottom:92 高16 → 占 92~108；武器槽高 25，
+       底边必须低于 108 才能不压在上面 → bottom:34 */
+    bottom: 34px !important;
+    width: auto !important;
+    display: flex !important;
+    gap: 6px !important;
+}
+
+/* ── 下中：手牌。唯一允许占正中，同时给它一个明确的「台面」 ── */
+#hand-tile-bar {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    bottom: calc(46px + env(safe-area-inset-bottom, 0px)) !important;
+}
